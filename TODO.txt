@@ -1,0 +1,17 @@
+Arborescence :
+
+	Dockerfiles
+	Docker compose
+	installations :
+		nodejs
+		npm
+	demande de clé API
+
+Frontend : Mayeul
+
+Game :
+
+BDD :
+
+CHAT :
+
