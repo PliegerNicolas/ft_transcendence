@@ -1,0 +1,60 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    docker-compose.yml                                 :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/01/08 19:41:05 by nicolas           #+#    #+#              #
+#    Updated: 2024/01/08 22:09:27 by nicolas          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+# Latest version as of january 8 2024
+version: '3.8'
+
+# Networks
+networks:
+  transcendence:
+    driver: bridge
+
+# Volumes
+
+# Services
+services:
+
+  backend:
+    container_name: backend
+    build:
+      context: ./requirements/backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - transcendence
+    ports:
+      - "3000:3000"
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./requirements/frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - transcendence
+    ports:
+      - "8080:8080"
+
+#  database:
+#    container_name: database
+#    build:
+#      context: ./requirements/database
+#      dockerfile: Dockerfile
+#    restart: unless-stopped
+#    env_file:
+#      - .env
+#    networks:
+#      - transcendence
