@@ -1,24 +1,75 @@
 body {
-  background: #001a30;
-  display: flex;
-  justify-content: center;
-
+	background: #001a30;
 }
 
 .App {
-  display: flex;
-  justify-content: center;
-  font-size: 5rem;
-  color: #0ff;
-  font-weight: bold;
-  font-style: italic;
-  padding: 40px;
-  border-radius: 15px;
-  border: #024 solid 5px;
-  transition: .2s;
-  text-shadow: 0 0 16px #0ff7;
+	margin-top: min(250px, 20vh);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 50px;
 }
-.App:hover {
-  background-color: #024;
-  text-shadow: 0 0 16px #0ffd;
+
+.App__Count {
+	font-size: 4rem;
+	background: #0ff;
+	color: #024;
+	aspect-ratio: 1;
+	padding: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	font-family: monospace;
+	font-weight: bold;
+	box-shadow: 0 0 20px #0ff8;
+	transition: .5s;
+}
+
+@keyframes count-glow {
+	from { box-shadow: 0 0 42px #0fff; }
+	to { box-shadow: 0 0 36px #0ff8; }
+}
+
+.App__Count--42 {
+	font-size: 4rem;
+	background: #024;
+	color: #0ff;
+	aspect-ratio: 1;
+	padding: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	font-family: monospace;
+	font-weight: bold;
+	animation-name: count-glow;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+	animation-direction: alternate-reverse;
+}
+
+.App__Button {
+	background: #001a30;
+	font-size: 5rem;
+	color: #0ff;
+	font-weight: bold;
+	font-style: italic;
+	padding: 40px;
+	border-radius: 15px;
+	border: #024 solid 5px;
+	transition: .1s;
+	text-shadow: 0 0 16px #0ff7;
+	user-select: none;
+}
+.App__Button:hover {
+	background-color: #024;
+	border-color: #024;
+	text-shadow: 0 0 16px #0ffd;
+}
+.App__Button:active {
+	background-color: #036;
+	box-shadow: 0 20px 60px -20px #0ff4;
+	border-color: #036;
 }
