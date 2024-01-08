@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:52:38 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/08 22:08:04 by nicolas          ###   ########.fr        #
+#    Updated: 2024/01/08 23:41:36 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # Latest stable version of alpine linux at 8 january 2024.
@@ -16,7 +16,7 @@ FROM alpine:3.19.0
 RUN apk update && \
 	apk add --no-cache nodejs npm
 
-# Map /app as wordking directory in container.
+# Map /app as working directory in container.
 WORKDIR /app
 
 # Copy local package files to container and install those dependencies.
