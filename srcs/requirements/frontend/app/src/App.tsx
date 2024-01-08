@@ -1,26 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import React from "react";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+function App()
+{
+	const [count, setCount] = React.useState(0);
+
+	function handleClick()
+	{
+		if (count === 42)
+			return ;
+		setCount(count + 1);
+	}
+
+	return (
+		<div className="App">
+			<div className={count != 42 ? "App__Count" : "App__Count--42"}>
+				{ count }
+			</div>
+			<button onClick={handleClick} className="App__Button">
+				Transcendence !!!
+			</button>
+		</div>
+	);
 }
 
 export default App;

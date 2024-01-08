@@ -1,38 +1,75 @@
+body {
+	background: #001a30;
+}
+
 .App {
-  text-align: center;
+	margin-top: min(250px, 20vh);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 50px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.App__Count {
+	font-size: 4rem;
+	background: #0ff;
+	color: #024;
+	aspect-ratio: 1;
+	padding: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	font-family: monospace;
+	font-weight: bold;
+	box-shadow: 0 0 20px #0ff8;
+	transition: .5s;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+@keyframes count-glow {
+	from { box-shadow: 0 0 42px #0fff; }
+	to { box-shadow: 0 0 36px #0ff8; }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.App__Count--42 {
+	font-size: 4rem;
+	background: #024;
+	color: #0ff;
+	aspect-ratio: 1;
+	padding: 15px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	font-family: monospace;
+	font-weight: bold;
+	animation-name: count-glow;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
+	animation-direction: alternate-reverse;
 }
 
-.App-link {
-  color: #61dafb;
+.App__Button {
+	background: #001a30;
+	font-size: 5rem;
+	color: #0ff;
+	font-weight: bold;
+	font-style: italic;
+	padding: 40px;
+	border-radius: 15px;
+	border: #024 solid 5px;
+	transition: .1s;
+	text-shadow: 0 0 16px #0ff7;
+	user-select: none;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.App__Button:hover {
+	background-color: #024;
+	border-color: #024;
+	text-shadow: 0 0 16px #0ffd;
+}
+.App__Button:active {
+	background-color: #036;
+	box-shadow: 0 20px 60px -20px #0ff4;
+	border-color: #036;
 }
