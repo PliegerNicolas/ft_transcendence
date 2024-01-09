@@ -119,8 +119,20 @@
 	width: 100%;
 }
 
+.MainContent__UserList {
+	margin: 50px 100px;
+	border: 1px solid var(--bg-color-4);
+	border-radius: 6px;
+	background: var(--bg-color-2);
+	padding: 0 20px;
+}
+
+.MainContent__UserList > p {
+	margin-left: 20px;
+}
+
 .Construction {
-	margin-top: 100px;
+	margin-top: 50px;
 	font-size: 1.6rem;
 	display: flex;
 	gap: 20px;
@@ -137,7 +149,7 @@
 		hue-rotate(195deg)
 		brightness(100%)
 		contrast(107%);
-	width: 100px;
+	min-width: 100px;
 }
 
 .Construction__Text > p {
