@@ -3,9 +3,9 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 10px 20px;
+	padding: 10px 30px;
 	color: var(--text-accent);
-	background: var(--bg-color-4);
+	background: var(--bg-color-3);
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -48,6 +48,7 @@
 
 .Header__Login {
 	font-size: 1.1rem;
+	background: var(--bg-color-4);
 	border: 1px solid var(--bg-color-5);
 	padding: 8px 20px;
 	border-radius: 7px;
@@ -58,7 +59,7 @@
 	background: var(--bg-color-5);
 }
 .Header__Login:active {
-	background: none;
+	background: var(--bg-color-4);
 }
 
 .App__Content {
@@ -69,7 +70,7 @@
 
 .Navbar {
 	background: var(--bg-color-2);
-	padding: 15px 10px;
+	padding: 20px 10px;
 	width: 200px;
 	min-width: 200px;
 	display: flex;
@@ -129,11 +130,11 @@
 	border: 1px solid var(--bg-color-4);
 	border-radius: 6px;
 	background: var(--bg-color-2);
-	padding: 0 20px;
+	padding: 0 20px 15px;
 }
 
 .MainContent__UserList > p {
-	margin-left: 20px;
+	margin: 0px 20px 5px 20px;
 }
 
 .Spinner {
