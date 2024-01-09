@@ -1,0 +1,27 @@
+:root {
+	--bg-color-1: #101423;
+	--bg-color-2: #181e34;
+	--bg-color-3: #262c40;
+	--bg-color-4: #363c50;
+	--bg-color-5: #464c60;
+
+	--text-faint: #aac;
+	--text-normal: #cce;
+	--text-middle: #d9d9fa;
+	--text-accent: #e2e2ff;
+
+	--current-option-bg: #46c;
+
+	--link-normal: #8af;
+	--link-visited: #aaf;
+
+	--error: #f9a;
+	--error-bg: #d35;
+}
+
+body {
+	background: var(--bg-color-1);
+	color: var(--text-normal);
+	font-family: sans-serif;
+	margin: 0;
+}
