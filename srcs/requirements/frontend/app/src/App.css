@@ -47,13 +47,18 @@
 }
 
 .Header__Login {
-	font-size: 1.2rem;
+	font-size: 1.1rem;
+	border: 1px solid var(--bg-color-5);
+	padding: 8px 20px;
+	border-radius: 7px;
+	transition: .1s;
+	margin: 0;
 }
 .Header__Login:hover {
-	filter: drop-shadow(0 0 6px #fff8);
+	background: var(--bg-color-5);
 }
 .Header__Login:active {
-	filter: none;
+	background: none;
 }
 
 .App__Content {
@@ -129,6 +134,29 @@
 
 .MainContent__UserList > p {
 	margin-left: 20px;
+}
+
+.Spinner {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 20px;
+}
+
+.Spinner > img {
+	filter:
+		invert(89%)
+		sepia(5%)
+		saturate(2749%)
+		hue-rotate(195deg)
+		brightness(100%)
+		contrast(107%);
+	min-width: 40px;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
 }
 
 .Construction {

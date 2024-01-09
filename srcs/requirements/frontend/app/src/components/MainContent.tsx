@@ -1,5 +1,6 @@
 import Construction from "./Construction";
 import React from "react";
+import hourglass from "../assets/hourglass.svg";
 
 function MainContent()
 {
@@ -16,25 +17,29 @@ function MainContent()
     if (xhttp.readyState == 4 && xhttp.status == 200) {
 			setLoaded(true);
 			setUserList(JSON.parse(xhttp.responseText));
-    	console.log(xhttp.responseText);
-			console.log(loaded);
+			clearInterval(loadingInterval);
     }
   };
 
-	if (!loaded) {
- 		xhttp.open("GET", "http://localhost:3450/users", true);
-  	xhttp.send();
+	function loadUserList() {
+		if (!loaded) {
+			xhttp.open("GET", "http://localhost:3450/users", true);
+			xhttp.send();
+		}
 	}
 
-	console.log("Coucou, mdr.");
+	loadUserList();
+	let loadingInterval = setInterval(loadUserList, 1000);
 
 	return (
 		<main className="MainContent">
 			<Construction />
-			<div className="MainContent__UserList">
-				<h3>User list:</h3>
-				{ userListHtml }
-			</div>
+			{
+				<div className="MainContent__UserList">
+					<h3>User list:</h3>
+					{ loaded ? userListHtml : <div className="Spinner"><img src={ hourglass } /></div> }
+				</div>
+				}
 		</main>
 	);
 }
