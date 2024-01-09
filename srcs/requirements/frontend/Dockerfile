@@ -6,9 +6,10 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:52:38 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/08 23:41:36 by nicolas          ###   ########.fr        #
+#    Updated: 2024/01/09 16:14:08 by mlaneyri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
+
 # Latest stable version of alpine linux at 8 january 2024.
 FROM alpine:3.19.0
 
@@ -34,4 +35,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Run NPM.
-CMD ["npm", "start"]
+ENTRYPOINT ["/bin/sh", "-c", "npm run build && npm run preview -- --host"]
