@@ -12,6 +12,8 @@ Frontend : Mayeul
 Game :
 
 BDD :
+ajouter un utilisateur non root
+créer la bdd avec psql
 
 CHAT :
 
