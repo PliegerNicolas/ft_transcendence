@@ -3,13 +3,13 @@
 #                                                         :::      ::::::::    #
 #    Dockerfile                                         :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
+#    By: julboyer <julboyer@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 23:43:12 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/09 00:33:55 by nicolas          ###   ########.fr        #
+#    Updated: 2024/01/10 13:54:48 by julboyer         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
-# Latest stable version of alpine linux at 8 january 2024.
+
 FROM alpine:3.19.0
 
 ENV POSTGRES_USER=postgres
@@ -28,6 +28,10 @@ ENV PGDATA=/var/lib/postgresql/data
 
 EXPOSE 5432
 
+RUN mkdir /run/postgresql && chown ${POSTGRES_USER}: /run/postgresql
+
 USER $POSTGRES_USER
+
+RUN initdb
 
 CMD ["postgres"]
