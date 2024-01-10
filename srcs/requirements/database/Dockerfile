@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 23:43:12 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/10 16:49:18 by nicolas          ###   ########.fr        #
+#    Updated: 2024/01/10 20:34:07 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # Latest stable version of alpine linux at 8 january 2024.
@@ -43,5 +43,5 @@ ENTRYPOINT ["sh", "/docker-entrypoint-initdb.d/init-db.sh"]
 # Expose the default postgres port.
 EXPOSE 5432
 
-# Star the postgreSQL database.
+# Run postgres as given user.
 CMD ["postgres", "-c", "listen_addresses=*"]
