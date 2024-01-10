@@ -1,0 +1,145 @@
+.Header {
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 20px;
+	color: var(--text-accent);
+	background: var(--bg-color-4);
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	box-shadow: 0 0 8px #000;
+	user-select: none;
+}
+
+.Header__Title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	transition: filter .1s;
+}
+.Header__Title:hover {
+	filter: drop-shadow(0 0 8px #fff8);
+}
+.Header__Title:active {
+	filter: none;
+}
+
+.Header__Logo {
+	height: 32px;
+	filter:
+		brightness(0)
+		saturate(100%)
+		invert(89%)
+		sepia(5%)
+		saturate(2749%)
+		hue-rotate(195deg)
+		brightness(100%)
+		contrast(107%);
+}
+
+.Header__TitleText {
+	font-size: 1.8rem;
+	font-weight: 700;
+	font-style: italic;
+}
+
+.Header__Login {
+	font-size: 1.2rem;
+}
+.Header__Login:hover {
+	filter: drop-shadow(0 0 6px #fff8);
+}
+.Header__Login:active {
+	filter: none;
+}
+
+.App__Content {
+	display: flex;
+	margin-top: 60px;
+	min-height: calc(100vh - 60px);
+}
+
+.Navbar {
+	background: var(--bg-color-2);
+	padding: 15px 10px;
+	width: 200px;
+	min-width: 200px;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-height: 100%;
+}
+
+.Navbar > button {
+	border: none;
+	border-radius: 7px;
+	font-size: 1.2rem;
+	padding: 6px 18px;
+	text-align: left;	
+}
+
+.Navbar > button:hover {
+	cursor: pointer;
+}
+
+.Navbar__Button {
+	background: none;
+	border: none;
+	border-radius: 7px;
+	color: var(--text-normal);
+	font-size: 1.2rem;
+	padding: 6px 18px;
+	text-align: left;
+}
+.Navbar__Button:hover {
+	background: var(--bg-color-3);
+}
+.Navbar__Button:active {
+	background: var(--bg-color-4);
+}
+
+.Navbar__Button--Current {
+	color: var(--text-accent);
+	background: var(--current-option-bg);
+	box-shadow: 0 0 4px #000a;
+}
+.Navbar__Button--Current:hover {
+	filter: brightness(1.1);
+}
+.Navbar__Button--Current:active {
+	filter: none;
+}
+
+.MainContent {
+	background: var(--bg-color-1);
+	padding: 15px 20px;
+	width: 100%;
+}
+
+.Construction {
+	margin-top: 100px;
+	font-size: 1.6rem;
+	display: flex;
+	gap: 20px;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+}
+
+.Construction__Icon {
+	filter:
+		invert(89%)
+		sepia(5%)
+		saturate(2749%)
+		hue-rotate(195deg)
+		brightness(100%)
+		contrast(107%);
+	width: 100px;
+}
+
+.Construction__Text > p {
+	margin: 10px;
+}
