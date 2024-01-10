@@ -1,12 +1,13 @@
 import Construction from "./Construction";
 
-function MainContent()
+function Chat()
 {
 	return (
 		<main className="MainContent">
+			<h2>Chat</h2>
 			<Construction />
 		</main>
 	);
 }
 
-export default MainContent;
+export default Chat;

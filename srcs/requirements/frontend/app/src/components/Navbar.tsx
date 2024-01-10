@@ -1,49 +1,31 @@
-import React from "react";
+import {Link} from "react-router-dom";
 
-function Navbar()
+function Navbar({current, setCurrent}: {current: number, setCurrent: Function})
 {
-	const [current, setCurrent] = React.useState(0);
+	//const options = ["Home", "Play", "Stats", "Chat", "Settings", "About"];
+	const options = [
+		{ name: "Home", path: "/" },
+		{ name: "Play",	path: "/play" },
+		{ name: "Stats", path: "/stats" },
+		{ name: "Chat", path: "/chat" },
+		{ name: "Settings", path: "/settings" },
+		{ name: "About", path: "/about" },
+		{ name: "API Sandbox", path: "/apisandbox" }
+	];
 
-	return (
-		<nav className="Navbar">
+	const navHtml = options.map((elem, index) =>
+		<Link to={elem.path} key={index} className="Navbar__Link">
 			<button
-				className={ "Navbar__Button" + (current === 0 ? "--Current" : "") }
-				onClick={ () => { setCurrent(0); } }
+				key={index}
+				className={"Navbar__Button" + (index === current ? "--Current" : "")}
+				onClick={() => {setCurrent(index);}}
 			>
-				Home
+				{elem.name}
 			</button>
-			<button
-				className={ "Navbar__Button" + (current === 1 ? "--Current" : "") }
-				onClick={ () => { setCurrent(1); } }
-			>
-				Play
-			</button>
-			<button
-				className={ "Navbar__Button" + (current === 2 ? "--Current" : "") }
-				onClick={ () => { setCurrent(2); } }
-			>
-				Stats
-			</button>
-			<button
-				className={ "Navbar__Button" + (current === 3 ? "--Current" : "") }
-				onClick={ () => { setCurrent(3); } }
-			>
-				Chat
-			</button>
-			<button
-				className={ "Navbar__Button" + (current === 4 ? "--Current" : "") }
-				onClick={ () => { setCurrent(4); } }
-			>
-				Settings
-			</button>
-			<button
-				className={ "Navbar__Button" + (current === 5 ? "--Current" : "") }
-				onClick={ () => { setCurrent(5); } }
-			>
-				About
-			</button>
-		</nav>
+		</Link>
 	);
+
+	return (<nav className="Navbar"> {navHtml} </nav>);
 }
 
 export default Navbar;
