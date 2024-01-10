@@ -3,13 +3,13 @@
 #                                                         :::      ::::::::    #
 #    Dockerfile                                         :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
+#    By: julboyer <julboyer@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 23:43:12 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/10 20:34:07 by nicolas          ###   ########.fr        #
+#    Updated: 2024/01/10 13:54:48 by julboyer         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
-# Latest stable version of alpine linux at 8 january 2024.
+
 FROM alpine:3.19.0
 
 ENV LANG=en_US.utf8
