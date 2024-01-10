@@ -15,7 +15,10 @@ FROM alpine:3.19.0
 
 # Install NODE.JS and NPM.
 RUN apk update && \
-	apk add --no-cache nodejs npm
+	apk add --no-cache \
+		nodejs \
+		npm && \
+	rm -f /var/cache/apk/*
 
 # Map /app as working directory in container.
 WORKDIR /app
