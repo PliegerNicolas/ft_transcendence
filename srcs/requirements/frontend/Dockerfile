@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:52:38 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/09 16:14:08 by mlaneyri         ###   ########.fr        #
+#    Updated: 2024/01/11 13:54:37 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -38,4 +38,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Run NPM.
-ENTRYPOINT ["/bin/sh", "-c", "npm run build && npm run preview -- --host"]
+CMD ["sh", "-c", "npm run build && npm run preview -- --host"]
