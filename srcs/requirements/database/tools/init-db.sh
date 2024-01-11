@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/10 16:28:52 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/10 20:40:54 by nicolas          ###   ########.fr        #
+#    Updated: 2024/01/11 18:40:03 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 #!/bin/sh
@@ -36,6 +36,7 @@ if [ -z "$DB_EXISTS" ]; then
 
 	psql -v ON_ERROR_STOP=1 --username postgres --dbname postgres <<-EOSQL
 		CREATE DATABASE "$POSTGRES_DB";
+		ALTER USER postgres WITH PASSWORD '$POSTGRES_PASSWORD';
 	EOSQL
 
 	echo "Database '$POSTGRES_DB' created."
@@ -48,7 +49,7 @@ USER_EXISTS=$(psql -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='$POST
 if [ -z "$USER_EXISTS" ]; then
 
 	psql -v ON_ERROR_STOP=1 --username postgres --dbname postgres <<-EOSQL
-		CREATE USER "$POSTGRES_USER" WITH ENCRYPTED PASSWORD '$POSTGRES_PASSWORD';
+		CREATE USER "$POSTGRES_USER" WITH PASSWORD '$POSTGRES_PASSWORD';
 	EOSQL
 
 	echo "User '$POSTGRES_USER' created."
