@@ -3,14 +3,6 @@ import {Link} from "react-router-dom";
 
 import hourglass from "../assets/hourglass.svg";
 
-function testPromise()
-{
-	const promise = Promise.resolve();
-
-	promise.then(() => console.log("Coucou, "));
-	console.log("mdr.");
-}
-
 function Sandbox()
 {
 	const [userList, setUserList] = React.useState([]);
@@ -23,23 +15,18 @@ function Sandbox()
 			</p>
 	);
 
-  const xhttp = new XMLHttpRequest();
-
-  xhttp.onreadystatechange = () => {
-    if (xhttp.readyState != 4 || xhttp.status != 200 || loaded)
+	async function loadUserList() {
+		if (loaded)
 			return ;
-		setLoaded(true);
-		console.log("RESSOURCE OK!!!");
-		testPromise();
-		setUserList(JSON.parse(xhttp.responseText));
-		clearInterval(loadingInterval);
-  };
-
-	function loadUserList() {
-			if (loaded)
-				return ;
-			xhttp.open("GET", `http://${location.hostname}:3450/users`, true);
-			xhttp.send();
+		try {
+			const response = await fetch(`http://${location.hostname}:3450/users`);
+			const users = await response.json();
+			clearInterval(loadingInterval);
+			setLoaded(true);
+			setUserList(users);
+		} catch (error: any) {
+			console.log("Failed to load user list: " + error.message);
+		}
 	}
 
 	loadUserList();
