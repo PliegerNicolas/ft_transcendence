@@ -6,15 +6,15 @@
 #    By: julboyer <julboyer@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 23:43:12 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/11 13:53:24 by nicolas          ###   ########.fr        #
+#    Updated: 2024/01/11 17:46:10 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 FROM alpine:3.19.0
 
 ENV LANG=en_US.utf8
-ENV PGDATA=/var/lib/postgresql/data
 ENV PG_RUN_DIR=/run/postgresql
+ARG PGDATA
 
 # POSTGRES_USER, POSTGRES_PASSWORD and POSTGRES_DB variables set in .env file
 
