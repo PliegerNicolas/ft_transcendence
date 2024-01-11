@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 20:08:41 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/10 12:58:32 by nicolas          ###   ########.fr        #
+#    Updated: 2024/01/11 17:27:39 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # Latest stable version of alpine linux at 8 january 2024.
@@ -37,4 +37,5 @@ ENV PORT=3000
 EXPOSE 3000
 
 # Run NPM.
-CMD ["npm", "start"]
+CMD ["npm", "run", "start:dev"]
+# START:DEV IS TEMPORARY FOR DEVELOPMENT PURPOSE
