@@ -1,8 +1,7 @@
-import {Link} from "react-router-dom";
+import {useLocation, Link} from "react-router-dom";
 
-function Navbar({current, setCurrent}: {current: number, setCurrent: Function})
+function Navbar()
 {
-	//const options = ["Home", "Play", "Stats", "Chat", "Settings", "About"];
 	const options = [
 		{ name: "Home", path: "/" },
 		{ name: "Play",	path: "/play" },
@@ -12,16 +11,16 @@ function Navbar({current, setCurrent}: {current: number, setCurrent: Function})
 		{ name: "About", path: "/about" },
 		{ name: "API Sandbox", path: "/apisandbox" }
 	];
+	let loc = useLocation();
 
 	const navHtml = options.map((elem, index) =>
-		<Link to={elem.path} key={index} className="Navbar__Link">
-			<button
-				key={index}
-				className={"Navbar__Button" + (index === current ? "--Current" : "")}
-				onClick={() => {setCurrent(index);}}
-			>
-				{elem.name}
-			</button>
+		<Link to={elem.path} key={index} 
+			className={
+				"Navbar__Link " +
+				"Navbar__Button" + ( elem.path === loc.pathname ? "--Current" : "")
+			}
+		>
+			{elem.name}
 		</Link>
 	);
 

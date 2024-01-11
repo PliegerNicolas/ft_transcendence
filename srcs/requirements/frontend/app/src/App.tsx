@@ -1,6 +1,5 @@
 import "./App.css";
 
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Header from "./components/Header.tsx";
@@ -16,14 +15,14 @@ import APISandbox from "./components/APISandbox.tsx";
 
 function App()
 {
-	const [navCurrent, setNavCurrent] = React.useState(0);
-
+	console.log(window.location.pathname);
+	console.log(window.location.host);
 	return (
 		<div className="App">
 			<Header />
 			<Router>
 				<div className="App__Content">
-					<Navbar current={navCurrent} setCurrent={setNavCurrent}/>
+					<Navbar />
 					<Routes>
 						<Route path="/"	element={<Home />} />
 						<Route path="/play" element={<Play />} />

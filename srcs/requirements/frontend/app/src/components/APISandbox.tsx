@@ -1,4 +1,6 @@
 import React from "react";
+import {Link} from "react-router-dom";
+
 import hourglass from "../assets/hourglass.svg";
 
 function APISandbox()
@@ -26,7 +28,7 @@ function APISandbox()
 	function loadUserList() {
 			if (loaded)
 				return ;
-			xhttp.open("GET", "http://localhost:3450/users", true);
+			xhttp.open("GET", "http://127.0.0.1:3450/users", true);
 			xhttp.send();
 	}
 
@@ -41,14 +43,15 @@ function APISandbox()
 				be removed sooner or later.
 			</p>
 			{
-				<div className="MainContent__UserList">
+				<div className="APISandbox__UserList">
 					<h3>User list:</h3>
 					{
 						loaded ?
-						userListHtml :
+						<div className="APISandbox__UserListItems">{userListHtml}</div> :
 						<div className="Spinner"><img src={ hourglass } /></div> }
 				</div>
 				}
+			<Link to="/">Go home</Link>
 		</main>
 	);
 }

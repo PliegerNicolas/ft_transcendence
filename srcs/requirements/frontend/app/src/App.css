@@ -81,17 +81,14 @@
 	min-height: 100%;
 }
 
-.Navbar__Link > button {
-	width: 100%;
+.Navbar__Link {
+	width: calc(100% - 36px);
 	border: none;
 	border-radius: 7px;
-	font-size: 1.2rem;
+	font-size: 1.1rem;
 	padding: 6px 18px;
-	text-align: left;	
-}
-
-.Navbar > button:hover {
-	cursor: pointer;
+	text-align: left;
+	text-decoration: none;
 }
 
 .Navbar__Button {
@@ -124,7 +121,7 @@
 	overflow: scroll;
 }
 
-.MainContent__UserList {
+.APISandbox__UserList {
 	margin: 50px 100px;
 	border: 1px solid var(--bg-color-4);
 	border-radius: 7px;
@@ -132,13 +129,20 @@
 	padding: 0 20px 15px;
 }
 
-.MainContent__UserList > p {
-	margin: 0px 20px;
+.APISandbox__UserListItems {
+	border: 1px solid var(--bg-color-3);
+	padding: 5px;
+	margin: 0px 15px;
+	border-radius: 9px;
+}
+
+.APISandbox__UserListItems > p {
+	margin: 0px;
 	padding: 5px;
 	border: none;
 	animation: fadein .25s ease-in-out;
 }
-.MainContent__UserList > p.odd {
+.APISandbox__UserListItems > p.odd {
 	background: var(--bg-color-3);
 }
 
