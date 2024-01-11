@@ -11,30 +11,26 @@ import Stats from "./components/Stats.tsx";
 import Chat from "./components/Chat.tsx";
 import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
-import APISandbox from "./components/APISandbox.tsx";
+import Sandbox from "./components/Sandbox.tsx";
 
 function App()
 {
-	console.log(window.location.pathname);
-	console.log(window.location.host);
 	return (
-		<div className="App">
+		<Router>
 			<Header />
-			<Router>
-				<div className="App__Content">
-					<Navbar />
-					<Routes>
-						<Route path="/"	element={<Home />} />
-						<Route path="/play" element={<Play />} />
-						<Route path="/stats" element={<Stats />} />
-						<Route path="/chat" element={<Chat />} />
-						<Route path="/settings" element={<Settings />} />
-						<Route path="/about" element={<About />} />
-						<Route path="/apisandbox" element={<APISandbox />} />
-					</Routes>
-				</div>
-			</Router>
-		</div>
+			<div className="App__Content">
+				<Navbar />
+				<Routes>
+					<Route path="/"	element={<Home />} />
+					<Route path="/play" element={<Play />} />
+					<Route path="/stats" element={<Stats />} />
+					<Route path="/chat" element={<Chat />} />
+					<Route path="/settings" element={<Settings />} />
+					<Route path="/about" element={<About />} />
+					<Route path="/sandbox" element={<Sandbox />} />
+				</Routes>
+			</div>
+		</Router>
 	);
 }
 

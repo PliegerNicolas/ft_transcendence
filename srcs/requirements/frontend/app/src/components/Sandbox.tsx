@@ -3,7 +3,15 @@ import {Link} from "react-router-dom";
 
 import hourglass from "../assets/hourglass.svg";
 
-function APISandbox()
+function testPromise()
+{
+	const promise = Promise.resolve();
+
+	promise.then(() => console.log("Coucou, "));
+	console.log("mdr.");
+}
+
+function Sandbox()
 {
 	const [userList, setUserList] = React.useState([]);
 	const [loaded, setLoaded] = React.useState(false);
@@ -18,17 +26,19 @@ function APISandbox()
   const xhttp = new XMLHttpRequest();
 
   xhttp.onreadystatechange = () => {
-    if (xhttp.readyState == 4 && xhttp.status == 200) {
-			setLoaded(true);
-			setUserList(JSON.parse(xhttp.responseText));
-			clearInterval(loadingInterval);
-    }
+    if (xhttp.readyState != 4 || xhttp.status != 200 || loaded)
+			return ;
+		setLoaded(true);
+		console.log("RESSOURCE OK!!!");
+		testPromise();
+		setUserList(JSON.parse(xhttp.responseText));
+		clearInterval(loadingInterval);
   };
 
 	function loadUserList() {
 			if (loaded)
 				return ;
-			xhttp.open("GET", "http://127.0.0.1:3450/users", true);
+			xhttp.open("GET", `http://${location.hostname}:3450/users`, true);
 			xhttp.send();
 	}
 
@@ -37,23 +47,23 @@ function APISandbox()
 
 	return (
 		<main className="MainContent">
-			<h2>API Sandbox</h2>
+			<h2>Sandbox</h2>
 			<p>
-				This page is just a sample to test API requests. Don't mind it, it shall
-				be removed sooner or later.
+				This page is just a sample to test frontend stuff. Don't mind it, it
+				shall be removed sooner or later.
 			</p>
 			{
-				<div className="APISandbox__UserList">
+				<div className="Sandbox__UserList">
 					<h3>User list:</h3>
 					{
 						loaded ?
-						<div className="APISandbox__UserListItems">{userListHtml}</div> :
+						<div className="Sandbox__UserListItems">{ userListHtml }</div> :
 						<div className="Spinner"><img src={ hourglass } /></div> }
 				</div>
 				}
-			<Link to="/">Go home</Link>
+			<Link to="/"><button>Go home</button></Link>
 		</main>
 	);
 }
 
-export default APISandbox;
+export default Sandbox;

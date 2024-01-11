@@ -9,17 +9,14 @@ function Navbar()
 		{ name: "Chat", path: "/chat" },
 		{ name: "Settings", path: "/settings" },
 		{ name: "About", path: "/about" },
-		{ name: "API Sandbox", path: "/apisandbox" }
+		{ name: "Sandbox", path: "/sandbox" }
 	];
 	let loc = useLocation();
 
 	const navHtml = options.map((elem, index) =>
-		<Link to={elem.path} key={index} 
-			className={
-				"Navbar__Link " +
-				"Navbar__Button" + ( elem.path === loc.pathname ? "--Current" : "")
-			}
-		>
+		<Link to={elem.path} key={index} className={
+			`Navbar__Link Navbar__Button${elem.path === loc.pathname ? "--Curr" : ""}`
+		}>
 			{elem.name}
 		</Link>
 	);
