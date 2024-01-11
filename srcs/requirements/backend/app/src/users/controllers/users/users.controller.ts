@@ -10,16 +10,12 @@ export class UsersController {
 
     @Get()
     async getUsers() {
-        const users = await this.userService.fetchUsers();
-        return (users);
+        return (await this.userService.fetchUsers());
     }
 
     @Get(':id')
-    getUserById(@Param('id', ParseIntPipe) id: number) {
-        //const user = this.userService.fetchUserById(id);
-        //if (!user)
-        //    throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-        //return (user);
+    async getUserById(@Param('id', ParseIntPipe) id: number) {
+        return (await this.userService.fetchUserById(id));
     }
 
     @Post()
