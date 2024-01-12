@@ -21,34 +21,29 @@
 	gap: 10px;
 	transition: filter .1s;
 }
+
 .Header__Title:hover {
-	filter: drop-shadow(0 0 8px #fff8);
+	filter: drop-shadow(0 0 10px #fff8);
 }
+
 .Header__Title:active {
 	filter: none;
 }
 
 .Header__Logo {
 	height: 32px;
-	filter:
-		brightness(0)
-		saturate(100%)
-		invert(89%)
-		sepia(5%)
-		saturate(2749%)
-		hue-rotate(195deg)
-		brightness(100%)
-		contrast(107%);
 }
 
 .Header__TitleText {
+	color: var(--text-middle);
+	text-decoration: none;
 	font-size: 1.8rem;
 	font-weight: 700;
-	font-style: italic;
 }
 
 .Header__Login {
 	font-size: 1.1rem;
+	color: var(--text-normal);
 	background: var(--bg-color-4);
 	border: 1px solid var(--bg-color-5);
 	padding: 8px 20px;
@@ -56,8 +51,13 @@
 	transition: .1s;
 	margin: 0;
 }
+.Header__Login:visited {
+	color: var(--text-normal);
+}
 .Header__Login:hover {
 	background: var(--bg-color-5);
+	color: var(--text-accent);
+	cursor: pointer;
 }
 .Header__Login:active {
 	background: var(--bg-color-4);
@@ -81,40 +81,51 @@
 	min-height: 100%;
 }
 
-.Navbar__Link > button {
-	width: 100%;
+.Navbar__Link {
+	width: calc(100% - 36px);
 	border: none;
 	border-radius: 7px;
-	font-size: 1.2rem;
+	font-size: 1.1rem;
 	padding: 6px 18px;
-	text-align: left;	
+	text-align: left;
+	text-decoration: none;
+	filter: none;
 }
 
-.Navbar > button:hover {
-	cursor: pointer;
+.Navbar__Link:visited {
+	color: var(--text-normal);
 }
 
 .Navbar__Button {
 	background: none;
 	color: var(--text-normal);
 }
+
 .Navbar__Button:hover {
 	background: var(--bg-color-3);
+	color: var(--text-middle);
 }
+
 .Navbar__Button:active {
 	background: var(--bg-color-4);
 }
 
-.Navbar__Button--Current {
+.Navbar__Button--Curr {
 	color: var(--text-accent);
 	background: var(--current-option-bg);
 	box-shadow: 0 0 4px #000a;
 }
-.Navbar__Button--Current:hover {
+
+.Navbar__Button--Curr:hover {
 	filter: brightness(1.1);
 }
-.Navbar__Button--Current:active {
+
+.Navbar__Button--Curr:active {
 	filter: none;
+}
+
+.Navbar__Button--Curr:visited {
+	color: var(--text-accent);
 }
 
 .MainContent {
@@ -124,7 +135,7 @@
 	overflow: scroll;
 }
 
-.MainContent__UserList {
+.Sandbox__UserList {
 	margin: 50px 100px;
 	border: 1px solid var(--bg-color-4);
 	border-radius: 7px;
@@ -132,13 +143,21 @@
 	padding: 0 20px 15px;
 }
 
-.MainContent__UserList > p {
-	margin: 0px 20px;
+.Sandbox__UserListItems {
+	border: 1px solid var(--bg-color-3);
 	padding: 5px;
-	border: none;
+	margin: 0px 15px;
+	border-radius: 9px;
 	animation: fadein .25s ease-in-out;
 }
-.MainContent__UserList > p.odd {
+
+.Sandbox__UserListItems > p {
+	margin: 0px;
+	padding: 5px;
+	border: none;
+}
+
+.Sandbox__UserListItems > p.odd {
 	background: var(--bg-color-3);
 }
 
@@ -148,22 +167,33 @@
 	margin-bottom: 20px;
 }
 
-.Spinner > img {
+.Spinner>img {
 	min-width: 40px;
 	animation:
 		spin .8s ease-in-out infinite,
 		fadein 1s ease-in-out,
-		glow alternate ease-in-out .8s infinite;;
+		glow alternate ease-in-out .8s infinite;
+	;
 }
 
 @keyframes spin {
-	0% { transform: rotate(0deg); }
-	100% { transform: rotate(180deg); }
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(180deg);
+	}
 }
 
 @keyframes fadein {
-	0% { opacity: 0; }
-	100% {opacity: 1;}
+	0% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 1;
+	}
 }
 
 .Construction {
@@ -176,18 +206,27 @@
 	width: 100%;
 }
 
+path {
+	fill:inherit;
+	stroke:inherit;
+}
+
 .Construction__Icon {
 	min-width: 100px;
 	background: transparent;
 	animation: glow alternate ease-in-out 1.5s infinite;
 }
-
 @keyframes glow {
-	0% { filter: drop-shadow(0 0 8px #fff6); }
-	100% { filter: brightness(2) (0 0 8px #ffff); }
+	0% {
+		filter: drop-shadow(0 0 8px #fff6);
+	}
+
+	100% {
+		filter: brightness(2) (0 0 8px #ffff);
+	}
 }
 
-.Construction__Text > p {
+.Construction__Text>p {
 	margin: 10px;
 	border: none;
 	background: none;
