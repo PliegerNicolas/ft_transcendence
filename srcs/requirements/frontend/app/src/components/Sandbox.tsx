@@ -1,5 +1,5 @@
 import React from "react";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 import hourglass from "../assets/hourglass.svg";
 
@@ -7,6 +7,7 @@ function Sandbox()
 {
 	const [userList, setUserList] = React.useState([]);
 	const [loaded, setLoaded] = React.useState(false);
+	const navigate = useNavigate();
 
 	const userListHtml = userList.map(
 		(item: {username: string}, index) =>
@@ -21,9 +22,11 @@ function Sandbox()
 		try {
 			const response = await fetch(`http://${location.hostname}:3450/users`);
 			const users = await response.json();
+
 			clearInterval(loadingInterval);
 			setLoaded(true);
 			setUserList(users);
+
 		} catch (error: any) {
 			console.log("Failed to load user list: " + error.message);
 		}
@@ -49,6 +52,7 @@ function Sandbox()
 				</div>
 				}
 			<Link to="/"><button>Go home</button></Link>
+			<button onClick={() => navigate("/user")}>Check some user page</button>
 		</main>
 	);
 }
