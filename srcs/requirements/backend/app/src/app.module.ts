@@ -3,7 +3,8 @@ import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './typeorm/entities/User';
-import { config } from 'dotenv';
+import { ProfilesModule } from './profiles/profiles.module';
+import { Profile } from './typeorm/entities/Profile';
 
 @Module({
   imports: [
@@ -15,10 +16,11 @@ import { config } from 'dotenv';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [User],
+      entities: [User, Profile],
     synchronize: true,
     }),
-    UsersModule],
+    UsersModule,
+    ProfilesModule],
   controllers: [],
   providers: [],
 })

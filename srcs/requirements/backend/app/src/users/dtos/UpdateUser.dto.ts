@@ -8,4 +8,5 @@ export class UpdateUserDto {
     @IsEmail()
     @IsNotEmpty()
     email: string;
+
 }

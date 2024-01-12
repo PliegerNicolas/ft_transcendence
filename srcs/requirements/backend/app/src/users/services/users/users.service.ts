@@ -9,18 +9,23 @@ export class UsersService {
 
     constructor(
         @InjectRepository(User)
-        private userRepository: Repository<User>,
+        private readonly userRepository: Repository<User>,
     ) {}
 
     async fetchUsers(): Promise<User[]> {
         return (this.userRepository.find());
     }
 
-    async fetchUserById(id: number): Promise<User> {
-        const user = await this.userRepository.findOne({ where: {  id }});
+    async getUser(id: number): Promise<User> {
+        const user = await this.userRepository.findOne({
+            where: { id },
+            relations: ['profile']
+        });
+
         if (!user) {
             throw new NotFoundException(`User with ID ${id} not found.`);
         }
+
         return (user);
     }
 
