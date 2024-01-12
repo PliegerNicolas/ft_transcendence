@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/10 16:28:52 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/11 18:40:03 by nicolas          ###   ########.fr        #
+#    Updated: 2024/01/12 01:59:18 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 #!/bin/sh
@@ -36,7 +36,6 @@ if [ -z "$DB_EXISTS" ]; then
 
 	psql -v ON_ERROR_STOP=1 --username postgres --dbname postgres <<-EOSQL
 		CREATE DATABASE "$POSTGRES_DB";
-		ALTER USER postgres WITH PASSWORD '$POSTGRES_PASSWORD';
 	EOSQL
 
 	echo "Database '$POSTGRES_DB' created."
@@ -60,7 +59,9 @@ fi
 # Give user ownership of database.
 psql -v ON_ERROR_STOP=1 --username postgres --dbname postgres <<-EOSQL
 	ALTER DATABASE "$POSTGRES_DB" OWNER TO "$POSTGRES_USER";
+	GRANT CONNECT ON DATABASE "$POSTGRES_DB" TO "$POSTGRES_USER";
 EOSQL
+
 echo "Giving ownership of '$POSTGRES_DB' to '$POSTGRES_USER'."
 
 if [ "$SHUTDOWN_POSTGRES" = true ]; then
