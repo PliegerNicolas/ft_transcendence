@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { NotFoundError } from 'rxjs';
 import { Profile } from 'src/typeorm/entities/Profile';
 import { CreateProfileParams, UpdateProfileParams } from 'src/utils/types';
 import { Repository } from 'typeorm';

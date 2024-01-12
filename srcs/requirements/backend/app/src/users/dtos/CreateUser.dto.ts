@@ -1,4 +1,6 @@
+import { Type } from "class-transformer";
 import { IsEmail, IsNotEmpty } from "class-validator";
+import { CreateProfileDto } from "src/profiles/dtos/CreateProfileDto";
 
 export class CreateUserDto {
 
@@ -9,4 +11,6 @@ export class CreateUserDto {
     @IsNotEmpty()
     email: string;
 
+    @Type(() => CreateProfileDto)
+    profile: CreateProfileDto;
 }

@@ -3,23 +3,23 @@
 /* User */
 
 export type CreateUserParams = {
-    username: string;
-    email: string;
+    username?: string;
+    email?: string;
 };
 
 export type UpdateUserParams = {
-    username: string;
-    email: string;
+    username?: string;
+    email?: string;
 };
 
 /* Profile */
 
 export type CreateProfileParams = {
-    firstName: string;
-    lastName: string;
+    firstName?: string;
+    lastName?: string;
 }
 
 export type UpdateProfileParams = {
-    firstName: string;
-    lastName: string;
+    firstName?: string;
+    lastName?: string;
 }

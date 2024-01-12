@@ -1,8 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Profile } from 'src/typeorm/entities/Profile';
 import { User } from 'src/typeorm/entities/User';
-import { CreateUserParams, UpdateUserParams } from 'src/utils/types';
-import { Repository, Unique } from 'typeorm';
+import { CreateProfileParams, CreateUserParams, UpdateUserParams } from 'src/utils/types';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
@@ -10,10 +11,12 @@ export class UsersService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        @InjectRepository(Profile)
+        private readonly profileRepository: Repository<Profile>,
     ) {}
 
-    async fetchUsers(): Promise<User[]> {
-        return (this.userRepository.find());
+    async getUsers(): Promise<User[]> {
+        return (this.userRepository.find({ relations: ['profile'] }));
     }
 
     async getUser(id: number): Promise<User> {

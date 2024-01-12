@@ -2,6 +2,8 @@ import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseI
 import { CreateUserDto } from '../../dtos/CreateUser.dto';
 import { UsersService } from 'src/users/services/users/users.service';
 import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
+import { CreateProfileDto } from 'src/profiles/dtos/CreateProfileDto';
+import { UpdateProfileDto } from 'src/profiles/dtos/UpdateProfileDto';
 
 @Controller('users')
 export class UsersController {
@@ -10,7 +12,7 @@ export class UsersController {
 
     @Get()
     async getUsers() {
-        return (await this.userService.fetchUsers());
+        return (await this.userService.getUsers());
     }
 
     @Get(':id')
@@ -20,14 +22,17 @@ export class UsersController {
 
     @Post()
     @UsePipes(new ValidationPipe())
-    createUser(@Body() createUserDto: CreateUserDto) {
+    createUser(
+        @Body() createUserDto: CreateUserDto
+    ) {
+        console.log(createUserDto);
         this.userService.createUser(createUserDto);
     }
 
     @Patch(':id')
     async updateUserById(
         @Param('id', ParseIntPipe) id: number,
-        @Body() updateUserDto: UpdateUserDto
+        @Body() updateUserDto: UpdateUserDto,
     ) {
         await this.userService.updateUser(id, updateUserDto);
     }

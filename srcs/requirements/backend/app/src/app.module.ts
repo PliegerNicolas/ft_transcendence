@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { User } from './typeorm/entities/User';
-import { ProfilesModule } from './profiles/profiles.module';
 import { Profile } from './typeorm/entities/Profile';
 
 @Module({
@@ -19,8 +18,7 @@ import { Profile } from './typeorm/entities/Profile';
       entities: [User, Profile],
     synchronize: true,
     }),
-    UsersModule,
-    ProfilesModule],
+    UsersModule],
   controllers: [],
   providers: [],
 })

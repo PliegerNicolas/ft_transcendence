@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty } from "class-validator";
+import { CreateProfileDto } from "src/profiles/dtos/CreateProfileDto";
 
 export class UpdateUserDto {
 
@@ -9,4 +10,5 @@ export class UpdateUserDto {
     @IsNotEmpty()
     email: string;
 
+    profile: CreateProfileDto;
 }
