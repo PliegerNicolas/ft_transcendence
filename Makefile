@@ -6,7 +6,7 @@
 #    By: julboyer <julboyer@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:32:44 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/10 12:24:51 by julboyer         ###   ########.fr        #
+#    Updated: 2024/01/11 17:39:53 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,6 +30,7 @@ COMPOSE_FILE	:=			./srcs/docker-compose.yml
 all:	up
 
 up:
+	mkdir -p "${HOME}/data/postgresql"
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d --build
 
 clean:
