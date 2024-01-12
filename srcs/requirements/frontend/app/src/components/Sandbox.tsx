@@ -6,7 +6,7 @@ import hourglass from "../assets/hourglass.svg";
 function Sandbox()
 {
 	const [userList, setUserList] = React.useState([]);
-	const [loaded, setLoaded] = React.useState(false);
+	const [loadCount, setLoadCount] = React.useState(0);
 	const navigate = useNavigate();
 
 	const userListHtml = userList.map(
@@ -17,23 +17,17 @@ function Sandbox()
 	);
 
 	async function loadUserList() {
-		if (loaded)
-			return ;
 		try {
 			const response = await fetch(`http://${location.hostname}:3450/users`);
 			const users = await response.json();
 
-			clearInterval(loadingInterval);
-			setLoaded(true);
+			setLoadCount(1);
 			setUserList(users);
 
 		} catch (error: any) {
-			console.log("Failed to load user list: " + error.message);
+			setLoadCount(2);
 		}
 	}
-
-	loadUserList();
-	let loadingInterval = setInterval(loadUserList, 2000);
 
 	return (
 		<main className="MainContent">
@@ -46,9 +40,15 @@ function Sandbox()
 				<div className="Sandbox__UserList">
 					<h3>User list:</h3>
 					{
-						loaded ?
-						<div className="Sandbox__UserListItems">{ userListHtml }</div> :
-						<div className="Spinner"><img src={ hourglass } /></div> }
+						(loadCount == 1 ?
+							<div className="Sandbox__UserListItems">{ userListHtml }</div>
+						:
+							<button onClick={loadUserList}>Load user list</button>)/*
+						<div className="Spinner"><img src={ hourglass } /></div>*/
+						}
+						{
+							loadCount == 2 && <span style={{color: "#f9a"}}>Failed to load</span>
+						}
 				</div>
 				}
 			<Link to="/"><button>Go home</button></Link>

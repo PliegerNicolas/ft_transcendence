@@ -5,7 +5,7 @@ function Header()
 {
 	const redirectLinkParams = new URLSearchParams({
 		client_id: "u-s4t2ud-6a30fe66352f0b35cfb0b9450bd1d47869dbcbe39ecb4f8fe01a3a95cb633809",
-		redirect_uri: `http://${location.hostname}:3030/`,
+		redirect_uri: `http://${location.hostname}:3030/auth`,
 		response_type: "code"
 	});
 	const redirectLink = "https://api.intra.42.fr/oauth/authorize?" + redirectLinkParams.toString();
