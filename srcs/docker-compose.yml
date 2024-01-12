@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:41:05 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/12 16:15:36 by nplieger         ###   ########.fr        #
+#    Updated: 2024/01/12 20:32:11 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # Latest version as of january 8 2024
@@ -18,13 +18,13 @@ networks:
     driver: bridge
 
 # Volumes
-volumes:
-  postgresql_data:
-    driver: local
-    driver_opts:
-      type: none
-      device: ${HOME}/data/postgresql
-      o: bind
+#volumes:
+#  postgresql_data:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      device: ${HOME}/data/postgresql
+#      o: bind
 
 # Services
 services:

@@ -8,6 +8,12 @@ export class ProfilesController {
 
     constructor(private profileService: ProfilesService) {}
 
+    @Get()
+    getProfiles()
+    {
+        return (this.profileService.getProfiles());
+    }
+
     @Get(':id')
     getProfile(@Param('id', ParseIntPipe) id: number) {
         return (this.profileService.getProfile(id));
