@@ -45,6 +45,7 @@ a:visited {
 
 button {
 	padding: 5px 10px;
+	margin-right: 8px;
 	background: var(--bg-color-3);
 	border: 1px solid var(--bg-color-5);
 	color: var(--text-normal);

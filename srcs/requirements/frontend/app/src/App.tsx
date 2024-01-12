@@ -12,6 +12,7 @@ import Chat from "./components/Chat.tsx";
 import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
+import User from "./components/User.tsx";
 
 function App()
 {
@@ -28,6 +29,7 @@ function App()
 					<Route path="/settings" element={<Settings />} />
 					<Route path="/about" element={<About />} />
 					<Route path="/sandbox" element={<Sandbox />} />
+					<Route path="/user" element={<User />} />
 				</Routes>
 			</div>
 		</Router>

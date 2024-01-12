@@ -35,15 +35,15 @@
 }
 
 .Header__TitleText {
-	color: var(--text-normal);
+	color: var(--text-middle);
 	text-decoration: none;
 	font-size: 1.8rem;
 	font-weight: 700;
-	font-style: italic;
 }
 
 .Header__Login {
 	font-size: 1.1rem;
+	color: var(--text-normal);
 	background: var(--bg-color-4);
 	border: 1px solid var(--bg-color-5);
 	padding: 8px 20px;
@@ -51,12 +51,14 @@
 	transition: .1s;
 	margin: 0;
 }
-
+.Header__Login:visited {
+	color: var(--text-normal);
+}
 .Header__Login:hover {
 	background: var(--bg-color-5);
+	color: var(--text-accent);
 	cursor: pointer;
 }
-
 .Header__Login:active {
 	background: var(--bg-color-4);
 }
