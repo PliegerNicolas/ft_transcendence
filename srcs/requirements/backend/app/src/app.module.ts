@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { User } from './typeorm/entities/User';
 import { Profile } from './typeorm/entities/Profile';
 import { AuthModule } from './auth/auth.module';
+import { ProfilesModule } from './profiles/profiles.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthModule } from './auth/auth.module';
     synchronize: true,
     }),
     UsersModule,
+    ProfilesModule,
     AuthModule],
   controllers: [],
   providers: [],

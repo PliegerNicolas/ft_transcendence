@@ -7,7 +7,8 @@ import { Profile } from 'src/typeorm/entities/Profile';
 import { ProfilesModule } from 'src/profiles/profiles.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Profile]),
+  imports: [
+    TypeOrmModule.forFeature([User, Profile]),
     ProfilesModule,
   ],
   controllers: [UsersController],
