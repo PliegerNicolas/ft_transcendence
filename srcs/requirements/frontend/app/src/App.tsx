@@ -1,7 +1,7 @@
 import "./App.css";
 
-import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 
 import Header from "./components/Header.tsx";
 import Navbar from "./components/Navbar.tsx";
@@ -17,88 +17,62 @@ import User from "./components/User.tsx";
 
 /*
 
-All the code in Auth will have to move server side.
+Here's the kind of code that will have to be implemented server-side to obtain
+the 42 api token:
 
-This is currently not secure and will probably explode and lead to disasters.
-
-(e.g. pushing FT A.P.I. credentials ^^' )
+async function loadFtToken()
+{
+	const response = await fetch("https://api.intra.42.fr/oauth/token", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify({
+			"grant_type": "authorization_code",
+			"client_id": client_id,
+			"client_secret": client_secret,
+			"code": code,
+			"redirect_uri": redirect_uri
+		})
+	});
+	const token_data = await response.json();
+	const token = token_data.access_token;
+}
 
 */
 
 function Auth()
 {
-	const [tokenString, setTokenString] = useState("");
-	const [me, setMe] = useState({usual_full_name: "", login: "", image: {versions: {small: ""}}});
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
 
-	const client_id = "u-s4t2ud-9a9cee22edb9c564d3166746c9bf18b72bd6b36cf73c9ab06d6120c44d63c0ff";
-	const client_secret = "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"; // THIS IS A BIG NONO
-	const redirect_uri = `http://${location.hostname}:3030/auth`;
+	console.log("Should send this code to the backend API: " + code);
 
-	async function loadFtToken() {
-		if (tokenString)
-			return ;
+	/*
+	**	HERE, SOME KIND OF BACKEND API CALL TO SEND THE AUTHENTIFICATION CODE
+	**	AND OBTAIN ALL RELEVANT USER LOGIN INFORMATION IN RETURN
+	**	EG:
+	**
+	**	fetch(`http://${location.hostname}:3450/auth`, {
+	**		method: "POST",
+	**		headers: {
+	**			"Content-Type": "application/json"
+	**		},
+	**		body: JSON.stringify({
+	**			"code": code,
+	**			"redirect_uri": `http://${location.hostname}:3030/auth`
+	**		})
+	**	}).then ...
+	*/
 
-		const response = await fetch("https://api.intra.42.fr/oauth/token", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({
-				"grant_type": "authorization_code",
-				"client_id": client_id,
-				"client_secret": client_secret,
-				"code": code,
-				"redirect_uri": redirect_uri
-			})
-		});
-		const token = await response.json();
-
-		setTokenString(token.access_token);
-	}
-
-	
-	async function loadMe() {
-		const meResponse = await fetch("https://api.intra.42.fr/v2/me", {
-			headers: {
-				"Authorization": "Bearer " + tokenString,
-				"Content-Type": "application/json"
-			}
-		});
-		const melol = await meResponse.json();
-
-		setMe(melol);
-	}
-
+	const navigate = useNavigate();
 	const redirectPath = localStorage.getItem("auth_redirect");
 
-	return (
-		<div className="MainContent">
-			<h3>Authentification... Redirect {"---> "+ redirectPath}</h3>
-			<p>
-				Code: {code} <br/>
-				Token: {tokenString} <br/>
-				{
-					me.login ?
-					"You are: " + me.usual_full_name + " a.k.a. " + me.login :
-					""
-				}
-				{
-					me.login ?
-					<img
-						src={me.image.versions.small}
-						style={{margin: "10px", display: "block", borderRadius: "7px"}}
-					/> :
-					""
-				}
-				<br/>
-				<button onClick={loadFtToken}>Load token</button>
-				<button onClick={loadMe}>Load me</button>
-				<Link to={redirectPath !}><button>Done</button></Link>
-			</p>
-		</div>
-	);
+	useEffect(() => {
+		navigate(redirectPath ? redirectPath : "/", {replace: true})
+	}, []);
+
+	return (<div />);
 }
 
 function App()

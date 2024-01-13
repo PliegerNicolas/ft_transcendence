@@ -18,10 +18,6 @@ function Sandbox()
 	async function loadUserList() {
 		if (loadCount <= 0)
 			return ;
-		if (loadCount > 5) {
-			setLoadCount(-1);
-			return ;
-		}
 		try {
 			const response = await fetch(`http://${location.hostname}:3450/users`);
 
@@ -34,7 +30,10 @@ function Sandbox()
 			setLoadCount(0);
 
 		} catch (error: any) {
-			setTimeout(() => {setLoadCount(prev => prev + 1)}, 2000);
+			if (loadCount > 1)
+				setLoadCount(-2);
+			else
+				setTimeout(() => {setLoadCount(prev => prev + 1)}, 2000);
 			console.log("ERROR: " + error.message);
 		}
 	}
@@ -59,7 +58,6 @@ function Sandbox()
 	return (
 		<main className="MainContent">
 			<h2>Sandbox</h2>
-
 			<p>
 				This page is just a sample to test frontend stuff. Don't mind it, it
 				shall be removed sooner or later.
@@ -67,14 +65,11 @@ function Sandbox()
 			<div className="Sandbox__UserList">
 				<h3>User list:</h3>
 				{renderSwitch()}
-				<p>{loadCount}</p>
 			</div>
 			<Link to="/"><button>Go home</button></Link>
 			<Link to="/user"><button>Check some user page</button></Link>
 		</main>
 	);
 }
-
-console.log(hourglass); // TEMP OTHERWISE IT DOESN'T COMPILE
 
 export default Sandbox;
