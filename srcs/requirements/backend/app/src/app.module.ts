@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from './typeorm/entities/User';
 import { config } from 'dotenv';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { config } from 'dotenv';
       entities: [User],
     synchronize: true,
     }),
-    UsersModule],
+    UsersModule,
+    AuthModule],
   controllers: [],
   providers: [],
 })
