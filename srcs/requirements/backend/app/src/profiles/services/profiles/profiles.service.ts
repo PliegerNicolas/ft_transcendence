@@ -14,7 +14,9 @@ export class ProfilesService {
     ) {}
 
     async getProfileByUserId(userId: number): Promise <Profile> {
-        const profile = this.profileRepository.findOne({ where: { id: userId } });
+        const profile = await this.profileRepository.findOne({ where: { user: { id: userId } } });
+
+        console.log(profile);
 
         if (!profile) {
             throw new NotFoundException(`Profile of User with ID ${userId} not found`);
@@ -24,7 +26,9 @@ export class ProfilesService {
     }
 
     async updateProfile(userId: number, updateProfileDetails: UpdateProfileParams): Promise<void> {
-        const profile = await this.profileRepository.findOne({ where: { id: userId } });
+        const profile = await this.profileRepository.findOne({ relations: ["user"], where: { user: { id: userId } } });
+
+        console.log(profile);
 
         if (!profile) {
             throw new NotFoundException(`Profile of User with ID ${userId} not found`);
