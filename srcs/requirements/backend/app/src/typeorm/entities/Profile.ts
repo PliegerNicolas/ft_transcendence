@@ -13,6 +13,7 @@ export class Profile {
     @Column({ nullable: true })
     lastName: string;
 
-    @OneToOne(() => User, user => user.profile)
+    @OneToOne(() => User, (user) => user.profile, { onDelete: 'CASCADE' })
+    @JoinColumn()
     user: User
 }

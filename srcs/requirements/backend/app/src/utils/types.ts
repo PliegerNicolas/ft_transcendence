@@ -1,6 +1,7 @@
 // Assuming the data has already been validated.
 
 import { CreateProfileDto } from "src/profiles/dtos/CreateProfileDto";
+import { UpdateProfileDto } from "src/profiles/dtos/UpdateProfileDto";
 
 /* User */
 
@@ -13,7 +14,7 @@ export type CreateUserParams = {
 export type UpdateUserParams = {
     username?: string;
     email?: string;
-    profile?: CreateProfileDto;
+    profile?: UpdateProfileDto;
 };
 
 /* Profile */

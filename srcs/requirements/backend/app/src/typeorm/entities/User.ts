@@ -13,7 +13,6 @@ export class User {
     @Column({ unique: true })
     email: string;
 
-    @OneToOne(() => Profile, { cascade: true, onDelete: 'CASCADE' })
-    @JoinColumn()
+    @OneToOne(() => Profile, (profile) => profile.user)
     profile: Profile
 }
