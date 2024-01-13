@@ -18,7 +18,11 @@ function Header()
 					<span className="Header__TitleText">PONG</span>
 				</div>
 			</Link>
-			<a href={redirectLink} className="Header__Login">
+			<a
+				href={redirectLink}
+				onClick={() => localStorage.setItem("auth_redirect", location.pathname)}
+				className="Header__Login"
+			>
 				Log In
 			</a>
 		</header>

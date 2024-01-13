@@ -1,7 +1,7 @@
 import "./App.css";
 
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
 import Header from "./components/Header.tsx";
 import Navbar from "./components/Navbar.tsx";
@@ -19,7 +19,8 @@ import User from "./components/User.tsx";
 
 All the code in Auth will have to move server side.
 
-This is currently note secure and will only lead to disasters.
+This is currently not secure and will probably explode and lead to disasters.
+
 (e.g. pushing FT A.P.I. credentials ^^' )
 
 */
@@ -27,7 +28,7 @@ This is currently note secure and will only lead to disasters.
 function Auth()
 {
 	const [tokenString, setTokenString] = useState("");
-	const [me, setMe] = useState({usual_full_name: "", login: ""});
+	const [me, setMe] = useState({usual_full_name: "", login: "", image: {versions: {small: ""}}});
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
 
@@ -57,6 +58,7 @@ function Auth()
 		setTokenString(token.access_token);
 	}
 
+	
 	async function loadMe() {
 		const meResponse = await fetch("https://api.intra.42.fr/v2/me", {
 			headers: {
@@ -65,19 +67,36 @@ function Auth()
 			}
 		});
 		const melol = await meResponse.json();
+
 		setMe(melol);
 	}
 
+	const redirectPath = localStorage.getItem("auth_redirect");
+
 	return (
 		<div className="MainContent">
-			<h3>Authentification...</h3>
+			<h3>Authentification... Redirect {"---> "+ redirectPath}</h3>
 			<p>
 				Code: {code} <br/>
 				Token: {tokenString} <br/>
-				{ me.login ? "You are: " + me.usual_full_name + " a.k.a. " + me.login : ""} <br/>
+				{
+					me.login ?
+					"You are: " + me.usual_full_name + " a.k.a. " + me.login :
+					""
+				}
+				{
+					me.login ?
+					<img
+						src={me.image.versions.small}
+						style={{margin: "10px", display: "block", borderRadius: "7px"}}
+					/> :
+					""
+				}
 				<br/>
 				<button onClick={loadFtToken}>Load token</button>
-				<button onClick={loadMe}>Load me</button></p>
+				<button onClick={loadMe}>Load me</button>
+				<Link to={redirectPath !}><button>Done</button></Link>
+			</p>
 		</div>
 	);
 }
@@ -86,7 +105,7 @@ function App()
 {
 	return (
 		<Router>
-			<Header />
+			<Header/>
 			<div className="App__Content">
 				<Navbar />
 				<Routes>
