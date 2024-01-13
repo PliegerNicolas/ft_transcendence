@@ -57,4 +57,6 @@ function Sandbox()
 	);
 }
 
+console.log(hourglass); // TEMP OTHERWISE IT DOESN'T COMPILE
+
 export default Sandbox;

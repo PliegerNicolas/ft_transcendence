@@ -10,24 +10,26 @@ export class UsersController {
 
     @Get()
     async getUsers() {
-        return (await this.userService.fetchUsers());
+        return (await this.userService.getUsers());
     }
 
     @Get(':id')
-    async getUserById(@Param('id', ParseIntPipe) id: number) {
-        return (await this.userService.fetchUserById(id));
+    async getUser(@Param('id', ParseIntPipe) id: number) {
+        return (await this.userService.getUser(id));
     }
 
     @Post()
     @UsePipes(new ValidationPipe())
-    createUser(@Body() createUserDto: CreateUserDto) {
+    createUser(
+        @Body() createUserDto: CreateUserDto
+    ) {
         this.userService.createUser(createUserDto);
     }
 
     @Patch(':id')
     async updateUserById(
         @Param('id', ParseIntPipe) id: number,
-        @Body() updateUserDto: UpdateUserDto
+        @Body() updateUserDto: UpdateUserDto,
     ) {
         await this.userService.updateUser(id, updateUserDto);
     }

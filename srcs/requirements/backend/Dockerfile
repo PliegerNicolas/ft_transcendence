@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 20:08:41 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/11 17:27:39 by nicolas          ###   ########.fr        #
+#    Updated: 2024/01/12 16:15:53 by nplieger         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # Latest stable version of alpine linux at 8 january 2024.
@@ -31,10 +31,10 @@ COPY ./app/ .
 RUN npm run build
 
 # Set environment variable for port
-ENV PORT=3000
+ENV PORT=3450
 
-# Expose port 3000.
-EXPOSE 3000
+# Expose port 3450.
+EXPOSE 3450
 
 # Run NPM.
 CMD ["npm", "run", "start:dev"]
