@@ -1,7 +1,7 @@
 import React from "react";
 import {Link, useNavigate} from "react-router-dom";
 
-import hourglass from "../assets/hourglass.svg";
+// import hourglass from "../assets/hourglass.svg";
 
 function Sandbox()
 {
