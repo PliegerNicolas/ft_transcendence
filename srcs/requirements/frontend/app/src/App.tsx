@@ -33,7 +33,7 @@ function Auth()
 	const code = params.get("code");
 
 	const client_id = "u-s4t2ud-9a9cee22edb9c564d3166746c9bf18b72bd6b36cf73c9ab06d6120c44d63c0ff";
-	const client_secret = ""; // THIS IS A BIG NONO
+	const client_secret = "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"; // THIS IS A BIG NONO
 	const redirect_uri = `http://${location.hostname}:3030/auth`;
 
 	async function loadFtToken() {
