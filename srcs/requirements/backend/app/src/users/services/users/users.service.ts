@@ -39,10 +39,14 @@ export class UsersService {
     }
 
     async updateUser(id: number, updateUserDetails: UpdateUserParams): Promise<void> {
-        const user = await this.userRepository.findOneOrFail({
+        const user = await this.userRepository.findOne({
             where: { id },
             relations: ['profile'],
         });
+
+        if (!user) {
+            throw new NotFoundException(`User with ID ${id} not found`);
+        }
 
         if (updateUserDetails.profile) {
             await this.profileRepository.save({

@@ -11,56 +11,28 @@ export class ProfilesService {
     constructor(
         @InjectRepository(Profile)
         private readonly profileRepository: Repository<Profile>,
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
     ) {}
 
     async getProfileByUserId(userId: number): Promise <Profile> {
-        return (this.profileRepository.findOne({ where: { id: userId } }));
-    }
+        const profile = this.profileRepository.findOne({ where: { id: userId } });
 
-    async updateProfile(userId: number, updateProfileDetails: UpdateProfileParams): Promise<void> {
-        const profile = await this.userRepository.findOneOrFail({
-            where: { id: userId },
-            relations: ['profile'],
-        });
-
-        const updatedProfile = { ...profile.profile, ...updateProfileDetails };
-
-        await this.profileRepository.save(updatedProfile);        
-    }
-
-    /*
-    async getProfiles(): Promise<Profile[]> {
-        return (this.profileRepository.find());
-    }
-
-    async getProfile(id: number): Promise<Profile> {
-        const profile = await this.profileRepository.findOne({ where: { id }});
         if (!profile) {
-            throw new NotFoundException(`Profile with ID ${id} not found.`);
+            throw new NotFoundException(`Profile of User with ID ${userId} not found`);
         }
+
         return (profile);
     }
 
-    async createProfile(profileDetails: CreateProfileParams): Promise<Profile> {
-        const newProfile = this.profileRepository.create({ ...profileDetails });
-        return (await this.profileRepository.save(newProfile));
-    }
-        
-    async updateProfile(id: number, updateProfileDetails: UpdateProfileParams): Promise<void> {
-        const updateResult = await this.profileRepository.update(id, updateProfileDetails);
-        if (updateResult.affected === 0) {
-            throw new NotFoundException(`Profile with ID ${id} not found.`);
+    async updateProfile(userId: number, updateProfileDetails: UpdateProfileParams): Promise<void> {
+        const profile = await this.profileRepository.findOne({ where: { id: userId } });
+
+        if (!profile) {
+            throw new NotFoundException(`Profile of User with ID ${userId} not found`);
         }
+
+        const updatedProfile = { ...profile, ...updateProfileDetails };
+
+        await this.profileRepository.save(updatedProfile);        
     }
-    
-    async deleteProfile(id: number): Promise<void> {
-        const deleteResult = await this.profileRepository.delete(id);
-        if (deleteResult.affected === 0) {
-            throw new NotFoundException(`Profile with ID ${id} not found.`);
-        }
-    }
-    */
 
 }
