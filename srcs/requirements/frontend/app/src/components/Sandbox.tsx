@@ -47,7 +47,7 @@ function Sandbox()
 			return (<div className="Spinner"><img src={ hourglass } /></div>);
 		return (
 			<div>
-				<span style={{color: "#f9a", fontStyle: "italic"}}>
+				<span className="error-msg">
 					Failed to load user list (is the backend up?)
 				</span><br />
 				<button onClick={() => setLoadCount(1)}>Retry</button>

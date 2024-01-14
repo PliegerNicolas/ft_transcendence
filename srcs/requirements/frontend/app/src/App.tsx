@@ -60,7 +60,7 @@ function Auth()
 	**		},
 	**		body: JSON.stringify({
 	**			"code": code,
-	**			"redirect_uri": `http://${location.hostname}:3030/auth`
+	**			"redirect_uri": `http://${location.host}/auth`
 	**		})
 	**	}).then ...
 	*/
