@@ -1,3 +1,2 @@
 *.env
-
-*.env
+srcs/requirements/frontend/app/dist

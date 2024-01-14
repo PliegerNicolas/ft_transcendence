@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 20:08:41 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/12 16:15:53 by nplieger         ###   ########.fr        #
+#    Updated: 2024/01/14 16:27:05 by lnr              ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # Latest stable version of alpine linux at 8 january 2024.
@@ -37,5 +37,5 @@ ENV PORT=3450
 EXPOSE 3450
 
 # Run NPM.
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start:dev", "--",  "--preserveWatchOutput"]
 # START:DEV IS TEMPORARY FOR DEVELOPMENT PURPOSE

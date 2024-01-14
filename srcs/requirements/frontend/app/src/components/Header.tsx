@@ -4,8 +4,8 @@ import ft_logo from "../assets/42.svg";
 function Header()
 {
 	const redirectLinkParams = new URLSearchParams({
-		client_id: "u-s4t2ud-9a9cee22edb9c564d3166746c9bf18b72bd6b36cf73c9ab06d6120c44d63c0ff",
-		redirect_uri: `http://${location.hostname}:3030/auth`,
+		client_id: import.meta.env.VITE_FTAPI_CLIENTID,
+		redirect_uri: `http://${location.host}/auth`,
 		response_type: "code"
 	});
 	const redirectLink = "https://api.intra.42.fr/oauth/authorize?" + redirectLinkParams.toString();
@@ -15,7 +15,7 @@ function Header()
 			<Link to="/">
 				<div className="Header__Title">
 					<img className="Header__Logo" src={ft_logo} />
-					<span className="Header__TitleText">PONG</span>
+					<span className="Header__TitleText">Pong</span>
 				</div>
 			</Link>
 			<a

@@ -111,7 +111,7 @@
 }
 
 .Navbar__Button--Curr {
-	color: var(--text-accent);
+	color: var(--current-option-text);
 	background: var(--current-option-bg);
 	box-shadow: 0 0 4px #000a;
 }
@@ -125,7 +125,7 @@
 }
 
 .Navbar__Button--Curr:visited {
-	color: var(--text-accent);
+	color: var(--current-option-text);
 }
 
 .MainContent {
