@@ -130,7 +130,7 @@
 
 .MainContent {
 	background: var(--bg-color-1);
-	padding: 15px 40px;
+	padding: 15px 40px 80px;
 	width: 100%;
 	overflow: scroll;
 }
@@ -141,24 +141,39 @@
 	border-radius: 7px;
 	background: var(--bg-color-2);
 	padding: 0 20px 15px;
+	height: 390px;
 }
 
 .Sandbox__UserListItems {
 	border: 1px solid var(--bg-color-3);
-	padding: 5px;
-	margin: 0px 15px;
-	border-radius: 9px;
+	padding: 0px;
+	margin: 0px;
+	border-radius: 10px;
 	animation: fadein .25s ease-in-out;
+	max-height: calc(390px - 65px);
+	overflow: scroll;
+	background: var(--bg-color-2);
 }
 
-.Sandbox__UserListItems > p {
+.Sandbox__UserItem {
 	margin: 0px;
 	padding: 5px;
 	border: none;
+	animation: fadein .15s ease-in-out;
+	display: grid;
+	grid-column-gap: 20px;
+	grid-template-columns: 1fr 2fr 3fr 1fr 1fr;
+	background: var(--bg-color-4);
+	border-radius: 0;
 }
-
-.Sandbox__UserListItems > p.odd {
+.Sandbox__UserItem.odd {
 	background: var(--bg-color-3);
+}
+.Sandbox__UserItem.first {
+	border-radius: 7px 7px 0 0;
+}
+.Sandbox__UserItem.last {
+	border-radius: 0 0 7px 7px;
 }
 
 .Spinner {
