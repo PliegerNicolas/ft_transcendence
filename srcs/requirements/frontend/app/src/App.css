@@ -141,23 +141,28 @@
 	border-radius: 7px;
 	background: var(--bg-color-2);
 	padding: 0 20px 15px;
-	height: 390px;
+	position: relative;
+}
+
+.Sandbox_UserListButtons {
+	margin-bottom: 10px;
 }
 
 .Sandbox__UserListItems {
-	border: 1px solid var(--bg-color-3);
+	border: 1px solid var(--bg-color-5);
 	padding: 0px;
 	margin: 0px;
-	border-radius: 10px;
+	margin-top: 20px;
+	border-radius: 7px;
 	animation: fadein .25s ease-in-out;
-	max-height: calc(390px - 65px);
+	max-height: 400px;
 	overflow: scroll;
 	background: var(--bg-color-2);
 }
 
 .Sandbox__UserItem {
 	margin: 0px;
-	padding: 5px;
+	padding: 6px;
 	border: none;
 	animation: fadein .15s ease-in-out;
 	display: grid;
@@ -165,6 +170,9 @@
 	grid-template-columns: 1fr 2fr 3fr 1fr 1fr;
 	background: var(--bg-color-4);
 	border-radius: 0;
+	user-select: none;
+	color: var(--text-normal);
+	transition: filter .1s, color .2s, text-shadow .2s;
 }
 .Sandbox__UserItem.odd {
 	background: var(--bg-color-3);
@@ -175,15 +183,26 @@
 .Sandbox__UserItem.last {
 	border-radius: 0 0 7px 7px;
 }
+.Sandbox__UserItem:hover {
+	border: 2px solid var(--text-faint);
+	padding: 4px;
+	filter: brightness(1.1) saturate(1.4);
+	cursor: pointer;
+	color: var(--text-accent);
+	text-shadow: 0 0 6px #fff4;
+}
+.Sandbox__UserItem:active{
+	filter: none;
+}
 
 .Spinner {
-	display: flex;
-	justify-content: center;
-	margin-bottom: 20px;
+	position: absolute;
+	top: 40px;
+	right: 60px;
 }
 
 .Spinner>img {
-	min-width: 40px;
+	min-width: 50px;
 	animation:
 		spin .8s ease-in-out infinite,
 		fadein 1s ease-in-out,

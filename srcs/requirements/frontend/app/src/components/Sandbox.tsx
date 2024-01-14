@@ -19,6 +19,7 @@ interface User {
 function UserItem({user, index, length}: {user: User, index: number, length: number})
 {
 	return (
+		<Link to={"/user/" + user.id}>
 		<p className={
 			"Sandbox__UserItem" +
 			(index % 2 ? "" : " odd") +
@@ -31,6 +32,7 @@ function UserItem({user, index, length}: {user: User, index: number, length: num
 				<span>{user.profile.firstName}</span>
 				<span>{user.profile.lastName}</span>
 		</p>
+		</Link>
 	);
 }
 
@@ -63,7 +65,6 @@ function Sandbox()
 
 	async function addUser() {
 		const random_value = Math.random().toString().slice(-10, -1);
-		console.log(random_value);
 
 		api.post("/users", {
 			"username": "Paul_" + random_value,
@@ -87,13 +88,13 @@ function Sandbox()
 	}
 
 	function renderSwitch() {
-		if (userList.length || !loadCount)
+		if (loadCount != -42 && (userList.length || !loadCount))
 			return (
 				<div className="Sandbox__UserListItems">
-					{ userList.length ? userListHtml : <p>There doesn't seem to be any user...</p> }
+					{ userList.length ? userListHtml : <p className="Sandbox__UserItem">No user...</p> }
 				</div>
 			);
-		else if (loadCount > 0)
+		else if (loadCount > 0 || loadCount === -42)
 			return (<div className="Spinner"><img src={ hourglass } /></div>);
 		return (
 			<div>
@@ -114,13 +115,13 @@ function Sandbox()
 			</p>
 			<div className="Sandbox__UserList">
 				<h3>User list:</h3>
+				<div className="Sandbox_UserListButtons">
+					<button onClick={addUser}>Add a user</button>
+					<button onClick={delUser}>Delete a user</button>
+					<button onClick={() => setLoadCount(1)}>Reload</button>
+				</div>
 				{renderSwitch()}
 			</div>
-			<button onClick={addUser}>Add a user</button>
-			<button onClick={delUser}>Delete a user</button>
-			<button onClick={() => setLoadCount(1)}>Reload</button><br />
-			<Link to="/"><button>Go home</button></Link>
-			<Link to="/user"><button>Check some user page</button></Link>
 		</main>
 	);
 }
