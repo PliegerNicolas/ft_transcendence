@@ -21,8 +21,8 @@ import { ProfilesModule } from './profiles/profiles.module';
     synchronize: true,
     }),
     UsersModule,
-    ProfilesModule,
-    AuthModule],
+    ProfilesModule/*,
+    AuthModule*/],
   controllers: [],
   providers: [],
 })
