@@ -4,7 +4,7 @@ import ft_logo from "../assets/42.svg";
 function Header()
 {
 	const redirectLinkParams = new URLSearchParams({
-		client_id: "u-s4t2ud-6a30fe66352f0b35cfb0b9450bd1d47869dbcbe39ecb4f8fe01a3a95cb633809",
+		client_id: "u-s4t2ud-9a9cee22edb9c564d3166746c9bf18b72bd6b36cf73c9ab06d6120c44d63c0ff",
 		redirect_uri: `http://${location.hostname}:3030/auth`,
 		response_type: "code"
 	});
@@ -18,7 +18,11 @@ function Header()
 					<span className="Header__TitleText">PONG</span>
 				</div>
 			</Link>
-			<a href={redirectLink} className="Header__Login">
+			<a
+				href={redirectLink}
+				onClick={() => localStorage.setItem("auth_redirect", location.pathname)}
+				className="Header__Login"
+			>
 				Log In
 			</a>
 		</header>
