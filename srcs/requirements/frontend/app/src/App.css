@@ -31,3 +31,15 @@
 		bottom: 62px;
 	}
 }
+
+.User__InfoGrid {
+	margin: 15px 0;
+	display: grid;
+	grid-template-columns: 120px 1fr;
+	border: 1px solid var(--bg-color-5);
+}
+
+.User__InfoGrid > div {
+	padding: 5px 10px;
+	border: 1px solid var(--bg-color-5);
+}

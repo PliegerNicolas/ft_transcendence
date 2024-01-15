@@ -36,7 +36,7 @@
 	animation: fadein .15s ease-in-out;
 	display: grid;
 	grid-column-gap: 20px;
-	grid-template-columns: 1fr 2fr 3fr 1fr 1fr;
+	grid-template-columns: 1fr 2fr 3fr;
 	background: var(--bg-color-4);
 	border-radius: 0;
 	user-select: none;
@@ -48,7 +48,7 @@
 @media (max-width: 850px) {
 	.Sandbox__UserItem {
 		grid-auto-flow: column;
-		grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+		grid-template-rows: 1fr 1fr 1fr;
 	}
 }
 
