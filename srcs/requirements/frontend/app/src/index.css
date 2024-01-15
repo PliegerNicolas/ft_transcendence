@@ -49,7 +49,7 @@ body {
 	margin: 0;
 }
 
-p {
+p, .p-style {
 	margin: 5px 20px 15px;
 	padding: 10px 15px;
 	background: var(--bg-color-2);
@@ -84,6 +84,11 @@ button:hover {
 }
 button:active {
 	background: var(--bg-color-4);
+}
+button:disabled {
+	background: var(--bg-color-2);
+	color: var(--text-faint);
+	cursor:default;
 }
 
 .error-msg {

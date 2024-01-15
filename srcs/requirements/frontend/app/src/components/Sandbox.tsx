@@ -21,8 +21,6 @@ function UserItem(props: {user: UserType, index: number, length: number})
 					<span>{"#" + props.user.id}</span>
 					<span>{props.user.username}</span>
 					<span>{props.user.email}</span>
-					<span>{props.user.profile.firstName}</span>
-					<span>{props.user.profile.lastName}</span>
 			</p>
 		</Link>
 	);
@@ -80,7 +78,7 @@ function Sandbox()
 	}
 
 	function renderSwitch() {
-		if (loadCount != -42 && (userList.length || !loadCount))
+		if (userList.length || !loadCount)
 			return (
 				<div>
 					<hr />
@@ -95,7 +93,7 @@ function Sandbox()
 					</div>
 				</div>
 			);
-		else if (loadCount > 0 || loadCount === -42)
+		else if (loadCount > 0)
 			return (<div className="Spinner"><img src={ hourglass } /></div>);
 		return (
 			<div>
@@ -116,9 +114,15 @@ function Sandbox()
 			<div className="Sandbox__UserList">
 				<h3>User list:</h3>
 				<div className="Sandbox_UserListButtons">
-					<button onClick={addUser}>Add a user</button>
-					<button onClick={delUser}>Delete a user</button>
-					<button onClick={() => setLoadCount(1)}>Reload</button>
+					<button disabled={loadCount < 0} onClick={addUser}>
+						Add a user
+					</button>
+					<button disabled={!userList.length} onClick={delUser}>
+						Delete a user
+					</button>
+					<button onClick={() => setLoadCount(1)}>
+						Reload
+					</button>
 				</div>
 				{renderSwitch()}
 			</div>

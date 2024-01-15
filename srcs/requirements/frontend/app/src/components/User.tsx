@@ -42,16 +42,16 @@ function User()
 				</p>
 				:
 				user != null &&
-				<p>
+				<div className="p-style">
 					<button onClick={delUser}>Delete</button>
-					<ul>
-						<li>{"#" + user.id}</li>
-						<li>{user.username}</li>
-						<li>{user.email}</li>
-						<li>{user.profile.firstName}</li>
-						<li>{user.profile.lastName}</li>
-					</ul>
-				</p>
+					<div className="User__InfoGrid">
+						<div>Id</div> <div>{"#" + user.id} </div>
+						<div>Username</div> <div>{user.username} </div>
+						<div>Email</div> <div>{user.email} </div>
+						<div>First Name</div> <div>Name: {user.profile.firstName} </div>
+						<div>Last Name</div> <div>{user.profile.lastName}</div>
+					</div>
+				</div>
 			}
 		</main>
 	);
