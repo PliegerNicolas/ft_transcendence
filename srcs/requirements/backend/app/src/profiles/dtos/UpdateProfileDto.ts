@@ -1,7 +1,7 @@
 export class UpdateProfileDto {
 
-    firstName: string;
+    firstName?: string;
 
-    lastName: string;
+    lastName?: string;
 
 }

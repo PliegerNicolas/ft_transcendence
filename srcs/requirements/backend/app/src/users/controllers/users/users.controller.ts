@@ -20,13 +20,14 @@ export class UsersController {
 
     @Post()
     @UsePipes(new ValidationPipe())
-    createUser(
+    async createUser(
         @Body() createUserDto: CreateUserDto
     ) {
         this.userService.createUser(createUserDto);
     }
 
     @Patch(':id')
+    @UsePipes(new ValidationPipe)
     async updateUserById(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateUserDto: UpdateUserDto,
