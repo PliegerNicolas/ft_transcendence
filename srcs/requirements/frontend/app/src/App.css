@@ -51,14 +51,17 @@
 	transition: .1s;
 	margin: 0;
 }
+
 .Header__Login:visited {
 	color: var(--text-normal);
 }
+
 .Header__Login:hover {
 	background: var(--bg-color-5);
 	color: var(--text-accent);
 	cursor: pointer;
 }
+
 .Header__Login:active {
 	background: var(--bg-color-4);
 }
@@ -136,7 +139,7 @@
 }
 
 .Sandbox__UserList {
-	margin: 50px 100px;
+	margin: 20px;
 	border: 1px solid var(--bg-color-4);
 	border-radius: 7px;
 	background: var(--bg-color-2);
@@ -148,22 +151,27 @@
 	margin-bottom: 10px;
 }
 
+.Sandbox__Scrollable {
+	max-height: 400px;
+	overflow: scroll;
+	margin-top: 10px;
+	padding-right: 10px;
+	margin-right: -10px;
+}
+
 .Sandbox__UserListItems {
 	border: 1px solid var(--bg-color-5);
 	padding: 0px;
 	margin: 0px;
-	margin-top: 20px;
-	border-radius: 7px;
+	border-radius: 12px;
 	animation: fadein .25s ease-in-out;
-	max-height: 400px;
-	overflow: scroll;
 	background: var(--bg-color-2);
 }
 
 .Sandbox__UserItem {
 	margin: 0px;
 	padding: 6px;
-	border: none;
+	border: 2px solid #0000;
 	animation: fadein .15s ease-in-out;
 	display: grid;
 	grid-column-gap: 20px;
@@ -172,33 +180,42 @@
 	border-radius: 0;
 	user-select: none;
 	color: var(--text-normal);
-	transition: filter .1s, color .2s, text-shadow .2s;
+	transition: filter .1s, color .2s, text-shadow .2s, border .2s;
 }
+
 .Sandbox__UserItem.odd {
 	background: var(--bg-color-3);
 }
+
 .Sandbox__UserItem.first {
-	border-radius: 7px 7px 0 0;
+	border-radius: 12px 12px 0 0;
 }
+
 .Sandbox__UserItem.last {
-	border-radius: 0 0 7px 7px;
+	border-radius: 0 0 12px 12px;
 }
+
+.Sandbox__UserItem.first.last {
+	border-radius: 12px;
+}
+
 .Sandbox__UserItem:hover {
 	border: 2px solid var(--text-faint);
-	padding: 4px;
+
 	filter: brightness(1.1) saturate(1.4);
 	cursor: pointer;
 	color: var(--text-accent);
 	text-shadow: 0 0 6px #fff4;
 }
-.Sandbox__UserItem:active{
+
+.Sandbox__UserItem:active {
 	filter: none;
 }
 
 .Spinner {
 	position: absolute;
-	top: 40px;
-	right: 60px;
+	top: 36px;
+	right: 48px;
 }
 
 .Spinner>img {
@@ -241,8 +258,8 @@
 }
 
 path {
-	fill:inherit;
-	stroke:inherit;
+	fill: inherit;
+	stroke: inherit;
 }
 
 .Construction__Icon {
@@ -250,6 +267,7 @@ path {
 	background: transparent;
 	animation: glow alternate ease-in-out 1.5s infinite;
 }
+
 @keyframes glow {
 	0% {
 		filter: drop-shadow(0 0 8px #fff6);

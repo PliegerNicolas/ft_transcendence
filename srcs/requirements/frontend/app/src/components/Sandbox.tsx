@@ -73,7 +73,7 @@ function Sandbox()
 					"firstName": "Paul",
 					"lastName": "Pliha"
 			}
-		}).then(() => setLoadCount(1))
+		}).then(() => {setLoadCount(1); setTimeout(() => setLoadCount(1), 100)})
 			.catch((err) => {console.error(err)});
 	}
 
@@ -90,8 +90,17 @@ function Sandbox()
 	function renderSwitch() {
 		if (loadCount != -42 && (userList.length || !loadCount))
 			return (
-				<div className="Sandbox__UserListItems">
-					{ userList.length ? userListHtml : <p className="Sandbox__UserItem">No user...</p> }
+				<div>
+					<hr />
+					<div className="Sandbox__Scrollable">
+						<div className="Sandbox__UserListItems">
+							{
+								userList.length ?
+								userListHtml :
+								<p className="Sandbox__UserItem odd first last">No user...</p>
+							}
+						</div>
+					</div>
 				</div>
 			);
 		else if (loadCount > 0 || loadCount === -42)
@@ -101,7 +110,6 @@ function Sandbox()
 				<span className="error-msg">
 					Failed to load user list (is the backend up?)
 				</span><br />
-				<button onClick={() => setLoadCount(1)}>Retry</button>
 			</div>
 		);
 	}

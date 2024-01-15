@@ -90,3 +90,8 @@ button:active {
 	color: var(--error);
 	font-style: italic;
 }
+
+hr {
+	color: var(--text-normal);
+	margin: 20px;
+}
