@@ -6,7 +6,7 @@
 #    By: julboyer <julboyer@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:32:44 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/14 18:32:50 by lnr              ###   ########.fr        #
+#    Updated: 2024/01/15 13:20:22 by mlaneyri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,4 +37,4 @@ clean:
 	$(COMPOSE) -f $(COMPOSE_FILE) down --volumes --remove-orphans
 	docker volume prune -f
 
-.PHONY: clean 
+.PHONY: up clean 
