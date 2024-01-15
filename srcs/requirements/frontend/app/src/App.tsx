@@ -90,7 +90,7 @@ function App()
 					<Route path="/settings" element={<Settings />} />
 					<Route path="/about" element={<About />} />
 					<Route path="/sandbox" element={<Sandbox />} />
-					<Route path="/user" element={<User />} />
+					<Route path="/user/:id" element={<User />} />
 					<Route path="/auth" element={<Auth />} />
 				</Routes>
 			</div>
