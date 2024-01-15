@@ -10,6 +10,7 @@
 	--text-middle: #d9d9fa;
 	--text-accent: #e2e2ff;
 
+	--current-option-text: #e8e8ff;
 	--current-option-bg: #46c;
 
 	--link-normal: #8af;
@@ -19,6 +20,28 @@
 	--error-bg: #d35;
 }
 
+/*
+:root {
+	--bg-color-1: #ffffff;
+	--bg-color-2: #f2f2ff;
+	--bg-color-3: #e4e4ff;
+	--bg-color-4: #d8d8ff;
+	--bg-color-5: #cacaff;
+
+	--text-normal: #336;
+	--text-middle: #2a2a4a;
+	--text-accent: #224;
+
+	--current-option-text: #fff;
+	--current-option-bg: #46c;
+
+	--link-normal: #37f;
+	--link-visited: #55f;
+
+	--error: #f37;
+	--error-bg: #fab;
+}*/
+
 body {
 	background: var(--bg-color-1);
 	color: var(--text-normal);
@@ -27,7 +50,7 @@ body {
 }
 
 p {
-	margin: 5px 20px;
+	margin: 5px 20px 15px;
 	padding: 10px 15px;
 	background: var(--bg-color-2);
 	border: 1px solid var(--bg-color-4);
@@ -46,6 +69,7 @@ a:visited {
 button {
 	padding: 5px 10px;
 	margin-right: 8px;
+	margin-top: 6px;
 	background: var(--bg-color-3);
 	border: 1px solid var(--bg-color-5);
 	color: var(--text-normal);
@@ -60,4 +84,9 @@ button:hover {
 }
 button:active {
 	background: var(--bg-color-4);
+}
+
+.error-msg {
+	color: var(--error);
+	font-style: italic;
 }
