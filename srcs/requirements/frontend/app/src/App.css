@@ -9,7 +9,7 @@
 	position: fixed;
 	z-index: 1;
 	top: 60px;
-	left: 180px;
+	left: 200px;
 	right: 0;
 	bottom: 0;
 
@@ -36,10 +36,12 @@
 	margin: 15px 0;
 	display: grid;
 	grid-template-columns: 120px 1fr;
-	border: 1px solid var(--bg-color-5);
 }
 
 .User__InfoGrid > div {
 	padding: 5px 10px;
-	border: 1px solid var(--bg-color-5);
+	margin: 4px 0px;
+	background: var(--bg-color-3);
+	border-radius: 0px;
+	border: 2px solid var(--bg-color-5);
 }

@@ -97,6 +97,6 @@ button:disabled {
 }
 
 hr {
-	color: var(--text-normal);
-	margin: 20px;
+	color: var(--text-faint);
+	margin: 20px 80px;
 }
