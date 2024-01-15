@@ -43,6 +43,8 @@ export class Friendship {
         }
     }
 
+    /* Helper functions */
+
     setStatus(userId: number, newStatus: FriendshipStatus) {
         if (userId == this.user1.id) {
             this.status1 = newStatus;

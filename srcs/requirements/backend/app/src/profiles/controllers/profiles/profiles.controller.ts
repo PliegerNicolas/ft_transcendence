@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Put, ValidationPipe } from '@nestjs/common';
 import { ReplaceProfileDto } from 'src/profiles/dtos/ReplaceProfile.dto';
 import { UpdateProfileDto } from 'src/profiles/dtos/UpdateProfile.dto';
 import { ProfilesService } from 'src/profiles/services/profiles/profiles.service';
@@ -16,7 +16,7 @@ export class ProfilesController {
     @Put()
     async replaceProfile(
         @Param('userId', ParseIntPipe) userId: number,
-        @Body() replaceProfileDto: ReplaceProfileDto
+        @Body(new ValidationPipe) replaceProfileDto: ReplaceProfileDto
     ) {
         return (await this.profileService.replaceProfile(userId, replaceProfileDto));
     }
@@ -24,7 +24,7 @@ export class ProfilesController {
     @Patch()
     async updateProfile(
         @Param('userId', ParseIntPipe) userId: number,
-        @Body() updateProfileDto: UpdateProfileDto
+        @Body(new ValidationPipe) updateProfileDto: UpdateProfileDto
     ) {
         return (await this.profileService.updateProfile(userId, updateProfileDto));
     }

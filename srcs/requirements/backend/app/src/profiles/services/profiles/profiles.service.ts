@@ -30,8 +30,8 @@ export class ProfilesService {
         }
 
         return (await this.profileRepository.save({
-            ...profile,
-            ...replaceProfileDetails
+            ... profile,
+            ...replaceProfileDetails,
         }));        
     }
 
