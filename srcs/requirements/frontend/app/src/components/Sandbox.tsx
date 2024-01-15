@@ -1,50 +1,42 @@
 import {Link} from "react-router-dom";
 import {useState, useEffect} from "react";
 
+import {UserType} from "../utils/types.ts"
 import Api from "../utils/Api.ts";
+
+import "../styles/sandbox.css";
 
 import hourglass from "../assets/hourglass.svg";
 
-interface User {
-	id: string,
-	username: string,
-	email: string,
-	profile: {
-		id: string,
-		firstName: string,
-		lastName:string
-	}
-}
-
-function UserItem({user, index, length}: {user: User, index: number, length: number})
+function UserItem(props: {user: UserType, index: number, length: number})
 {
 	return (
-		<Link to={"/user/" + user.id}>
-		<p className={
-			"Sandbox__UserItem" +
-			(index % 2 ? "" : " odd") +
-			(!index ? " first" : "") +
-			((index === length - 1) ? " last" : "")
-		}>
-				<span>{"#" + user.id}</span>
-				<span>{user.username}</span>
-				<span>{user.email}</span>
-				<span>{user.profile.firstName}</span>
-				<span>{user.profile.lastName}</span>
-		</p>
+		<Link to={"/user/" + props.user.id}>
+			<p className={
+				"Sandbox__UserItem" +
+				(props.index % 2 ? "" : " odd") +
+				(!props.index ? " first" : "") +
+				((props.index === props.length - 1) ? " last" : "")
+			}>
+					<span>{"#" + props.user.id}</span>
+					<span>{props.user.username}</span>
+					<span>{props.user.email}</span>
+					<span>{props.user.profile.firstName}</span>
+					<span>{props.user.profile.lastName}</span>
+			</p>
 		</Link>
 	);
 }
 
 function Sandbox()
 {
-	const [userList, setUserList] = useState<User[]>([]);
+	const [userList, setUserList] = useState<UserType[]>([]);
 	const [loadCount, setLoadCount] = useState(1);
 
 	const api = new Api(`http://${location.hostname}:3450`);
 
 	const userListHtml = userList.map(
-		(item: User, index) =>
+		(item: UserType, index) =>
 			<UserItem key={index} user={item} index={index} length={userList.length}/>
 	);
 

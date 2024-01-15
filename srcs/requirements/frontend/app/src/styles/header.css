@@ -1,0 +1,67 @@
+.Header {
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 30px;
+	color: var(--text-accent);
+	background: var(--bg-color-3);
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	box-shadow: 0 0 12px #000;
+	user-select: none;
+	z-index: 100;
+}
+
+.Header__Title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	transition: filter .1s;
+}
+
+.Header__Title:hover {
+	filter: drop-shadow(0 0 10px #fff8);
+}
+
+.Header__Title:active {
+	filter: none;
+}
+
+.Header__Logo {
+	height: 32px;
+}
+
+.Header__TitleText {
+	color: var(--text-middle);
+	text-decoration: none;
+	font-size: 1.8rem;
+	font-weight: 700;
+}
+
+.Header__Login {
+	font-size: 1.1rem;
+	color: var(--text-normal);
+	background: var(--bg-color-4);
+	border: 1px solid var(--bg-color-5);
+	padding: 8px 20px;
+	border-radius: 7px;
+	transition: .1s;
+	margin: 0;
+}
+
+.Header__Login:visited {
+	color: var(--text-normal);
+}
+
+.Header__Login:hover {
+	background: var(--bg-color-5);
+	color: var(--text-accent);
+	cursor: pointer;
+}
+
+.Header__Login:active {
+	background: var(--bg-color-4);
+}
