@@ -1,0 +1,127 @@
+.Sandbox__UserList {
+	margin: 20px;
+	border: 1px solid var(--bg-color-4);
+	border-radius: 7px;
+	background: var(--bg-color-2);
+	padding: 0 20px 15px;
+	position: relative;
+}
+
+.Sandbox_UserListButtons {
+	margin-bottom: 10px;
+}
+
+.Sandbox__Scrollable {
+	max-height: 400px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	margin-top: 10px;
+	padding-right: 10px;
+	margin-right: -10px;
+}
+
+.Sandbox__UserListItems {
+	border: 1px solid var(--bg-color-5);
+	padding: 0px;
+	margin: 0px;
+	border-radius: 12px;
+	animation: fadein .25s ease-in-out;
+	background: var(--bg-color-2);
+}
+
+.Sandbox__UserItem {
+	margin: 0px;
+	padding: 6px;
+	border: 2px solid #0000;
+	animation: fadein .15s ease-in-out;
+	display: grid;
+	grid-column-gap: 20px;
+	grid-template-columns: 1fr 2fr 3fr 1fr 1fr;
+	background: var(--bg-color-4);
+	border-radius: 0;
+	user-select: none;
+	color: var(--text-normal);
+	overflow-x: hidden;
+	transition: filter .1s, color .2s, text-shadow .2s, border .2s;
+}
+
+@media (max-width: 850px) {
+	.Sandbox__UserItem {
+		grid-auto-flow: column;
+		grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+	}
+}
+
+.Sandbox__UserItem.odd {
+	background: var(--bg-color-3);
+}
+
+.Sandbox__UserItem.first {
+	border-radius: 12px 12px 0 0;
+}
+
+.Sandbox__UserItem.last {
+	border-radius: 0 0 12px 12px;
+}
+
+.Sandbox__UserItem.first.last {
+	border-radius: 12px;
+}
+
+.Sandbox__UserItem:hover {
+	border: 2px solid var(--text-faint);
+
+	filter: brightness(1.1) saturate(1.4);
+	cursor: pointer;
+	color: var(--text-accent);
+	text-shadow: 0 0 6px #fff4;
+}
+
+.Sandbox__UserItem:active {
+	filter: none;
+}
+
+.Spinner {
+	position: absolute;
+	top: 36px;
+	right: 48px;
+}
+
+.Spinner>img {
+	min-width: 50px;
+	animation:
+		spin .8s ease-in-out infinite,
+		fadein 1s ease-in-out,
+		glow alternate ease-in-out .8s infinite;
+	;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(180deg);
+	}
+}
+
+@keyframes fadein {
+	0% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 1;
+	}
+}
+
+@keyframes glow {
+	0% {
+		filter: drop-shadow(0 0 8px #fff6);
+	}
+
+	100% {
+		filter: brightness(2) (0 0 8px #ffff);
+	}
+}

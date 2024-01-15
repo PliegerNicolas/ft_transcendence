@@ -80,20 +80,18 @@ function App()
 	return (
 		<Router>
 			<Header/>
-			<div className="App__Content">
-				<Navbar />
-				<Routes>
-					<Route path="/"	element={<Home />} />
-					<Route path="/play" element={<Play />} />
-					<Route path="/stats" element={<Stats />} />
-					<Route path="/chat" element={<Chat />} />
-					<Route path="/settings" element={<Settings />} />
-					<Route path="/about" element={<About />} />
-					<Route path="/sandbox" element={<Sandbox />} />
-					<Route path="/user/:id" element={<User />} />
-					<Route path="/auth" element={<Auth />} />
-				</Routes>
-			</div>
+			<Navbar />
+			<Routes>
+				<Route path="/"	element={<Home />} />
+				<Route path="/play" element={<Play />} />
+				<Route path="/stats" element={<Stats />} />
+				<Route path="/chat" element={<Chat />} />
+				<Route path="/settings" element={<Settings />} />
+				<Route path="/about" element={<About />} />
+				<Route path="/sandbox" element={<Sandbox />} />
+				<Route path="/user/:id" element={<User />} />
+				<Route path="/auth" element={<Auth />} />
+			</Routes>
 		</Router>
 	);
 }
