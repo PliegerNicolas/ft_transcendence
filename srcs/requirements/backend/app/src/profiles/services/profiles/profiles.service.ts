@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'src/profiles/entities/Profile';
-import { UpdateProfileParams } from 'src/utils/types';
+import { ReplaceProfileParams, UpdateProfileParams } from 'src/utils/types';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -22,16 +22,30 @@ export class ProfilesService {
         return (profile);
     }
 
-    async updateProfile(userId: number, updateProfileDetails: UpdateProfileParams): Promise<void> {
+    async replaceProfile(userId: number, replaceProfileDetails: ReplaceProfileParams): Promise<Profile> {
         const profile = await this.profileRepository.findOne({ where: { user: { id: userId } } });
 
         if (!profile) {
             throw new NotFoundException(`Profile of User with ID ${userId} not found`);
         }
 
-        const updatedProfile = { ...profile, ...updateProfileDetails };
+        return (await this.profileRepository.save({
+            ...profile,
+            ...replaceProfileDetails
+        }));        
+    }
 
-        await this.profileRepository.save(updatedProfile);        
+    async updateProfile(userId: number, updateProfileDetails: UpdateProfileParams): Promise<Profile> {
+        const profile = await this.profileRepository.findOne({ where: { user: { id: userId } } });
+
+        if (!profile) {
+            throw new NotFoundException(`Profile of User with ID ${userId} not found`);
+        }
+
+        return (await this.profileRepository.save({
+            ...profile,
+            ...updateProfileDetails
+        }));        
     }
 
 }

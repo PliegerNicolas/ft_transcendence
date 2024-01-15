@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CreateUserDto } from '../../dtos/CreateUser.dto';
 import { UsersService } from 'src/users/services/users/users.service';
 import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
+import { ReplaceUserDto } from 'src/users/dtos/ReplaceUser.dto';
 
 @Controller('users')
 export class UsersController {
@@ -19,25 +20,29 @@ export class UsersController {
     }
 
     @Post()
-    @UsePipes(new ValidationPipe())
-    async createUser(
-        @Body() createUserDto: CreateUserDto
+    async createUser(@Body(new ValidationPipe) createUserDto: CreateUserDto) {
+        return (await this.userService.createUser(createUserDto));
+    }
+
+    @Put(':id')
+    async replaceUserById(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ValidationPipe) replaceUserDto: ReplaceUserDto,
     ) {
-        this.userService.createUser(createUserDto);
+        return (await this.userService.updateUser(id, replaceUserDto));
     }
 
     @Patch(':id')
-    @UsePipes(new ValidationPipe)
     async updateUserById(
         @Param('id', ParseIntPipe) id: number,
-        @Body() updateUserDto: UpdateUserDto,
+        @Body(new ValidationPipe) updateUserDto: UpdateUserDto,
     ) {
-        await this.userService.updateUser(id, updateUserDto);
+        return (await this.userService.updateUser(id, updateUserDto));
     }
 
     @Delete(':id')
     async deleteUserById(@Param('id', ParseIntPipe) id: number) {
-        await this.userService.deleteUser(id);
+        return (await this.userService.deleteUser(id));
     }
 
 }

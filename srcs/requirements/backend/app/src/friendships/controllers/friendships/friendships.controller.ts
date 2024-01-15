@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, UsePipes, ValidationPipe } from '@nestjs/common';
-import { CreateFriendshipDto } from 'src/friendships/dtos/CreateFriendshipDto';
-import { UpdateFriendshipDto } from 'src/friendships/dtos/UpdateFriendshipDto';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
+import { CreateFriendshipDto } from 'src/friendships/dtos/CreateFriendship.dto';
+import { ReplaceFriendshipDto } from 'src/friendships/dtos/ReplaceFriendship.dto';
+import { UpdateFriendshipDto } from 'src/friendships/dtos/UpdateFriendship.dto';
 import { FriendshipsService } from 'src/friendships/services/friendships/friendships.service';
 
 @Controller('users/:userId/friendships')
@@ -22,20 +23,27 @@ export class FriendshipsController {
     }
 
     @Post()
-    @UsePipes(new ValidationPipe())
     async createFriendship(
         @Param('userId', ParseIntPipe) userId: number,
-        @Body() createFriendshipDto: CreateFriendshipDto,
+        @Body(new ValidationPipe) createFriendshipDto: CreateFriendshipDto,
     ) {
         return (this.friendshipService.createUserFriendship(userId, createFriendshipDto));
     }
 
+    @Put(':targetId')
+    async replaceFriendship(
+        @Param('userId', ParseIntPipe) userId: number,
+        @Param('targetId', ParseIntPipe) targetId: number,
+        @Body(new ValidationPipe) replaceFriendshipDto: ReplaceFriendshipDto,
+    ) {
+        return (this.friendshipService.replaceUserFriendship(userId, targetId, replaceFriendshipDto));
+    }
+
     @Patch(':targetId')
-    @UsePipes(new ValidationPipe())
     async updateFriendship(
         @Param('userId', ParseIntPipe) userId: number,
         @Param('targetId', ParseIntPipe) targetId: number,
-        @Body() updateFriendshipDto: UpdateFriendshipDto,
+        @Body(new ValidationPipe) updateFriendshipDto: UpdateFriendshipDto,
     ) {
         return (this.friendshipService.updateUserFriendship(userId, targetId, updateFriendshipDto));
     }

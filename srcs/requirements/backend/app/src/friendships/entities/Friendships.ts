@@ -43,4 +43,22 @@ export class Friendship {
         }
     }
 
+    setStatus(userId: number, newStatus: FriendshipStatus) {
+        if (userId == this.user1.id) {
+            this.status1 = newStatus;
+        } else if (userId == this.user2.id) {
+            this.status2 = newStatus;            
+        }
+        return (null);
+    }
+
+    status(userId: number) {
+        if (userId == this.user1.id) {
+            return (this.status1);
+        } else if (userId == this.user2.id) {
+            return (this.status2);
+        }
+        return (null);
+    }
+
 }
