@@ -1,9 +1,8 @@
 // Assuming the data has already been validated.
 
 import { FriendshipStatus } from "src/friendships/entities/Friendships";
-import { CreateProfileDto } from "src/profiles/dtos/CreateProfileDto";
-import { UpdateProfileDto } from "src/profiles/dtos/UpdateProfileDto";
-import { User } from "src/users/entities/User";
+import { CreateProfileDto } from "src/profiles/dtos/CreateProfile.dto";
+import { UpdateProfileDto } from "src/profiles/dtos/UpdateProfile.dto";
 
 /* User */
 
@@ -11,6 +10,12 @@ export type CreateUserParams = {
     username: string;
     email: string;
     profile: CreateProfileDto;
+};
+
+export type ReplaceUserParams = {
+    username: string;
+    email: string;
+    profile: UpdateProfileDto;
 };
 
 export type UpdateUserParams = {
@@ -26,6 +31,11 @@ export type CreateProfileParams = {
     lastName: string;
 }
 
+export type ReplaceProfileParams = {
+    firstName: string;
+    lastName: string;
+}
+
 export type UpdateProfileParams = {
     firstName?: string;
     lastName?: string;
@@ -35,6 +45,10 @@ export type UpdateProfileParams = {
 
 export type CreateFriendshipParams = {
     targetId: number;
+}
+
+export type ReplaceFriendshipParams = {
+    status: FriendshipStatus;
 }
 
 export type UpdateFriendshipParams = {
