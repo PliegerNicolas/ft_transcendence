@@ -6,7 +6,7 @@
 #    By: julboyer <julboyer@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:32:44 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/11 17:39:53 by nicolas          ###   ########.fr        #
+#    Updated: 2024/01/14 18:36:14 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,7 @@ NAME			:=			transcendence
 # *                                 DOCKER                                   * #
 # **************************************************************************** #
 
-COMPOSE			:=			docker-compose --project-name $(NAME)
+COMPOSE			:=			docker-compose
 COMPOSE_FILE	:=			./srcs/docker-compose.yml
 
 # **************************************************************************** #
@@ -37,4 +37,4 @@ clean:
 	$(COMPOSE) -f $(COMPOSE_FILE) down --volumes --remove-orphans
 	docker volume prune -f
 
-.PHONY: clean 
+.PHONY: up clean 
