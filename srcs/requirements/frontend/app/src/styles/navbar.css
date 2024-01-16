@@ -1,0 +1,144 @@
+.Navbar {
+	position: fixed;
+	z-index: 50;
+	top: 60px;
+	left: 0;
+	bottom: 0;
+
+	padding: 20px 10px;
+	width: 180px;
+
+	background: var(--bg-color-2);
+
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+
+	transition: .1s;
+}
+
+.Navbar__Link {
+	width: calc(100% - 36px);
+	border: none;
+	border-radius: 7px;
+	font-size: 1.1rem;
+	padding: 6px 18px;
+	text-align: left;
+	text-decoration: none;
+	display: flex;
+	align-items: center;
+	justify-content: left;
+	gap: 10px;
+	transition: .1s;
+}
+
+.Navbar__Link>img {
+	height: 100%;
+}
+
+/*
+** CONDENSED NAVBAR (ONLY ICONS):
+*/
+
+@media (max-width: 1000px) {
+	.Navbar__Text {
+		display: none;
+	}
+
+	.Navbar {
+		position: fixed;
+		top: 60px;
+		left: 0;
+		bottom: 0;
+
+		padding: 20px 8px;
+		width: 50px;
+		min-width: 50px;
+
+		gap: 2px;
+		transition: none;
+	}
+
+	.Navbar__Link {
+		justify-content: center;
+		padding: 6px;
+		height: 40px;
+		width: calc(100% - 12px);
+		transition: none;
+	}
+
+	.Navbar__Link>img {
+		height: calc(100% - 12px);
+	}
+}
+
+/*
+** MOBILE NAVBAR (AT BOTTOM):
+*/
+
+@media (max-width: 640px) {
+	.Navbar {
+		position: fixed;
+		top: unset;
+		bottom: 0;
+		right: 0;
+		left: 0;
+
+		padding: 4px;
+
+		width: calc(100% - 8px);
+		height: 54px;
+		flex-direction: row;
+		justify-content: space-around;
+
+		box-shadow: 0 0 8px #000;
+	}
+
+	.Navbar__Link {
+		justify-content: center;
+		padding: 2px;
+		height: calc(100% - 4px);
+		transition: none;
+	}
+
+	.Navbar__Link>img {
+		height: calc(100% - 16px);
+		transition: none;
+	}
+}
+
+.Navbar__Link:visited {
+	color: var(--text-normal);
+}
+
+.Navbar__Button {
+	background: none;
+	color: var(--text-normal);
+}
+
+.Navbar__Button:hover {
+	background: var(--bg-color-3);
+	color: var(--text-middle);
+}
+
+.Navbar__Button:active {
+	background: var(--bg-color-4);
+}
+
+.Navbar__Button--Curr {
+	color: var(--current-option-text);
+	background: var(--current-option-bg);
+	box-shadow: 0 0 4px #000a;
+}
+
+.Navbar__Button--Curr:hover {
+	filter: brightness(1.1);
+}
+
+.Navbar__Button--Curr:active {
+	filter: none;
+}
+
+.Navbar__Button--Curr:visited {
+	color: var(--current-option-text);
+}

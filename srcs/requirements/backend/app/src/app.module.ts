@@ -9,6 +9,7 @@ import { FriendshipsModule } from './friendships/friendships.module';
 import { Friendship } from './friendships/entities/Friendships';
 import { Profile } from './profiles/entities/Profile';
 import { User } from './users/entities/User';
+import { GameLogsModule } from './game-logs/game-logs.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { User } from './users/entities/User';
     UsersModule,
     ProfilesModule,
     FriendshipsModule,
+    GameLogsModule,
     AuthModule],
   controllers: [],
   providers: [],

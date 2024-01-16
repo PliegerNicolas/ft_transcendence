@@ -1,3 +1,5 @@
+import "../styles/construction.css";
+
 import constructionIcon from "../assets/construction.svg";
 
 function Construction()

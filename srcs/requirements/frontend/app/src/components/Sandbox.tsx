@@ -1,50 +1,40 @@
 import {Link} from "react-router-dom";
 import {useState, useEffect} from "react";
 
+import {UserType} from "../utils/types.ts"
 import Api from "../utils/Api.ts";
+
+import "../styles/sandbox.css";
 
 import hourglass from "../assets/hourglass.svg";
 
-interface User {
-	id: string,
-	username: string,
-	email: string,
-	profile: {
-		id: string,
-		firstName: string,
-		lastName:string
-	}
-}
-
-function UserItem({user, index, length}: {user: User, index: number, length: number})
+function UserItem(props: {user: UserType, index: number, length: number})
 {
 	return (
-		<Link to={"/user/" + user.id}>
-		<p className={
-			"Sandbox__UserItem" +
-			(index % 2 ? "" : " odd") +
-			(!index ? " first" : "") +
-			((index === length - 1) ? " last" : "")
-		}>
-				<span>{"#" + user.id}</span>
-				<span>{user.username}</span>
-				<span>{user.email}</span>
-				<span>{user.profile.firstName}</span>
-				<span>{user.profile.lastName}</span>
-		</p>
+		<Link to={"/user/" + props.user.id}>
+			<p className={
+				"Sandbox__UserItem" +
+				(props.index % 2 ? "" : " odd") +
+				(!props.index ? " first" : "") +
+				((props.index === props.length - 1) ? " last" : "")
+			}>
+					<span>{"#" + props.user.id}</span>
+					<span>{props.user.username}</span>
+					<span>{props.user.email}</span>
+			</p>
 		</Link>
 	);
 }
 
 function Sandbox()
 {
-	const [userList, setUserList] = useState<User[]>([]);
+	const [userList, setUserList] = useState<UserType[]>([]);
 	const [loadCount, setLoadCount] = useState(1);
 
 	const api = new Api(`http://${location.hostname}:3450`);
 
 	const userListHtml = userList.map(
-		(item: User, index) =>
+		(item: UserType, index) =>
 			<UserItem key={index} user={item} index={index} length={userList.length}/>
 	);
 
@@ -88,7 +78,7 @@ function Sandbox()
 	}
 
 	function renderSwitch() {
-		if (loadCount != -42 && (userList.length || !loadCount))
+		if (userList.length || !loadCount)
 			return (
 				<div>
 					<hr />
@@ -103,7 +93,7 @@ function Sandbox()
 					</div>
 				</div>
 			);
-		else if (loadCount > 0 || loadCount === -42)
+		else if (loadCount > 0)
 			return (<div className="Spinner"><img src={ hourglass } /></div>);
 		return (
 			<div>
@@ -124,9 +114,15 @@ function Sandbox()
 			<div className="Sandbox__UserList">
 				<h3>User list:</h3>
 				<div className="Sandbox_UserListButtons">
-					<button onClick={addUser}>Add a user</button>
-					<button onClick={delUser}>Delete a user</button>
-					<button onClick={() => setLoadCount(1)}>Reload</button>
+					<button disabled={loadCount < 0} onClick={addUser}>
+						Add a user
+					</button>
+					<button disabled={!userList.length} onClick={delUser}>
+						Delete a user
+					</button>
+					<button onClick={() => setLoadCount(1)}>
+						Reload
+					</button>
 				</div>
 				{renderSwitch()}
 			</div>

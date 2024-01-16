@@ -1,4 +1,7 @@
 import {Link} from "react-router-dom";
+
+import "../styles/header.css";
+
 import ft_logo from "../assets/42.svg";
 
 function Header()

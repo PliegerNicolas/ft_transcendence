@@ -58,6 +58,28 @@ export class FriendshipsService {
         return (await this.friendshipRepository.save(newFriendship));
     }
 
+    async replaceUserFriendship(userId: number, targetId: number, friendshipDetails: UpdateFriendshipParams): Promise<Friendship> {
+        if (userId === targetId) {
+            throw new ConflictException('You cannot perform this action on yourself');
+        }
+
+        const friendship = await this.friendshipRepository.findOne({
+            where: [
+                { user1: { id: userId }, user2: { id: targetId } },
+                { user1: { id: targetId }, user2: { id: userId } },
+            ],
+            relations: ['user1', 'user2'],
+        });
+
+        if (!friendship) {
+            throw new NotFoundException(`No friendship found with User ID ${targetId}`);
+        }
+
+        friendship.setStatus(userId, friendshipDetails.status);
+
+        return (await this.friendshipRepository.save(friendship));
+    }
+
     async updateUserFriendship(userId: number, targetId: number, friendshipDetails: UpdateFriendshipParams): Promise<Friendship> {
         if (userId === targetId) {
             throw new ConflictException('You cannot perform this action on yourself');
@@ -75,14 +97,7 @@ export class FriendshipsService {
             throw new NotFoundException(`No friendship found with User ID ${targetId}`);
         }
 
-        console.log(friendship.user1.id == userId);
-        console.log(friendship.user2.id == userId);
-
-        if (friendship.user1.id == userId) {
-            friendship.status1 = friendshipDetails.status;
-        } else if (friendship.user2.id == userId) {
-            friendship.status2 = friendshipDetails.status;
-        }
+        friendship.setStatus(userId, friendshipDetails.status);
 
         return (await this.friendshipRepository.save(friendship));
     }
