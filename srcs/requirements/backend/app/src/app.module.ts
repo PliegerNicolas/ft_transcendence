@@ -26,7 +26,7 @@ import { User } from './users/entities/User';
     UsersModule,
     ProfilesModule,
     FriendshipsModule,
-    /*AuthModule*/],
+    AuthModule],
   controllers: [],
   providers: [],
 })
