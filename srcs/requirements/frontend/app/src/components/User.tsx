@@ -1,31 +1,23 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import {UserType} from "../utils/types.ts"
+import {UserType, FriendshipType} from "../utils/types.ts"
 import Api from "../utils/Api";
 
-interface FriendshipType {
-	id: string,
-	status1: string,
-	status2: string,
-	last_update: string,
-	created_at: string,
-	user1: UserType,
-	user2: UserType
-}
+import "../styles/user.css";
+
+import defaultPicture from "../assets/default_profile.png";
 
 function FriendShip(props: {
-	ship: FriendshipType,
-	id: string,
-	index: number,
-	length: number
-}) {
+	ship: FriendshipType, id: string, index: number, length: number
+})
+{
 	const ship = props.ship;
 	const friend = ship.user1.id == props.id ? ship.user2 : ship.user1;
 
 	return (
 		<div className={
-			"User__FriendItem" +
+			"User__FriendItem genericListItem" +
 			(props.index % 2 ? "" : " odd") +
 			(!props.index ? " first" : "") +
 			((props.index === props.length - 1) ? " last" : "")
@@ -33,6 +25,20 @@ function FriendShip(props: {
 			<div>{"#" + friend.id}</div>
 			<div>{"@" + friend.username}</div>
 			<div>{ship.last_update}</div>
+		</div>
+	);
+}
+
+function FriendShipList(props : {title: string, list: JSX.Element[]})
+{
+	if (!props.list.length)
+		return (<div />);
+	return (
+		<div>
+			<h4>{props.title}:</h4>
+			<div className="genericList">
+				{props.list}
+			</div>
 		</div>
 	);
 }
@@ -48,36 +54,37 @@ function User()
 	const [friendShips, setFriendships] = useState([]);
 	const [userStatus, setUserStatus] = useState(0);
 
-	const friendshipsAccepted = friendShips
-		.filter((item: FriendshipType) =>
-			item.status1 === "accepted" && item.status2 === "accepted")
-		.map((item: FriendshipType, index, array) =>
-			<FriendShip key={index} ship={item} id={id!} index={index} length={array.length}/>
-		);
+	const friendships = {
+		accepted:	friendShips
 
-	const friendshipsPending = friendShips
-		.filter((item: FriendshipType) => (
-			item.user1.id === id && item.status2 === "pending"
-		))
-		.map((item: FriendshipType, index, array) =>
-			<FriendShip key={index} ship={item} id={id!} index={index} length={array.length}/>
-		);
+			.filter((item: FriendshipType) =>
+				item.status1 === "accepted" && item.status2 === "accepted")
 
-	const friendshipsToApprove = friendShips
-		.filter((item: FriendshipType) => (
-			item.user2.id === id && item.status2 === "pending"
-		))
-		.map((item: FriendshipType, index, array) =>
-			<div key={index} className="clickable" onClick={() => acceptFriendship(item.user1.id)}>
-				<FriendShip ship={item} id={id!} index={index} length={array.length}/>
-			</div>
-		);
+			.map((item: FriendshipType, index, array) =>
+				<FriendShip key={index} ship={item} id={id!}
+					index={index} length={array.length}/>),
 
-	async function acceptFriendship(friendId: string) {
-		api.patch("/users/" + id + "/friendships/" + friendId, {status: "accepted"})
-			.then((data) => {console.log(data); setTimeout(loadFriendships, 100)})
-			.catch(err => console.error(err));
-	}
+		pending: friendShips
+
+			.filter((item: FriendshipType) =>
+				item.user1.id === id && item.status2 === "pending")
+
+			.map((item: FriendshipType, index, array) =>
+				<FriendShip key={index} ship={item} id={id!}
+					index={index} length={array.length}/>),
+
+		toApprove: friendShips
+
+			.filter((item: FriendshipType) =>
+				item.user2.id === id && item.status2 === "pending")
+
+			.map((item: FriendshipType, index, array) =>
+				<div key={index} className="clickable"
+					onClick={() => acceptFriendship(item.user1.id)}
+				>
+					<FriendShip ship={item} id={id!} index={index} length={array.length}/>
+				</div>)
+	};
 
 	async function loadUser() {
 		api.get("/users/" + id)
@@ -100,70 +107,64 @@ function User()
 			.then(() => setUserStatus(410))
 			.catch((err: Error) => {console.error(err)});
 	}
+	
+	async function acceptFriendship(friendId: string) {
+		api.patch("/users/" + id + "/friendships/" + friendId, {status: "accepted"})
+			.then((data) => {console.log(data); setTimeout(loadFriendships, 100)})
+			.catch(err => console.error(err));
+	}
+
+	if (!user) return (
+			<main className="MainContent">
+				<p className="error-msg">
+					There is no user to display...
+					{ userStatus !== 0 && <div>(Error {userStatus})</div> }
+				</p>
+			</main>
+	);
 
 	return (
 		<main className="MainContent">
-			<h2>
-				Profile of #{id}:
-				{user != null && " " + user.profile.firstName + " " + user.profile.lastName}
-				<button style={{margin: "-5px 20px"}} onClick={delUser}>Delete</button>
-			</h2>
-			{ userStatus
-				?
-				<p style={{color: "pink"}}>
+			<div className="p-style">
+				<h2>
 					{
-						userStatus != 410 ?
-						`Cannot load this user: ${userStatus}` :
-						"This user was removed."
+						user.profile.firstName
+						+ " «" + user.username + "» "
+						+ user.profile.lastName
 					}
-				</p>
-				:
-				user != null &&
-				<div className="p-style">
-					<h3>User infos:</h3>
-					<div className="User__InfoGrid">
-						<div>Id</div> <div>{"#" + user.id} </div>
-						<div>Username</div> <div>{"@" + user.username} </div>
-						<div>Email</div> <div>{user.email} </div>
-						<div>First Name</div> <div>{user.profile.firstName} </div>
-						<div>Last Name</div> <div>{user.profile.lastName}</div>
+				</h2>
+				<div className="User__Infos">
+					<div className="User__PictureContainer">
+						<img className="User__Picture" src={defaultPicture}/>
+						<img className="User__PictureBg" src={defaultPicture}/>
 					</div>
-					<hr />
-					<h3>User friendships:</h3>
-					{
-						friendShips.length ?
-						(
-							<div>
-								<h4>Accepted friendships:</h4>
-								{
-									friendshipsAccepted.length ?
-									<div className="User__FriendList">
-										{friendshipsAccepted}
-									</div> :
-									<span className="User_NothingToSee">No friendship accepted yet...</span>
-								}
-								<h4>Pending friendships:</h4>
-								{
-									friendshipsPending.length ?
-									<div className="User__FriendList">
-										{friendshipsPending}
-									</div> :
-									<span className="User_NothingToSee">No friendship pending yet...</span>
-								}
-								<h4>Friendships to approve:</h4>
-								{
-									friendshipsToApprove.length ?
-									<div className="User__FriendList">
-										{friendshipsToApprove}
-									</div> :
-									<span className="User_NothingToSee">No friendship to approve yet...</span>
-								}
-							</div>
-						) :
-						<span className="User_NothingToSee">No friendship was found for this user :'-(</span>
-					}
+					<div className="genericList User__InfoItems">
+						<div className="User__InfoItem genericListItem odd first">
+							<div>Id</div> <div>{"#" + user.id}</div>
+						</div>
+						<div className="User__InfoItem genericListItem">
+							<div>Username</div> <div>{"@" + user.username}</div>
+						</div>
+						<div className="User__InfoItem genericListItem odd">
+							<div>Email</div> <div>{user.email}</div>
+						</div>
+						<div className="User__InfoItem genericListItem">
+							<div>First Name</div> <div>{user.profile.firstName}</div>
+						</div>
+						<div className="User__InfoItem genericListItem odd last">
+							<div>Last Name</div> <div>{user.profile.lastName}</div>
+						</div>
+					</div>
 				</div>
-			}
+				<hr />
+				<h3>User friendships:</h3>
+				<FriendShipList title="Accepted friendships" list={friendships.accepted}/>
+				<FriendShipList title="Pending friendships" list={friendships.pending}/>
+				<FriendShipList title="Friendships to approve" list={friendships.toApprove}/>
+			</div>
+			<button style={{margin: "0 15px", color: "pink"}} onClick={delUser}>
+				Delete user
+			</button>
 		</main>
 	);
 }
