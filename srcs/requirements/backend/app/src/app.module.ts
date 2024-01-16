@@ -10,6 +10,7 @@ import { Friendship } from './friendships/entities/Friendships';
 import { Profile } from './profiles/entities/Profile';
 import { User } from './users/entities/User';
 import { ChatModule } from './chat/chat.module';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ChatModule } from './chat/chat.module';
     ProfilesModule,
     FriendshipsModule,
     ChatModule,
+    SocketModule,
     /*AuthModule*/],
   controllers: [],
   providers: [],

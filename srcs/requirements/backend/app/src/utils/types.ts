@@ -56,6 +56,9 @@ export type UpdateFriendshipParams = {
 }
 
 export type Message = {
-	username: string;
-	message: string;
+	author_id: number;
+    channel_id: number;
+	content: string;
+    time: Date;
+    status: boolean;
 }
