@@ -10,3 +10,13 @@ export interface UserType {
 		lastName:string
 	}
 }
+
+export interface FriendshipType {
+	id: string,
+	status1: string,
+	status2: string,
+	last_update: string,
+	created_at: string,
+	user1: UserType,
+	user2: UserType
+}

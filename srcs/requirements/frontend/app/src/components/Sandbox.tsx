@@ -13,7 +13,7 @@ function UserItem(props: {user: UserType, index: number, length: number})
 	return (
 		<Link to={"/user/" + props.user.id}>
 			<p className={
-				"Sandbox__UserItem" +
+				"Sandbox__UserItem genericListItem clickable" +
 				(props.index % 2 ? "" : " odd") +
 				(!props.index ? " first" : "") +
 				((props.index === props.length - 1) ? " last" : "")
@@ -80,16 +80,16 @@ function Sandbox()
 	function renderSwitch() {
 		if (userList.length || !loadCount)
 			return (
-				<div>
+				<div className="Sandbox__Scrollable">
 					<hr />
-					<div className="Sandbox__Scrollable">
-						<div className="Sandbox__UserListItems">
-							{
-								userList.length ?
-								userListHtml :
-								<p className="Sandbox__UserItem odd first last">No user...</p>
-							}
-						</div>
+					<div className="genericList">
+					{
+						userList.length ?
+						userListHtml :
+						<p className="Sandbox__UserItem odd first last">
+							No user...
+						</p>
+					}
 					</div>
 				</div>
 			);
@@ -113,7 +113,7 @@ function Sandbox()
 			</p>
 			<div className="Sandbox__UserList p-style">
 				<h3>User list:</h3>
-				<div className="Sandbox_UserListButtons">
+				<div>
 					<button disabled={loadCount != 0} onClick={addUser}>
 						Add a user
 					</button>
