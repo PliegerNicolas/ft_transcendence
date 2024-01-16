@@ -28,7 +28,7 @@ import { GameLogsModule } from './game-logs/game-logs.module';
     ProfilesModule,
     FriendshipsModule,
     GameLogsModule,
-    /*AuthModule*/],
+    AuthModule],
   controllers: [],
   providers: [],
 })
