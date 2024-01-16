@@ -54,3 +54,8 @@ export type ReplaceFriendshipParams = {
 export type UpdateFriendshipParams = {
     status?: FriendshipStatus;
 }
+
+export type Message = {
+	username: string;
+	message: string;
+}
