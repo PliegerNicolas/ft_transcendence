@@ -9,7 +9,8 @@ export class ChatGateway {
   server: Server<any, ServerToClientEvents>;
 
   @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
+  handleMessage(client: any, message: Message): string {
+    this.server.emit('newMessage', message);
     return 'Hello world!';
   }
 
