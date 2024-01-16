@@ -111,7 +111,7 @@ function Sandbox()
 				This page is just a sample to test frontend stuff. Don't mind it, it
 				shall be removed sooner or later.
 			</p>
-			<div className="Sandbox__UserList">
+			<div className="Sandbox__UserList p-style">
 				<h3>User list:</h3>
 				<div className="Sandbox_UserListButtons">
 					<button disabled={loadCount != 0} onClick={addUser}>

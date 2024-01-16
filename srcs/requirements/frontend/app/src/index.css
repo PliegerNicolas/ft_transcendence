@@ -50,12 +50,19 @@ body {
 }
 
 p, .p-style {
-	margin: 5px 20px 15px;
+	margin: 5px 15px 15px;
 	padding: 10px 15px;
 	background: var(--bg-color-2);
 	border: 1px solid var(--bg-color-4);
 	border-radius: 7px;
 	line-height: 1.5em;
+}
+
+@media (max-width: 640px)
+{
+	p, .p-style {
+		margin: 5px 0px 15px;
+	}
 }
 
 a {
