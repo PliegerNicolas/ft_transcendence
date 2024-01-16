@@ -1,7 +1,7 @@
 import { Type } from "class-transformer";
 import { IsEnum, ValidateNested } from "class-validator";
 import { User } from "src/users/entities/User";
-import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 
 export enum FriendshipStatus {
     PENDING = 'pending',
@@ -34,6 +34,12 @@ export class Friendship {
     @IsEnum(FriendshipStatus)
     @Column({ type: 'enum', enum: FriendshipStatus, default: FriendshipStatus.PENDING })
     status2: FriendshipStatus;
+
+    @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    last_update: Date;
+
+    @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    created_at: Date;
 
     @BeforeInsert()
     @BeforeUpdate()
