@@ -114,7 +114,7 @@ function Sandbox()
 			<div className="Sandbox__UserList">
 				<h3>User list:</h3>
 				<div className="Sandbox_UserListButtons">
-					<button disabled={loadCount < 0} onClick={addUser}>
+					<button disabled={loadCount != 0} onClick={addUser}>
 						Add a user
 					</button>
 					<button disabled={!userList.length} onClick={delUser}>

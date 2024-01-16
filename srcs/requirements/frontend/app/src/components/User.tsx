@@ -4,6 +4,39 @@ import { useParams } from "react-router-dom";
 import {UserType} from "../utils/types.ts"
 import Api from "../utils/Api";
 
+interface FriendshipType {
+	id: string,
+	status1: string,
+	status2: string,
+	last_update: string,
+	created_at: string,
+	user1: UserType,
+	user2: UserType
+}
+
+function FriendShip(props: {
+	ship: FriendshipType,
+	id: string,
+	index: number,
+	length: number
+}) {
+	const ship = props.ship;
+	const friend = ship.user1.id == props.id ? ship.user2 : ship.user1;
+
+	return (
+		<div className={
+			"User__FriendItem" +
+			(props.index % 2 ? "" : " odd") +
+			(!props.index ? " first" : "") +
+			((props.index === props.length - 1) ? " last" : "")
+		}>
+			<div>{"#" + friend.id}</div>
+			<div>{"@" + friend.username}</div>
+			<div>{ship.last_update}</div>
+		</div>
+	);
+}
+
 function User()
 {
 	const params = useParams();
@@ -15,16 +48,36 @@ function User()
 	const [friendShips, setFriendships] = useState([]);
 	const [userStatus, setUserStatus] = useState(0);
 
-	const friendshipHTML = friendShips.map((item: any, index) => {
-		const friend = item.user1.id == id ? item.user2 : item.user1;
+	const friendshipsAccepted = friendShips
+		.filter((item: FriendshipType) =>
+			item.status1 === "accepted" && item.status2 === "accepted")
+		.map((item: FriendshipType, index, array) =>
+			<FriendShip key={index} ship={item} id={id!} index={index} length={array.length}/>
+		);
 
-		return (
-			<div key={index} className="User__InfoGrid" style={{margin: "0"}}>
-				<div>{friend.id}</div>
-				<div>{friend.username}</div>
+	const friendshipsPending = friendShips
+		.filter((item: FriendshipType) => (
+			item.user1.id === id && item.status2 === "pending"
+		))
+		.map((item: FriendshipType, index, array) =>
+			<FriendShip key={index} ship={item} id={id!} index={index} length={array.length}/>
+		);
+
+	const friendshipsToApprove = friendShips
+		.filter((item: FriendshipType) => (
+			item.user2.id === id && item.status2 === "pending"
+		))
+		.map((item: FriendshipType, index, array) =>
+			<div key={index} className="clickable" onClick={() => acceptFriendship(item.user1.id)}>
+				<FriendShip ship={item} id={id!} index={index} length={array.length}/>
 			</div>
 		);
-	});
+
+	async function acceptFriendship(friendId: string) {
+		api.patch("/users/" + id + "/friendships/" + friendId, {status: "accepted"})
+			.then((data) => {console.log(data); setTimeout(loadFriendships, 100)})
+			.catch(err => console.error(err));
+	}
 
 	async function loadUser() {
 		api.get("/users/" + id)
@@ -58,7 +111,11 @@ function User()
 			{ userStatus
 				?
 				<p style={{color: "pink"}}>
-					{ userStatus != 410 ? `Cannot load this user: ${userStatus}` : "This user was removed."}
+					{
+						userStatus != 410 ?
+						`Cannot load this user: ${userStatus}` :
+						"This user was removed."
+					}
 				</p>
 				:
 				user != null &&
@@ -66,7 +123,7 @@ function User()
 					<h3>User infos:</h3>
 					<div className="User__InfoGrid">
 						<div>Id</div> <div>{"#" + user.id} </div>
-						<div>Username</div> <div>{user.username} </div>
+						<div>Username</div> <div>{"@" + user.username} </div>
 						<div>Email</div> <div>{user.email} </div>
 						<div>First Name</div> <div>{user.profile.firstName} </div>
 						<div>Last Name</div> <div>{user.profile.lastName}</div>
@@ -75,8 +132,35 @@ function User()
 					<h3>User friendships:</h3>
 					{
 						friendShips.length ?
-						friendshipHTML :
-						"No friendship was found for this user :'-("
+						(
+							<div>
+								<h4>Accepted friendships:</h4>
+								{
+									friendshipsAccepted.length ?
+									<div className="User__FriendList">
+										{friendshipsAccepted}
+									</div> :
+									<span className="User_NothingToSee">No friendship accepted yet...</span>
+								}
+								<h4>Pending friendships:</h4>
+								{
+									friendshipsPending.length ?
+									<div className="User__FriendList">
+										{friendshipsPending}
+									</div> :
+									<span className="User_NothingToSee">No friendship pending yet...</span>
+								}
+								<h4>Friendships to approve:</h4>
+								{
+									friendshipsToApprove.length ?
+									<div className="User__FriendList">
+										{friendshipsToApprove}
+									</div> :
+									<span className="User_NothingToSee">No friendship to approve yet...</span>
+								}
+							</div>
+						) :
+						<span className="User_NothingToSee">No friendship was found for this user :'-(</span>
 					}
 				</div>
 			}

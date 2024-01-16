@@ -26,11 +26,10 @@
 	margin: 0px;
 	border-radius: 12px;
 	animation: fadein .25s ease-in-out;
-	background: var(--bg-color-2);
 }
 
 .Sandbox__UserItem {
-	margin: 0px;
+	margin: 0;
 	padding: 6px;
 	border: 2px solid #0000;
 	animation: fadein .15s ease-in-out;
@@ -61,6 +60,7 @@
 }
 
 .Sandbox__UserItem.last {
+	margin-bottom: 0;
 	border-radius: 0 0 12px 12px;
 }
 
