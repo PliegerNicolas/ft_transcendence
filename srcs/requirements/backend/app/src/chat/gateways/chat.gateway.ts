@@ -1,7 +1,7 @@
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io'
 //import { ServerToClientEvents } from '../types/chat';
-import { Message } from 'src/utils/types';
+import { Message } from '../types/chat';
 import { OnModuleInit } from '@nestjs/common';
 
 @WebSocketGateway({
