@@ -85,31 +85,27 @@ function User()
 			),
 	};
 
-	/*
-	<div key={item.id} className="clickable"
-		onClick={() => acceptFriendship(item.user1.id)}
-	>
-	*/
-
 	function friend(ship: FriendshipType) {
 		return (ship.user1.id == id ? ship.user2 : ship.user1);
 	}
 
 	async function loadUser() {
+		console.log("API -> LOAD USER INFO");
 		api.get("/users/" + id)
 			.then(data => setUser(data))
 			.catch(err => {
 				err instanceof Response ? setUserStatus(err.status) : console.error(err)
 			});
 	}
-	useEffect(() => {loadUser()}, []);
+	useEffect(() => {loadUser()}, [params]);
 
 	async function loadFriendships() {
+		console.log("API -> LOAD FRIENDS LIST");
 		api.get("/users/" + id + "/relationships")
 			.then(data => setFriendships(data))
 			.catch(err => {!(err instanceof Response) && console.error(err)});
 	}
-	useEffect(() => {loadFriendships()}, []);
+	useEffect(() => {loadFriendships()}, [params]);
 
 	async function delUser() {
 		api.delete("/users/" + id)
@@ -149,19 +145,19 @@ function User()
 						<img className="User__PictureBg" src={defaultPicture}/>
 					</div>
 					<div className="genericList User__InfoItems">
-						<div className="User__InfoItem genericListItem odd first">
+						<div className="User__InfoItem">
 							<div>Id</div> <div>{"#" + user.id}</div>
 						</div>
-						<div className="User__InfoItem genericListItem">
+						<div className="User__InfoItem">
 							<div>Username</div> <div>{"@" + user.username}</div>
 						</div>
-						<div className="User__InfoItem genericListItem odd">
+						<div className="User__InfoItem">
 							<div>Email</div> <div>{user.email}</div>
 						</div>
-						<div className="User__InfoItem genericListItem">
+						<div className="User__InfoItem">
 							<div>First Name</div> <div>{user.profile.firstName}</div>
 						</div>
-						<div className="User__InfoItem genericListItem odd last">
+						<div className="User__InfoItem">
 							<div>Last Name</div> <div>{user.profile.lastName}</div>
 						</div>
 					</div>
