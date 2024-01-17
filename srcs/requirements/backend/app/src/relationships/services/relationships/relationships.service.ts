@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Relationship } from 'src/relationships/entities/Relationship';
 import { CreateRelationshipParams, ReplaceRelationshipParams, UpdateRelationshipParams } from 'src/relationships/types/relationship.type';
 import { User } from 'src/users/entities/User';
-import { Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class RelationshipsService {
@@ -16,17 +16,17 @@ export class RelationshipsService {
     ) {}
 
     async getUserRelationships(userId: number): Promise<Relationship[]> {
-        const user = await this.userRepository.findOne({ where : { id: userId }});
-
-        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
-
-        return (await this.relationshipRepository.find({
+        const relationships = await this.relationshipRepository.find({
             where: [
                 { user1: { id: userId } },
                 { user2: { id: userId } },
             ],
             relations: ['user1', 'user2'],
-        }));
+        });
+
+        if (!relationships || relationships.length === 0) throw new NotFoundException(`No Relationships found for User with ID ${userId}`);
+
+        return (relationships);
     }
 
     async getUserRelationship(userId: number, targetId: number): Promise<Relationship> {
@@ -77,6 +77,13 @@ export class RelationshipsService {
             ...relationship,
             ...relationshipDetails,
         }));
+    }
+
+    async deleteRelationship(userId: number, targetId: number): Promise<string> {
+        const relationship = await this.findRelationship(userId, targetId);
+        await this.relationshipRepository.remove(relationship);
+
+        return (`Relationship between user with ID ${userId} and user with ID ${targetId} successfully deleted`);
     }
 
 

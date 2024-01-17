@@ -11,11 +11,12 @@ PGDATA=/var/lib/postgresql/data
 
 #VITEJS
 VITE_FTAPI_CLIENTID="u-s4t2ud-etc..."
-```
 
 #NESTJS
 API_CLIENT_ID="<UID>"
 API_SECRET = "<SECRET>"
+```
+
 ### Nest.js & API's paths
 
 @Users
@@ -34,6 +35,7 @@ API_SECRET = "<SECRET>"
 @Relationships
 - `GET` ⇒ `/users/{:userId}/relationships` : *This lists all Users's Relationships.*
 - `GET` ⇒ `/users/{:userId}/relationships/{:targetId}` : *This lists the Relationship the User shares with the Target*
-- `POST` ⇒ `/users/:id` : *This creates a new Relationship between two users. (cf. CreateRelationship.dto.ts)*
-- `PUT` ⇒ `/users/{:userId}` : *This modifies the Relationship set between the two Users, asking for a complete alteration. (cf. ReplaceRelationship.dto.ts)*
-- `PATCH` ⇒ `/users/{:userId}` : *This modifies the Relationship set between the two Users, asking for a partial or complete alteration. (cf. UpdateRelationship.dto.ts)*
+- `POST` ⇒ `/users/{:userId}/relationships` : *This creates a new Relationship between two users. (cf. CreateRelationship.dto.ts)*
+- `PUT` ⇒ `/users/{:userId}/relationships/{:targetId}` : *This modifies the Relationship set between the two Users, asking for a complete alteration. (cf. ReplaceRelationship.dto.ts)*
+- `PATCH` ⇒ `/users/{:userId}/relationships/{:targetId}` : *This modifies the Relationship set between the two Users, asking for a partial or complete alteration. (cf. UpdateRelationship.dto.ts)*
+- `DELETE` ⇒ `/users/{:userId}/relationships/{:targetId}` : *This delete the Relationship set between the two Users.*

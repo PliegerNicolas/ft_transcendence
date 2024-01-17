@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Put, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, ValidationPipe } from '@nestjs/common';
 import { CreateRelationshipDto } from 'src/relationships/dtos/CreateRelationship.dto';
 import { ReplaceRelationshipDto } from 'src/relationships/dtos/ReplaceRelationship.dto';
 import { UpdateRelationshipDto } from 'src/relationships/dtos/UpdateRelationship.dto';
@@ -46,6 +46,14 @@ export class RelationshipsController {
         @Body(new ValidationPipe) updateRelationshipDto: UpdateRelationshipDto,
     ) {
         return (this.relationshipService.updateUserRelationship(userId, targetId, updateRelationshipDto));
+    }
+
+    @Delete(':targetId')
+    async deleteUserById(
+        @Param('userId', ParseIntPipe) userId: number,
+        @Param('targetId', ParseIntPipe) targetId: number,
+    ) {
+        return (await this.relationshipService.deleteRelationship(userId, targetId));
     }
 
 }
