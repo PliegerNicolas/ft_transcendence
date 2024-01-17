@@ -13,6 +13,9 @@ PGDATA=/var/lib/postgresql/data
 VITE_FTAPI_CLIENTID="u-s4t2ud-etc..."
 ```
 
+#NESTJS
+API_CLIENT_ID="<UID>"
+API_SECRET = "<SECRET>"
 ### Nest.js & API's paths
 
 @Users
