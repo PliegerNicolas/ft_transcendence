@@ -6,8 +6,8 @@ export class AuthController {
 	constructor(private authService: AuthService){}
 	
 	@HttpCode(HttpStatus.OK)
-	@Post('login')
-	@Get('auth')
+	// @Post('login')
+	@Post()
 
 	signIn(@Body() oauthToken:string) {
 		return this.authService.signIn(oauthToken);

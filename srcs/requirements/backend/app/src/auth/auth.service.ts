@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Get, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 
@@ -22,8 +22,10 @@ export class AuthService
 					"redirect_uri": "http://localhost:8080/auth"
 				})
 			})
+			console.log(payload)
 		return {
-			access_token: await this.jwtService.signAsync((await payload).json()),
+			// access_token: await this.jwtService.signAsync((await payload)),
+			access_token: (await payload),
 		};
 	}
 }

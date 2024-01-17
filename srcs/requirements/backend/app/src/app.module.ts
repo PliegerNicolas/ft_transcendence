@@ -10,6 +10,7 @@ import { Friendship } from './friendships/entities/Friendships';
 import { Profile } from './profiles/entities/Profile';
 import { User } from './users/entities/User';
 import { GameLogsModule } from './game-logs/game-logs.module';
+import { AuthController } from './auth/auth.controller';
 
 @Module({
   imports: [
