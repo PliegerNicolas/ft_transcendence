@@ -52,7 +52,8 @@ function Auth()
 
 	console.log("Should send this code to the backend API: " + code);
 
-	api.post("/auth", {"code": code, "redirect_uri": `http://${location.host}/auth`})
+	api.post("/auth",
+		{"code": code, "redirect_uri": `http://${location.host}/auth`})
 		.then(data => console.log(data))
 		.catch(err => console.log(err));
 

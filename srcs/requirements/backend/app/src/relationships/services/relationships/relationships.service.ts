@@ -16,17 +16,17 @@ export class RelationshipsService {
     ) {}
 
     async getUserRelationships(userId: number): Promise<Relationship[]> {
-        const user = await this.userRepository.findOne({ where : { id: userId }});
-
-        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
-
-        return (await this.relationshipRepository.find({
+        const relationships = await this.relationshipRepository.find({
             where: [
                 { user1: { id: userId } },
                 { user2: { id: userId } },
             ],
             relations: ['user1', 'user2'],
-        }));
+        });
+
+        if (!relationships || relationships.length === 0) throw new NotFoundException(`No Relationships found for User with ID ${userId}`);
+
+        return (relationships);
     }
 
     async getUserRelationship(userId: number, targetId: number): Promise<Relationship> {
@@ -50,10 +50,13 @@ export class RelationshipsService {
     ): Promise<Relationship> {
         const relationship = await this.findRelationship(userId, targetId);
 
+        console.log(relationship);
+
         relationship.setStatus(userId, relationshipDetails.status);
 
         return (await this.relationshipRepository.save({
-            ...relationship
+            ...relationship,
+            ...relationshipDetails,
         }));
     }
 
@@ -64,11 +67,23 @@ export class RelationshipsService {
     ): Promise<Relationship> {
         const relationship = await this.findRelationship(userId, targetId);
 
+         if (!relationship) throw new NotFoundException(`Relationship between user with ID ${userId} and user with ID ${targetId} not found`);
+
+        console.log(relationship);
+
         relationship.setStatus(userId, relationshipDetails.status);
 
         return (await this.relationshipRepository.save({
-            ...relationship
+            ...relationship,
+            ...relationshipDetails,
         }));
+    }
+
+    async deleteRelationship(userId: number, targetId: number): Promise<string> {
+        const relationship = await this.findRelationship(userId, targetId);
+        await this.relationshipRepository.remove(relationship);
+
+        return (`Relationship between user with ID ${userId} and user with ID ${targetId} successfully deleted`);
     }
 
 
@@ -78,11 +93,13 @@ export class RelationshipsService {
     private async findRelationship(userId: number, targetId: number): Promise<Relationship> {
         const relationship = await this.relationshipRepository.findOne({
             where: [
-                 { user1: { id: userId } }, { user2: { id: targetId } },
-                 { user1: { id: targetId } }, { user2: { id: userId } },
-             ],
+                { user1: { id: userId }, user2: { id: targetId }, },
+                { user1: { id: targetId }, user2: { id: userId }, },
+            ],
              relations: ['user1', 'user2'],
          });
+
+         console.log(relationship);
 
          if (!relationship) throw new NotFoundException(`Relationship between user with ID ${userId} and user with ID ${targetId} not found`);
 
