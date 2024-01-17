@@ -11,17 +11,10 @@ import hourglass from "../assets/hourglass.svg";
 function UserItem(props: {user: UserType, index: number, length: number})
 {
 	return (
-		<Link to={"/user/" + props.user.id}>
-			<p className={
-				"Sandbox__UserItem genericListItem clickable" +
-				(props.index % 2 ? "" : " odd") +
-				(!props.index ? " first" : "") +
-				((props.index === props.length - 1) ? " last" : "")
-			}>
-					<span>{"#" + props.user.id}</span>
-					<span>{props.user.username}</span>
-					<span>{props.user.email}</span>
-			</p>
+		<Link to={"/user/" + props.user.id} className="Sandbox__UserItem clickable">
+			<div>{"#" + props.user.id}</div>
+			<div>{props.user.username}</div>
+			<div>{props.user.email}</div>
 		</Link>
 	);
 }

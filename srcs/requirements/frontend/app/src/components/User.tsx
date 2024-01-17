@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 import {UserType, FriendshipType} from "../utils/types.ts"
 import Api from "../utils/Api";
@@ -8,27 +8,6 @@ import "../styles/user.css";
 
 import defaultPicture from "../assets/default_profile.png";
 
-function FriendShip(props: {
-	ship: FriendshipType, id: string, index: number, length: number
-})
-{
-	const ship = props.ship;
-	const friend = ship.user1.id == props.id ? ship.user2 : ship.user1;
-
-	return (
-		<div className={
-			"User__FriendItem genericListItem" +
-			(props.index % 2 ? "" : " odd") +
-			(!props.index ? " first" : "") +
-			((props.index === props.length - 1) ? " last" : "")
-		}>
-			<div>{"#" + friend.id}</div>
-			<div>{"@" + friend.username}</div>
-			<div>{ship.last_update}</div>
-		</div>
-	);
-}
-
 function FriendShipList(props : {title: string, list: JSX.Element[]})
 {
 	if (!props.list.length)
@@ -36,9 +15,7 @@ function FriendShipList(props : {title: string, list: JSX.Element[]})
 	return (
 		<div>
 			<h4>{props.title}:</h4>
-			<div className="genericList">
-				{props.list}
-			</div>
+			<div className="genericList"> {props.list} </div>
 		</div>
 	);
 }
@@ -58,11 +35,17 @@ function User()
 		accepted:	friendShips
 
 			.filter((item: FriendshipType) =>
-				item.status1 === "accepted" && item.status2 === "accepted")
-
-			.map((item: FriendshipType, index, array) =>
-				<FriendShip key={item.id} ship={item} id={id!}
-					index={index} length={array.length}/>),
+				item.status1 === "accepted" && item.status2 === "accepted"
+			)
+			.map((item: FriendshipType) =>
+					<div className="User__FriendItem" key={item.id}>
+						<div>{"#" + friend(item).id}</div>
+						<Link to={"/user/" + friend(item).id}>
+							{"@" + friend(item).username}
+						</Link>
+						<div>{item.updated_at}</div>
+					</div>
+			),
 
 		pending: friendShips
 
@@ -70,9 +53,15 @@ function User()
 				(item.status1 === "pending" && item.user2.id === id)
 				|| (item.status2 === "pending" && item.user1.id === id))
 
-			.map((item: FriendshipType, index, array) =>
-				<FriendShip key={item.id} ship={item} id={id!}
-					index={index} length={array.length}/>),
+			.map((item: FriendshipType) =>
+				<div className="User__FriendItem" key={item.id}>
+					<div>{"#" + friend(item).id}</div>
+					<Link to={"/user/" + friend(item).id}>
+						{"@" + friend(item).username}
+					</Link>
+					<div>{item.updated_at}</div>
+				</div>
+			),
 
 		toApprove: friendShips
 
@@ -80,13 +69,31 @@ function User()
 				(item.status1 === "pending" && item.user1.id === id)
 				|| (item.status2 === "pending" && item.user2.id === id))
 
-			.map((item: FriendshipType, index, array) =>
-				<div key={item.id} className="clickable"
-					onClick={() => acceptFriendship(item.user1.id)}
-				>
-					<FriendShip ship={item} id={id!} index={index} length={array.length}/>
-				</div>)
+			.map((item: FriendshipType) =>
+				<div className="User__FriendItem--approve" key={item.id}>
+					<div>{"#" + friend(item).id}</div>
+					<Link to={"/user/" + friend(item).id}>
+						{"@" + friend(item).username}
+					</Link>
+					<div>{item.updated_at}</div>
+					<div className="clickable"
+						onClick={() => acceptFriendship(friend(item).id)}
+					>
+						Approve
+					</div>
+				</div>
+			),
 	};
+
+	/*
+	<div key={item.id} className="clickable"
+		onClick={() => acceptFriendship(item.user1.id)}
+	>
+	*/
+
+	function friend(ship: FriendshipType) {
+		return (ship.user1.id == id ? ship.user2 : ship.user1);
+	}
 
 	async function loadUser() {
 		api.get("/users/" + id)

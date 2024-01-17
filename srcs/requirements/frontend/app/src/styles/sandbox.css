@@ -20,6 +20,9 @@
 	grid-column-gap: 20px;
 	grid-template-columns: 1fr 2fr 3fr;
 }
+.Sandbox__UserItem:visited {
+	color: var(--text-normal);
+}
 
 @media (max-width: 850px)
 {
