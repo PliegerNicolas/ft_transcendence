@@ -9,6 +9,7 @@ import { ProfilesModule } from './profiles/profiles.module';
 import { GameLogsModule } from './game-logs/game-logs.module';
 import { RelationshipsModule } from './relationships/relationships.module';
 import { Relationship } from './relationships/entities/Relationship';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { Relationship } from './relationships/entities/Relationship';
     ProfilesModule,
     GameLogsModule,
     RelationshipsModule,
-	AuthModule
+	AuthModule,
   ],
   controllers: [],
   providers: [],

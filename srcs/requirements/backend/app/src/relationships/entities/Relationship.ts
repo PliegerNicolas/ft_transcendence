@@ -1,5 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
-import { IsEnum, Validate } from "class-validator";
+import { IsEnum } from "class-validator";
 import { User } from "src/users/entities/User";
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 
