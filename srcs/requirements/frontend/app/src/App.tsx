@@ -1,6 +1,6 @@
 import "./App.css";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 
 import Header from "./components/Header.tsx";
@@ -17,69 +17,39 @@ import User from "./components/User.tsx";
 
 import Api from "./utils/Api";
 
-/*
-
-Here's the kind of code that will have to be implemented server-side to obtain
-the 42 api token:
-
-async function loadFtToken()
-{
-	const response = await fetch("https://api.intra.42.fr/oauth/token", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json"
-		},
-		body: JSON.stringify({
-			"grant_type": "authorization_code",
-			"client_id": client_id,
-			"client_secret": client_secret,
-			"code": code,
-			"redirect_uri": redirect_uri
-		})
-	});
-	const token_data = await response.json();
-	const token = token_data.access_token;
-}
-
-*/
-
-function Auth()
+function Auth(props: {setMyInfo: Function})
 {
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
 
 	const api = new Api(`http://${location.hostname}:3450`);
 
-	console.log("Should send this code to the backend API: " + code);
-
-	api.post("/auth",
-		{"code": code, "redirect_uri": `http://${location.host}/auth`})
-		.then(data => console.log(data))
-		.catch(err => console.log(err));
-
-	/*
-	**	HERE, SOME KIND OF BACKEND API CALL TO SEND THE AUTHENTIFICATION CODE
-	**	AND OBTAIN ALL RELEVANT USER LOGIN INFORMATION IN RETURN
-	**	EG:
-	**
-	**	fetch(`http://${location.hostname}:3450/auth`, {
-	**		method: "POST",
-	**		headers: {
-	**			"Content-Type": "application/json"
-	**		},
-	**		body: JSON.stringify({
-	**			"code": code,
-	**			"redirect_uri": `http://${location.host}/auth`
-	**		})
-	**	}).then ...
-	*/
-
 	const navigate = useNavigate();
 	const redirectPath = localStorage.getItem("auth_redirect");
 
-	useEffect(() => {
-		navigate(redirectPath ? redirectPath : "/", {replace: true})
-	}, []);
+	console.log("Should send this code to the backend API: " + code);
+
+	async function connect() {
+		api
+			.post("/auth", {
+				"code": code, "redirect_uri": `http://${location.host}/auth`
+			})
+			.then((data: any) => {
+				props.setMyInfo({logged: true, token: data.access_token});
+				localStorage.setItem(
+					"my_info", JSON.stringify({logged: true, token: data.access_token})
+				);
+			})
+			.catch(err => {
+				console.log(err);
+				props.setMyInfo({logged: false, token: ""});
+				localStorage.removeItemItem("my_info")
+			})
+			.finally(() =>
+				navigate(redirectPath ? redirectPath : "/", {replace: true})
+			);
+	};
+	useEffect(() => {connect()}, []);
 
 	return (<div />);
 }
@@ -96,9 +66,19 @@ function NotFound()
 
 function App()
 {
+	const [myInfo, setMyInfo] = useState({
+		logged: false,
+		token: "",
+	});
+
+	useEffect(() => {
+		const data = localStorage.getItem("my_info");
+		data && setMyInfo(JSON.parse(data));
+	}, []);
+
 	return (
 		<Router>
-			<Header/>
+			<Header myInfo={myInfo}/>
 			<Navbar />
 			<Routes>
 				<Route path="/"	element={<Home />} />
@@ -109,7 +89,7 @@ function App()
 				<Route path="/about" element={<About />} />
 				<Route path="/sandbox" element={<Sandbox />} />
 				<Route path="/user/:id" element={<User />} />
-				<Route path="/auth" element={<Auth />} />
+				<Route path="/auth" element={<Auth setMyInfo={setMyInfo} />} />
 				<Route path="*" element={<NotFound />} />
 			</Routes>
 		</Router>

@@ -20,3 +20,8 @@ export interface FriendshipType {
 	user1: UserType,
 	user2: UserType
 }
+
+export interface MyInfoType {
+	logged: boolean,
+	token: string
+}

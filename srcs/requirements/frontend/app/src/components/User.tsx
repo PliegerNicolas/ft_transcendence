@@ -90,7 +90,6 @@ function User()
 	}
 
 	async function loadUser() {
-		console.log("API -> LOAD USER INFO");
 		api.get("/users/" + id)
 			.then(data => setUser(data))
 			.catch(err => {
@@ -100,7 +99,6 @@ function User()
 	useEffect(() => {loadUser()}, [params]);
 
 	async function loadFriendships() {
-		console.log("API -> LOAD FRIENDS LIST");
 		api.get("/users/" + id + "/relationships")
 			.then(data => setFriendships(data))
 			.catch(err => {!(err instanceof Response) && console.error(err)});
@@ -158,7 +156,7 @@ function User()
 				<FriendShipList title="Pending friendships" list={friendships.pending}/>
 				<FriendShipList title="Friendships to approve" list={friendships.toApprove}/>
 			</div>
-			<button style={{margin: "0 15px", color: "pink"}} onClick={delUser}>
+			<button style={{margin: "0 15px", color: "#f9c"}} onClick={delUser}>
 				Delete user
 			</button>
 		</main>
