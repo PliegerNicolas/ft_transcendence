@@ -46,22 +46,27 @@
 	color: var(--text-normal);
 	background: var(--bg-color-4);
 	border: 1px solid var(--bg-color-5);
-	padding: 8px 20px;
+	padding: 6px 15px;
+	height: 26px;
 	border-radius: 7px;
 	transition: .1s;
 	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 5px;
 }
-
 .Header__Login:visited {
 	color: var(--text-normal);
 }
-
 .Header__Login:hover {
 	background: var(--bg-color-5);
 	color: var(--text-accent);
 	cursor: pointer;
 }
-
 .Header__Login:active {
 	background: var(--bg-color-4);
+}
+
+.Header__Login > img {
+	height: 100%;
 }

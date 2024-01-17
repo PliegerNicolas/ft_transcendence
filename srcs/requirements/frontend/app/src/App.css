@@ -4,12 +4,11 @@
 
 .MainContent {
 	background: var(--bg-color-1);
-	padding: 15px 40px 80px;
-
+	padding: 15px 25px 80px;
 	position: fixed;
 	z-index: 1;
 	top: 60px;
-	left: 180px;
+	left: 200px;
 	right: 0;
 	bottom: 0;
 
@@ -17,17 +16,122 @@
 	transition: .1s;
 }
 
-@media (max-width: 1000px)
-{
+@media (min-width: 1200px) {
+	.MainContent {
+		padding: 15px 50px 80px;
+	}
+}
+
+@media (min-width: 1500px) {
+	.MainContent {
+		padding: 15px 100px 80px;
+	}
+}
+
+@media (min-width: 1800px) {
+	.MainContent {
+		padding: 15px 150px 80px;
+	}
+}
+
+@media (min-width: 2100px) {
+	.MainContent {
+		padding: 15px 200px 80px;
+	}
+}
+
+@media (max-width: 1000px) {
 	.MainContent {
 		left: 66px;
 	}
 }
 
-@media (max-width: 640px)
-{
+@media (max-width: 640px) {
 	.MainContent {
 		left: 0;
 		bottom: 62px;
 	}
+}
+
+.genericList {
+	background: var(--bg-color-3);
+	border: 1px solid var(--bg-color-5);
+	padding: 0px;
+	margin: 0px;
+	border-radius: 7px;
+	overflow-x: auto;
+}
+
+.genericList > * > * {
+	border: 2px solid #0000;
+	margin: -1px;
+	padding: 6px;
+	z-index: 50;
+}
+.genericList > * > *:first-child {
+	border: 2px solid #0000;
+	padding: 6px;
+	border-radius: 7px 0 0 7px;
+}
+.genericList > * > *:last-child {
+	border: 2px solid #0000;
+	padding: 6px;
+	border-radius: 0 7px 7px 0;
+}
+
+.genericList > * {
+	margin: 0px;
+	border: 2px solid #0000;
+	animation: fadein .15s ease-in-out;
+	display: grid;
+	grid-column-gap: 20px;
+	grid-template-columns: 1fr 2fr 2fr;
+	background: var(--bg-color-4);
+	border-radius: 0px;
+	color: var(--text-normal);
+	overflow-x: visible;
+	min-width: fit-content;
+	transition: filter .1s, color .2s, text-shadow .2s, border .2s;
+}
+
+.genericList > *:nth-child(odd) {
+	background: var(--bg-color-3);
+}
+
+.genericList > *:first-child {
+	border-radius: 7px 7px 0 0;
+}
+
+.genericList > *:last-child {
+	border-radius: 0 0 7px 7px;
+}
+
+.genericList > *:first-child:last-child {
+	border-radius: 7px;
+}
+
+.genericList > *.clickable:hover {
+	border: 2px solid var(--text-faint);
+
+	filter: brightness(1.1) saturate(1.4);
+	cursor: pointer;
+	color: var(--text-accent);
+	text-shadow: 0 0 6px #fff4;
+}
+
+.genericList > *.clickable:active {
+	filter: none;
+}
+
+.genericList > * > *.clickable:hover {
+	border: 2px solid var(--text-faint);
+
+	filter: brightness(1.1) saturate(1.4);
+	cursor: pointer;
+	color: var(--text-accent);
+	text-shadow: 0 0 6px #fff4;
+}
+
+.genericList > * > *.clickable:active {
+	filter: none;
 }

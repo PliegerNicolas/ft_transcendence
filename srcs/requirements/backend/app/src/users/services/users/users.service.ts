@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'src/profiles/entities/Profile';
 import { User } from 'src/users/entities/User';
-import { CreateUserParams, ReplaceUserParams, UpdateUserParams } from 'src/utils/types';
+import { CreateUserParams, ReplaceUserParams, UpdateUserParams } from 'src/users/types/user.types';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class UsersService {
     ) {}
 
     async getUsers(): Promise<User[]> {
-        return (this.userRepository.find());
+        return (this.userRepository.find({}));
     }
 
     async getUser(id: number): Promise<User> {
@@ -25,9 +25,7 @@ export class UsersService {
             relations: ['profile']
         });
 
-        if (!user) {
-            throw new NotFoundException(`User with ID ${id} not found`);
-        }
+        if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
         return (user);
     }
@@ -47,9 +45,7 @@ export class UsersService {
             relations: ['profile'],
         });
 
-        if (!user) {
-            throw new NotFoundException(`User with ID ${id} not found`);
-        }
+        if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
         return (await this.userRepository.save({ ...replaceUserDetails }));
     }
@@ -60,9 +56,7 @@ export class UsersService {
             relations: ['profile'],
         });
 
-        if (!user) {
-            throw new NotFoundException(`User with ID ${id} not found`);
-        }
+        if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
         return (
             await this.userRepository.save({
@@ -78,7 +72,7 @@ export class UsersService {
 
     async deleteUser(id: number): Promise<string> {
         await this.userRepository.delete(id);
-        return (`User with ID ${id} successfuly deleted`);
+        return (`User with ID ${id} successfully deleted`);
     }
 
 }

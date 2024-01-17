@@ -11,19 +11,10 @@ import hourglass from "../assets/hourglass.svg";
 function UserItem(props: {user: UserType, index: number, length: number})
 {
 	return (
-		<Link to={"/user/" + props.user.id}>
-			<p className={
-				"Sandbox__UserItem" +
-				(props.index % 2 ? "" : " odd") +
-				(!props.index ? " first" : "") +
-				((props.index === props.length - 1) ? " last" : "")
-			}>
-					<span>{"#" + props.user.id}</span>
-					<span>{props.user.username}</span>
-					<span>{props.user.email}</span>
-					<span>{props.user.profile.firstName}</span>
-					<span>{props.user.profile.lastName}</span>
-			</p>
+		<Link to={"/user/" + props.user.id} className="Sandbox__UserItem clickable">
+			<div>{"#" + props.user.id}</div>
+			<div>{props.user.username}</div>
+			<div>{props.user.email}</div>
 		</Link>
 	);
 }
@@ -80,22 +71,21 @@ function Sandbox()
 	}
 
 	function renderSwitch() {
-		if (loadCount != -42 && (userList.length || !loadCount))
+		if (userList.length || !loadCount)
 			return (
-				<div>
-					<hr />
-					<div className="Sandbox__Scrollable">
-						<div className="Sandbox__UserListItems">
-							{
-								userList.length ?
-								userListHtml :
-								<p className="Sandbox__UserItem odd first last">No user...</p>
-							}
-						</div>
+				<div className="Sandbox__Scrollable">
+					<div className="genericList">
+					{
+						userList.length ?
+						userListHtml :
+						<p className="Sandbox__UserItem genericListItem odd first last">
+							No user...
+						</p>
+					}
 					</div>
 				</div>
 			);
-		else if (loadCount > 0 || loadCount === -42)
+		else if (loadCount > 0)
 			return (<div className="Spinner"><img src={ hourglass } /></div>);
 		return (
 			<div>
@@ -113,13 +103,20 @@ function Sandbox()
 				This page is just a sample to test frontend stuff. Don't mind it, it
 				shall be removed sooner or later.
 			</p>
-			<div className="Sandbox__UserList">
+			<div className="Sandbox__UserList p-style">
 				<h3>User list:</h3>
-				<div className="Sandbox_UserListButtons">
-					<button onClick={addUser}>Add a user</button>
-					<button onClick={delUser}>Delete a user</button>
-					<button onClick={() => setLoadCount(1)}>Reload</button>
+				<div>
+					<button disabled={loadCount != 0} onClick={addUser}>
+						Add a user
+					</button>
+					<button disabled={!userList.length} onClick={delUser}>
+						Delete a user
+					</button>
+					<button onClick={() => setLoadCount(1)}>
+						Reload
+					</button>
 				</div>
+				<hr />
 				{renderSwitch()}
 			</div>
 		</main>

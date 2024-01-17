@@ -23,7 +23,6 @@ class Api
 		if (!response.ok)
 			return (Promise.reject(response));
 		return (response.json());
-
 	};
 
 	async post(endpoint: string, body: any) {
@@ -38,6 +37,15 @@ class Api
 	async delete(endpoint: string, body = {}) {
 		const response = await fetch(this.base_url + endpoint, {
 			method: "DELETE",
+			headers: this.headers,
+			body: JSON.stringify(body)
+		});
+		return (this.#return_switch(response));
+	};
+
+	async patch(endpoint: string, body: any) {
+		const response = await fetch(this.base_url + endpoint, {
+			method: "PATCH",
 			headers: this.headers,
 			body: JSON.stringify(body)
 		});

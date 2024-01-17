@@ -49,13 +49,20 @@ body {
 	margin: 0;
 }
 
-p {
-	margin: 5px 20px 15px;
+p, .p-style {
+	margin: 5px 15px 15px;
 	padding: 10px 15px;
 	background: var(--bg-color-2);
 	border: 1px solid var(--bg-color-4);
 	border-radius: 7px;
 	line-height: 1.5em;
+}
+
+@media (max-width: 640px)
+{
+	p, .p-style {
+		margin: 5px 0px 15px;
+	}
 }
 
 a {
@@ -85,6 +92,11 @@ button:hover {
 button:active {
 	background: var(--bg-color-4);
 }
+button:disabled {
+	background: var(--bg-color-2);
+	color: var(--text-faint);
+	cursor:default;
+}
 
 .error-msg {
 	color: var(--error);
@@ -92,6 +104,17 @@ button:active {
 }
 
 hr {
-	color: var(--text-normal);
-	margin: 20px;
+	color: var(--text-faint);
+	margin: 20px 80px;
+}
+
+h3 {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+h4 {
+	margin-top: 20px;
+	margin-bottom: 20px;
+	margin-left: 5px;
 }
