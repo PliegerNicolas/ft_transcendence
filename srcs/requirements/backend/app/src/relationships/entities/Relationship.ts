@@ -50,7 +50,6 @@ export class Relationship {
     }
 
     @BeforeInsert()
-    @BeforeUpdate()
     reorderUsers(): void  {
         if (this.user1.id > this.user2.id) {
             this.setRelationshipStatusDefaults();
