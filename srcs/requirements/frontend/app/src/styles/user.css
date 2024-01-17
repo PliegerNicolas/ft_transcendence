@@ -77,3 +77,22 @@
 	grid-column-gap: 20px;
 	grid-template-columns: 1fr 2fr 2fr;
 }
+
+.User__FriendItem--approve {
+	display: grid;
+	grid-column-gap: 20px;
+	grid-template-columns: .8fr 2fr 3fr 1.5fr;
+}
+
+.User__FriendItem--approve > *:last-child {
+	display: flex;
+	justify-content: center;
+	border: 2px solid #4a8;
+	color: #afd;
+	background: #133;
+	user-select: none;
+}
+.User__FriendItem--approve > *:last-child:hover {
+	color: #cfe;
+	border: 2px solid #6da;
+}

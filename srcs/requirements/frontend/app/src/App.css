@@ -17,30 +17,36 @@
 }
 
 @media (min-width: 1200px) {
-	.MainContent { padding: 15px 50px 80px; }
+	.MainContent {
+		padding: 15px 50px 80px;
+	}
 }
 
 @media (min-width: 1500px) {
-	.MainContent { padding: 15px 100px 80px; }
+	.MainContent {
+		padding: 15px 100px 80px;
+	}
 }
 
 @media (min-width: 1800px) {
-	.MainContent { padding: 15px 150px 80px; }
+	.MainContent {
+		padding: 15px 150px 80px;
+	}
 }
 
 @media (min-width: 2100px) {
-	.MainContent { padding: 15px 200px 80px; }
+	.MainContent {
+		padding: 15px 200px 80px;
+	}
 }
 
-@media (max-width: 1000px)
-{
+@media (max-width: 1000px) {
 	.MainContent {
 		left: 66px;
 	}
 }
 
-@media (max-width: 640px)
-{
+@media (max-width: 640px) {
 	.MainContent {
 		left: 0;
 		bottom: 62px;
@@ -56,9 +62,25 @@
 	overflow-x: auto;
 }
 
-.genericListItem {
-	margin: 0px;
+.genericList > * > * {
+	border: 2px solid #0000;
+	margin: -1px;
 	padding: 6px;
+	z-index: 50;
+}
+.genericList > * > *:first-child {
+	border: 2px solid #0000;
+	padding: 6px;
+	border-radius: 7px 0 0 7px;
+}
+.genericList > * > *:last-child {
+	border: 2px solid #0000;
+	padding: 6px;
+	border-radius: 0 7px 7px 0;
+}
+
+.genericList > * {
+	margin: 0px;
 	border: 2px solid #0000;
 	animation: fadein .15s ease-in-out;
 	display: grid;
@@ -71,19 +93,24 @@
 	min-width: fit-content;
 	transition: filter .1s, color .2s, text-shadow .2s, border .2s;
 }
-.genericListItem.odd {
+
+.genericList > *:nth-child(odd) {
 	background: var(--bg-color-3);
 }
-.genericListItem.first {
-	border-radius:7px 7px 0 0;
+
+.genericList > *:first-child {
+	border-radius: 7px 7px 0 0;
 }
-.genericListItem.last {
+
+.genericList > *:last-child {
 	border-radius: 0 0 7px 7px;
 }
-.genericListItem.first.last {
+
+.genericList > *:first-child:last-child {
 	border-radius: 7px;
 }
-.clickable.genericListItem:hover {
+
+.genericList > *.clickable:hover {
 	border: 2px solid var(--text-faint);
 
 	filter: brightness(1.1) saturate(1.4);
@@ -91,11 +118,12 @@
 	color: var(--text-accent);
 	text-shadow: 0 0 6px #fff4;
 }
-.clickable.genericListItem:active {
+
+.genericList > *.clickable:active {
 	filter: none;
 }
 
-.clickable > .genericListItem:hover {
+.genericList > * > *.clickable:hover {
 	border: 2px solid var(--text-faint);
 
 	filter: brightness(1.1) saturate(1.4);
@@ -103,6 +131,7 @@
 	color: var(--text-accent);
 	text-shadow: 0 0 6px #fff4;
 }
-.clickable > .genericListItem:active {
+
+.genericList > * > *.clickable:active {
 	filter: none;
 }
