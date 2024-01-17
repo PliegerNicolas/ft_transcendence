@@ -98,9 +98,8 @@ function User()
 	useEffect(() => {loadUser()}, []);
 
 	async function loadFriendships() {
-		console.log("Coucou");
 		api.get("/users/" + id + "/relationships")
-			.then(data => {console.log(data); setFriendships(data)})
+			.then(data => setFriendships(data))
 			.catch(err => {!(err instanceof Response) && console.error(err)});
 	}
 	useEffect(() => {loadFriendships()}, []);
@@ -112,6 +111,7 @@ function User()
 	}
 	
 	async function acceptFriendship(friendId: string) {
+		console.log("/users/" + id + "/relationships/" + friendId);
 		api.patch("/users/" + id + "/relationships/" + friendId, {status: "accepted"})
 			.then((data) => {console.log(data); setTimeout(loadFriendships, 100)})
 			.catch(err => console.error(err));

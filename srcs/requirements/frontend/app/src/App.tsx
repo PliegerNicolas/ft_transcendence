@@ -15,6 +15,8 @@ import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
 import User from "./components/User.tsx";
 
+import Api from "./utils/Api";
+
 /*
 
 Here's the kind of code that will have to be implemented server-side to obtain
@@ -46,7 +48,13 @@ function Auth()
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
 
+	const api = new Api(`http://${location.hostname}:3450`);
+
 	console.log("Should send this code to the backend API: " + code);
+
+	api.post("/auth", {"code": code, "redirect_uri": `http://${location.host}/auth`})
+		.then(data => console.log(data))
+		.catch(err => console.log(err));
 
 	/*
 	**	HERE, SOME KIND OF BACKEND API CALL TO SEND THE AUTHENTIFICATION CODE
