@@ -51,7 +51,7 @@ function User()
 	const api = new Api(`http://${location.hostname}:3450`);
 
 	const [user, setUser] = useState<UserType | null>(null);
-	const [friendShips, setFriendships] = useState([]);
+	const [friendShips, setFriendships] = useState<FriendshipType[]>([]);
 	const [userStatus, setUserStatus] = useState(0);
 
 	const friendships = {
@@ -61,25 +61,27 @@ function User()
 				item.status1 === "accepted" && item.status2 === "accepted")
 
 			.map((item: FriendshipType, index, array) =>
-				<FriendShip key={index} ship={item} id={id!}
+				<FriendShip key={item.id} ship={item} id={id!}
 					index={index} length={array.length}/>),
 
 		pending: friendShips
 
 			.filter((item: FriendshipType) =>
-				item.user1.id === id && item.status2 === "pending")
+				(item.status1 === "pending" && item.user2.id === id)
+				|| (item.status2 === "pending" && item.user1.id === id))
 
 			.map((item: FriendshipType, index, array) =>
-				<FriendShip key={index} ship={item} id={id!}
+				<FriendShip key={item.id} ship={item} id={id!}
 					index={index} length={array.length}/>),
 
 		toApprove: friendShips
 
 			.filter((item: FriendshipType) =>
-				item.user2.id === id && item.status2 === "pending")
+				(item.status1 === "pending" && item.user1.id === id)
+				|| (item.status2 === "pending" && item.user2.id === id))
 
 			.map((item: FriendshipType, index, array) =>
-				<div key={index} className="clickable"
+				<div key={item.id} className="clickable"
 					onClick={() => acceptFriendship(item.user1.id)}
 				>
 					<FriendShip ship={item} id={id!} index={index} length={array.length}/>
@@ -96,7 +98,7 @@ function User()
 	useEffect(() => {loadUser()}, []);
 
 	async function loadFriendships() {
-		api.get("/users/" + id + "/friendships")
+		api.get("/users/" + id + "/relationships")
 			.then(data => setFriendships(data))
 			.catch(err => {!(err instanceof Response) && console.error(err)});
 	}
@@ -109,7 +111,8 @@ function User()
 	}
 	
 	async function acceptFriendship(friendId: string) {
-		api.patch("/users/" + id + "/friendships/" + friendId, {status: "accepted"})
+		console.log("/users/" + id + "/relationships/" + friendId);
+		api.patch("/users/" + id + "/relationships/" + friendId, {status: "accepted"})
 			.then((data) => {console.log(data); setTimeout(loadFriendships, 100)})
 			.catch(err => console.error(err));
 	}

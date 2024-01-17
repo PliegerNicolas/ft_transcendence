@@ -34,6 +34,6 @@ API_SECRET = "<SECRET>"
 @Relationships
 - `GET` ⇒ `/users/{:userId}/relationships` : *This lists all Users's Relationships.*
 - `GET` ⇒ `/users/{:userId}/relationships/{:targetId}` : *This lists the Relationship the User shares with the Target*
-- `POST` ⇒ `/users` : *This creates a new Relationship between two users. (cf. CreateRelationship.dto.ts)*
+- `POST` ⇒ `/users/:id` : *This creates a new Relationship between two users. (cf. CreateRelationship.dto.ts)*
 - `PUT` ⇒ `/users/{:userId}` : *This modifies the Relationship set between the two Users, asking for a complete alteration. (cf. ReplaceRelationship.dto.ts)*
 - `PATCH` ⇒ `/users/{:userId}` : *This modifies the Relationship set between the two Users, asking for a partial or complete alteration. (cf. UpdateRelationship.dto.ts)*
