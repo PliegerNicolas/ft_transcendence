@@ -3,6 +3,7 @@ import {Link} from "react-router-dom";
 import "../styles/header.css";
 
 import ft_logo from "../assets/42.svg";
+import loginIcon from "../assets/login.svg";
 
 function Header()
 {
@@ -27,6 +28,7 @@ function Header()
 				className="Header__Login"
 			>
 				Log In
+				<img src={loginIcon} />
 			</a>
 		</header>
 	);

@@ -75,6 +75,16 @@ function Auth()
 	return (<div />);
 }
 
+function NotFound()
+{
+	return (
+		<div className="MainContent">
+			<h2>Page not found :-/</h2>
+			The page: "{location.pathname}" doesn't seem to exist on our site. Sorry.
+		</div>
+	);
+}
+
 function App()
 {
 	return (
@@ -91,6 +101,7 @@ function App()
 				<Route path="/sandbox" element={<Sandbox />} />
 				<Route path="/user/:id" element={<User />} />
 				<Route path="/auth" element={<Auth />} />
+				<Route path="*" element={<NotFound />} />
 			</Routes>
 		</Router>
 	);

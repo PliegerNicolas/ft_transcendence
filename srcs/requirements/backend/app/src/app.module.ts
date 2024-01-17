@@ -27,6 +27,7 @@ import { Relationship } from './relationships/entities/Relationship';
     ProfilesModule,
     GameLogsModule,
     RelationshipsModule,
+	AuthModule
   ],
   controllers: [],
   providers: [],

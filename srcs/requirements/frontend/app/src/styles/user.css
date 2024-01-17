@@ -1,0 +1,79 @@
+.User__Infos {
+	display: flex;
+	gap: 12px;
+	max-height: min-content;
+	align-items: center;
+}
+
+.User__PictureContainer {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	overflow: hidden;
+	border-radius: 12px;
+	height: 192px;
+	min-width: 192px;
+	border: 1px solid var(--bg-color-5);
+}
+
+.User__Picture {
+	width: 192px;
+	height: 192px;
+	object-fit: cover;
+	border-radius: 12px;
+}
+
+.User__PictureBg {
+	position: absolute;
+	display: none;
+}
+
+@media (max-width: 800px) {
+	.User__Infos {
+		flex-direction: column;
+	}
+
+	.User__PictureContainer {
+		position: relative;
+		height: 256px;
+		width: 100%;
+	}
+
+	.User__PictureBg {
+		position: absolute;
+		top: 0;
+		display: block;
+		width: 100%;
+		height: 256px;
+		object-fit: cover;
+		filter: blur(15px);
+	}	
+
+	.User__Picture {
+		z-index: 1;
+		border-radius: 0;
+		border: none;
+		width: 256px;
+		height: 256px;
+		box-shadow: 0 0 32px #000a;
+	}
+}
+
+.User__InfoItems {
+	width: 100%;
+	overflow: auto;
+}
+
+.User__InfoItem {
+	display: grid;
+	grid-column-gap: 20px;
+	grid-template-columns: 1fr 2.5fr;
+	min-width: fit-content;
+	overflow-x: visible;
+}
+
+.User__FriendItem {
+	display: grid;
+	grid-column-gap: 20px;
+	grid-template-columns: 1fr 2fr 2fr;
+}

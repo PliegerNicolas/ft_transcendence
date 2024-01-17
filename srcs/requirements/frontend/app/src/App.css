@@ -4,17 +4,32 @@
 
 .MainContent {
 	background: var(--bg-color-1);
-	padding: 15px 40px 80px;
-
+	padding: 15px 25px 80px;
 	position: fixed;
 	z-index: 1;
 	top: 60px;
-	left: 180px;
+	left: 200px;
 	right: 0;
 	bottom: 0;
 
 	overflow-y: auto;
 	transition: .1s;
+}
+
+@media (min-width: 1200px) {
+	.MainContent { padding: 15px 50px 80px; }
+}
+
+@media (min-width: 1500px) {
+	.MainContent { padding: 15px 100px 80px; }
+}
+
+@media (min-width: 1800px) {
+	.MainContent { padding: 15px 150px 80px; }
+}
+
+@media (min-width: 2100px) {
+	.MainContent { padding: 15px 200px 80px; }
 }
 
 @media (max-width: 1000px)
@@ -32,14 +47,62 @@
 	}
 }
 
-.User__InfoGrid {
-	margin: 15px 0;
-	display: grid;
-	grid-template-columns: 120px 1fr;
+.genericList {
+	background: var(--bg-color-3);
 	border: 1px solid var(--bg-color-5);
+	padding: 0px;
+	margin: 0px;
+	border-radius: 7px;
+	overflow-x: auto;
 }
 
-.User__InfoGrid > div {
-	padding: 5px 10px;
-	border: 1px solid var(--bg-color-5);
+.genericListItem {
+	margin: 0px;
+	padding: 6px;
+	border: 2px solid #0000;
+	animation: fadein .15s ease-in-out;
+	display: grid;
+	grid-column-gap: 20px;
+	grid-template-columns: 1fr 2fr 2fr;
+	background: var(--bg-color-4);
+	border-radius: 0px;
+	color: var(--text-normal);
+	overflow-x: visible;
+	min-width: fit-content;
+	transition: filter .1s, color .2s, text-shadow .2s, border .2s;
+}
+.genericListItem.odd {
+	background: var(--bg-color-3);
+}
+.genericListItem.first {
+	border-radius:7px 7px 0 0;
+}
+.genericListItem.last {
+	border-radius: 0 0 7px 7px;
+}
+.genericListItem.first.last {
+	border-radius: 7px;
+}
+.clickable.genericListItem:hover {
+	border: 2px solid var(--text-faint);
+
+	filter: brightness(1.1) saturate(1.4);
+	cursor: pointer;
+	color: var(--text-accent);
+	text-shadow: 0 0 6px #fff4;
+}
+.clickable.genericListItem:active {
+	filter: none;
+}
+
+.clickable > .genericListItem:hover {
+	border: 2px solid var(--text-faint);
+
+	filter: brightness(1.1) saturate(1.4);
+	cursor: pointer;
+	color: var(--text-accent);
+	text-shadow: 0 0 6px #fff4;
+}
+.clickable > .genericListItem:active {
+	filter: none;
 }
