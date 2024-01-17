@@ -9,7 +9,7 @@ export class AuthController {
 	// @Post('login')
 	@Post()
 
-	signIn(@Body() oauthToken:string) {
+	signIn(@Body() oauthToken:JSON) {
 		return this.authService.signIn(oauthToken);
 	  }
 

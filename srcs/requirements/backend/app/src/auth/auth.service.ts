@@ -1,4 +1,4 @@
-import { Get, Injectable } from '@nestjs/common';
+import {Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 
@@ -9,23 +9,22 @@ export class AuthService
 	constructor(private jwtService : JwtService) {}
 
 
-	async signIn(oauthToken : string): Promise<any> {
-		// const payload = {sub : oauthToken};
-
-		const payload = fetch("https://api.intra.42.fr/", {method : "POST", headers: {
+	async signIn(oauthToken : JSON ): Promise<any> {
+		const token = Object.values(oauthToken)
+		const payload = await fetch("https://api.intra.42.fr/oauth/token", {method : "POST", headers: {
 			"Content-Type": "application/json"},
 			body:
-				JSON.stringify({"grant-type": "authorization_code",
+				JSON.stringify({"grant_type": "authorization_code",
 					"client_id": process.env.API_CLIENT_ID,
 					"client_secret": process.env.API_SECRET,
-					"code": oauthToken,
-					"redirect_uri": "http://localhost:8080/auth"
+					"code": token[0],
+					"redirect_uri": token[1]
 				})
-			})
-			console.log(payload)
+			}).then(
+				(data) => data.json()
+			)
 		return {
-			// access_token: await this.jwtService.signAsync((await payload)),
-			access_token: (await payload),
+			access_token: await this.jwtService.signAsync(payload),
 		};
 	}
 }
