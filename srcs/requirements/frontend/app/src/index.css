@@ -40,7 +40,8 @@
 
 	--error: #f37;
 	--error-bg: #fab;
-}*/
+}
+*/
 
 body {
 	background: var(--bg-color-1);
@@ -56,6 +57,7 @@ p, .p-style {
 	border: 1px solid var(--bg-color-4);
 	border-radius: 7px;
 	line-height: 1.5em;
+	box-shadow: 0 0 12px -4px #000a;
 }
 
 @media (max-width: 640px)

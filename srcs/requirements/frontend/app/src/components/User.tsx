@@ -145,21 +145,11 @@ function User()
 						<img className="User__PictureBg" src={defaultPicture}/>
 					</div>
 					<div className="genericList User__InfoItems">
-						<div className="User__InfoItem">
-							<div>Id</div> <div>{"#" + user.id}</div>
-						</div>
-						<div className="User__InfoItem">
-							<div>Username</div> <div>{"@" + user.username}</div>
-						</div>
-						<div className="User__InfoItem">
-							<div>Email</div> <div>{user.email}</div>
-						</div>
-						<div className="User__InfoItem">
-							<div>First Name</div> <div>{user.profile.firstName}</div>
-						</div>
-						<div className="User__InfoItem">
-							<div>Last Name</div> <div>{user.profile.lastName}</div>
-						</div>
+						<div><div>Id</div> <div>{"#" + user.id}</div></div>
+						<div><div>Username</div> <div>{"@" + user.username}</div></div>
+						<div><div>Email</div> <div>{user.email}</div></div>
+						<div><div>First Name</div> <div>{user.profile.firstName}</div></div>
+						<div><div>Last Name</div> <div>{user.profile.lastName}</div></div>
 					</div>
 				</div>
 				<hr />

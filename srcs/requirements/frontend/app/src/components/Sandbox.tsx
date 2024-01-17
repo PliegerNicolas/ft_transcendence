@@ -75,13 +75,7 @@ function Sandbox()
 			return (
 				<div className="Sandbox__Scrollable">
 					<div className="genericList">
-					{
-						userList.length ?
-						userListHtml :
-						<p className="Sandbox__UserItem genericListItem odd first last">
-							No user...
-						</p>
-					}
+					{ userList.length ?	userListHtml : <div><div>No user...</div></div> }
 					</div>
 				</div>
 			);
