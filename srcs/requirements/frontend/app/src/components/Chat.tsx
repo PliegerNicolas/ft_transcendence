@@ -1,9 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from 'socket.io-client';
+import { format } from 'date-fns';
 
 type MessagePayload = {
-	content: string;
-	msg: string;
+	content: string,
+	sender_id: Number,
+	channel_id: Number,
+	date: string
 }
 
 export const socket = io('http://localhost:3450/chat')
@@ -47,11 +50,13 @@ function Chat() {
 				<div>
 					{messages.length === 0 ? <div>No Messages</div> : <div>
 					{messages.map((msg) => <div>
+						<span>{format(new Date(), 'MMMM do yyyy, h:mm:ss a')}</span>
 						<p>{msg.content}</p>
 					</div>)}
 					</div>}
 				</div>
 				<div>
+					<span>Send message : </span>
 					<input
 						type="text"
 						value={value}
