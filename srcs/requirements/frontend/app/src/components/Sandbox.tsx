@@ -81,12 +81,11 @@ function Sandbox()
 		if (userList.length || !loadCount)
 			return (
 				<div className="Sandbox__Scrollable">
-					<hr />
 					<div className="genericList">
 					{
 						userList.length ?
 						userListHtml :
-						<p className="Sandbox__UserItem odd first last">
+						<p className="Sandbox__UserItem genericListItem odd first last">
 							No user...
 						</p>
 					}
@@ -124,6 +123,7 @@ function Sandbox()
 						Reload
 					</button>
 				</div>
+				<hr />
 				{renderSwitch()}
 			</div>
 		</main>
