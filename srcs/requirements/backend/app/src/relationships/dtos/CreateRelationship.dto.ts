@@ -1,6 +1,6 @@
 import { IsInt, IsNotEmpty } from "class-validator";
 
-export class CreateFriendshipDto {
+export class CreateRelationshipDto {
 
     @IsInt()
     @IsNotEmpty()
