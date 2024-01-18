@@ -88,7 +88,7 @@ function UserListRender(
 	if (query.isError) return (
 		<div>
 			<span className="error-msg">
-				Failed to load user list (is the backend up?)
+				Failed to load user list: {query.error.message}
 			</span><br />
 		</div>
 	);
