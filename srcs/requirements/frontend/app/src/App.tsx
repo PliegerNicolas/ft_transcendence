@@ -58,7 +58,7 @@ function NotFound()
 {
 	return (
 		<div className="MainContent">
-			<h2>Page not found :-/</h2>
+			<h2>404 Page not found :-/</h2>
 			The page: "{location.pathname}" doesn't seem to exist on our site. Sorry.
 		</div>
 	);
@@ -71,10 +71,12 @@ function App()
 		token: "",
 	});
 
+	/*
 	useEffect(() => {
 		const data = localStorage.getItem("my_info");
 		data && setMyInfo(JSON.parse(data));
 	}, []);
+	*/
 
 	return (
 		<Router>

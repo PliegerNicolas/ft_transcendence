@@ -8,8 +8,8 @@ function Construction()
 		<div className="Construction">
 			<img className="Construction__Icon" src={ constructionIcon }/>
 			<div className="Construction__Text">
-				<p>This page is still under construction.</p>
-				<p>Please come back later!</p>
+				<div>This page is still under construction.</div>
+				<div>Please come back later!</div>
 			</div>
 		</div>
 	);

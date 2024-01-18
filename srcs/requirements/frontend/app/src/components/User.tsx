@@ -91,7 +91,10 @@ function User()
 
 	async function loadUser() {
 		api.get("/users/" + id)
-			.then(data => setUser(data))
+			.then(data => {
+				setUser(data);
+				loadFriendships();
+			})
 			.catch(err => {
 				err instanceof Response ? setUserStatus(err.status) : console.error(err)
 			});
@@ -103,7 +106,6 @@ function User()
 			.then(data => setFriendships(data))
 			.catch(err => {!(err instanceof Response) && console.error(err)});
 	}
-	useEffect(() => {loadFriendships()}, [params]);
 
 	async function delUser() {
 		api.delete("/users/" + id)
@@ -120,10 +122,10 @@ function User()
 
 	if (!user) return (
 			<main className="MainContent">
-				<p className="error-msg">
+				<div className="p-style error-msg">
 					There is no user to display...
 					{ userStatus !== 0 && <div>(Error {userStatus})</div> }
-				</p>
+				</div>
 			</main>
 	);
 

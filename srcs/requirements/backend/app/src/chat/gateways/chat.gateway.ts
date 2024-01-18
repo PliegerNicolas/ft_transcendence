@@ -5,9 +5,7 @@ import { Message } from '../types/chat';
 import { OnModuleInit } from '@nestjs/common';
 
 @WebSocketGateway({
-  cors: {
-    origin: ['http://localhost:8080']
-  },
+  cors: true,
   namespace: 'chat'
 })
 export class ChatGateway implements OnModuleInit {

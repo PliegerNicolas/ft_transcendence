@@ -1,5 +1,6 @@
 import {Link} from "react-router-dom";
 import {useState, useEffect} from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import {UserType} from "../utils/types.ts"
 import Api from "../utils/Api.ts";
@@ -8,7 +9,7 @@ import "../styles/sandbox.css";
 
 import hourglass from "../assets/hourglass.svg";
 
-function UserItem(props: {user: UserType, index: number, length: number})
+function UserItem(props: {user: UserType})
 {
 	return (
 		<Link to={"/user/" + props.user.id} className="Sandbox__UserItem clickable">
@@ -22,29 +23,17 @@ function UserItem(props: {user: UserType, index: number, length: number})
 function Sandbox()
 {
 	const [userList, setUserList] = useState<UserType[]>([]);
-	const [loadCount, setLoadCount] = useState(1);
 
 	const api = new Api(`http://${location.hostname}:3450`);
 
-	const userListHtml = userList.map(
-		(item: UserType, index) =>
-			<UserItem key={index} user={item} index={index} length={userList.length}/>
-	);
+	const query = useQuery({
+		queryKey: ["users"],
+		queryFn: () => api.get("/users").then(data => data)
+	});
 
-	async function loadUserList() {
-		if (loadCount <= 0)
-			return ;
-		api.get("/users")
-			.then(users => {setUserList(users); setLoadCount(0)})
-			.catch(error => {
-				if (loadCount > 1)
-					setLoadCount(-2);
-				else
-					setTimeout(() => {setLoadCount(prev => prev + 1)}, 2000);
-				console.error(error);
-			});
-	}
-	useEffect(() => {loadUserList()}, [loadCount]);
+	const userListHtml = userList.map((item: UserType) =>
+		<UserItem key={item.id} user={item}/>
+	);
 
 	async function addUser() {
 		const random_value = Math.random().toString().slice(-10, -1);
@@ -56,8 +45,7 @@ function Sandbox()
 					"firstName": "Paul",
 					"lastName": "Pliha"
 			}
-		}).then(() => {setLoadCount(1); setTimeout(() => setLoadCount(1), 100)})
-			.catch((err) => {console.error(err)});
+		}).catch((err) => {console.error(err)});
 	}
 
 	async function delUser() {
@@ -66,28 +54,37 @@ function Sandbox()
 		const id: string = userList[userList.length - 1].id;
 
 		api.delete("/users/" + id)
-			.then(() => setLoadCount(1))
 			.catch((err: Error) => {console.error(err)});
 	}
 
 	function renderSwitch() {
-		if (userList.length || !loadCount)
-			return (
-				<div className="Sandbox__Scrollable">
-					<div className="genericList">
-					{ userList.length ?	userListHtml : <div><div>No user...</div></div> }
-					</div>
-				</div>
-			);
-		else if (loadCount > 0)
-			return (<div className="Spinner"><img src={ hourglass } /></div>);
-		return (
+		if (query.isError) return (
 			<div>
 				<span className="error-msg">
 					Failed to load user list (is the backend up?)
 				</span><br />
 			</div>
 		);
+
+		if (query.isPending) return (
+			<div className="Spinner"><img src={ hourglass } /></div>
+		);
+
+		return (
+			<div className="Sandbox__Scrollable">
+				<div className="genericList">
+				{ userList.length ?	userListHtml : <div><div>No user...</div></div> }
+				</div>
+			</div>
+		);
+	}
+
+	function status() {
+		if (query.isError)
+			return (<div>Error</div>);
+		if (query.isPending)
+			return (<div>Pending</div>)
+		return (<div>{JSON.stringify(query.data)}</div>)
 	}
 
 	return (
@@ -99,14 +96,17 @@ function Sandbox()
 			</p>
 			<div className="Sandbox__UserList p-style">
 				<h3>User list:</h3>
+					<div className="p-style">
+						{status()}
+					</div>
 				<div>
-					<button disabled={loadCount != 0} onClick={addUser}>
+					<button disabled={false} onClick={addUser}>
 						Add a user
 					</button>
 					<button disabled={!userList.length} onClick={delUser}>
 						Delete a user
 					</button>
-					<button onClick={() => setLoadCount(1)}>
+					<button>
 						Reload
 					</button>
 				</div>
