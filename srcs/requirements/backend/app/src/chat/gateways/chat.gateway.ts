@@ -5,9 +5,7 @@ import { Message } from '../types/chat';
 import { OnModuleInit } from '@nestjs/common';
 
 @WebSocketGateway({
-  cors: {
-    origin: ['http://localhost:8080']
-  },
+  cors: true,
   namespace: 'chat'
 })
 export class ChatGateway implements OnModuleInit {
@@ -25,8 +23,8 @@ export class ChatGateway implements OnModuleInit {
   handleNewMessage(@MessageBody() body: any) {
     console.log(body);
     this.server.emit('onMessage', {
-      msg: 'New Message',
       content: body,
+      date: Date().toLocaleString()
     });
   }
 
