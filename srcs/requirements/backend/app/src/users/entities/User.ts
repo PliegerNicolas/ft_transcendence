@@ -1,7 +1,7 @@
 import { GameLog } from "src/game-logs/entities/GameLog";
 import { Profile } from "src/profiles/entities/Profile";
 import { Relationship } from "src/relationships/entities/Relationship";
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, Relation, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: 'users' })
 export class User {
@@ -24,20 +24,12 @@ export class User {
     @OneToOne(() => Profile, (profile) => profile.user, { cascade: true })
     profile: Profile
 
-    @OneToMany(() => Relationship, relationship => relationship.user1, { cascade: true, onDelete: 'CASCADE' })
-    @OneToMany(() => Relationship, relationship => relationship.user2, { cascade: true, onDelete: 'CASCADE' })
-    @JoinTable()
-    relationships: Relationship[];
+    @ManyToMany(() => Relationship, (relationship) => relationship.users, { cascade: true })
+    @JoinTable({ name: 'user_relationship'})
+    relationships?: Relationship[];
 
     @ManyToMany(() => GameLog, (gameLog) => gameLog.users, { nullable: true })
     @JoinTable()
-    gameLogs: GameLog[];
-
-    /* Helper Functions */
-
-    addRelationship(relationship: Relationship): void {
-        if (!this.relationships) this.relationships = [];
-        this.relationships.push(relationship);
-    }
+    gameLogs?: GameLog[];
 
 }
