@@ -23,8 +23,8 @@ export class ChatGateway implements OnModuleInit {
   handleNewMessage(@MessageBody() body: any) {
     console.log(body);
     this.server.emit('onMessage', {
-      msg: 'New Message',
       content: body,
+      date: Date().toLocaleString()
     });
   }
 

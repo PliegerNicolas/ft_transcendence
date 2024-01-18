@@ -2,7 +2,7 @@ export type Message = {
 	content: string,
 	sender_id: Number,
 	channel_id: Number,
-	timestamp: Date
+	date: Date
 }
 
 export interface ServerToClientEvents {
