@@ -1,5 +1,7 @@
 import {Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Console } from 'console';
 
 
 @Injectable()
@@ -23,6 +25,19 @@ export class AuthService
 			}).then(
 				(data) => data.json()
 			)
+
+			const access = (Object.values(payload)[0]).toString();
+			console.log("access");
+			console.log(access);
+			const info = await fetch("https://api.intra.42.fr/v2/me", {method : "GET", headers: {
+			"Authorization" : access},
+			}).then(
+				(data) => data.json()
+			)
+			console.log("info");
+			console.log(info);
+			
+
 		return {
 			access_token: await this.jwtService.signAsync(payload),
 		};
