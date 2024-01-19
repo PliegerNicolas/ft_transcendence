@@ -1,7 +1,7 @@
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io'
 //import { ServerToClientEvents } from '../types/chat';
-import { Message } from '../types/chat';
+import { Message } from '../types/chat.types';
 import { OnModuleInit } from '@nestjs/common';
 
 
@@ -17,6 +17,10 @@ export class ChatGateway implements OnModuleInit {
     this.server.on('connection', (socket) => {
       console.log(socket.id);
       console.log('Connected');
+      this.server.emit('newUser', socket.id);
+      socket.on('disconnect', () => {
+        this.server.emit('userDisconnected', socket.id);
+      });
     });
   }
 
