@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { io, Socket } from 'socket.io-client';
+import { useEffect, useState } from "react";
+import { io } from 'socket.io-client';
 import { format } from 'date-fns';
 
 type MessagePayload = {
@@ -9,50 +9,48 @@ type MessagePayload = {
 	date: string
 }
 
-export const socket = io('http://localhost:3450/chat')
-export const WebsocketContext = createContext<Socket>(socket);
-
-export const WebsocketProvider = WebsocketContext.Provider;
+export const socket = io(`http://${location.hostname}:3450/chat`);
 
 function Chat() {
 
 	const [value, setValue] = useState('');
 	const [messages, setMessages] = useState<MessagePayload[]>([]);
-	const socketObj = useContext(WebsocketContext);
 
 	useEffect(() => {
-		socketObj.on('connect', () => {
+		socket.on('connect', () => {
 			console.log('Connected');
 		});
-		socketObj.on('onMessage', (newMessage: MessagePayload) => {
+		socket.on('onMessage', (newMessage: MessagePayload) => {
 			console.log('onMessage event received');
 			console.log(newMessage);
 			setMessages((prev) => [...prev, newMessage])
 		});
 
-		return () => {
-			socketObj.off('connect');
-			socketObj.off('onMessage');
+		return (() => {
+			socket.off('connect');
+			socket.off('onMessage');
 			console.log('Unregistering Events');
-		}
+		});
 	}, []);
 
 	const onSubmit = () => {
-		socketObj.emit('newMessage', value);
+		socket.emit('newMessage', value);
 		setValue('');
 	}
 
 	return (
 		<main className="MainContent">
-			<WebsocketProvider value={socket}></WebsocketProvider>
 			<div>
 				<h1>Chat testing</h1>
 				<div>
 					{messages.length === 0 ? <div>No Messages</div> : <div>
-					{messages.map((msg) => <div>
-						<span>{format(new Date(), 'MMMM do yyyy, h:mm:ss a')}</span>
-						<p>{msg.content}</p>
-					</div>)}
+					{
+						messages.map((msg, index) =>
+							<div key={index}>
+								<span>{format(new Date(), 'MMMM do yyyy, h:mm:ss a')}</span>
+								<p>{msg.content}</p>
+							</div>)
+					}
 					</div>}
 				</div>
 				<div>
