@@ -1,93 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 
-import {UserType, FriendshipType} from "../utils/types.ts"
+import { FriendshipContext } from "../utils/contexts.ts";
+import { UserType, FriendshipType } from "../utils/types.ts"
 import Api from "../utils/Api";
 
 import "../styles/user.css";
 
 import defaultPicture from "../assets/default_profile.png";
 
-function FriendShipList(props : {title: string, list: JSX.Element[]})
-{
-	if (!props.list.length)
-		return (<div />);
-	return (
-		<div>
-			<h4>{props.title}:</h4>
-			<div className="genericList"> {props.list} </div>
-		</div>
-	);
-}
+// <User /> ====================================================================
 
-function User()
+export default function User()
 {
 	const params = useParams();
-	const id = params.id;
+	const id = params.id!;
 
 	const api = new Api(`http://${location.hostname}:3450`);
 
 	const [user, setUser] = useState<UserType | null>(null);
-	const [friendShips, setFriendships] = useState<FriendshipType[]>([]);
+	const [friendships, setFriendships] = useState<FriendshipType[]>([]);
 	const [userStatus, setUserStatus] = useState(0);
-
-	const friendships = {
-		accepted:	friendShips
-
-			.filter((item: FriendshipType) =>
-				item.status1 === "accepted" && item.status2 === "accepted"
-			)
-			.map((item: FriendshipType) =>
-					<div className="User__FriendItem" key={item.id}>
-						<div>{"#" + friend(item).id}</div>
-						<Link to={"/user/" + friend(item).id}>
-							{"@" + friend(item).username}
-						</Link>
-						<div>{item.updated_at}</div>
-					</div>
-			),
-
-		pending: friendShips
-
-			.filter((item: FriendshipType) =>
-				(item.status1 === "pending" && item.user2.id === id)
-				|| (item.status2 === "pending" && item.user1.id === id))
-
-			.map((item: FriendshipType) =>
-				<div className="User__FriendItem" key={item.id}>
-					<div>{"#" + friend(item).id}</div>
-					<Link to={"/user/" + friend(item).id}>
-						{"@" + friend(item).username}
-					</Link>
-					<div>{item.updated_at}</div>
-				</div>
-			),
-
-		toApprove: friendShips
-
-			.filter((item: FriendshipType) =>
-				(item.status1 === "pending" && item.user1.id === id)
-				|| (item.status2 === "pending" && item.user2.id === id))
-
-			.map((item: FriendshipType) =>
-				<div className="User__FriendItem--approve" key={item.id}>
-					<div>{"#" + friend(item).id}</div>
-					<Link to={"/user/" + friend(item).id}>
-						{"@" + friend(item).username}
-					</Link>
-					<div>{item.updated_at}</div>
-					<div className="clickable"
-						onClick={() => acceptFriendship(friend(item).id)}
-					>
-						Approve
-					</div>
-				</div>
-			),
-	};
-
-	function friend(ship: FriendshipType) {
-		return (ship.user1.id == id ? ship.user2 : ship.user1);
-	}
 
 	async function loadUser() {
 		api.get("/users/" + id)
@@ -113,11 +46,16 @@ function User()
 			.catch((err: Error) => {console.error(err)});
 	}
 	
-	async function acceptFriendship(friendId: string) {
-		console.log("/users/" + id + "/relationships/" + friendId);
-		api.patch("/users/" + id + "/relationships/" + friendId, {status: "accepted"})
-			.then((data) => {console.log(data); setTimeout(loadFriendships, 100)})
-			.catch(err => console.error(err));
+	function friendshipAction(action: string, ship: FriendshipType) {
+		const friendId = ship.user1.id == id ? ship.user2.id : ship.user1.id;
+
+		switch (action) {
+			case "approve":
+				api.patch("/users/" + id + "/relationships/" + friendId, {status: "accepted"})
+					.then(() => {setTimeout(loadFriendships, 100)})
+					.catch(err => console.error(err));
+			break ;
+		}
 	}
 
 	if (!user) return (
@@ -154,9 +92,34 @@ function User()
 				</div>
 				<hr />
 				<h3>User friendships:</h3>
-				<FriendShipList title="Accepted friendships" list={friendships.accepted}/>
-				<FriendShipList title="Pending friendships" list={friendships.pending}/>
-				<FriendShipList title="Friendships to approve" list={friendships.toApprove}/>
+				<FriendshipContext.Provider value={{id, friendships}}>
+					<Friendships
+						title="Accepted friendships"
+						filter={
+							(item: FriendshipType) =>
+							item.status1 === "accepted" && item.status2 === "accepted"
+						}
+						actions={[]} action={friendshipAction}
+					/>
+					<Friendships
+						title="Pending friendships"
+						filter={
+							(item: FriendshipType) =>
+								(item.status1 === "pending" && item.user2.id === id)
+								|| (item.status2 === "pending" && item.user1.id === id)
+						}
+						actions={[]} action={friendshipAction}
+					/>
+					<Friendships
+						title="Friendships to approve"
+						filter={
+							(item: FriendshipType) =>
+								(item.status1 === "pending" && item.user1.id === id)
+								|| (item.status2 === "pending" && item.user2.id === id)
+						}
+						actions={["approve"]} action={friendshipAction}
+					/>
+				</FriendshipContext.Provider>
 			</div>
 			<button style={{margin: "0 15px", color: "#f9c"}} onClick={delUser}>
 				Delete user
@@ -165,4 +128,59 @@ function User()
 	);
 }
 
-export default User;
+// <Friendships /> =============================================================
+
+function Friendships(props: {
+	title: string,
+	filter: Function,
+	actions: string[],
+	action: Function
+})
+{
+	const {id, friendships} = useContext(FriendshipContext);
+	const filterList = friendships.filter((item: FriendshipType) =>
+		props.filter(item)
+	);
+	const actionClass = props.actions.join(" ");
+
+	function friend(ship: FriendshipType) {
+		return (ship.user1.id == id ? ship.user2 : ship.user1);
+	}
+
+	if (!filterList.length) return (
+		<div />
+	);
+
+	return (
+		<div>
+			<h4> {props.title}:</h4>
+			<div className="genericList">
+			{
+				filterList.map((item: FriendshipType) =>
+					<div className={"User__FriendItem " + actionClass} key={item.id}>
+						<div>
+							{"#" + friend(item).id}
+						</div>
+						<Link to={"/user/" + friend(item).id}>
+							{"@" + friend(item).username}
+						</Link>
+						<div>
+							{item.updated_at}
+						</div>
+						{
+							props.actions.map((actionItem, index) =>
+								<div
+									key={index}
+									className={"clickable " + actionClass}
+									onClick={() => props.action(actionItem, item)}
+								>
+									{actionItem}
+								</div>
+							)
+						}
+					</div>)
+			}
+			</div>
+		</div>
+	);
+}

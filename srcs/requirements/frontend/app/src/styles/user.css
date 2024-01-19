@@ -79,13 +79,13 @@
 	grid-template-columns: 1fr 2fr 2fr;
 }
 
-.User__FriendItem--approve {
+.User__FriendItem.approve {
 	display: grid;
 	grid-column-gap: 20px;
 	grid-template-columns: .8fr 2fr 3fr 1.5fr;
 }
 
-.User__FriendItem--approve > *:last-child {
+.User__FriendItem.approve > .approve {
 	display: flex;
 	justify-content: center;
 	border: 2px solid #4a8;
@@ -94,7 +94,7 @@
 	user-select: none;
 	transition: .15s;
 }
-.User__FriendItem--approve > *:last-child:hover {
+.User__FriendItem.approve > .approve:hover {
 	color: #cfe;
 	border: 2px solid #6da;
 }
