@@ -4,9 +4,10 @@ import { FriendshipType } from "./types";
 
 interface FriendshipContextType {
 	id: string,
-	friendships: FriendshipType[]
+	friendships: FriendshipType[],
+	action: Function
 }
 
 export const FriendshipContext = createContext(
-	{id: "0", friendships: []} as FriendshipContextType
+	{id: "0", friendships: [], action: () => {}} as FriendshipContextType
 );

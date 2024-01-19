@@ -1,8 +1,9 @@
-import { useEffect, useState, useContext } from "react";
+import { useContext } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useQuery, UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { FriendshipContext } from "../utils/contexts.ts";
-import { UserType, FriendshipType } from "../utils/types.ts"
+import { FriendshipType } from "../utils/types.ts"
 import Api from "../utils/Api";
 
 import "../styles/user.css";
@@ -15,57 +16,65 @@ export default function User()
 {
 	const params = useParams();
 	const id = params.id!;
-
+	const queryClient = useQueryClient();
 	const api = new Api(`http://${location.hostname}:3450`);
 
-	const [user, setUser] = useState<UserType | null>(null);
-	const [friendships, setFriendships] = useState<FriendshipType[]>([]);
-	const [userStatus, setUserStatus] = useState(0);
+	const userGet = useQuery({
+		queryKey: ["users", id],
+		queryFn: () => api.get("/users/" + id),
+		retry: (count, error) => !error.message.includes("404") || count < 0
+	});
 
-	async function loadUser() {
-		api.get("/users/" + id)
-			.then(data => {
-				setUser(data);
-				loadFriendships();
-			})
-			.catch(err => {
-				err instanceof Response ? setUserStatus(err.status) : console.error(err)
-			});
-	}
-	useEffect(() => {loadUser()}, [params]);
+	const userDel = useMutation({
+		mutationFn: () => api.delete("/users/" + id),
+		onSettled: () => invalidate(["users", id])
+	});
 
-	async function loadFriendships() {
-		api.get("/users/" + id + "/relationships")
-			.then(data => setFriendships(data))
-			.catch(err => {!(err instanceof Response) && console.error(err)});
+	const friendshipsGet = useQuery({
+		queryKey: ["users", id, "friends"],
+		queryFn: () => api.get("/users/" + id + "/relationships"),
+		enabled: userGet.isSuccess,
+		retry: (count, error) => !error.message.includes("404") || count < 0
+	});
+
+	const friendshipAccept = useMutation({
+		mutationFn: (friendId: string) =>
+			api.patch(
+				"/users/" + id + "/relationships/" + friendId,
+				{status: "accepted"}
+			),
+		onSettled: () => invalidate(["users", id, "friends"])
+	});
+
+	function invalidate(queryKey: Array<any>) {
+		queryClient.invalidateQueries({queryKey});
 	}
 
-	async function delUser() {
-		api.delete("/users/" + id)
-			.then(() => setUserStatus(410))
-			.catch((err: Error) => {console.error(err)});
-	}
+	if (!userGet.isSuccess) return (
+		<main className="MainContent">
+		{
+			userGet.isPending ?
+			<div className="p-style notice-msg">
+				Loading...
+			</div> :
+			<div className="p-style error-msg">
+				Failed to load user #{id}: {userGet.error.message}
+			</div>
+		}
+		</main>
+	);
+
+	const user = userGet.data;
 	
 	function friendshipAction(action: string, ship: FriendshipType) {
-		const friendId = ship.user1.id == id ? ship.user2.id : ship.user1.id;
-
 		switch (action) {
 			case "approve":
-				api.patch("/users/" + id + "/relationships/" + friendId, {status: "accepted"})
-					.then(() => {setTimeout(loadFriendships, 100)})
-					.catch(err => console.error(err));
+				friendshipAccept.mutate(
+					ship.user1.id == id ? ship.user2.id : ship.user1.id
+				);
 			break ;
 		}
 	}
-
-	if (!user) return (
-			<main className="MainContent">
-				<div className="p-style error-msg">
-					There is no user to display...
-					{ userStatus !== 0 && <div>(Error {userStatus})</div> }
-				</div>
-			</main>
-	);
 
 	return (
 		<main className="MainContent">
@@ -92,36 +101,12 @@ export default function User()
 				</div>
 				<hr />
 				<h3>User friendships:</h3>
-				<FriendshipContext.Provider value={{id, friendships}}>
-					<Friendships
-						title="Accepted friendships"
-						filter={
-							(item: FriendshipType) =>
-							item.status1 === "accepted" && item.status2 === "accepted"
-						}
-						actions={[]} action={friendshipAction}
-					/>
-					<Friendships
-						title="Pending friendships"
-						filter={
-							(item: FriendshipType) =>
-								(item.status1 === "pending" && item.user2.id === id)
-								|| (item.status2 === "pending" && item.user1.id === id)
-						}
-						actions={[]} action={friendshipAction}
-					/>
-					<Friendships
-						title="Friendships to approve"
-						filter={
-							(item: FriendshipType) =>
-								(item.status1 === "pending" && item.user1.id === id)
-								|| (item.status2 === "pending" && item.user2.id === id)
-						}
-						actions={["approve"]} action={friendshipAction}
-					/>
-				</FriendshipContext.Provider>
+				<Friendships id={id} query={friendshipsGet} action={friendshipAction}/>
 			</div>
-			<button style={{margin: "0 15px", color: "#f9c"}} onClick={delUser}>
+			<button
+				style={{margin: "0 15px", color: "#f9c"}}
+				onClick={() => userDel.mutate()}
+			>
 				Delete user
 			</button>
 		</main>
@@ -131,13 +116,70 @@ export default function User()
 // <Friendships /> =============================================================
 
 function Friendships(props: {
-	title: string,
-	filter: Function,
-	actions: string[],
+	id: string,
+	query: UseQueryResult<any, Error>,
 	action: Function
 })
 {
-	const {id, friendships} = useContext(FriendshipContext);
+	if (props.query.isPending) return (
+		<div className="p-style notice-msg">
+			Loading...
+		</div>
+	);
+
+	if (props.query.isError) return (
+		<div className="p-style error-msg">
+			Failed to load friendships: {props.query.error.message}
+		</div>
+	);
+
+	if (!props.query.data.length) return (
+		<div className="p-style notice-msg">
+			No friendship for this user...
+		</div>
+	);
+
+	return (
+		<FriendshipContext.Provider	value={{...props,	friendships: props.query.data}}>
+			<FriendshipList
+				title="Accepted friendships"
+				filter={
+					(item: FriendshipType) =>
+					item.status1 === "accepted" && item.status2 === "accepted"
+				}
+				actions={[]}
+			/>
+			<FriendshipList
+				title="Pending friendships"
+				filter={
+					(item: FriendshipType) =>
+						(item.status1 === "pending" && item.user2.id === props.id)
+						|| (item.status2 === "pending" && item.user1.id === props.id)
+				}
+				actions={[]}
+			/>
+			<FriendshipList
+				title="Friendships to approve"
+				filter={
+					(item: FriendshipType) =>
+						(item.status1 === "pending" && item.user1.id === props.id)
+						|| (item.status2 === "pending" && item.user2.id === props.id)
+				}
+				actions={["approve"]}
+			/>
+		</FriendshipContext.Provider>
+	);
+}
+
+// <FriendshipList /> ==========================================================
+
+function FriendshipList(props: {
+	title: string,
+	filter: Function,
+	actions: string[],
+})
+{
+	const {id, friendships, action} = useContext(FriendshipContext);
 	const filterList = friendships.filter((item: FriendshipType) =>
 		props.filter(item)
 	);
@@ -172,7 +214,7 @@ function Friendships(props: {
 								<div
 									key={index}
 									className={"clickable " + actionClass}
-									onClick={() => props.action(actionItem, item)}
+									onClick={() => action(actionItem, item)}
 								>
 									{actionItem}
 								</div>

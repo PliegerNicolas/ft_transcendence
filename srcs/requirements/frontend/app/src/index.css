@@ -100,10 +100,16 @@ button:disabled {
 	cursor:default;
 }
 
+.notice-msg {
+	color: var(--text-faint);
+	font-style: italic;
+}
+
 .error-msg {
 	color: var(--error);
 	font-style: italic;
 }
+
 
 hr {
 	color: var(--text-faint);
