@@ -1,13 +1,14 @@
 import { BadRequestException } from "@nestjs/common";
 import { IsEnum } from "class-validator";
 import { User } from "src/users/entities/User";
-import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
+import { BeforeInsert, BeforeRemove, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 
 export enum RelationshipStatus {
+    BLOCKED = 'blocked',
+    DECLINED = 'declined',
+    UNDEFINED = 'undefined',
     PENDING = 'pending',
     ACCEPTED = 'accepted',
-    DECLINED = 'declined',
-    BLOCKED = 'blocked',
 }
 
 @Entity({ name: 'relationships' })
@@ -30,11 +31,11 @@ export class Relationship {
     user2: User;
 
     @IsEnum(RelationshipStatus)
-    @Column({ type: 'enum', enum: RelationshipStatus, default: RelationshipStatus.ACCEPTED })
+    @Column({ type: 'enum', enum: RelationshipStatus, default: RelationshipStatus.UNDEFINED })
     status1: RelationshipStatus;
 
     @IsEnum(RelationshipStatus)
-    @Column({ type: 'enum', enum: RelationshipStatus, default: RelationshipStatus.PENDING })
+    @Column({ type: 'enum', enum: RelationshipStatus, default: RelationshipStatus.UNDEFINED })
     status2: RelationshipStatus;
 
     /* Helper Functions */
@@ -43,17 +44,11 @@ export class Relationship {
     @BeforeUpdate()
     initializeRelationship(): void {
         this.preventSelfRelationship();
-        this.initializeStatuses();
         this.reorderElements();
     }
 
     private preventSelfRelationship(): void {
         if (this.user1.id === this.user2.id) throw new BadRequestException('You cannot create a relationship with yourself');
-    }
-
-    private initializeStatuses(): void {
-        if (!this.status1) this.status1 = RelationshipStatus.ACCEPTED;
-        if (!this.status2) this.status2 = RelationshipStatus.PENDING;
     }
 
     private reorderElements(): void {
@@ -67,9 +62,51 @@ export class Relationship {
         return ([this.user1, this.user2]);
     }
 
-    setStatusById(id: number, status: RelationshipStatus): void {
-        if (this.user1.id == id) this.status1 = status;
-        else if (this.user2.id == id) this.status2 = status;
+    setStatusById(userId: number, status: RelationshipStatus): void {
+        if (this.user1.id == userId) this.status1 = status;
+        else if (this.user2.id == userId) this.status2 = status;
+    }
+
+    setStatusOnCreation(status: RelationshipStatus): void {
+        if (!status) status = RelationshipStatus.ACCEPTED;
+
+        switch (status) {
+            case (RelationshipStatus.ACCEPTED): {
+                this.status1 = RelationshipStatus.ACCEPTED;
+                this.status2 = RelationshipStatus.PENDING;
+                break ;
+            }
+            case (RelationshipStatus.BLOCKED): {
+                this.status1 = RelationshipStatus.BLOCKED;
+                this.status2 = RelationshipStatus.UNDEFINED;
+                break ;
+            }
+            default: {
+                throw new BadRequestException(`Cannot initialize a relationship with given status (${status})`);
+            }
+        }
+    }
+
+    isDeletionPermitted(userId: number): void {
+        const isBlockedOrDeclined = [RelationshipStatus.BLOCKED, RelationshipStatus.DECLINED];
+
+        switch (true) {
+            case (userId == this.user1.id): {
+                if (isBlockedOrDeclined.includes(this.status2)) {
+                    throw new BadRequestException(`Relationship cannot be deleted due to counterpart's status (${this.status2})`);
+                }
+                break ;
+            }
+            case (userId == this.user2.id): {
+                if (isBlockedOrDeclined.includes(this.status1)) {
+                    throw new BadRequestException(`Relationship cannot be deleted due to counterpart's status (${this.status1})`);
+                }
+                break ;
+            }
+            default: {
+                throw new BadRequestException(`User with ID ${userId} isn't concerned by this relationship`);
+            }
+        }
     }
 
 }
