@@ -1,9 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Relationship } from 'src/relationships/entities/Relationship';
 import { CreateRelationshipParams, ReplaceRelationshipParams, UpdateRelationshipParams } from 'src/relationships/types/relationship.type';
 import { User } from 'src/users/entities/User';
-import { In, Like, Relation, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class RelationshipsService {
