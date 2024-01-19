@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Relationship } from 'src/relationships/entities/Relationship';
 import { CreateRelationshipParams, ReplaceRelationshipParams, UpdateRelationshipParams } from 'src/relationships/types/relationship.type';
@@ -47,8 +47,9 @@ export class RelationshipsService {
         const newRelationship = this.relationshipRepository.create({
             user1: { id: userId },
             user2: { id: relationshipDetails.targetId },
-            ...relationshipDetails,
         });
+
+        newRelationship.setStatusOnCreation(relationshipDetails.status);
 
         return (await this.relationshipRepository.save(newRelationship));
     }
@@ -103,6 +104,8 @@ export class RelationshipsService {
         });
 
         if (!relationship) throw new NotFoundException(`Relationship between given users (${[userId, targetId]}) not found`);
+
+        relationship.isDeletionPermitted(userId);
 
         await this.relationshipRepository.remove(relationship);
         return (`Relationship between Users with IDs ${[userId, targetId]} successfully deleted`);
