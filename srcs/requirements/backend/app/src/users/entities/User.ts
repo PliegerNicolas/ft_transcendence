@@ -1,7 +1,7 @@
-import { GameLog } from "src/game-logs/entities/GameLog";
+import { Exclude } from "class-transformer";
 import { Profile } from "src/profiles/entities/Profile";
 import { Relationship } from "src/relationships/entities/Relationship";
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: 'users' })
 export class User {
@@ -10,10 +10,14 @@ export class User {
     id: number;
 
     @Column({ unique: true })
-    username: string;
+    email: string;
 
     @Column({ unique: true })
-    email: string;
+    username: string;
+
+    @Exclude()
+    @Column()
+    password: string;
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
@@ -29,10 +33,6 @@ export class User {
 
     @OneToMany(() => Relationship, (relationship) => relationship.user2, { cascade: true })
     relationships2?: Relationship[];
-
-    @ManyToMany(() => GameLog, (gameLog) => gameLog.users, { nullable: true })
-    @JoinTable()
-    gameLogs?: GameLog[];
 
     /* Helper Function */
 

@@ -4,12 +4,15 @@ import { UpdateProfileDto } from "src/profiles/dtos/UpdateProfile.dto";
 
 export class UpdateUserDto {
 
-    @IsNotEmpty()
+    @IsEmail()
+    @IsOptional()
+    email: string;
+
+    @IsOptional()
     username: string;
 
-    @IsEmail()
-    @IsNotEmpty()
-    email: string;
+    @IsOptional()
+    password: string;
 
     @ValidateNested()
     @Type(() => UpdateProfileDto)
