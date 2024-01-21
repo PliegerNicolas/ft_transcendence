@@ -10,6 +10,9 @@ import { Relationship } from './relationships/entities/Relationship';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { SocketModule } from './socket/socket.module';
+import { GamelogsModule } from './gamelogs/gamelogs.module';
+import { Gamelog } from './gamelogs/entities/Gamelog';
+import { UserToGamelog } from './gamelogs/entities/UserToGamelog';
 
 @Module({
   imports: [
@@ -21,15 +24,17 @@ import { SocketModule } from './socket/socket.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [User, Profile, Relationship],
+      entities: [User, Profile, Relationship, Gamelog, UserToGamelog],
     synchronize: true,
     }),
     UsersModule,
     ProfilesModule,
     RelationshipsModule,
+    GamelogsModule,
 	  AuthModule,
     ChatModule,
     SocketModule,
+    GamelogsModule,
   ],
   controllers: [],
   providers: [],

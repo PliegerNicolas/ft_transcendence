@@ -1,7 +1,9 @@
 import { Exclude } from "class-transformer";
+import { Gamelog } from "src/gamelogs/entities/Gamelog";
+import { UserToGamelog } from "src/gamelogs/entities/UserToGamelog";
 import { Profile } from "src/profiles/entities/Profile";
 import { Relationship } from "src/relationships/entities/Relationship";
-import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: 'users' })
 export class User {
@@ -33,6 +35,14 @@ export class User {
 
     @OneToMany(() => Relationship, (relationship) => relationship.user2, { cascade: true })
     relationships2?: Relationship[];
+
+    @ManyToMany(() => Gamelog, (gamelog) => gamelog.users)
+    @JoinTable()
+    gamelogs?: Gamelog[];
+
+    @OneToMany(() => UserToGamelog, (userToGamelog) => userToGamelog.user)
+    @JoinTable()
+    userToGamelog?: UserToGamelog[];
 
     /* Helper Function */
 
