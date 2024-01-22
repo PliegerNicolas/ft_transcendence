@@ -11,6 +11,15 @@ export interface UserType {
 	}
 }
 
+export interface UserPostType {
+	username: string,
+	email: string,
+	profile: {
+		firstName: string,
+		lastName:string
+	}
+}
+
 export interface FriendshipType {
 	id: string,
 	status1: string,
@@ -19,4 +28,9 @@ export interface FriendshipType {
 	created_at: string,
 	user1: UserType,
 	user2: UserType
+}
+
+export interface MyInfoType {
+	logged: boolean,
+	token: string
 }

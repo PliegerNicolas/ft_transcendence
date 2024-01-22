@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Relationship } from 'src/relationships/entities/Relationship';
 import { CreateRelationshipParams, ReplaceRelationshipParams, UpdateRelationshipParams } from 'src/relationships/types/relationship.type';
@@ -16,31 +16,42 @@ export class RelationshipsService {
     ) {}
 
     async getUserRelationships(userId: number): Promise<Relationship[]> {
-        const relationships = await this.relationshipRepository.find({
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: [
+                'relationships1.user1', 'relationships1.user2',
+                'relationships2.user1', 'relationships2.user2',
+            ],
+        });
+
+        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+
+        return (user.getRelationships());
+    }
+
+    async getUserRelationship(userId: number, targetId: number): Promise<Relationship> {
+        const relationship = await this.relationshipRepository.findOne({
             where: [
-                { user1: { id: userId } },
-                { user2: { id: userId } },
+                { user1: { id: userId }, user2: { id: targetId } },
+                { user1: { id: targetId }, user2: { id: userId } },
             ],
             relations: ['user1', 'user2'],
         });
 
-        if (!relationships || relationships.length === 0) throw new NotFoundException(`No Relationships found for User with ID ${userId}`);
+        if (!relationship) throw new NotFoundException(`Relationship between given users (${[userId, targetId]}) not found`);
 
-        return (relationships);
-    }
-
-    async getUserRelationship(userId: number, targetId: number): Promise<Relationship> {
-        return (await this.findRelationship(userId, targetId));
+        return (relationship);
     }
 
     async createUserRelationship(userId: number, relationshipDetails: CreateRelationshipParams): Promise<Relationship> {
         const newRelationship = this.relationshipRepository.create({
             user1: { id: userId },
             user2: { id: relationshipDetails.targetId },
-            ...relationshipDetails,
         });
 
-        return (await this.relationshipRepository.save(newRelationship));        
+        newRelationship.setStatusOnCreation(relationshipDetails.status);
+
+        return (await this.relationshipRepository.save(newRelationship));
     }
 
     async replaceUserRelationship(
@@ -48,16 +59,19 @@ export class RelationshipsService {
         targetId: number,
         relationshipDetails: ReplaceRelationshipParams
     ): Promise<Relationship> {
-        const relationship = await this.findRelationship(userId, targetId);
+        const relationship = await this.relationshipRepository.findOne({
+            where: [
+                { user1: { id: userId }, user2: { id: targetId } },
+                { user1: { id: targetId }, user2: { id: userId } },
+            ],
+            relations: ['user1', 'user2'],
+        });
 
-        console.log(relationship);
+        if (!relationship) throw new NotFoundException(`Relationship between given users (${[userId, targetId]}) not found`);
 
-        relationship.setStatus(userId, relationshipDetails.status);
+        relationship.setStatusById(userId, relationshipDetails.status);
 
-        return (await this.relationshipRepository.save({
-            ...relationship,
-            ...relationshipDetails,
-        }));
+        return (await this.relationshipRepository.save(relationship));
     }
 
     async updateUserRelationship(
@@ -65,45 +79,37 @@ export class RelationshipsService {
         targetId: number,
         relationshipDetails: UpdateRelationshipParams
     ): Promise<Relationship> {
-        const relationship = await this.findRelationship(userId, targetId);
+        const relationship = await this.relationshipRepository.findOne({
+            where: [
+                { user1: { id: userId }, user2: { id: targetId } },
+                { user1: { id: targetId }, user2: { id: userId } },
+            ],
+            relations: ['user1', 'user2'],
+        });
 
-         if (!relationship) throw new NotFoundException(`Relationship between user with ID ${userId} and user with ID ${targetId} not found`);
+        if (!relationship) throw new NotFoundException(`Relationship between given users (${[userId, targetId]}) not found`);
 
-        console.log(relationship);
+        relationship.setStatusById(userId, relationshipDetails.status);
 
-        relationship.setStatus(userId, relationshipDetails.status);
-
-        return (await this.relationshipRepository.save({
-            ...relationship,
-            ...relationshipDetails,
-        }));
+        return (await this.relationshipRepository.save(relationship));
     }
 
     async deleteRelationship(userId: number, targetId: number): Promise<string> {
-        const relationship = await this.findRelationship(userId, targetId);
-        await this.relationshipRepository.remove(relationship);
-
-        return (`Relationship between user with ID ${userId} and user with ID ${targetId} successfully deleted`);
-    }
-
-
-    /* Helper Methods */
-
-
-    private async findRelationship(userId: number, targetId: number): Promise<Relationship> {
         const relationship = await this.relationshipRepository.findOne({
             where: [
-                { user1: { id: userId }, user2: { id: targetId }, },
-                { user1: { id: targetId }, user2: { id: userId }, },
+                { user1: { id: userId }, user2: { id: targetId } },
+                { user1: { id: targetId }, user2: { id: userId } },
             ],
-             relations: ['user1', 'user2'],
-         });
+            relations: ['user1', 'user2'],
+        });
 
-         console.log(relationship);
+        if (!relationship) throw new NotFoundException(`Relationship between given users (${[userId, targetId]}) not found`);
 
-         if (!relationship) throw new NotFoundException(`Relationship between user with ID ${userId} and user with ID ${targetId} not found`);
+        relationship.isDeletionPermitted(userId);
 
-        return (relationship);
+        await this.relationshipRepository.remove(relationship);
+        return (`Relationship between Users with IDs ${[userId, targetId]} successfully deleted`);
+
     }
 
 }

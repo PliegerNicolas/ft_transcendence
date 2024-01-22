@@ -9,7 +9,7 @@ type MessagePayload = {
 	date: Date
 }
 
-export const socket = io('http://localhost:3450/chat')
+export const socket = io(`http://${location.hostname}:3450/chat`);
 
 function Chat() {
 
@@ -40,9 +40,11 @@ function Chat() {
 			socket.off('connect');
 			socket.off('newUser');
 			socket.off('userDisconnected');
+		return (() => {
+			socket.off('connect');
 			socket.off('onMessage');
 			console.log('Unregistering Events');
-		}
+		});
 	}, []);
 
 	const onSubmit = () => {
@@ -56,11 +58,14 @@ function Chat() {
 				<h1>Chat testing</h1>
 				<div>
 					{messages.length === 0 ? <div>No Messages</div> : <div>
-					{messages.map((msg, index) => <div>
-						<b key={index}>{msg.sender_id.toString()}</b>
-						<span key={index}>{format(msg.date, 'MMMM do yyyy, h:mm:ss a')}</span>
-						<p key={index}>{msg.content}</p>
-					</div>)}
+					{
+						messages.map((msg, index) =>
+							<div key={index}>
+                <b key={index}>{msg.sender_id.toString()}</b>
+								<span>{format(new Date(), 'MMMM do yyyy, h:mm:ss a')}</span>
+								<p>{msg.content}</p>
+							</div>)
+					}
 					</div>}
 				</div>
 				<div>

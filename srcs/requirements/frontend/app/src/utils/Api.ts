@@ -8,7 +8,7 @@ class Api
 
 	#return_switch(response: Response) {
 		if (!response.ok)
-			return (Promise.reject(response));
+			return (Promise.reject(new Error(response.status + " " + response.statusText)));
 		const content_type = response.headers.get("content-type");
 		if (content_type && content_type.toLowerCase().includes("application/json"))
 			return (response.json());
@@ -21,7 +21,7 @@ class Api
 			headers: this.headers
 		});
 		if (!response.ok)
-			return (Promise.reject(response));
+			return (Promise.reject(new Error(response.status + " " + response.statusText)));
 		return (response.json());
 	};
 
