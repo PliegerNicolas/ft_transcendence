@@ -1,8 +1,9 @@
-import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io'
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io'
 //import { ServerToClientEvents } from '../types/chat';
-import { Message } from '../types/chat';
+import { Message } from '../types/chat.types';
 import { OnModuleInit } from '@nestjs/common';
+
 
 @WebSocketGateway({
   cors: true,
@@ -16,15 +17,21 @@ export class ChatGateway implements OnModuleInit {
     this.server.on('connection', (socket) => {
       console.log(socket.id);
       console.log('Connected');
+      this.server.emit('newUser', socket.id);
+      socket.on('disconnect', () => {
+        this.server.emit('userDisconnected', socket.id);
+      });
     });
   }
 
   @SubscribeMessage('newMessage')
-  handleNewMessage(@MessageBody() body: any) {
+  handleNewMessage(@MessageBody() body: any, @ConnectedSocket() client: Socket) {
     console.log(body);
     this.server.emit('onMessage', {
       content: body,
-      date: Date().toLocaleString()
+      sender_id: client.id,
+      channel_id: 1,
+      date: Date()
     });
   }
 
