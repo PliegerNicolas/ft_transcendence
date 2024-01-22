@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { io } from 'socket.io-client';
 import { format } from 'date-fns';
 
@@ -14,21 +14,35 @@ export const socket = io(`http://${location.hostname}:3450/chat`);
 function Chat() {
 
 	const [value, setValue] = useState('');
-	const [messages, setMessages] = useState<MessagePayload[]>([]);
+	const [messages, setMessages] = useState<MessagePayload[]>(() => {
+		const data = localStorage.getItem("chat/id_here");
+
+		if (data) {
+			try { return (JSON.parse(data)); }
+			catch (error) { return ([]); }
+		}
+		return ([]);
+	});
+
+	const msgRef = useRef<MessagePayload[]>();
+
+	msgRef.current = messages;
 
 	useEffect(() => {
 		socket.on('connect', () => {
 			console.log('Connected');
 		});
+
 		socket.on('onMessage', (newMessage: MessagePayload) => {
 			console.log('onMessage event received');
 			console.log(newMessage);
-			setMessages((prev) => [...prev, newMessage])
+			setMessages(prev => [...prev, newMessage]);
 		});
 
 		return (() => {
 			socket.off('connect');
 			socket.off('onMessage');
+			localStorage.setItem("chat/id_here", JSON.stringify(msgRef.current));
 			console.log('Unregistering Events');
 		});
 	}, []);
@@ -42,17 +56,19 @@ function Chat() {
 		<main className="MainContent">
 			<div>
 				<h1>Chat testing</h1>
-				<div>
-					{messages.length === 0 ? <div>No Messages</div> : <div>
+				{
+					messages.length === 0 ?
+					<div>No Messages</div> :
+					<div className="genericList">
 					{
 						messages.map((msg, index) =>
 							<div key={index}>
-								<span>{format(new Date(), 'MMMM do yyyy, h:mm:ss a')}</span>
-								<p>{msg.content}</p>
+								<div className="notice-msg">{format(new Date(msg.date), 'MMMM do yyyy, h:mm:ss a')}</div>
+								<div>{msg.content}</div>
 							</div>)
 					}
-					</div>}
-				</div>
+					</div>
+				}
 				<div>
 					<span>Send message : </span>
 					<input
