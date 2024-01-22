@@ -8,6 +8,6 @@ export class GameLog {
     id: number;
 
     @ManyToMany(() => User, (user) => user.gameLogs, { onDelete: 'SET NULL' })
-    users: User[];
+    users?: User[];
 
 }

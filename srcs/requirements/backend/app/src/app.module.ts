@@ -10,6 +10,8 @@ import { GameLogsModule } from './game-logs/game-logs.module';
 import { RelationshipsModule } from './relationships/relationships.module';
 import { Relationship } from './relationships/entities/Relationship';
 import { AuthModule } from './auth/auth.module';
+import { ChatModule } from './chat/chat.module';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
@@ -26,9 +28,11 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule,
     ProfilesModule,
-    GameLogsModule,
     RelationshipsModule,
-	AuthModule,
+    GameLogsModule,
+	  AuthModule,
+    ChatModule,
+    SocketModule,
   ],
   controllers: [],
   providers: [],
