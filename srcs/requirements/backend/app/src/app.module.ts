@@ -30,7 +30,7 @@ import { SocketModule } from './socket/socket.module';
     ProfilesModule,
     RelationshipsModule,
     GameLogsModule,
-	  AuthModule,
+	AuthModule,
     ChatModule,
     SocketModule,
   ],
