@@ -14,6 +14,7 @@ export const socket = io(`http://${location.hostname}:3450/chat`);
 function Chat() {
 
 	const [value, setValue] = useState('');
+	const [channel, setChannel] = useState('');
 
 	const [messages, setMessages] = useState<MessagePayload[]>(() => {
 		const data = localStorage.getItem("chat/id_here");
@@ -34,9 +35,8 @@ function Chat() {
 	useEffect(() => {
 		socket.on('connect', () => {
 			console.log('Connected');
-			
 		});
-		socket.on('newUser', (newUserId: string) => {
+		socket.on('userJoinedChannel', (newUserId: string) => {
 			console.log('New user connected:', newUserId);
 			setUsers((prev) => [...prev, newUserId]);
 		});
@@ -51,25 +51,43 @@ function Chat() {
 			setMessages(prev => [...prev, newMessage]);
 		});
 
+		socket.on('joinedChannel', (channel: string) => {
+			console.log('Channel joined');
+			setChannel(channel);
+		});
+
 		return () => {
 			socket.off('connect');
-			socket.off('newUser');
+			socket.off('userJoinedChannel');
 			socket.off('userDisconnected');
 			socket.off('onMessage');
+			socket.off('joinedChannel');
 			localStorage.setItem("chat/id_here", JSON.stringify(msgRef.current));
 			console.log('Unregistering Events');
 		}
 	}, []);
 
 	const onSubmit = () => {
-		socket.emit('newMessage', value);
+		socket.emit('newMessage', {
+			content: value,
+			channel: channel
+		});
 		setValue('');
+	}
+
+	const onClickJoinChannel = () => {
+		socket.emit('joinChannel', 'general');
 	}
 
 	return (
 		<main className="MainContent">
 			<div>
 				<h1>Chat testing</h1>
+				{channel.length === 0 ? <div>
+					<button onClick={onClickJoinChannel}>Join channel 'general'</button>
+				</div> : 
+				<div>
+				<h3>Channel {channel} :</h3>
 				<div>
 					{messages.length === 0 ? <div>No Messages</div> : <div> {
 						messages.map((msg, index) =>
@@ -97,6 +115,7 @@ function Chat() {
 					</div>)}
 					</div>}
 				</div>
+				</div>}
 			</div>
 		</main>
 	);
