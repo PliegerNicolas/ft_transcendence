@@ -1,10 +1,11 @@
 export type Message = {
 	content: string,
-	sender_id: Number,
-	channel_id: Number,
+	sender_id: string,
+	channel_id: string,
 	date: Date
 }
 
-export interface ServerToClientEvents {
-	newMessage: (payload: Message) => void;
+export type MessagePayloads = {
+	content: string,
+	channel: string,
 }
