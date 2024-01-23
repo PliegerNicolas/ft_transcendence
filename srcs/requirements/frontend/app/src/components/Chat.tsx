@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { io } from 'socket.io-client';
 import { format } from 'date-fns';
 
@@ -14,8 +14,22 @@ export const socket = io(`http://${location.hostname}:3450/chat`);
 function Chat() {
 
 	const [value, setValue] = useState('');
-	const [messages, setMessages] = useState<MessagePayload[]>([]);
+
+	const [messages, setMessages] = useState<MessagePayload[]>(() => {
+		const data = localStorage.getItem("chat/id_here");
+
+		if (data) {
+			try { return (JSON.parse(data)); }
+			catch (error) { return ([]); }
+		}
+		return ([]);
+	});
+
+	const msgRef = useRef<MessagePayload[]>();
+	msgRef.current = messages;
+
 	const [users, setUsers] = useState<string[]>([]);
+
 
 	useEffect(() => {
 		socket.on('connect', () => {
@@ -30,21 +44,21 @@ function Chat() {
     		console.log('User disconnected:', disconnectedUserId);
     		setUsers((prev) => prev.filter(userId => userId !== disconnectedUserId));
 		});
+
 		socket.on('onMessage', (newMessage: MessagePayload) => {
 			console.log('onMessage event received');
 			console.log(newMessage);
-			setMessages((prev) => [...prev, newMessage]);
+			setMessages(prev => [...prev, newMessage]);
 		});
 
 		return () => {
 			socket.off('connect');
 			socket.off('newUser');
 			socket.off('userDisconnected');
-		return (() => {
-			socket.off('connect');
 			socket.off('onMessage');
+			localStorage.setItem("chat/id_here", JSON.stringify(msgRef.current));
 			console.log('Unregistering Events');
-		});
+		}
 	}, []);
 
 	const onSubmit = () => {
@@ -57,16 +71,14 @@ function Chat() {
 			<div>
 				<h1>Chat testing</h1>
 				<div>
-					{messages.length === 0 ? <div>No Messages</div> : <div>
-					{
+					{messages.length === 0 ? <div>No Messages</div> : <div> {
 						messages.map((msg, index) =>
 							<div key={index}>
-                <b key={index}>{msg.sender_id.toString()}</b>
-								<span>{format(new Date(), 'MMMM do yyyy, h:mm:ss a')}</span>
+                				<b key={index}>{msg.sender_id.toString()}</b>
+								<span>{format(new Date(msg.date), 'MMMM do yyyy, h:mm:ss a')}</span>
 								<p>{msg.content}</p>
 							</div>)
-					}
-					</div>}
+					} </div>}
 				</div>
 				<div>
 					<span>Send message : </span>
