@@ -1,9 +1,15 @@
-import { IsInt, IsNotEmpty } from "class-validator";
+import { IsEnum, IsIn, IsInt, IsNotEmpty, IsOptional } from "class-validator";
+import { RelationshipStatus } from "../entities/Relationship";
 
 export class CreateRelationshipDto {
 
     @IsInt()
     @IsNotEmpty()
     targetId: number;
+
+    @IsEnum(RelationshipStatus, { message: 'Invalid relationship status' })
+    @IsIn([RelationshipStatus.ACCEPTED, RelationshipStatus.BLOCKED], { message: 'Status must be either "accepted" or "blocked" on creation' })
+    @IsOptional()
+    status?: RelationshipStatus;
 
 }

@@ -6,7 +6,7 @@ type MessagePayload = {
 	content: string,
 	sender_id: Number,
 	channel_id: Number,
-	date: string
+	date: Date
 }
 
 export const socket = io(`http://${location.hostname}:3450/chat`);
@@ -14,6 +14,7 @@ export const socket = io(`http://${location.hostname}:3450/chat`);
 function Chat() {
 
 	const [value, setValue] = useState('');
+
 	const [messages, setMessages] = useState<MessagePayload[]>(() => {
 		const data = localStorage.getItem("chat/id_here");
 
@@ -25,12 +26,23 @@ function Chat() {
 	});
 
 	const msgRef = useRef<MessagePayload[]>();
-
 	msgRef.current = messages;
+
+	const [users, setUsers] = useState<string[]>([]);
+
 
 	useEffect(() => {
 		socket.on('connect', () => {
 			console.log('Connected');
+			
+		});
+		socket.on('newUser', (newUserId: string) => {
+			console.log('New user connected:', newUserId);
+			setUsers((prev) => [...prev, newUserId]);
+		});
+		socket.on('userDisconnected', (disconnectedUserId: string) => {
+    		console.log('User disconnected:', disconnectedUserId);
+    		setUsers((prev) => prev.filter(userId => userId !== disconnectedUserId));
 		});
 
 		socket.on('onMessage', (newMessage: MessagePayload) => {
@@ -39,12 +51,14 @@ function Chat() {
 			setMessages(prev => [...prev, newMessage]);
 		});
 
-		return (() => {
+		return () => {
 			socket.off('connect');
+			socket.off('newUser');
+			socket.off('userDisconnected');
 			socket.off('onMessage');
 			localStorage.setItem("chat/id_here", JSON.stringify(msgRef.current));
 			console.log('Unregistering Events');
-		});
+		}
 	}, []);
 
 	const onSubmit = () => {
@@ -56,19 +70,16 @@ function Chat() {
 		<main className="MainContent">
 			<div>
 				<h1>Chat testing</h1>
-				{
-					messages.length === 0 ?
-					<div>No Messages</div> :
-					<div className="genericList">
-					{
+				<div>
+					{messages.length === 0 ? <div>No Messages</div> : <div> {
 						messages.map((msg, index) =>
 							<div key={index}>
-								<div className="notice-msg">{format(new Date(msg.date), 'MMMM do yyyy, h:mm:ss a')}</div>
-								<div>{msg.content}</div>
+                				<b key={index}>{msg.sender_id.toString()}</b>
+								<span>{format(new Date(msg.date), 'MMMM do yyyy, h:mm:ss a')}</span>
+								<p>{msg.content}</p>
 							</div>)
-					}
-					</div>
-				}
+					} </div>}
+				</div>
 				<div>
 					<span>Send message : </span>
 					<input
@@ -77,6 +88,14 @@ function Chat() {
 						onChange={(e) => setValue(e.target.value)}
 					/>
 					<button onClick={onSubmit}>Submit</button>
+				</div>
+				<h2>Connected Users</h2>
+				<div>
+					{users.length === 0 ? <div>No Online Users</div> : <div>
+					{users.map((usr, index) => <div>
+						<b key={index}>{usr}</b>
+					</div>)}
+					</div>}
 				</div>
 			</div>
 		</main>
