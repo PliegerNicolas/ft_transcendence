@@ -14,7 +14,6 @@ export class AuthService
 	async checkUser(oauth_id : string) {
 
 
-		console.log(oauth_id)
 		const users = await this.dataSource
 		.getRepository(User)
 		.createQueryBuilder()
