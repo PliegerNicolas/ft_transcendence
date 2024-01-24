@@ -14,6 +14,7 @@
 	height: 192px;
 	min-width: 192px;
 	border: 1px solid var(--bg-color-5);
+	box-shadow: 0 0 8px -3px #0008;
 }
 
 .User__Picture {
@@ -64,7 +65,7 @@
 	overflow: auto;
 }
 
-.User__InfoItem {
+.User__InfoItems > * {
 	display: grid;
 	grid-column-gap: 20px;
 	grid-template-columns: 1fr 2.5fr;
@@ -78,21 +79,22 @@
 	grid-template-columns: 1fr 2fr 2fr;
 }
 
-.User__FriendItem--approve {
+.User__FriendItem.approve {
 	display: grid;
 	grid-column-gap: 20px;
 	grid-template-columns: .8fr 2fr 3fr 1.5fr;
 }
 
-.User__FriendItem--approve > *:last-child {
+.User__FriendItem.approve > .approve {
 	display: flex;
 	justify-content: center;
 	border: 2px solid #4a8;
 	color: #afd;
 	background: #133;
 	user-select: none;
+	transition: .15s;
 }
-.User__FriendItem--approve > *:last-child:hover {
+.User__FriendItem.approve > .approve:hover {
 	color: #cfe;
 	border: 2px solid #6da;
 }

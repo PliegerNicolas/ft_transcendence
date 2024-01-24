@@ -1,137 +1,80 @@
-import { useEffect, useState } from "react";
+import { useContext } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useQuery, UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import {UserType, FriendshipType} from "../utils/types.ts"
+import { FriendshipContext } from "../utils/contexts.ts";
+import { FriendshipType } from "../utils/types.ts"
 import Api from "../utils/Api";
 
 import "../styles/user.css";
 
 import defaultPicture from "../assets/default_profile.png";
 
-function FriendShipList(props : {title: string, list: JSX.Element[]})
-{
-	if (!props.list.length)
-		return (<div />);
-	return (
-		<div>
-			<h4>{props.title}:</h4>
-			<div className="genericList"> {props.list} </div>
-		</div>
-	);
-}
+// <User /> ====================================================================
 
-function User()
+export default function User()
 {
 	const params = useParams();
-	const id = params.id;
-
+	const id = params.id!;
+	const queryClient = useQueryClient();
 	const api = new Api(`http://${location.hostname}:3450`);
 
-	const [user, setUser] = useState<UserType | null>(null);
-	const [friendShips, setFriendships] = useState<FriendshipType[]>([]);
-	const [userStatus, setUserStatus] = useState(0);
+	const userGet = useQuery({
+		queryKey: ["users", id],
+		queryFn: () => api.get("/users/" + id),
+		retry: (count, error) => !error.message.includes("404") || count < 0
+	});
 
-	const friendships = {
-		accepted:	friendShips
+	const userDel = useMutation({
+		mutationFn: () => api.delete("/users/" + id),
+		onSettled: () => invalidate(["users", id])
+	});
 
-			.filter((item: FriendshipType) =>
-				item.status1 === "accepted" && item.status2 === "accepted"
-			)
-			.map((item: FriendshipType) =>
-					<div className="User__FriendItem" key={item.id}>
-						<div>{"#" + friend(item).id}</div>
-						<Link to={"/user/" + friend(item).id}>
-							{"@" + friend(item).username}
-						</Link>
-						<div>{item.updated_at}</div>
-					</div>
+	const friendshipsGet = useQuery({
+		queryKey: ["users", id, "friends"],
+		queryFn: () => api.get("/users/" + id + "/relationships"),
+		enabled: userGet.isSuccess,
+		retry: (count, error) => !error.message.includes("404") || count < 0
+	});
+
+	const friendshipAccept = useMutation({
+		mutationFn: (friendId: string) =>
+			api.patch(
+				"/users/" + id + "/relationships/" + friendId,
+				{status: "accepted"}
 			),
+		onSettled: () => invalidate(["users", id, "friends"])
+	});
 
-		pending: friendShips
-
-			.filter((item: FriendshipType) =>
-				(item.status1 === "pending" && item.user2.id === id)
-				|| (item.status2 === "pending" && item.user1.id === id))
-
-			.map((item: FriendshipType) =>
-				<div className="User__FriendItem" key={item.id}>
-					<div>{"#" + friend(item).id}</div>
-					<Link to={"/user/" + friend(item).id}>
-						{"@" + friend(item).username}
-					</Link>
-					<div>{item.updated_at}</div>
-				</div>
-			),
-
-		toApprove: friendShips
-
-			.filter((item: FriendshipType) =>
-				(item.status1 === "pending" && item.user1.id === id)
-				|| (item.status2 === "pending" && item.user2.id === id))
-
-			.map((item: FriendshipType) =>
-				<div className="User__FriendItem--approve" key={item.id}>
-					<div>{"#" + friend(item).id}</div>
-					<Link to={"/user/" + friend(item).id}>
-						{"@" + friend(item).username}
-					</Link>
-					<div>{item.updated_at}</div>
-					<div className="clickable"
-						onClick={() => acceptFriendship(friend(item).id)}
-					>
-						Approve
-					</div>
-				</div>
-			),
-	};
-
-	/*
-	<div key={item.id} className="clickable"
-		onClick={() => acceptFriendship(item.user1.id)}
-	>
-	*/
-
-	function friend(ship: FriendshipType) {
-		return (ship.user1.id == id ? ship.user2 : ship.user1);
+	function invalidate(queryKey: Array<any>) {
+		queryClient.invalidateQueries({queryKey});
 	}
 
-	async function loadUser() {
-		api.get("/users/" + id)
-			.then(data => setUser(data))
-			.catch(err => {
-				err instanceof Response ? setUserStatus(err.status) : console.error(err)
-			});
-	}
-	useEffect(() => {loadUser()}, []);
-
-	async function loadFriendships() {
-		api.get("/users/" + id + "/relationships")
-			.then(data => setFriendships(data))
-			.catch(err => {!(err instanceof Response) && console.error(err)});
-	}
-	useEffect(() => {loadFriendships()}, []);
-
-	async function delUser() {
-		api.delete("/users/" + id)
-			.then(() => setUserStatus(410))
-			.catch((err: Error) => {console.error(err)});
-	}
-	
-	async function acceptFriendship(friendId: string) {
-		console.log("/users/" + id + "/relationships/" + friendId);
-		api.patch("/users/" + id + "/relationships/" + friendId, {status: "accepted"})
-			.then((data) => {console.log(data); setTimeout(loadFriendships, 100)})
-			.catch(err => console.error(err));
-	}
-
-	if (!user) return (
-			<main className="MainContent">
-				<p className="error-msg">
-					There is no user to display...
-					{ userStatus !== 0 && <div>(Error {userStatus})</div> }
-				</p>
-			</main>
+	if (!userGet.isSuccess) return (
+		<main className="MainContent">
+		{
+			userGet.isPending ?
+			<div className="p-style notice-msg">
+				Loading...
+			</div> :
+			<div className="p-style error-msg">
+				Failed to load user #{id}: {userGet.error.message}
+			</div>
+		}
+		</main>
 	);
+
+	const user = userGet.data;
+	
+	function friendshipAction(action: string, ship: FriendshipType) {
+		switch (action) {
+			case "approve":
+				friendshipAccept.mutate(
+					ship.user1.id == id ? ship.user2.id : ship.user1.id
+				);
+			break ;
+		}
+	}
 
 	return (
 		<main className="MainContent">
@@ -149,34 +92,137 @@ function User()
 						<img className="User__PictureBg" src={defaultPicture}/>
 					</div>
 					<div className="genericList User__InfoItems">
-						<div className="User__InfoItem genericListItem odd first">
-							<div>Id</div> <div>{"#" + user.id}</div>
-						</div>
-						<div className="User__InfoItem genericListItem">
-							<div>Username</div> <div>{"@" + user.username}</div>
-						</div>
-						<div className="User__InfoItem genericListItem odd">
-							<div>Email</div> <div>{user.email}</div>
-						</div>
-						<div className="User__InfoItem genericListItem">
-							<div>First Name</div> <div>{user.profile.firstName}</div>
-						</div>
-						<div className="User__InfoItem genericListItem odd last">
-							<div>Last Name</div> <div>{user.profile.lastName}</div>
-						</div>
+						<div><div>Id</div> <div>{"#" + user.id}</div></div>
+						<div><div>Username</div> <div>{"@" + user.username}</div></div>
+						<div><div>Email</div> <div>{user.email}</div></div>
+						<div><div>First Name</div> <div>{user.profile.firstName}</div></div>
+						<div><div>Last Name</div> <div>{user.profile.lastName}</div></div>
 					</div>
 				</div>
 				<hr />
 				<h3>User friendships:</h3>
-				<FriendShipList title="Accepted friendships" list={friendships.accepted}/>
-				<FriendShipList title="Pending friendships" list={friendships.pending}/>
-				<FriendShipList title="Friendships to approve" list={friendships.toApprove}/>
+				<Friendships id={id} query={friendshipsGet} action={friendshipAction}/>
 			</div>
-			<button style={{margin: "0 15px", color: "pink"}} onClick={delUser}>
+			<button
+				style={{margin: "0 15px", color: "#f9c"}}
+				onClick={() => userDel.mutate()}
+			>
 				Delete user
 			</button>
 		</main>
 	);
 }
 
-export default User;
+// <Friendships /> =============================================================
+
+function Friendships(props: {
+	id: string,
+	query: UseQueryResult<any, Error>,
+	action: Function
+})
+{
+	if (props.query.isPending) return (
+		<div className="p-style notice-msg">
+			Loading...
+		</div>
+	);
+
+	if (props.query.isError) return (
+		<div className="p-style error-msg">
+			Failed to load friendships: {props.query.error.message}
+		</div>
+	);
+
+	if (!props.query.data.length) return (
+		<div className="p-style notice-msg">
+			No friendship for this user...
+		</div>
+	);
+
+	return (
+		<FriendshipContext.Provider	value={{...props,	friendships: props.query.data}}>
+			<FriendshipList
+				title="Accepted friendships"
+				filter={
+					(item: FriendshipType) =>
+					item.status1 === "accepted" && item.status2 === "accepted"
+				}
+				actions={[]}
+			/>
+			<FriendshipList
+				title="Pending friendships"
+				filter={
+					(item: FriendshipType) =>
+						(item.status1 === "pending" && item.user2.id === props.id)
+						|| (item.status2 === "pending" && item.user1.id === props.id)
+				}
+				actions={[]}
+			/>
+			<FriendshipList
+				title="Friendships to approve"
+				filter={
+					(item: FriendshipType) =>
+						(item.status1 === "pending" && item.user1.id === props.id)
+						|| (item.status2 === "pending" && item.user2.id === props.id)
+				}
+				actions={["approve"]}
+			/>
+		</FriendshipContext.Provider>
+	);
+}
+
+// <FriendshipList /> ==========================================================
+
+function FriendshipList(props: {
+	title: string,
+	filter: Function,
+	actions: string[],
+})
+{
+	const {id, friendships, action} = useContext(FriendshipContext);
+	const filterList = friendships.filter((item: FriendshipType) =>
+		props.filter(item)
+	);
+	const actionClass = props.actions.join(" ");
+
+	function friend(ship: FriendshipType) {
+		return (ship.user1.id == id ? ship.user2 : ship.user1);
+	}
+
+	if (!filterList.length) return (
+		<div />
+	);
+
+	return (
+		<div>
+			<h4> {props.title}:</h4>
+			<div className="genericList">
+			{
+				filterList.map((item: FriendshipType) =>
+					<div className={"User__FriendItem " + actionClass} key={item.id}>
+						<div>
+							{"#" + friend(item).id}
+						</div>
+						<Link to={"/user/" + friend(item).id}>
+							{"@" + friend(item).username}
+						</Link>
+						<div>
+							{item.updated_at}
+						</div>
+						{
+							props.actions.map((actionItem, index) =>
+								<div
+									key={index}
+									className={"clickable " + actionClass}
+									onClick={() => action(actionItem, item)}
+								>
+									{actionItem}
+								</div>
+							)
+						}
+					</div>)
+			}
+			</div>
+		</div>
+	);
+}

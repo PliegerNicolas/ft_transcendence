@@ -33,13 +33,13 @@
 }
 
 .Spinner {
-	position: absolute;
-	top: 36px;
-	right: 48px;
+	display: flex;
+	justify-content: center;
+	height: 80px;
 }
 
 .Spinner > img {
-	min-width: 50px;
+	width: 50px;
 	animation:
 		spin .8s ease-in-out infinite,
 		fadein 1s ease-in-out,

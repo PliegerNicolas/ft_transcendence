@@ -60,32 +60,13 @@
 	margin: 0px;
 	border-radius: 7px;
 	overflow-x: auto;
-}
-
-.genericList > * > * {
-	border: 2px solid #0000;
-	margin: -1px;
-	padding: 6px;
-	z-index: 50;
-}
-.genericList > * > *:first-child {
-	border: 2px solid #0000;
-	padding: 6px;
-	border-radius: 7px 0 0 7px;
-}
-.genericList > * > *:last-child {
-	border: 2px solid #0000;
-	padding: 6px;
-	border-radius: 0 7px 7px 0;
+	box-shadow: 0 0 8px -3px #0008;
 }
 
 .genericList > * {
 	margin: 0px;
 	border: 2px solid #0000;
 	animation: fadein .15s ease-in-out;
-	display: grid;
-	grid-column-gap: 20px;
-	grid-template-columns: 1fr 2fr 2fr;
 	background: var(--bg-color-4);
 	border-radius: 0px;
 	color: var(--text-normal);
@@ -110,7 +91,7 @@
 	border-radius: 7px;
 }
 
-.genericList > *.clickable:hover {
+.genericList > *.clickable:hover, .genericList > * > *.clickable:hover {
 	border: 2px solid var(--text-faint);
 
 	filter: brightness(1.1) saturate(1.4);
@@ -119,19 +100,23 @@
 	text-shadow: 0 0 6px #fff4;
 }
 
-.genericList > *.clickable:active {
+.genericList > *.clickable:active, .genericList > * > *.clickable:active {
 	filter: none;
 }
 
-.genericList > * > *.clickable:hover {
-	border: 2px solid var(--text-faint);
-
-	filter: brightness(1.1) saturate(1.4);
-	cursor: pointer;
-	color: var(--text-accent);
-	text-shadow: 0 0 6px #fff4;
+.genericList > * > * {
+	border: 2px solid #0000;
+	margin: -1px;
+	padding: 6px;
+	z-index: 50;
 }
-
-.genericList > * > *.clickable:active {
-	filter: none;
+.genericList > * > *:first-child {
+	border: 2px solid #0000;
+	padding: 6px;
+	border-radius: 7px 0 0 7px;
+}
+.genericList > * > *:last-child {
+	border: 2px solid #0000;
+	padding: 6px;
+	border-radius: 0 7px 7px 0;
 }

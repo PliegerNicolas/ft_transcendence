@@ -1,8 +1,8 @@
-import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io'
-//import { ServerToClientEvents } from '../types/chat';
-import { Message } from '../types/chat';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io'
+import { Message, MessagePayloads } from '../types/chat.types';
 import { OnModuleInit } from '@nestjs/common';
+import { channel } from 'diagnostics_channel';
 
 @WebSocketGateway({
   cors: true,
@@ -10,25 +10,38 @@ import { OnModuleInit } from '@nestjs/common';
 })
 export class ChatGateway implements OnModuleInit {
   @WebSocketServer()
-  server: Server;//<any, ServerToClientEvents>;
+  server: Server;
 
   onModuleInit() {
     this.server.on('connection', (socket) => {
-      console.log(socket.id);
-      console.log('Connected');
+      this.server.emit('newUser', socket.id);
+
+      socket.on('disconnect', () => {
+        this.server.emit('userDisconnected', socket.id);
+      });
     });
   }
 
   @SubscribeMessage('newMessage')
-  handleNewMessage(@MessageBody() body: any) {
-    console.log(body);
-    this.server.emit('onMessage', {
-      content: body,
-      date: Date().toLocaleString()
+  handleNewMessage(@MessageBody() message: MessagePayloads, @ConnectedSocket() client: Socket) {
+    client.to(message.channel).emit('onMessage', {
+      content: message.content,
+      sender_id: client.id,
+      channel_id: message.channel,
+      date: Date()
     });
   }
 
-  sendMessage(message: Message) {
-    this.server.emit('newMessage', message);
+  @SubscribeMessage('createChannel')
+  handleChannelCreate(@MessageBody() channel_name: string, @ConnectedSocket() client: Socket) {
+    client.join(channel_name);
+    this.server.to(channel_name).emit('createdChannel', channel_name);
+  }
+
+  @SubscribeMessage('joinChannel')
+  handleChannelJoin(@MessageBody() channel_name: string, @ConnectedSocket() client: Socket) {
+    client.join(channel_name);
+    client.emit('joinedChannel', channel_name);
+    this.server.to(channel_name).emit('userJoinedChannel', client.id);
   }
 }
