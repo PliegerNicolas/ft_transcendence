@@ -39,7 +39,7 @@ export class UsersService {
         return (await this.userRepository.save(newUser));
     }
 
-    async replaceUser(id: number, replaceUserDetails: ReplaceUserParams): Promise<User> {
+    async replaceUser(id: number, userDetails: ReplaceUserParams): Promise<User> {
         const user = await this.userRepository.findOne({
             where: { id },
             relations: ['profile'],
@@ -47,10 +47,10 @@ export class UsersService {
 
         if (!user) throw new NotFoundException(`User with ID ${id} not found`);
 
-        return (await this.userRepository.save({ ...replaceUserDetails }));
+        return (await this.userRepository.save({ ...userDetails }));
     }
 
-    async updateUser(id: number, updateUserDetails: UpdateUserParams): Promise<User> {
+    async updateUser(id: number, userDetails: UpdateUserParams): Promise<User> {
         const user = await this.userRepository.findOne({
             where: { id },
             relations: ['profile'],
@@ -61,10 +61,10 @@ export class UsersService {
         return (
             await this.userRepository.save({
                 ...user,
-                ...updateUserDetails,
-                profile: updateUserDetails.profile? {
+                ...userDetails,
+                profile: userDetails.profile? {
                     ...user.profile,
-                    ...updateUserDetails.profile
+                    ...userDetails.profile
                 } : user.profile,
             })
         );

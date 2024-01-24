@@ -25,8 +25,8 @@ import { UserToGamelog } from './gamelogs/entities/UserToGamelog';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [User, Profile, Relationship, Gamelog, UserToGamelog],
-    synchronize: true,
-    logging: true, // TEMP
+      synchronize: true,
+      //logging: true, // TEMP
     }),
     UsersModule,
     ProfilesModule,

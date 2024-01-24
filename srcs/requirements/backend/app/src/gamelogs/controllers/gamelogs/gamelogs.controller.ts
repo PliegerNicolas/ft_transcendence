@@ -29,7 +29,7 @@ export class GamelogsController {
         @Param('id', ParseIntPipe) id: number,
         @Body(new ValidationPipe) replaceGamelogDto: ReplaceGamelogDto
     ) {
-        return (null);
+        return (await this.gamelogService.replaceGamelog(id, replaceGamelogDto));
     }
 
     @Patch('gamelogs/:id')
@@ -37,12 +37,12 @@ export class GamelogsController {
         @Param('id', ParseIntPipe) id: number,
         @Body(new ValidationPipe) updateGamelogDto: UpdateGamelogDto
     ) {
-        return (null);
+        return (await this.gamelogService.updateGamelog(id, updateGamelogDto));
     }
 
     @Delete('gamelogs/:id')
     async deleteGamelog(@Param('id', ParseIntPipe) id: number) {
-        return (null);
+        return (await this.gamelogService.deleteGamelog(id));
     }
 
 }

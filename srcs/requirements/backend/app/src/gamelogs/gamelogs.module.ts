@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Gamelog } from './entities/Gamelog';
 import { User } from 'src/users/entities/User';
 import { UserToGamelog } from './entities/UserToGamelog';
-import { ArraySizeMatchValidator } from './validators/ArraySizeMatchValidator';
+import { ArraySizeMatchValidator } from './validators/ArraySizeMatch.validator';
 
 @Module({
   imports: [

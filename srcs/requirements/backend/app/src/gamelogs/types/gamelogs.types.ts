@@ -16,7 +16,7 @@ export type ReplaceGamelogParams = {
 
 export type UpdateGamelogParams = {
 
-    userIds: number[];
-    results: GameResult[];
+    userIds?: number[];
+    results?: GameResult[];
 
 };
