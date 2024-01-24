@@ -15,6 +15,7 @@ function Chat() {
 
 	const [value, setValue] = useState('');
 	const [channel, setChannel] = useState('');
+	const [openMenu, setOpenMenu] = useState(false);
 
 	const [messages, setMessages] = useState<MessagePayload[]>(() => {
 		const data = localStorage.getItem("chat/id_here");
@@ -26,11 +27,26 @@ function Chat() {
 		return ([]);
 	});
 
+	const UserMenu = () => {
+		return (
+			<div>
+				<ul>
+					<span>Send private message : </span>
+					<input
+						type="text"
+						value={value}
+						onChange={(e) => setValue(e.target.value)}
+					/>
+					<button onClick={onSubmit}>Submit</button>
+				</ul>
+			</div>
+		)
+	}
+
 	const msgRef = useRef<MessagePayload[]>();
 	msgRef.current = messages;
 
 	const [users, setUsers] = useState<string[]>([]);
-
 
 	useEffect(() => {
 		socket.on('connect', () => {
@@ -111,7 +127,7 @@ function Chat() {
 				<div>
 					{users.length === 0 ? <div>No Online Users</div> : <div>
 					{users.map((usr, index) => <div>
-						<b key={index}>{usr}</b>
+						<b key={index} onClick={() => setOpenMenu((prev) => !prev)}>{usr} {openMenu && <UserMenu />}</b>
 					</div>)}
 					</div>}
 				</div>
