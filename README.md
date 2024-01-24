@@ -39,3 +39,11 @@ API_SECRET = "<SECRET>"
 - `PUT` ⇒ `/users/{:userId}/relationships/{:targetId}` : *This modifies the Relationship set between the two Users, asking for a complete alteration. (cf. ReplaceRelationship.dto.ts)*
 - `PATCH` ⇒ `/users/{:userId}/relationships/{:targetId}` : *This modifies the Relationship set between the two Users, asking for a partial or complete alteration. (cf. UpdateRelationship.dto.ts)*
 - `DELETE` ⇒ `/users/{:userId}/relationships/{:targetId}` : *This delete the Relationship set between the two Users.*
+
+@Gamelogs
+- `GET` ⇒ `/gamelogs` : *This lists all the existing gamelogs.*
+- `GET` ⇒ `/users/{:userId}/gamelogs` : *This lists all Users's Gamelogs.*
+- `POST` ⇒ `/gamelogs` : *This creates a new Gamelog by passing a list of userIds, of results and a game type. (cf. CreateGamelog.dto.ts)*
+- `PUT` ⇒ `/gamelogs/{:id}` : *This modifies the Gamelog set, asking for a complete alteration. (cf. ReplaceGamelog.dto.ts)*
+- `PATCH` ⇒ `/gamelogs/{:id}` : *This modifies the Gamelog set between the two Users, asking for a partial or complete alteration. (cf. UpdateGamelog.dto.ts)*
+- `DELETE` ⇒ `/gamelogs/{:id}` : *This delete the Gamelog.*
