@@ -11,6 +11,25 @@ export class AuthService
 	
 	constructor(private jwtService : JwtService, private dataSource : DataSource) {}
 
+	async checkUser(oauth_id : string) {
+
+
+		console.log(oauth_id)
+		const users = await this.dataSource
+		.getRepository(User)
+		.createQueryBuilder()
+		.select("user.id")
+		.from(User, "user")
+		.where("user.oauth_id = :id", { id: Number(oauth_id) })
+		.getOne()
+		.then(
+			(data) => data
+		)
+
+		return{
+			users
+		};
+	}
 
 	async signIn(oauthToken : JSON ): Promise<any> {
 		const token = Object.values(oauthToken)
@@ -27,35 +46,25 @@ export class AuthService
 				(data) => data.json()
 			)
 			const access = (Object.values(payload)[0]).toString();
-			console.log("access");
-			console.log(access);
 			const info = await fetch("https://api.intra.42.fr/v2/me", {method : "GET", headers: {
 			"Authorization" : "Bearer " + access},
 			}).then(
 				(data) => data.json()
 			)
-			console.log("info");
-			console.log(Object.values(info)[0]);
-			this.dataSource
-			.createQueryBuilder()
-			.insert()
-			.into(User)
-			.values([
-				{"email" : Object.values(info)[1].toString(),
-				"oauth_id" :Number(Object.values(info)[0].toString()),
-				"username" : Object.values(info)[2].toString()
-				}
-			])
-			.execute()
-
-			const users = this.dataSource
-			.getRepository(User)
-			.createQueryBuilder("user")
-			.where("user.oauth_id = :id", { id: info.id })
-			.getOne()
-
-			console.log(await users)
-			// payload.user_id = (await users).id
+			if ((await this.checkUser(Object.values(info)[0].toString())).users === null){
+				this.dataSource
+				.createQueryBuilder()
+				.insert()
+				.into(User)
+				.values([
+					{"email" : Object.values(info)[1].toString(),
+					"oauth_id" :Number(Object.values(info)[0].toString()),
+					"username" : Object.values(info)[2].toString()
+					}
+				])
+				.execute()
+			}
+			payload.user_id = info.id
 			console.log(JSON.stringify(payload))
 			const access_token = await this.jwtService.signAsync(payload)
 		return {

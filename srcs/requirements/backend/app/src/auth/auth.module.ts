@@ -12,7 +12,8 @@ import { User } from 'src/users/entities/User';
   imports: [JwtModule.register({
 	global:true,
 	secret:jwtConstants.secret
-  }), TypeOrmModule.forFeature([User])],
+  }), 
+  TypeOrmModule.forFeature([User])],
   controllers: [AuthController],
   providers: [AuthService]
 })
