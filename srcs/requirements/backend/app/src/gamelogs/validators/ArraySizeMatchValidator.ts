@@ -3,10 +3,14 @@ import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments 
 @ValidatorConstraint({ name: 'arraySizeMatch', async: false })
 export class ArraySizeMatchValidator implements ValidatorConstraintInterface {
     validate(values: any[], args: ValidationArguments) {
-        const propertyName = args.property;
+        const propertyName = args.constraints[0];
 
-        if (args.object.hasOwnProperty(propertyName)) {
-            const targetArray = args.object[propertyName] || [];
+        if (
+            values && args.object
+            && args.object.hasOwnProperty(propertyName)
+            && Array.isArray(args.object[propertyName])
+        ) {
+            const targetArray = args.object[propertyName];
             return (values.length === targetArray.length);
         }
 

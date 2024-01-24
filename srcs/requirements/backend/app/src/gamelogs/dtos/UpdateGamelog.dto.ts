@@ -1,15 +1,13 @@
-import { IsEnum, IsNotEmpty, Validate } from "class-validator";
+import { IsEnum, Validate } from "class-validator";
 import { GameResult } from "../entities/UserToGamelog";
 import { ArraySizeMatchValidator } from "../validators/ArraySizeMatchValidator";
 
 export class UpdateGamelogDto {
 
-    @IsNotEmpty()
-    userIds: number[];
+    @Validate(ArraySizeMatchValidator, ['results'])
+    userIds?: number[];
 
-    @IsNotEmpty()
     @IsEnum(GameResult, { each: true, message: 'Invalid game result' })
-    @Validate(ArraySizeMatchValidator, ['userIds'])
-    results: GameResult[];
+    results?: GameResult[];
 
 }

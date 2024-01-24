@@ -5,11 +5,11 @@ import { ArraySizeMatchValidator } from "../validators/ArraySizeMatchValidator";
 export class ReplaceGamelogDto {
 
     @IsNotEmpty()
+    @Validate(ArraySizeMatchValidator, ['results'])
     userIds: number[];
 
     @IsNotEmpty()
     @IsEnum(GameResult, { each: true, message: 'Invalid game result' })
-    @Validate(ArraySizeMatchValidator, ['userIds'])
     results: GameResult[];
 
 }

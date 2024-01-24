@@ -16,14 +16,14 @@ export class UserToGamelog {
     @PrimaryGeneratedColumn({ type: 'bigint' })
     id: number;
 
-    @ManyToOne(() => User, (user) => user.userToGamelog)
-    user: User;
-
-    @ManyToOne(() => Gamelog, (gamelog) => gamelog.userToGamelog)
-    gamelog: Gamelog;
-
     @IsEnum(GameResult)
     @Column({ type: 'enum', enum: GameResult, default: GameResult.UNDEFINED })
     result: GameResult;
+
+    @ManyToOne(() => User, (user) => user.userToGamelogs)
+    user: User;
+
+    @ManyToOne(() => Gamelog, (gamelog) => gamelog.userToGamelogs)
+    gamelog: Gamelog;
 
 }

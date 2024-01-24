@@ -36,13 +36,13 @@ export class User {
     @OneToMany(() => Relationship, (relationship) => relationship.user2, { cascade: true })
     relationships2?: Relationship[];
 
-    @ManyToMany(() => Gamelog, (gamelog) => gamelog.users)
-    @JoinTable()
-    gamelogs?: Gamelog[];
-
     @OneToMany(() => UserToGamelog, (userToGamelog) => userToGamelog.user)
-    @JoinTable()
-    userToGamelog?: UserToGamelog[];
+    @JoinTable({ name: 'users_to_gamelogs' })
+    userToGamelogs: UserToGamelog[];
+
+    @ManyToMany(() => Gamelog, (gamelog) => gamelog.users)
+    @JoinTable({ name: 'users_to_gamelogs' })
+    gamelogs?: Gamelog[];
 
     /* Helper Function */
 
