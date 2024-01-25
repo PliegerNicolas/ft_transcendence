@@ -6,15 +6,11 @@ export class AuthController {
 	constructor(private authService: AuthService){}
 	
 	@HttpCode(HttpStatus.OK)
-	// @Post('login')
 	@Post()
 
 	signIn(@Body() oauthToken:JSON) {
 		return this.authService.signIn(oauthToken);
 	  }
 
-	//   signIn(@Body() signInDto: Record<string, any>) {
-	// 	return this.authService.signIn(signInDto.username, signInDto.password);
-	//   }
 
 }

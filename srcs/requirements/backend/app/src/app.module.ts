@@ -29,7 +29,7 @@ import { ChatModule } from './chat/chat.module';
     ProfilesModule,
     RelationshipsModule,
     GameLogsModule,
-	  AuthModule,
+	AuthModule,
     ChatModule,
   ],
   controllers: [],

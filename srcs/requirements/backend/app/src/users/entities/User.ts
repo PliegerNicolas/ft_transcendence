@@ -15,6 +15,9 @@ export class User {
     @Column({ unique: true })
     email: string;
 
+	@Column({type: 'bigint', unique:true})
+	oauth_id: number;
+
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
 
