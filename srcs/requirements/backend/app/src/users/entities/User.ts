@@ -37,11 +37,9 @@ export class User {
     relationships2?: Relationship[];
 
     @OneToMany(() => UserToGamelog, (userToGamelog) => userToGamelog.user)
-    @JoinTable({ name: 'users_to_gamelogs' })
-    userToGamelogs: UserToGamelog[];
+    userToGamelogs?: UserToGamelog[];
 
     @ManyToMany(() => Gamelog, (gamelog) => gamelog.users)
-    @JoinTable({ name: 'users_to_gamelogs' })
     gamelogs?: Gamelog[];
 
     /* Helper Function */

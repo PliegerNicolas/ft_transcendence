@@ -20,10 +20,10 @@ export class UserToGamelog {
     @Column({ type: 'enum', enum: GameResult, default: GameResult.UNDEFINED })
     result: GameResult;
 
-    @ManyToOne(() => User, (user) => user.userToGamelogs)
-    user: User;
-
-    @ManyToOne(() => Gamelog, (gamelog) => gamelog.userToGamelogs)
+    @ManyToOne(() => Gamelog, (gamelog) => gamelog.userToGamelogs, { onDelete: 'CASCADE' })
     gamelog: Gamelog;
+
+    @ManyToOne(() => User, (user) => user.userToGamelogs, { onDelete: 'CASCADE' })
+    user: User;
 
 }

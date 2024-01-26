@@ -1,7 +1,8 @@
-import { User } from "src/users/entities/User";
-import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { UserToGamelog } from "./UserToGamelog";
 import { IsEnum } from "class-validator";
+import { User } from "src/users/entities/User";
+import { Exclude } from "class-transformer";
 
 export enum GameType {
     PONG = "pong",
@@ -19,9 +20,10 @@ export class Gamelog {
     gameType: GameType;
 
     @OneToMany(() => UserToGamelog, (userToGamelog) => userToGamelog.gamelog, { cascade: true })
-    userToGamelogs: UserToGamelog[];
+    userToGamelogs?: UserToGamelog[];
 
-    @ManyToMany(() => User, (user) => user.gamelogs)
+    @ManyToMany(() => User, (user) => user.gamelogs, { cascade: true })
+    @JoinTable()
     users?: User[];
 
 }

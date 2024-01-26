@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Length } from 'class-validator';
 import { Gamelog } from 'src/gamelogs/entities/Gamelog';
 import { GameResult, UserToGamelog } from 'src/gamelogs/entities/UserToGamelog';
+import { GamelogsModule } from 'src/gamelogs/gamelogs.module';
 import { CreateGamelogParams, ReplaceGamelogParams, UpdateGamelogParams } from 'src/gamelogs/types/gamelogs.types';
 import { User } from 'src/users/entities/User';
 import { In, Repository } from 'typeorm';
@@ -33,8 +34,6 @@ export class GamelogsService {
 
         if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
 
-        console.log(user.gamelogs);
-
         return (user.gamelogs);
     }
 
@@ -59,7 +58,6 @@ export class GamelogsService {
     async replaceGamelog(id: number, gamelogDetails: ReplaceGamelogParams): Promise<Gamelog> {
         const gamelog = await this.gamelogRepository.findOne({
             where: { id },
-            relations: ['userToGamelogs.user'],
         });
 
         if (!gamelog) throw new NotFoundException(`Gamelog with ID ${id} not found`);
@@ -81,9 +79,10 @@ export class GamelogsService {
     }
 
     async updateGamelog(id: number, gamelogDetails: UpdateGamelogParams): Promise<Gamelog> {
+        return (null);
+        /*
         const gamelog = await this.gamelogRepository.findOne({
             where: { id },
-            relations: ['userToGamelogs.user'],
         });
 
         if (!gamelog) throw new NotFoundException(`Gamelog with ID ${id} not found`);
@@ -106,6 +105,7 @@ export class GamelogsService {
             userToGamelogs: gamelog.userToGamelogs ? this.generateUserToGamelogs(users, gamelogDetails.results) : gamelog.userToGamelogs,
             ...gamelogDetails
         }));
+        */
     }
 
     async deleteGamelog(id: number): Promise<string> {
