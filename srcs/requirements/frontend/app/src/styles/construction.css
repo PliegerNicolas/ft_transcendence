@@ -14,11 +14,11 @@
 	animation: glow alternate ease-in-out 1.5s infinite;
 }
 
-.Construction__Text>p {
-	margin: 10px;
+.Construction__Text > div {
+	line-height: 1.5em;
 	border: none;
 	background: none;
-	margin: 0;
+	margin: 5px 15px;
 }
 
 @keyframes glow {

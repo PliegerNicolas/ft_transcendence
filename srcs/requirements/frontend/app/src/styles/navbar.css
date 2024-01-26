@@ -17,6 +17,8 @@
 	transition: .1s;
 
 	user-select: none;
+
+	box-shadow: 0 0 12px #000a;
 }
 
 .Navbar__Link {

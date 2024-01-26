@@ -21,6 +21,9 @@ export class User {
     @Column()
     password: string;
 
+	@Column({type: 'bigint', unique:true})
+	oauth_id: number;
+
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
 

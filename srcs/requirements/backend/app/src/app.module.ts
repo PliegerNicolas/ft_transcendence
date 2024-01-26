@@ -35,7 +35,6 @@ import { UserToGamelog } from './gamelogs/entities/UserToGamelog';
 	  AuthModule,
     ChatModule,
     SocketModule,
-    GamelogsModule,
   ],
   controllers: [],
   providers: [],
