@@ -4,14 +4,18 @@ import { ReplaceProfileDto } from "src/profiles/dtos/ReplaceProfile.dto";
 
 export class ReplaceUserDto {
 
-    @IsDefined()
-    @IsNotEmpty()
-    username: string;
-
     @IsEmail()
     @IsDefined()
     @IsNotEmpty()
     email: string;
+
+    @IsDefined()
+    @IsNotEmpty()
+    username: string;
+
+    @IsDefined()
+    @IsNotEmpty()
+    password: string;
 
     @ValidateNested()
     @Type(() => ReplaceProfileDto)

@@ -20,25 +20,25 @@ export class ProfilesService {
         return (profile);
     }
 
-    async replaceProfile(userId: number, replaceProfileDetails: ReplaceProfileParams): Promise<Profile> {
+    async replaceProfile(userId: number, profileDetails: ReplaceProfileParams): Promise<Profile> {
         const profile = await this.profileRepository.findOne({ where: { user: { id: userId } } });
 
         if (!profile) throw new NotFoundException(`Profile of User with ID ${userId} not found`);
 
         return (await this.profileRepository.save({
             ... profile,
-            ...replaceProfileDetails,
+            ...profileDetails,
         }));        
     }
 
-    async updateProfile(userId: number, updateProfileDetails: UpdateProfileParams): Promise<Profile> {
+    async updateProfile(userId: number, profileDetails: UpdateProfileParams): Promise<Profile> {
         const profile = await this.profileRepository.findOne({ where: { user: { id: userId } } });
 
         if (!profile) throw new NotFoundException(`Profile of User with ID ${userId} not found`);
 
         return (await this.profileRepository.save({
             ...profile,
-            ...updateProfileDetails
+            ...profileDetails
         }));        
     }
 

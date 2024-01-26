@@ -3,14 +3,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { Profile } from './profiles/entities/Profile';
 import { User } from './users/entities/User';
-import { GameLog } from './game-logs/entities/GameLog';
 import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
-import { GameLogsModule } from './game-logs/game-logs.module';
 import { RelationshipsModule } from './relationships/relationships.module';
 import { Relationship } from './relationships/entities/Relationship';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
+import { SocketModule } from './socket/socket.module';
+import { GamelogsModule } from './gamelogs/gamelogs.module';
+import { Gamelog } from './gamelogs/entities/Gamelog';
+import { UserToGamelog } from './gamelogs/entities/UserToGamelog';
 
 @Module({
   imports: [
@@ -22,15 +24,17 @@ import { ChatModule } from './chat/chat.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [User, Profile, GameLog, Relationship],
-    synchronize: true,
+      entities: [User, Profile, Relationship, Gamelog, UserToGamelog],
+      synchronize: true,
+      //logging: true, // TEMP
     }),
     UsersModule,
     ProfilesModule,
     RelationshipsModule,
-    GameLogsModule,
-	AuthModule,
+    GamelogsModule,
+	  AuthModule,
     ChatModule,
+    SocketModule,
   ],
   controllers: [],
   providers: [],

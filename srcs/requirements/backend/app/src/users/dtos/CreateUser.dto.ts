@@ -4,12 +4,15 @@ import { CreateProfileDto } from "src/profiles/dtos/CreateProfile.dto";
 
 export class CreateUserDto {
 
-    @IsNotEmpty()
-    username: string;
-
     @IsEmail()
     @IsNotEmpty()
     email: string;
+
+    @IsNotEmpty()
+    username: string;
+
+    @IsNotEmpty()
+    password: string;
 
     @ValidateNested()
     @Type(() => CreateProfileDto)
