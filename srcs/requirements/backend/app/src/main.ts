@@ -1,14 +1,21 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { TypeormExceptionFilter } from './common/filters/typeorm-exception/typeorm-exception.filter';
-import { ChatGateway } from './chat/gateways/chat.gateway';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+	const app = await NestFactory.create(AppModule, { cors: true });
 
-  // Apply a global TypeORM exception filter
-  app.useGlobalFilters(new TypeormExceptionFilter());
+	// Apply a global TypeORM exception filter
+	app.useGlobalFilters(new TypeormExceptionFilter());
 
-  await app.listen(3450);
+	app.useGlobalPipes(
+		new ValidationPipe({
+			transform: true,
+			transformOptions: { groups: ['transform'] },
+		}),
+	);
+
+	await app.listen(3450);
 }
 bootstrap();

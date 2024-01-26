@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Length } from 'class-validator';
+import { UserResult } from 'src/gamelogs/dtos/UserResult.dto';
 import { Gamelog } from 'src/gamelogs/entities/Gamelog';
 import { GameResult, UserToGamelog } from 'src/gamelogs/entities/UserToGamelog';
 import { GamelogsModule } from 'src/gamelogs/gamelogs.module';
@@ -38,74 +39,57 @@ export class GamelogsService {
     }
 
     async createGamelog(gamelogDetails: CreateGamelogParams): Promise<Gamelog> {
-        const users = await this.userRepository.find({
-            where: { id: In(gamelogDetails.userIds) },
-        });
-
-        if (users.length !== gamelogDetails.userIds.length) {
-            throw new NotFoundException(`Some users of the given list (${gamelogDetails.userIds}) couldn't be found`);
-        }
+        const usersAndGamelogs = await this.findUsersAndGenerateResults(gamelogDetails.userResults);
+        delete gamelogDetails.userResults;
 
         const gamelog = this.gamelogRepository.create({
-            users: users,
-            userToGamelogs: this.generateUserToGamelogs(users, gamelogDetails.results),
+            users: usersAndGamelogs.users,
+            userToGamelogs: usersAndGamelogs.userToGamelogs,
             ...gamelogDetails,
         });
 
-        return (await this.gamelogRepository.save(gamelog));
+        return (await this.gamelogRepository.save({
+            ...gamelog,
+            ...gamelogDetails,
+        }));
     }
 
     async replaceGamelog(id: number, gamelogDetails: ReplaceGamelogParams): Promise<Gamelog> {
         const gamelog = await this.gamelogRepository.findOne({
             where: { id },
-        });
+            relations: ['userToGamelogs.user'],
+        })
 
         if (!gamelog) throw new NotFoundException(`Gamelog with ID ${id} not found`);
 
-        const users = await this.userRepository.find({
-            where: { id: In(gamelogDetails.userIds) },
-        });
-
-        if (users.length !== gamelogDetails.userIds.length) {
-            throw new NotFoundException(`Some users of the given list (${gamelogDetails.userIds}) couldn't be found`);
-        }
+        const usersAndGamelogs = await this.findUsersAndGenerateResults(gamelogDetails.userResults);
+        delete gamelogDetails.userResults;
 
         return (await this.gamelogRepository.save({
             ...gamelog,
-            users: users,
-            userToGamelogs: this.generateUserToGamelogs(users, gamelogDetails.results),
+            users: usersAndGamelogs.users,
+            userToGamelogs: usersAndGamelogs.userToGamelogs,
             ...gamelogDetails,
         }));
     }
 
     async updateGamelog(id: number, gamelogDetails: UpdateGamelogParams): Promise<Gamelog> {
-        return (null);
-        /*
         const gamelog = await this.gamelogRepository.findOne({
             where: { id },
-        });
+            relations: ['userToGamelogs.user'],
+        })
 
         if (!gamelog) throw new NotFoundException(`Gamelog with ID ${id} not found`);
 
-        let users = undefined;
-
-        if (gamelogDetails.userIds) {
-            users = await this.userRepository.find({
-                where: { id: In(gamelogDetails.userIds) },
-            });
-
-            if (users.length !== gamelogDetails.userIds.length) {
-                throw new NotFoundException(`Some users of the given list (${gamelogDetails.userIds}) couldn't be found`);
-            }
-        }
+        const usersAndGamelogs = await this.findUsersAndGenerateResults(gamelogDetails.userResults);
+        delete gamelogDetails.userResults;
 
         return (await this.gamelogRepository.save({
             ...gamelog,
-            users: users ? users : gamelog.users,
-            userToGamelogs: gamelog.userToGamelogs ? this.generateUserToGamelogs(users, gamelogDetails.results) : gamelog.userToGamelogs,
-            ...gamelogDetails
+            users: usersAndGamelogs.users,
+            userToGamelogs: usersAndGamelogs.userToGamelogs,
+            ...gamelogDetails,
         }));
-        */
     }
 
     async deleteGamelog(id: number): Promise<string> {
@@ -115,17 +99,24 @@ export class GamelogsService {
 
     /* Helper Functions */
 
-    private generateUserToGamelogs(users: User[], results: GameResult[]): UserToGamelog[] {
-        if (!users) return (null);
+    private async findUsersAndGenerateResults(userResults: UserResult[]): Promise<{ users: User[], userToGamelogs: UserToGamelog[] }> {
+        if (!userResults) return (null);
 
-        const userToGamelogs = users.map((user, i) => {
+        const users = await this.userRepository.find({
+            where: { id: In(userResults.map(userResult => userResult.id)) },
+            relations: [],
+        });
+
+        if (!users) throw new NotFoundException(`At least one user hasn't been found in the given list (${userResults})`);
+
+        const userToGamelogs = userResults.map((userResult, i) => {
             const userToGamelog = new UserToGamelog();
-            userToGamelog.user = user;
-            userToGamelog.result = results[i] || GameResult.UNDEFINED;
+            userToGamelog.user = users[i];
+            userToGamelog.result = userResults[i].result;
             return (userToGamelog);
         });
 
-        return (userToGamelogs);
+        return ({ users, userToGamelogs });        
     }
 
 }

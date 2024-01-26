@@ -23,7 +23,7 @@ export class UserToGamelog {
     @ManyToOne(() => Gamelog, (gamelog) => gamelog.userToGamelogs, { onDelete: 'CASCADE' })
     gamelog: Gamelog;
 
-    @ManyToOne(() => User, (user) => user.userToGamelogs, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User, (user) => user.userToGamelogs, { cascade: true, onDelete: 'CASCADE' })
     user: User;
 
 }

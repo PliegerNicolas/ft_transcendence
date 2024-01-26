@@ -3,7 +3,7 @@ import { Gamelog } from "src/gamelogs/entities/Gamelog";
 import { UserToGamelog } from "src/gamelogs/entities/UserToGamelog";
 import { Profile } from "src/profiles/entities/Profile";
 import { Relationship } from "src/relationships/entities/Relationship";
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: 'users' })
 export class User {

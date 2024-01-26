@@ -1,21 +1,16 @@
-import { IsArray, IsEnum, IsOptional, ValidateIf } from "class-validator";
-import { GameResult } from "../entities/UserToGamelog";
-import { ArraySizeMatch } from "../validators/ArraySizeMatch.validator";
-import { BothFieldsAreSet } from "../validators/BothFieldsAreSet.validator";
+import { IsArray, IsEnum, IsOptional, ValidateNested } from "class-validator";
 import { GameType } from "../entities/Gamelog";
+import { UserResult } from "./UserResult.dto";
+import { Transform, Type } from "class-transformer";
 
 export class UpdateGamelogDto {
 
     @IsOptional()
-    @BothFieldsAreSet('results', { message: 'userIds and results should either be defined or not' })
-    @ArraySizeMatch('results', { message: 'userIds and results should be the same size' })
     @IsArray()
-    userIds: number[];
-
-    @IsOptional()
-    @IsArray()
-    @IsEnum(GameResult, { each: true, message: 'Invalid game result' })
-    results: GameResult[];
+    @ValidateNested({ each: true })
+    @Type(() => UserResult)
+    @Transform(({ value }) => value.sort((a: UserResult, b: UserResult) => a.id - b.id))
+    userResults: UserResult[];
 
     @IsOptional()
     @IsEnum(GameType, { message: 'Invalid game type' })

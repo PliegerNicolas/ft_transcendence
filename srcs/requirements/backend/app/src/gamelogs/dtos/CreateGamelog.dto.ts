@@ -1,22 +1,25 @@
-import { IsArray, IsEnum, IsNotEmpty, Validate } from "class-validator";
-import { GameResult } from "../entities/UserToGamelog";
-import { ArraySizeMatch } from "../validators/ArraySizeMatch.validator";
+import { IsArray, IsEnum, IsNotEmpty, ValidateNested } from "class-validator";
 import { GameType } from "../entities/Gamelog";
+import { UserResult } from "./UserResult.dto";
+import { Transform, Type } from "class-transformer";
 
 export class CreateGamelogDto {
 
     @IsNotEmpty()
     @IsArray()
-    @ArraySizeMatch('results', { message: 'userIds and results should be the same size' })
-    userIds: number[];
-
-    @IsNotEmpty()
-    @IsArray()
-    @IsEnum(GameResult, { each: true, message: 'Invalid game result' })
-    results: GameResult[];
+    @ValidateNested({ each: true })
+    @Type(() => UserResult)
+    @Transform(({ value }) => value.sort((a: UserResult, b: UserResult) => a.id - b.id))
+    userResults: UserResult[];
 
     @IsNotEmpty()
     @IsEnum(GameType, { message: 'Invalid game type' })
     gameType: GameType;
+
+    /* Helper Function */
+
+    private sortUserResults(): void {
+        this.userResults.sort((a, b) => a.id - b.id);
+    }
 
 }
