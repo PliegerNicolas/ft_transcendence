@@ -1,11 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Length } from 'class-validator';
 import { UserResult } from 'src/gamelogs/dtos/UserResult.dto';
 import { Gamelog } from 'src/gamelogs/entities/Gamelog';
-import { GameResult, UserToGamelog } from 'src/gamelogs/entities/UserToGamelog';
-import { GamelogsModule } from 'src/gamelogs/gamelogs.module';
-import { CreateGamelogParams, ReplaceGamelogParams, UpdateGamelogParams } from 'src/gamelogs/types/gamelogs.types';
+import { UserToGamelog } from 'src/gamelogs/entities/UserToGamelog';
+import { CreateGamelogParams, ReplaceGamelogParams, UpdateGamelogParams } from 'src/gamelogs/types/gamelogs.type';
 import { User } from 'src/users/entities/User';
 import { In, Repository } from 'typeorm';
 

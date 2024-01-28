@@ -1,4 +1,5 @@
 import { Exclude } from "class-transformer";
+import { ChannelMember } from "src/chats/channels/entities/ChannelMember";
 import { Gamelog } from "src/gamelogs/entities/Gamelog";
 import { UserToGamelog } from "src/gamelogs/entities/UserToGamelog";
 import { Profile } from "src/profiles/entities/Profile";
@@ -44,6 +45,9 @@ export class User {
 
     @ManyToMany(() => Gamelog, (gamelog) => gamelog.users)
     gamelogs?: Gamelog[];
+
+    @OneToMany(() => ChannelMember, (member) => member.user)
+    channels?: ChannelMember[];
 
     /* Helper Function */
 

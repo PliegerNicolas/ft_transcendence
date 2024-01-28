@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'src/profiles/entities/Profile';
-import { ReplaceProfileParams, UpdateProfileParams } from 'src/profiles/types/profile.types';
+import { ReplaceProfileParams, UpdateProfileParams } from 'src/profiles/types/profile.type';
 import { Repository } from 'typeorm';
 
 @Injectable()

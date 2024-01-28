@@ -5,10 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/User';
 import { Profile } from 'src/profiles/entities/Profile';
 import { Relationship } from 'src/relationships/entities/Relationship';
+import { Gamelog } from 'src/gamelogs/entities/Gamelog';
+import { ChannelMember } from 'src/chats/channels/entities/ChannelMember';
+import { UserToGamelog } from 'src/gamelogs/entities/UserToGamelog';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Profile, Relationship])
+    TypeOrmModule.forFeature([User, Profile, Relationship, Gamelog, UserToGamelog, ChannelMember])
   ],
   controllers: [UsersController],
   providers: [UsersService]
