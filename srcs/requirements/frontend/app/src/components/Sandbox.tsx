@@ -40,7 +40,8 @@ export default function Sandbox()
 		return {
 			username: "mayeul_" + uid, email: "mayeul_" + uid + "@example.com",
 			profile: { firstName: "Mayeul", lastName: "Laneyrie" },
-			password: "some random password I guess"
+			password: "some random password I guess",
+			oauth_id: uid
 		};
 	}
 
