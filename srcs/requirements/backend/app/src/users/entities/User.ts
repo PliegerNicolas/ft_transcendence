@@ -17,9 +17,6 @@ export class User {
     @Column({ unique: true })
     username: string;
 
-    @Exclude()
-    @Column()
-    password: string;
 
 	@Column({type: 'bigint', unique:true})
 	oauth_id: number;

@@ -11,8 +11,6 @@ export class UpdateUserDto {
     @IsOptional()
     username: string;
 
-    @IsOptional()
-    password: string;
 
     @ValidateNested()
     @Type(() => UpdateProfileDto)
