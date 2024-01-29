@@ -1,7 +1,7 @@
-import { User } from "src/users/entities/User";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Gamelog } from "./Gamelog";
+import { Gamelog } from "./Gamelog.entity";
 import { IsEnum } from "class-validator";
+import { User } from "src/users/entities/User.entity";
 
 export enum GameResult {
     VICTORY = 'victory',
@@ -10,7 +10,7 @@ export enum GameResult {
     UNDEFINED = 'undefined',
 }
 
-@Entity()
+@Entity({ name: 'user_to_gamelogs' })
 export class UserToGamelog {
 
     @PrimaryGeneratedColumn({ type: 'bigint' })

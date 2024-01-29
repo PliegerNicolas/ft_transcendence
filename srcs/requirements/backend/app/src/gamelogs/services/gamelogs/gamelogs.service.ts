@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserResult } from 'src/gamelogs/dtos/UserResult.dto';
-import { Gamelog } from 'src/gamelogs/entities/Gamelog';
-import { UserToGamelog } from 'src/gamelogs/entities/UserToGamelog';
+import { Gamelog } from 'src/gamelogs/entities/Gamelog.entity';
+import { UserToGamelog } from 'src/gamelogs/entities/UserToGamelog.entity';
 import { CreateGamelogParams, ReplaceGamelogParams, UpdateGamelogParams } from 'src/gamelogs/types/gamelogs.type';
-import { User } from 'src/users/entities/User';
+import { User } from 'src/users/entities/User.entity';
 import { In, Repository } from 'typeorm';
 
 @Injectable()
@@ -13,8 +13,6 @@ export class GamelogsService {
     constructor(
         @InjectRepository(Gamelog)
         private readonly gamelogRepository: Repository<Gamelog>,
-        @InjectRepository(UserToGamelog)
-        private readonly userToGamelogRepository: Repository<Gamelog>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
     ) {}

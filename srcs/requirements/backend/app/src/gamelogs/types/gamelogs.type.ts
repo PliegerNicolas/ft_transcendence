@@ -1,5 +1,5 @@
 import { UserResult } from "../dtos/UserResult.dto";
-import { GameType } from "../entities/Gamelog";
+import { GameType } from "../entities/Gamelog.entity";
 
 export type CreateGamelogParams = {
 

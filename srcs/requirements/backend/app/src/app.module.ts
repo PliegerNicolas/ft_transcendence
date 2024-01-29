@@ -1,22 +1,20 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { Profile } from './profiles/entities/Profile';
-import { User } from './users/entities/User';
+import { Profile } from './profiles/entities/Profile.entity';
+import { User } from './users/entities/User.entity';
 import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { RelationshipsModule } from './relationships/relationships.module';
-import { Relationship } from './relationships/entities/Relationship';
+import { Relationship } from './relationships/entities/Relationship.entity';
 import { AuthModule } from './auth/auth.module';
 import { GamelogsModule } from './gamelogs/gamelogs.module';
-import { Gamelog } from './gamelogs/entities/Gamelog';
-import { UserToGamelog } from './gamelogs/entities/UserToGamelog';
-import { ChannelsModule } from './chats/channels/channels.module';
-import { MessagesModule } from './chats/messages/messages.module';
+import { Gamelog } from './gamelogs/entities/Gamelog.entity';
+import { UserToGamelog } from './gamelogs/entities/UserToGamelog.entity';
 import { ChatsModule } from './chats/chats.module';
-import { ChannelMember } from './chats/channels/entities/ChannelMember';
-import { Channel } from './chats/channels/entities/Channel';
-import { Message } from './chats/messages/entities/Message';
+import { ChannelMember } from './chats/channels/entities/ChannelMember.entity';
+import { Channel } from './chats/channels/entities/Channel.entity';
+import { Message } from './chats/messages/entities/Message.entity';
 
 @Module({
   imports: [

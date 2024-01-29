@@ -1,7 +1,7 @@
 import { BadRequestException } from "@nestjs/common";
 import { IsEnum } from "class-validator";
-import { User } from "src/users/entities/User";
-import { BeforeInsert, BeforeRemove, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
+import { User } from "src/users/entities/User.entity";
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 
 export enum RelationshipStatus {
     BLOCKED = 'blocked',

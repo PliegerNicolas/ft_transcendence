@@ -1,7 +1,6 @@
 import {Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/users/entities/User';
+import { User } from 'src/users/entities/User.entity';
 import { DataSource } from 'typeorm';
 
 

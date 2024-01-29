@@ -1,9 +1,8 @@
 import { Exclude } from "class-transformer";
-import { ChannelMember } from "src/chats/channels/entities/ChannelMember";
-import { Gamelog } from "src/gamelogs/entities/Gamelog";
-import { UserToGamelog } from "src/gamelogs/entities/UserToGamelog";
-import { Profile } from "src/profiles/entities/Profile";
-import { Relationship } from "src/relationships/entities/Relationship";
+import { Gamelog } from "src/gamelogs/entities/Gamelog.entity";
+import { UserToGamelog } from "src/gamelogs/entities/UserToGamelog.entity";
+import { Profile } from "src/profiles/entities/Profile.entity";
+import { Relationship } from "src/relationships/entities/Relationship.entity";
 import { Column, CreateDateColumn, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: 'users' })
@@ -31,8 +30,12 @@ export class User {
     @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updated_at: Date;
 
+    /* Profile */
+
     @OneToOne(() => Profile, (profile) => profile.user, { cascade: true })
     profile: Profile
+
+    /* Relationships */
 
     @OneToMany(() => Relationship, (relationship) => relationship.user1, { cascade: true })
     relationships1?: Relationship[];
@@ -40,14 +43,15 @@ export class User {
     @OneToMany(() => Relationship, (relationship) => relationship.user2, { cascade: true })
     relationships2?: Relationship[];
 
+    /* Gamelogs */
+
     @OneToMany(() => UserToGamelog, (userToGamelog) => userToGamelog.user)
     userToGamelogs?: UserToGamelog[];
 
     @ManyToMany(() => Gamelog, (gamelog) => gamelog.users)
     gamelogs?: Gamelog[];
 
-    @OneToMany(() => ChannelMember, (member) => member.user)
-    channels?: ChannelMember[];
+    /* Chat */
 
     /* Helper Function */
 

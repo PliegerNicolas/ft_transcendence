@@ -3,9 +3,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constant';
-import { TypeORMError } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/users/entities/User';
+import { User } from 'src/users/entities/User.entity';
 
 @Module({
 

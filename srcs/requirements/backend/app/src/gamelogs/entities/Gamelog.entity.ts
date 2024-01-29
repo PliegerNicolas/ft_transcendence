@@ -1,7 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { UserToGamelog } from "./UserToGamelog";
 import { IsEnum } from "class-validator";
-import { User } from "src/users/entities/User";
+import { UserToGamelog } from "./UserToGamelog.entity";
+import { User } from "src/users/entities/User.entity";
 
 export enum GameType {
     PONG = "pong",
