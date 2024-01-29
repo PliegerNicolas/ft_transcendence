@@ -31,8 +31,14 @@ export class ChannelsService {
     }
 
     async createChannel(userId: number, channelDetails: CreateChannelParams): Promise<Channel> {
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+        });
+
+        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+
         const channel = this.channelRepository.create({
-            members: await this.initializeChannelMembersList(userId),
+            members: [user],
             ...channelDetails,
         });
 
@@ -68,19 +74,6 @@ export class ChannelsService {
     async deleteChannel(id: number): Promise<string> {
         await this.channelRepository.delete(id);
         return (`Channel with ID ${id} successfully deleted`);
-    }
-
-    /* Helper Functions */
-
-    private async initializeChannelMembersList(userId: number): Promise<User[]> {
-        const user = await this.userRepository.findOne({
-            where: { id: userId },
-            relations: ['channels'],
-        });
-
-        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
-
-        return ([user]);
     }
 
 }
