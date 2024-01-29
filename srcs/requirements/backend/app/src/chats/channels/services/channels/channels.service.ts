@@ -2,8 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel } from '../../entities/Channel.entity';
 import { Repository } from 'typeorm';
-import { CreateChannelParams } from '../../types/channel.type';
-import { ChannelMember } from '../../entities/ChannelMember.entity';
+import { CreateChannelParams, ReplaceChannelParams, UpdateChannelParams } from '../../types/channel.type';
 import { User } from 'src/users/entities/User.entity';
 
 @Injectable()
@@ -12,8 +11,6 @@ export class ChannelsService {
     constructor(
         @InjectRepository(Channel)
         private readonly channelRepository: Repository<Channel>,
-        @InjectRepository(ChannelMember)
-        private readonly channelMemberRepository: Repository<ChannelMember>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
     ) {}
@@ -23,8 +20,6 @@ export class ChannelsService {
     }
 
     async getUserChannels(userId: number): Promise<Channel[]> {
-        return null;
-        /*
         const user = await this.userRepository.findOne({
             where: { id: userId },
             relations: ['channels'],
@@ -33,36 +28,59 @@ export class ChannelsService {
         if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
 
         return (user.channels);
-        */
     }
 
     async createChannel(userId: number, channelDetails: CreateChannelParams): Promise<Channel> {
-        return null;
-        /*
         const channel = this.channelRepository.create({
-            users: await this.initializeChannelMembers(userId),
+            members: await this.initializeChannelMembersList(userId),
             ...channelDetails,
         });
 
         return (await this.channelRepository.save(channel));
-        */
+    }
+
+    async replaceChannel(id: number, channelDetails: ReplaceChannelParams): Promise<Channel> {
+        const channel = await this.channelRepository.findOne({
+            where: { id },
+        });
+
+        if (!channel) throw new NotFoundException(`Channel with ID ${id} not found`);
+
+        return (await this.channelRepository.save({
+            ...channelDetails,
+            ...channel,
+        }));
+    }
+
+    async updateChannel(id: number, channelDetails: UpdateChannelParams): Promise<Channel> {
+        const channel = await this.channelRepository.findOne({
+            where: { id },
+        });
+
+        if (!channel) throw new NotFoundException(`Channel with ID ${id} not found`);
+
+        return (await this.channelRepository.save({
+            ...channelDetails,
+            ...channel,
+        }));
+    }
+
+    async deleteChannel(id: number): Promise<string> {
+        await this.channelRepository.delete(id);
+        return (`Channel with ID ${id} successfully deleted`);
     }
 
     /* Helper Functions */
 
-    /*
-    private async initializeChannelMembers(userId: number): Promise<ChannelMember[]> {
+    private async initializeChannelMembersList(userId: number): Promise<User[]> {
         const user = await this.userRepository.findOne({
             where: { id: userId },
-            relations: ['channels']
+            relations: ['channels'],
         });
 
         if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
 
-        const members = [this.channelMemberRepository.create({ user: user })];
-
-        return (members);
+        return ([user]);
     }
-    */
 
 }

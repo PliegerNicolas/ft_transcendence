@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, ValidationPipe } from '@nestjs/common';
 import { ChannelsService } from '../services/channels/channels.service';
 import { CreateChannelDto } from '../dtos/CreateChannel.dto';
-import { CreateGamelogDto } from 'src/gamelogs/dtos/CreateGamelog.dto';
+import { UpdateChannelDto } from '../dtos/UpdateChannel.dto';
+import { ReplaceChannelDto } from '../dtos/ReplaceChannel.dto';
 
 @Controller()
 export class ChannelsController {
@@ -26,53 +27,25 @@ export class ChannelsController {
         return (await this.channelService.createChannel(userId, createChannelDto));
     }
 
-    /*
-    @Get()
-    async getRelationships(@Param('userId', ParseIntPipe) userId: number) {
-        return (await this.relationshipService.getUserRelationships(userId));
+    @Put('channels/:id')
+    async replaceChannel(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ValidationPipe) replaceChannelDto: ReplaceChannelDto
+    ) {
+        return (await this.channelService.replaceChannel(id, replaceChannelDto));
     }
 
-    @Get(':targetId')
-    async getRelationship(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('targetId', ParseIntPipe) targetId: number
+    @Patch('channels/:id')
+    async updateChannel(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ValidationPipe) updateChannelDto: UpdateChannelDto
     ) {
-        return (await this.relationshipService.getUserRelationship(userId, targetId));
+        return (await this.channelService.updateChannel(id, updateChannelDto));
     }
 
-    @Post()
-    async createRelationship(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Body(new ValidationPipe) createRelationshipDto: CreateRelationshipDto,
-    ) {
-        return (this.relationshipService.createUserRelationship(userId, createRelationshipDto));
+    @Delete('channels/:id')
+    async deleteChannel(@Param('id', ParseIntPipe) id: number) {
+        return (await this.channelService.deleteChannel(id));
     }
-
-    @Put(':targetId')
-    async replaceRelationship(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('targetId', ParseIntPipe) targetId: number,
-        @Body(new ValidationPipe) replaceRelationshipDto: ReplaceRelationshipDto,
-    ) {
-        return (this.relationshipService.replaceUserRelationship(userId, targetId, replaceRelationshipDto));
-    }
-
-    @Patch(':targetId')
-    async updateRelationship(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('targetId', ParseIntPipe) targetId: number,
-        @Body(new ValidationPipe) updateRelationshipDto: UpdateRelationshipDto,
-    ) {
-        return (this.relationshipService.updateUserRelationship(userId, targetId, updateRelationshipDto));
-    }
-
-    @Delete(':targetId')
-    async deleteUserById(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('targetId', ParseIntPipe) targetId: number,
-    ) {
-        return (await this.relationshipService.deleteRelationship(userId, targetId));
-    }
-    */
 
 }

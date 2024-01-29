@@ -47,3 +47,11 @@ API_SECRET = "<SECRET>"
 - `PUT` ⇒ `/gamelogs/{:id}` : *This modifies the Gamelog set, asking for a complete alteration. (cf. ReplaceGamelog.dto.ts)*
 - `PATCH` ⇒ `/gamelogs/{:id}` : *This modifies the Gamelog set between the two Users, asking for a partial or complete alteration. (cf. UpdateGamelog.dto.ts)*
 - `DELETE` ⇒ `/gamelogs/{:id}` : *This delete the Gamelog.*
+
+@Channels
+- `GET` ⇒ `/channels` : *This lists all the existing channels.*
+- `GET` ⇒ `/users/{:userId}/channels` : *This lists all Users's Channels.*
+- `POST` ⇒ `/users/{:userId}/channels` : *This creates a new Channel. (cf. CreateChannel.dto.ts)*
+- `PUT` ⇒ `/channels/{:id}` : *This modifies the Channel set, asking for a complete alteration. (cf. ReplaceGamelog.dto.ts)*
+- `PATCH` ⇒ `/channels/{:id}` : *This modifies the Channel set between the two Users, asking for a partial or complete alteration. (cf. UpdateGamelog.dto.ts)*
+- `DELETE` ⇒ `/gamelogs/{:id}` : *This delete the Gamelog.*

@@ -12,7 +12,6 @@ import { GamelogsModule } from './gamelogs/gamelogs.module';
 import { Gamelog } from './gamelogs/entities/Gamelog.entity';
 import { UserToGamelog } from './gamelogs/entities/UserToGamelog.entity';
 import { ChatsModule } from './chats/chats.module';
-import { ChannelMember } from './chats/channels/entities/ChannelMember.entity';
 import { Channel } from './chats/channels/entities/Channel.entity';
 import { Message } from './chats/messages/entities/Message.entity';
 
@@ -26,7 +25,7 @@ import { Message } from './chats/messages/entities/Message.entity';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [User, Profile, Relationship, Gamelog, UserToGamelog, Channel, ChannelMember, Message],
+      entities: [User, Profile, Relationship, Gamelog, UserToGamelog, Channel, Message],
       synchronize: true,
       //logging: true, // TEMP
     }),

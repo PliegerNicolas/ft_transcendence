@@ -1,4 +1,6 @@
 import { Exclude } from "class-transformer";
+import { Channel } from "src/chats/channels/entities/Channel.entity";
+import { Message } from "src/chats/messages/entities/Message.entity";
 import { Gamelog } from "src/gamelogs/entities/Gamelog.entity";
 import { UserToGamelog } from "src/gamelogs/entities/UserToGamelog.entity";
 import { Profile } from "src/profiles/entities/Profile.entity";
@@ -52,6 +54,12 @@ export class User {
     gamelogs?: Gamelog[];
 
     /* Chat */
+
+    @ManyToMany(() => Channel, (channel) => channel.members)
+    channels?: Channel[];
+
+    @OneToMany(() => Message, (message) => message.user, { cascade: true })
+    messages?: Message[];
 
     /* Helper Function */
 
