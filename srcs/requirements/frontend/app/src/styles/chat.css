@@ -1,0 +1,113 @@
+.Chat {
+	padding: 0;
+	display: flex;
+}
+
+.Chat__Channels {
+	width: 250px;
+	padding: 0;
+
+	overflow-y: scroll;
+
+	background-color: var(--bg-color-2);
+	border-right: 1px solid var(--bg-color-3);
+
+	z-index: 50;
+	box-shadow: 0 0 12px #000a;
+}
+
+.Chat__ChannelsTitle {
+	margin: 18px;
+	user-select: none;
+}
+
+.Chat__ChannelList {
+	border: none;
+	border-radius: 0;
+	overflow-x: hidden;
+}
+
+.Chat__ChannelListItem,
+.Chat__ChannelListItem--curr {
+	height: 36px;
+	width: 226px;
+
+	margin: 0;
+	padding: 6px 16px;
+
+	user-select: none;
+
+	transition: .1s;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.Chat__ChannelListItem:hover {
+	cursor: pointer;
+	background-color: var(--bg-color-3);
+	color: var(--text-accent);
+}
+
+.Chat__ChannelListItem:active {
+	background-color: var(--bg-color-4);
+}
+
+.Chat__ChannelListItem--curr {
+	color: var(--text-accent);
+	background-color: var(--bg-color-4);
+}
+
+.Chat__ChannelListItem--curr:hover {
+	cursor: pointer;
+}
+
+.Chat__ChannelListItemName {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-size: .92rem;
+}
+
+.Chat__ChannelListItemSize {
+	margin-top: 1px;
+	font-size: .64rem;
+	color: var(--text-faint);
+}
+
+.Chat__Content {
+	flex: 1;
+	padding-top: 72px;
+	position: relative;
+}
+
+.Chat__Header {
+	font-size: 1.1rem;
+	font-weight: 600;
+	margin: 0;
+	padding: 18px;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	font-style: italic;
+	background: var(--bg-color-2);
+	border-bottom: 1px solid var(--bg-color-3);
+	box-shadow: 0 0 12px #000a;
+}
+
+.Msg {
+	background: var(--bg-color-2);
+	border: 1px solid var(--bg-color-3);
+	border-radius: 7px 7px 7px 0;
+	margin: 8px;
+	padding: 6px 8px;
+	font-size: .92rem;
+}
+
+.Msg__Sender {
+	font-size: 1rem;
+	color: var(--text-accent);
+	margin-bottom: 4px;
+}
