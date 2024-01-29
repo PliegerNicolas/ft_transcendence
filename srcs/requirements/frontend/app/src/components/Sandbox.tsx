@@ -4,10 +4,9 @@ import { UseQueryResult, useQuery, useMutation, useQueryClient } from "@tanstack
 import { UserType, UserPostType } from "../utils/types.ts"
 import Api from "../utils/Api.ts";
 
+import Spinner from "./Spinner.tsx";
+
 import "../styles/sandbox.css";
-
-import hourglass from "../assets/hourglass.svg";
-
 
 // <Sandbox /> =================================================================
 
@@ -40,9 +39,13 @@ export default function Sandbox()
 
 		return {
 			username: "mayeul_" + uid, email: "mayeul_" + uid + "@example.com",
-			profile: { firstName: "Mayeul", lastName: "Laneyrie" }
+			profile: { firstName: "Mayeul", lastName: "Laneyrie" },
+			password: "some random password I guess"
 		};
 	}
+
+	if (usersPost.isError)
+		console.log(usersPost.error);
 
 	return (
 		<main className="MainContent">
@@ -81,7 +84,7 @@ function UserListRender(
 {
 	if (query.isPending) return (
 		<div className="genericList">
-			<div><div className="Spinner"><img src={ hourglass } /></div></div>
+			<div><Spinner /></div>
 		</div>
 	);
 
