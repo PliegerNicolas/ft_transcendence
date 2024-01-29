@@ -9,7 +9,6 @@ import { RelationshipsModule } from './relationships/relationships.module';
 import { Relationship } from './relationships/entities/Relationship';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
-import { SocketModule } from './socket/socket.module';
 import { GamelogsModule } from './gamelogs/gamelogs.module';
 import { Gamelog } from './gamelogs/entities/Gamelog';
 import { UserToGamelog } from './gamelogs/entities/UserToGamelog';
@@ -34,7 +33,6 @@ import { UserToGamelog } from './gamelogs/entities/UserToGamelog';
     GamelogsModule,
 	  AuthModule,
     ChatModule,
-    SocketModule,
   ],
   controllers: [],
   providers: [],
