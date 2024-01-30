@@ -3,8 +3,8 @@
 	display: flex;
 }
 
-.Chat__Channels {
-	width: 250px;
+.Chat__Sidebar {
+	width: 240px;
 	padding: 0;
 
 	overflow-y: scroll;
@@ -19,27 +19,35 @@
 
 }
 
-.Chat__Channels.collapse {
+.Chat__Sidebar.collapse {
 	animation: collapse .2s ease-in-out forwards;
 }
 
-.Chat__Channels.expand {
+.Chat__Sidebar.expand {
 	animation: expand .2s ease-in-out forwards;
 }
 
-@keyframes collapse
-{
-	0% { width: 250px; }
-	100% { width: 0px; }
+@keyframes collapse {
+	0% {
+		width: 240px;
+	}
+
+	100% {
+		width: 0px;
+	}
 }
 
-@keyframes expand
-{
-	0% { width: 0px; }
-	100% { width: 250px; }
+@keyframes expand {
+	0% {
+		width: 0px;
+	}
+
+	100% {
+		width: 240px;
+	}
 }
 
-.Chat__ChannelsTitle {
+.Chat__SidebarTitle {
 	height: 54px;
 	margin: 0;
 	display: flex;
@@ -59,10 +67,12 @@
 	align-items: center;
 	border-left: 1px solid var(--bg-color-4);
 }
+
 .Chat__Collapse:hover {
 	cursor: pointer;
 	background: var(--bg-color-3);
 }
+
 .Chat__Collapse:active {
 	background: var(--bg-color-4);
 }
@@ -71,20 +81,20 @@
 	height: 28px;
 }
 
-.Chat__ChannelList {
+.Chat__ChanList {
 	border: none;
 	border-top: 1px solid var(--bg-color-4);
 	border-radius: 0;
 	overflow-x: hidden;
 }
 
-.Chat__ChannelListItem,
-.Chat__ChannelListItem--curr {
+.Chat__ChanListItem,
+.Chat__ChanListItem--curr {
 	height: 36px;
 	width: calc(100% - 32px - 12px);
 
 	margin: 4px 6px;
-	padding: 4px 16px;
+	padding: 4px 16px 2px;
 	border-radius: 7px;
 
 	user-select: none;
@@ -96,33 +106,33 @@
 	justify-content: center;
 }
 
-.Chat__ChannelListItem:hover {
+.Chat__ChanListItem:hover {
 	cursor: pointer;
 	background-color: var(--bg-color-3);
 	color: var(--text-accent);
 }
 
-.Chat__ChannelListItem:active {
+.Chat__ChanListItem:active {
 	background-color: var(--bg-color-4);
 }
 
-.Chat__ChannelListItem--curr {
+.Chat__ChanListItem--curr {
 	color: var(--text-accent);
 	background-color: var(--bg-color-4);
 }
 
-.Chat__ChannelListItem--curr:hover {
+.Chat__ChanListItem--curr:hover {
 	cursor: pointer;
 }
 
-.Chat__ChannelListItemName {
+.Chat__ChanListItemName {
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	font-size: .92rem;
 }
 
-.Chat__ChannelListItemSize {
+.Chat__ChanListItemSize {
 	margin-top: 1px;
 	font-size: .64rem;
 	overflow-x: hidden;
@@ -134,7 +144,7 @@
 	position: relative;
 	flex: 1;
 	padding-top: 54px;
-	padding-bottom: 104px;
+	padding-bottom: 100px;
 	display: flex;
 	flex-direction: column;
 	justify-content: end;
@@ -164,10 +174,14 @@
 	animation: expandbutton .2s ease-in-out forwards;
 }
 
-@keyframes expandbutton
-{
-	0% { width: 0px; }
-	100% { width: 48px; }
+@keyframes expandbutton {
+	0% {
+		width: 0px;
+	}
+
+	100% {
+		width: 48px;
+	}
 }
 
 .Chat__Title {
@@ -179,27 +193,82 @@
 
 .Chat__Convo {
 	overflow-y: auto;
+	padding-bottom: 2px;
 }
 
-.Msg,
-.Msg--me {
-	background: var(--bg-color-2);
-	border: 1px solid var(--bg-color-3);
-	border-radius: 18px 18px 18px 0;
-	margin: 4px 8px;
-	padding: 6px 8px;
+.Chat__Start {
 	font-size: .92rem;
+	margin: 32px 24px;
 }
 
-.Msg--me {
+.Msg {
+	background: var(--bg-color-2);
+	border-radius: 18px 18px 18px 0;
+	margin: 6px 8px;
+	padding: 6px 8px;
+	font-size: .9rem;
+	display: flex;
+}
+.Msg.me {
 	background: var(--bg-color-3);
-	border: 1px solid var(--bg-color-4);
 	border-radius: 18px 18px 0 18px;
 }
+
+.Msg.connectPrev {
+	margin-top: 0;
+	border-top: 1px solid var(--bg-color-3);
+	border-radius: 0 0 18px 0;
+}
+.Msg.connectPrev.me {
+	border-top: 1px solid var(--bg-color-4);
+	border-radius: 0 0 0 18px;
+}
+
+.Msg.connectNext {
+	margin-bottom: 0;
+	border-radius: 18px 18px 0 0;
+}
+
+.Msg.connectNext.Msg.connectPrev {
+	border-radius: 0px;
+}
+
+.Msg__PictureDiv {
+	width: 48px;
+	height: 50px;
+	margin-right: 12px;
+}
+.Msg.connectPrev>.Msg__PictureDiv {
+	height: 0;
+}
+
+.Msg__PictureDiv>img {
+	width: 48px;
+	height: 48px;
+
+	border-radius: 12px;
+	border: 1px solid var(--bg-color-5);
+}
+.Msg.connectPrev>.Msg__PictureDiv>img {
+	display: none;
+}
+
+.Msg__Info {
+	margin-bottom: 4px;
+}
+.Msg.connectPrev>div>.Msg__Info {
+	display: none;
+}
+
 
 .Msg__Sender {
 	font-size: .92rem;
 	margin-bottom: 4px;
+}
+
+.Msg__Date {
+	margin-left: 8px;
+	font-size: .72rem;
 }
 
 .Chat__Input {
