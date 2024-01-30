@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
+import closeLeft from "../assets/close-left.svg";
+import openLeft from "../assets/open-left.svg";
 import "../styles/chat.css";
 
 function ChatTest()
@@ -12,18 +14,18 @@ function ChatTest()
 		},
 		{
 			id: 2,
-			name: "julboyer, PliegerNicolas, Jonatesp",
-			size: 3
+			name: "julboyer, PliegerNicolas, Jonatesp, mayeul",
+			size: 4
 		},
 		{
 			id: 3,
 			name: "PliegerNicolas",
-			size: 1
+			size: 2
 		},
 		{
 			id: 4,
 			name: "Jonatesp",
-			size: 1
+			size: 2
 		},
 		{
 			id: 5,
@@ -33,7 +35,7 @@ function ChatTest()
 		{
 			id: 6,
 			name: " julboyer",
-			size: 1
+			size: 2
 		}
 	];
 
@@ -86,28 +88,51 @@ function ChatTest()
 		},
 	]
 
-	const [currentChan, setCurrentChan] = useState(1);
+	const [showChanList, setShowChanList] = useState(1);
 
-	const currentChanName = dummyChanList
-		.filter(item => item.id === currentChan)[0].name;
+	const [currentChanId, setCurrentChanId] = useState(1);
+
+	const currentChan = dummyChanList
+		.filter(item => item.id === currentChanId)[0];
+
+	/*
+	** These lines are desirable to auto-scroll at bottom of chat.
+	*/
+	const ref = useRef<HTMLDivElement>(null);
+
+	useEffect(() => ref.current?.scrollIntoView({behavior: "smooth"}), []);
 
 	return (
 		<main className="MainContent Chat">
-			<div className="Chat__Channels">
+		{
+			showChanList ?
+			<div className={
+				"Chat__Channels"
+				+ (showChanList === -1 ? " collapse" : "")
+				+ (showChanList === 2 ? " expand" : "")
+			}>
 				<h3 className="Chat__ChannelsTitle">
-					Your channels:
+					Your channels
+					<div
+						className="Chat__Collapse"
+						onClick={() => {
+							setShowChanList(-1);
+							setTimeout(() => {setShowChanList(0)}, 200);
+					}}>
+						<img src={closeLeft} />
+					</div>
 				</h3>
 				<div className="Chat__ChannelList">
 				{
 					dummyChanList.map(item =>
 						<div
 							key={item.id}
-							className={`Chat__ChannelListItem${item.id === currentChan ? "--curr" : ""}`}
-							onClick={() => {setCurrentChan(item.id)}}
+							className={`Chat__ChannelListItem${item.id === currentChanId ? "--curr" : ""}`}
+							onClick={() => {setCurrentChanId(item.id)}}
 						>
 							<div className="Chat__ChannelListItemName">{item.name}</div>
 							{
-								item.size != 1 &&
+								item.size > 2 &&
 								<div className="Chat__ChannelListItemSize">
 									{item.size + " members"}
 								</div>
@@ -116,22 +141,43 @@ function ChatTest()
 					)
 				}
 				</div>
-			</div>
+			</div> : ""
+		}
 			<div className="Chat__Content">
 				<div className="Chat__Header">
-					{currentChanName}
+				{
+					showChanList < 1 ?
+					<div className="Chat__Collapse Chat__Expand" onClick={() => {
+						setShowChanList(2);
+						setTimeout(() => {setShowChanList(1)}, 200);
+					}}>
+						<img src={openLeft} />
+					</div> : ""
+				}
+					<div className="Chat__Title">
+						{currentChan.name}
+					</div>
 				</div>
-				<div className="Chat__MsgList">
+				<div className="Chat__Convo">
 				{
 					dummyMsgList.map((item, index) => 
-						<div key={index} className="Msg">
-							<div className="Msg__Sender">
+						<div key={index} className={`Msg${item.uid === 1 ? "--me" : ""}`}>
+							<div
+								className="Msg__Sender"
+								style={{color: `hsl(${(360 / currentChan.size) * item.uid} 80% 80%)`}}
+							>
 								{item.username}
 							</div>
 							{item.content}
 						</div>
 					)
 				}
+				<div ref={ref} />
+				</div>
+				<div className="Chat__Input">
+					<textarea
+						placeholder={`Send a message to « ${currentChan.name} »`}
+					/>
 				</div>
 			</div>
 		</main>
