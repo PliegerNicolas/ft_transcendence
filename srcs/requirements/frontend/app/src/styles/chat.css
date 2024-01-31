@@ -1,0 +1,56 @@
+:root {
+	--bg-color-1: #101423;
+	--bg-color-2: #181e34;
+	--bg-color-3: #262c40;
+	--bg-color-4: #363c50;
+	--bg-color-5: #464c60;
+
+	--text-faint: #aac;
+	--text-normal: #cce;
+	--text-middle: #d9d9fa;
+	--text-accent: #e2e2ff;
+
+	--current-option-text: #e8e8ff;
+	--current-option-bg: #46c;
+
+	--link-normal: #8af;
+	--link-visited: #aaf;
+
+	--error: #f9a;
+	--error-bg: #d35;
+}
+
+.Messages__Sender {
+	position: relative;
+	padding-left: 15px;
+	margin-left: 2px;
+	margin-right: 5px;
+	font-size: 0.9rem;
+}
+
+.Messages__Content {
+	display:flex
+}
+
+.Messages__Date {
+	font-size: 0.65rem;
+	opacity: 0.5;
+}
+
+.UserList__name {
+	display: inline flex;
+	margin: 10px 5px;
+	padding: 5px 10px;
+	background: var(--bg-color-2);
+	border: 1px solid var(--bg-color-4);
+	border-radius: 3px;
+	line-height: 1em;
+	box-shadow: 0 0 12px -4px #000a;
+}
+
+.UserList__name:hover {
+	cursor: pointer;
+	background: var(--bg-color-3);
+	color: var(--text-accent);
+	border: 1px solid var(--bg-color-3);
+}
