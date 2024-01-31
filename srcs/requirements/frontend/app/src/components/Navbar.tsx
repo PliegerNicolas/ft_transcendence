@@ -22,7 +22,7 @@ function Navbar()
 		{ name: "About", path: "/about", img: aboutIcon },
 		{ name: "Sandbox", path: "/sandbox", img: sandboxIcon }
 	];
-	let loc = useLocation();
+	const loc = useLocation();
 
 	const navHtml = options.map((elem, index) =>
 		<Link to={elem.path} key={index} className={

@@ -41,3 +41,10 @@ export interface MsgType {
 	content: string,
 	date: string
 }
+
+export interface ChanType {
+	id: number,
+	name: string,
+	size: number,
+	msgs: MsgType[]
+}

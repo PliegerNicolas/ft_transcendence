@@ -42,7 +42,7 @@
 	display: flex;
 }
 
-.Chat__Sidebar {
+.ChatSidebar {
 	width: 240px;
 	padding: 0;
 
@@ -58,11 +58,11 @@
 
 }
 
-.Chat__Sidebar.collapse {
+.ChatSidebar.collapse {
 	animation: collapse .2s ease-in-out forwards;
 }
 
-.Chat__Sidebar.expand {
+.ChatSidebar.expand {
 	animation: expand .2s ease-in-out forwards;
 }
 
@@ -86,7 +86,7 @@
 	}
 }
 
-.Chat__SidebarTitle {
+.ChatSidebar__Title {
 	height: 54px;
 	margin: 0;
 	display: flex;
@@ -127,8 +127,7 @@
 	overflow-x: hidden;
 }
 
-.Chat__ChanListItem,
-.Chat__ChanListItem--curr {
+.Chat__ChanListItem {
 	height: 36px;
 	width: calc(100% - 32px - 12px);
 
@@ -143,6 +142,11 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+
+	color: var(--text-normal);
+}
+.Chat__ChanListItem:visited {
+	color: var(--text-normal);
 }
 
 .Chat__ChanListItem:hover {
@@ -155,12 +159,12 @@
 	background-color: var(--bg-color-4);
 }
 
-.Chat__ChanListItem--curr {
+.Chat__ChanListItem.curr {
 	color: var(--text-accent);
 	background-color: var(--bg-color-4);
 }
 
-.Chat__ChanListItem--curr:hover {
+.Chat__ChanListItem.curr:hover {
 	cursor: pointer;
 }
 
