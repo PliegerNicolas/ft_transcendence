@@ -24,7 +24,7 @@ export class ChatGateway implements OnModuleInit {
 
   @SubscribeMessage('newMessage')
   handleNewMessage(@MessageBody() message: MessagePayloads, @ConnectedSocket() client: Socket) {
-    client.to(message.channel).emit('onMessage', {
+    this.server.to(message.channel).emit('onMessage', {
       content: message.content,
       sender_id: client.id,
       channel_id: message.channel,
@@ -32,10 +32,14 @@ export class ChatGateway implements OnModuleInit {
     });
   }
 
-  @SubscribeMessage('createChannel')
-  handleChannelCreate(@MessageBody() channel_name: string, @ConnectedSocket() client: Socket) {
-    client.join(channel_name);
-    this.server.to(channel_name).emit('createdChannel', channel_name);
+  @SubscribeMessage('privMessage')
+  handlePrivMessage(@MessageBody() message: MessagePayloads, @ConnectedSocket() client: Socket) {
+    client.to(message.channel).emit('onMessage', {
+      content: message.content,
+      sender_id: client.id,
+      channel_id: message.channel,
+      date: Date()
+    });
   }
 
   @SubscribeMessage('joinChannel')
