@@ -212,7 +212,7 @@ export default function ChatTest()
 						{
 							currentChan.size === 2 ?
 							`Start of your conversation with ${currentChan.name}` :
-							`Start of channel « ${currentChan.name} »`
+							`Start of channel « ${currentChan.name} »`
 						}
 						<hr />
 					</div>
@@ -230,7 +230,7 @@ export default function ChatTest()
 				</div>
 				<div className="Chat__Input">
 					<textarea
-						placeholder={`Send a message to « ${currentChan.name} »`}
+						placeholder={`Send a message to « ${currentChan.name} »`}
 						value={inputValue}
 						onChange={handleInputChange}
 					/>
