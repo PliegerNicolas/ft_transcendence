@@ -23,10 +23,12 @@ function Navbar()
 		{ name: "Sandbox", path: "/sandbox", img: sandboxIcon }
 	];
 	const loc = useLocation();
+	const pathArray = loc.pathname.match(/^\/[^/]*/);
+	const path = pathArray?.length ? pathArray[0] : "";
 
 	const navHtml = options.map((elem, index) =>
 		<Link to={elem.path} key={index} className={
-			`Navbar__Link Navbar__Button${elem.path === loc.pathname ? "--Curr" : ""}`
+			`Navbar__Link Navbar__Button${elem.path === path ? "--Curr" : ""}`
 		}>
 			<img src={elem.img}/>
 			<div className="Navbar__Text">
