@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import { Routes, Route, useNavigate, Link, useParams, useLocation } from "react-router-dom";
 
-import { MsgType } from "../utils/types";
+import { MsgType, ChanType } from "../utils/types";
 
 import closeLeft from "../assets/close-left.svg";
 import openLeft from "../assets/open-left.svg";
@@ -12,39 +13,6 @@ import "../styles/chat.css";
 
 export default function ChatTest()
 {
-	const chanList = [
-		{
-			id: 1,
-			name: "Un channel",
-			size: 7
-		},
-		{
-			id: 2,
-			name: "julboyer, PliegerNicolas, Jonatesp, mayeul",
-			size: 4
-		},
-		{
-			id: 3,
-			name: "PliegerNicolas",
-			size: 2
-		},
-		{
-			id: 4,
-			name: "Jonatesp",
-			size: 2
-		},
-		{
-			id: 5,
-			name: "La meilleure convo",
-			size: 42
-		},
-		{
-			id: 6,
-			name: " julboyer",
-			size: 2
-		}
-	];
-
 	const [msgList, setMsgList] = useState([
 		{
 			uid: 1,
@@ -119,124 +87,199 @@ export default function ChatTest()
 		},
 	]);
 
-	const [showChanList, setShowChanList] = useState(1);
-	const [currentChanId, setCurrentChanId] = useState(1);
-	const [inputValue, setInputValue] = useState("");
+	const chanList = [
+		{
+			id: 1,
+			name: "Un channel",
+			size: 7,
+			msgs: msgList
+		},
+		{
+			id: 2,
+			name: "julboyer, PliegerNicolas, Jonatesp, mayeul",
+			size: 4,
+			msgs: msgList
+		},
+		{
+			id: 3,
+			name: "PliegerNicolas",
+			size: 2,
+			msgs: msgList
+		},
+		{
+			id: 4,
+			name: "Jonatesp",
+			size: 2,
+			msgs: msgList
+		},
+		{
+			id: 5,
+			name: "La meilleure convo",
+			size: 42,
+			msgs: msgList
+		},
+		{
+			id: 6,
+			name: " julboyer",
+			size: 2,
+			msgs: msgList
+		}
+	];
 
-	const currentChan = chanList
-		.filter(item => item.id === currentChanId)[0];
+	const [showSidebar, setShowSidebar] = useState(1);
+	const navigate = useNavigate();
+
+	useEffect(() => {navigate("/chattest/1")}, []);
+
+	return (
+		<main className="MainContent Chat">
+		{
+			!!showSidebar &&
+			<ChatSidebar show={showSidebar} setShow={setShowSidebar} list={chanList}/>
+		}
+			<Routes>
+				<Route path="/:id" element={
+					<ChatContent
+						showSidebar={showSidebar}
+						setShowSidebar={setShowSidebar}
+						chanList={chanList}
+						setMsgs={setMsgList}/>
+				}/>
+			</Routes>
+		</main>
+	);
+}
+
+// <ChatSidebar /> =============================================================
+
+function ChatSidebar(
+	{show, setShow, list} : {show: number, setShow: Function, list: ChanType[]}
+)
+{
+	const loc = useLocation();
+	const idArray = loc.pathname.match(/\/[^/]*$/);
+	const id = idArray?.length ? +idArray[0].slice(1) : 0;
+
+	return (
+		<div className={
+			`ChatSidebar ${show < 0 && " collapse"} ${show > 1 && "expand"}`
+		}>
+			<h3 className="ChatSidebar__Title">
+				Your channels
+				<div
+					className="Chat__Collapse"
+					onClick={() => { setShow(-1); setTimeout(() => setShow(0), 200); }}
+				>
+					<img src={closeLeft} />
+				</div>
+			</h3>
+			<div className="Chat__ChanList">
+			{
+				list.map(item =>
+					<Link
+						to={`/chattest/${item.id}`}
+						key={item.id}
+						className={`Chat__ChanListItem ${id === item.id && "curr"}`}
+					>
+						<div className="Chat__ChanListItemName">{item.name}</div>
+						{
+							item.size > 2 &&
+							<div className="Chat__ChanListItemSize">
+								{item.size} members
+							</div>
+						}
+					</Link>
+				)
+			}
+			</div>
+		</div>
+	);
+}
+
+// <ChatContent /> =============================================================
+
+function ChatContent(
+	{showSidebar, setShowSidebar, chanList, setMsgs}:
+	{showSidebar: number, setShowSidebar: Function, chanList: ChanType[], setMsgs: Function}
+)
+{
+	const params = useParams();
+	const chan = chanList.filter(item => item.id === +params.id!)[0];
+
+	const [inputValue, setInputValue] = useState("");
 
 	/*
 	** These lines are desirable to auto-scroll at bottom of chat.
 	*/
-	const convoRef = useRef<HTMLDivElement>(null);
 	const anchorRef = useRef<HTMLDivElement>(null);
-	useEffect(() => anchorRef.current?.scrollIntoView(), [msgList]);
+	useEffect(() => anchorRef.current?.scrollIntoView(), [chan.msgs]);
 
+	/*
+	** Manage the input. If the last char is "\n", the textarea is cleared and the
+	** message is added to the list. Of course, it should be send to the server
+	** instead!
+	*/
 	function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
-		const elem: HTMLDivElement = convoRef.current!;
-
-		if (elem?.scrollHeight - elem?.scrollTop === elem?.clientHeight)
-			console.log("AT BOTTOM");
 
 		if (e.currentTarget.value.slice(-1) !== "\n") {
 			setInputValue(e.currentTarget.value);
 			return ;
 		}
-		if (inputValue === "")
+
+		if (!inputValue)
 			return ;
-		setMsgList(prev =>
+
+		setMsgs((prev: MsgType[]) =>
 			[...prev, {uid: 1, username: "mama", content: inputValue, date: "00:00"}]
 		);
 		setInputValue("");
 	}
 
 	return (
-		<main className="MainContent Chat">
-		{
-			showChanList ?
-			<div className={
-				"Chat__Sidebar"
-				+ (showChanList === -1 ? " collapse" : "")
-				+ (showChanList === 2 ? " expand" : "")
-			}>
-				<h3 className="Chat__SidebarTitle">
-					Your channels
-					<div
-						className="Chat__Collapse"
-						onClick={() => {
-							setShowChanList(-1);
-							setTimeout(() => {setShowChanList(0)}, 200);
-					}}>
-						<img src={closeLeft} />
-					</div>
-				</h3>
-				<div className="Chat__ChanList">
-				{
-					chanList.map(item =>
-						<div
-							key={item.id}
-							className={`Chat__ChanListItem${item.id === currentChanId ? "--curr" : ""}`}
-							onClick={() => {setCurrentChanId(item.id)}}
-						>
-							<div className="Chat__ChanListItemName">{item.name}</div>
-							{
-								item.size > 2 &&
-								<div className="Chat__ChanListItemSize">
-									{item.size + " members"}
-								</div>
-							}
-						</div>
-					)
-				}
+		<div className="Chat__Content">
+			<div className="Chat__Header">
+			{
+				showSidebar < 1 &&
+				<div className="Chat__Collapse Chat__Expand" onClick={() => {
+					setShowSidebar(2);
+					setTimeout(() => {setShowSidebar(1)}, 200);
+				}}>
+					<img src={openLeft} />
 				</div>
-			</div> : ""
-		}
-			<div className="Chat__Content">
-				<div className="Chat__Header">
-				{
-					showChanList < 1 ?
-					<div className="Chat__Collapse Chat__Expand" onClick={() => {
-						setShowChanList(2);
-						setTimeout(() => {setShowChanList(1)}, 200);
-					}}>
-						<img src={openLeft} />
-					</div> : ""
-				}
-					<div className="Chat__Title">
-						{currentChan.name}
-					</div>
-				</div>
-				<div className="Chat__Convo" ref={convoRef}>
-					<div className="notice-msg Chat__Start">
-						{
-							currentChan.size === 2 ?
-							`Start of your conversation with ${currentChan.name}` :
-							`Start of channel « ${currentChan.name} »`
-						}
-						<hr />
-					</div>
-					{
-					msgList.map((item, index) =>
-						<Msg
-							key={index}
-							data={item}
-							prev={index ? msgList[index - 1] : null}
-							next={index < msgList.length ? msgList[index + 1] : null}
-							size={currentChan.size}
-						/>)
-					}
-					<div ref={anchorRef} />
-				</div>
-				<div className="Chat__Input">
-					<textarea
-						placeholder={`Send a message to « ${currentChan.name} »`}
-						value={inputValue}
-						onChange={handleInputChange}
-					/>
+			}
+				<div className="Chat__Title">
+					{chan.name}
 				</div>
 			</div>
-		</main>
+			<div className="Chat__Convo">
+				<div className="notice-msg Chat__Start">
+					{
+						chan.size === 2 ?
+						`Start of your conversation with ${chan.name}` :
+						`Start of channel « ${chan.name} »`
+					}
+					<hr />
+				</div>
+				{
+				chan.msgs.map((item, index) =>
+					<Msg
+						key={index}
+						data={item}
+						prev={index ? chan.msgs[index - 1] : null}
+						next={index < chan.msgs.length ? chan.msgs[index + 1] : null}
+						size={chan.size}
+					/>)
+				}
+				<div ref={anchorRef} />
+			</div>
+			<div className="Chat__Input">
+				<textarea
+					placeholder={`Send a message to « ${chan.name} »`}
+					value={inputValue}
+					onChange={handleInputChange}
+				/>
+			</div>
+		</div>
 	);
 }
 
@@ -252,10 +295,10 @@ function Msg(
 
 	return (
 		<div className={
-			"Msg"
-			+ (data.uid === 1 ? " me" : "")
-			+ (connectPrev ? " connectPrev": "")
-			+ (connectNext ? " connectNext" : "")
+			`Msg
+			${data.uid === 1 && "me"}
+			${connectPrev && "connectPrev"}
+			${connectNext && "connectNext"}`
 		}>
 			<div className="Msg__PictureDiv">
 				<img src={defaultPicture} />

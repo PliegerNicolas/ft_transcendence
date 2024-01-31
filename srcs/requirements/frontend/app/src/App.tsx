@@ -103,7 +103,7 @@ function App()
 					<Route path="/play" element={<Play />} />
 					<Route path="/stats" element={<Stats />} />
 					<Route path="/chat" element={<Chat />} />
-					<Route path="/chattest" element={<ChatInterface />} />
+					<Route path="/chattest/*" element={<ChatInterface />} />
 					<Route path="/settings" element={<Settings />} />
 					<Route path="/about" element={<About />} />
 					<Route path="/sandbox" element={<Sandbox />} />
