@@ -3,6 +3,8 @@ import "./App.css";
 import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 
+import { MyContext } from "./utils/contexts.ts";
+
 import Header from "./components/Header.tsx";
 import Navbar from "./components/Navbar.tsx";
 
@@ -10,6 +12,7 @@ import Home from "./components/Home.tsx";
 import Play from "./components/Play.tsx";
 import Stats from "./components/Stats.tsx";
 import Chat from "./components/Chat.tsx";
+import ChatInterface from "./components/ChatInterface.tsx";
 import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
@@ -32,18 +35,22 @@ function Auth(props: {setMyInfo: Function})
 	async function connect() {
 		api
 			.post("/auth", {
-				"code": code, "redirect_uri": `http://${location.host}/auth`
+				"code": code,
+				"redirect_uri": `http://${location.host}/auth`
 			})
 			.then((data: any) => {
+				console.log("SUCCESS");
+				console.log(data);
 				props.setMyInfo({logged: true, token: data.access_token});
 				localStorage.setItem(
 					"my_info", JSON.stringify({logged: true, token: data.access_token})
 				);
 			})
 			.catch(err => {
+				console.log("FAIL");
 				console.log(err);
 				props.setMyInfo({logged: false, token: ""});
-				localStorage.removeItemItem("my_info")
+				localStorage.removeItem("my_info")
 			})
 			.finally(() =>
 				navigate(redirectPath ? redirectPath : "/", {replace: true})
@@ -66,35 +73,46 @@ function NotFound()
 
 function App()
 {
-	const [myInfo, setMyInfo] = useState({
-		logged: false,
-		token: "",
+	const [myInfo, setMyInfo] = useState(() => {
+
+		const data = localStorage.getItem("my_info");
+
+		/*
+		**	Instead of directly returning the data retrieved from the storage, we
+		**	should send an API request to check if the token is still valid. That's
+		**	what we're going to do when possible.
+		*/
+
+		if (data)
+			return (JSON.parse(data));
+
+		return ({
+			logged: false,
+			token: "",
+		});
+
 	});
 
-	/*
-	useEffect(() => {
-		const data = localStorage.getItem("my_info");
-		data && setMyInfo(JSON.parse(data));
-	}, []);
-	*/
-
 	return (
-		<Router>
-			<Header myInfo={myInfo}/>
-			<Navbar />
-			<Routes>
-				<Route path="/"	element={<Home />} />
-				<Route path="/play" element={<Play />} />
-				<Route path="/stats" element={<Stats />} />
-				<Route path="/chat" element={<Chat />} />
-				<Route path="/settings" element={<Settings />} />
-				<Route path="/about" element={<About />} />
-				<Route path="/sandbox" element={<Sandbox />} />
-				<Route path="/user/:id" element={<User />} />
-				<Route path="/auth" element={<Auth setMyInfo={setMyInfo} />} />
-				<Route path="*" element={<NotFound />} />
-			</Routes>
-		</Router>
+		<MyContext.Provider value={myInfo}>
+			<Router>
+				<Header/>
+				<Navbar />
+				<Routes>
+					<Route path="/"	element={<Home />} />
+					<Route path="/play" element={<Play />} />
+					<Route path="/stats" element={<Stats />} />
+					<Route path="/chat" element={<Chat />} />
+					<Route path="/chattest" element={<ChatInterface />} />
+					<Route path="/settings" element={<Settings />} />
+					<Route path="/about" element={<About />} />
+					<Route path="/sandbox" element={<Sandbox />} />
+					<Route path="/user/:id" element={<User />} />
+					<Route path="/auth" element={<Auth setMyInfo={setMyInfo} />} />
+					<Route path="*" element={<NotFound />} />
+				</Routes>
+			</Router>
+		</MyContext.Provider>
 	);
 }
 

@@ -11,3 +11,8 @@ interface FriendshipContextType {
 export const FriendshipContext = createContext(
 	{id: "0", friendships: [], action: () => {}} as FriendshipContextType
 );
+
+export const MyContext = createContext({
+	logged: false,
+	token: ""
+});

@@ -17,6 +17,7 @@ function Navbar()
 		{ name: "Play",	path: "/play", img: playIcon },
 		{ name: "Stats", path: "/stats", img: statsIcon },
 		{ name: "Chat", path: "/chat", img: chatIcon },
+		{ name: "Chat Test", path: "/chattest", img: chatIcon },
 		{ name: "Settings", path: "/settings", img: settingsIcon },
 		{ name: "About", path: "/about", img: aboutIcon },
 		{ name: "Sandbox", path: "/sandbox", img: sandboxIcon }
@@ -34,7 +35,11 @@ function Navbar()
 		</Link>
 	);
 
-	return (<nav className="Navbar"> {navHtml} </nav>);
+	return (
+		<nav className="Navbar">
+			{navHtml}
+		</nav>
+	);
 }
 
 export default Navbar;
