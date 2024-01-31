@@ -10,11 +10,12 @@ export class LocalStrategy extends PassportStrategy(Strategy){
 	}
 
 	async sign(oauthToken:JSON) : Promise<any>{
+		console.log("sign")
 		const token = await this.authService.signIn(oauthToken);
-		if (!token.access_token)
-		{
-			throw new UnauthorizedException();
-		}
+		// if (!token.access_token)
+		// {
+		// 	throw new UnauthorizedException();
+		// }
 		return token;
 	}
 }

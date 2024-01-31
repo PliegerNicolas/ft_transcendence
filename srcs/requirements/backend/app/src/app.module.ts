@@ -12,6 +12,7 @@ import { ChatModule } from './chat/chat.module';
 import { GamelogsModule } from './gamelogs/gamelogs.module';
 import { Gamelog } from './gamelogs/entities/Gamelog';
 import { UserToGamelog } from './gamelogs/entities/UserToGamelog';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -31,10 +32,10 @@ import { UserToGamelog } from './gamelogs/entities/UserToGamelog';
     ProfilesModule,
     RelationshipsModule,
     GamelogsModule,
-	  AuthModule,
+	AuthModule,
     ChatModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
