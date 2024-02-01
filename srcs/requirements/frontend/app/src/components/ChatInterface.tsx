@@ -138,7 +138,7 @@ export default function ChatTest()
 	const loc = useLocation();
 	const navigate = useNavigate();
 	useEffect(() => {
-		if (!loc.pathname.match(/\/[^/]*$/)?.length)
+		if (!loc.pathname.match(/chattest\/[^/]+$/))
 			navigate("/chattest/1")
 	}, []);
 
@@ -167,7 +167,7 @@ function ChatSidebar()
 
 	return (
 		<div className={
-			`ChatSidebar ${showSidebar < 0 && " collapse"} ${showSidebar > 1 && "expand"}`
+			`ChatSidebar ${showSidebar < 0 && "collapse"} ${showSidebar > 1 && "expand"}`
 		}>
 			<h3 className="ChatSidebar__Title">
 				Your channels
