@@ -55,3 +55,5 @@ API_SECRET = "<SECRET>"
 - `PUT` ⇒ `/channels/{:id}` : *This modifies the Channel set, asking for a complete alteration. (cf. ReplaceGamelog.dto.ts)*
 - `PATCH` ⇒ `/channels/{:id}` : *This modifies the Channel set between the two Users, asking for a partial or complete alteration. (cf. UpdateGamelog.dto.ts)*
 - `DELETE` ⇒ `/gamelogs/{:id}` : *This delete the Gamelog.*
+- `PATCH` ⇒ `/users/{:userId}/channels/${:channelId}/join` : *This makes the user join a channel.*
+- `PATCH` ⇒ `/users/{:userId}/channels/${:channelId}/leave` : *This makes the user leave a channel.*

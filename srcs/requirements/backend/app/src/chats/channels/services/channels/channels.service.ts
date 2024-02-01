@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel } from '../../entities/Channel.entity';
 import { Repository } from 'typeorm';
@@ -69,6 +69,56 @@ export class ChannelsService {
             ...channelDetails,
             ...channel,
         }));
+    }
+
+    async joinChannel(userId: number, channelId: number) {
+        const user = await this.userRepository.findOne({
+            where: { id: userId},
+            relations: ['channels'],
+        });
+
+        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+
+        const targetChannel = await this.channelRepository.findOne({
+            where: { id: channelId },
+            relations: ['members'],
+        });
+
+        if (!targetChannel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+
+        if (user.channels.find((channel) => channel.id == targetChannel.id)) {
+            throw new BadRequestException(`User with ID ${userId} already in channel with ID ${channelId}`);
+        }
+
+        targetChannel.members.push(user);
+
+        return (await this.channelRepository.save(targetChannel));
+
+    }
+
+    async leaveChannel(userId: number, channelId: number) {
+        const user = await this.userRepository.findOne({
+            where: { id: userId},
+            relations: ['channels'],
+        });
+
+        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+
+        const targetChannel = await this.channelRepository.findOne({
+            where: { id: channelId },
+            relations: ['members'],
+        });
+
+        if (!targetChannel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+
+        const memberIndex = targetChannel.members.findIndex((member) => member.id == user.id);
+
+        if (memberIndex == -1) throw new BadRequestException(`User with ID ${userId} not in channel with ID ${channelId}`);
+
+        targetChannel.members.splice(memberIndex, 1);
+
+        return (await this.channelRepository.save(targetChannel));
+
     }
 
     async deleteChannel(id: number): Promise<string> {

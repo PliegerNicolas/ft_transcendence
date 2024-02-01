@@ -43,6 +43,22 @@ export class ChannelsController {
         return (await this.channelService.updateChannel(id, updateChannelDto));
     }
 
+    @Patch('users/:userId/channels/:id/join')
+    async joinChannel(
+        @Param('userId', ParseIntPipe) userId: number,
+        @Param('id', ParseIntPipe) channelId: number,
+    ) {
+        return (await this.channelService.joinChannel(userId, channelId));
+    }
+
+    @Patch('users/:userId/channels/:id/leave')
+    async leaveChannel(
+        @Param('userId', ParseIntPipe) userId: number,
+        @Param('id', ParseIntPipe) channelId: number,
+    ) {
+        return (await this.channelService.leaveChannel(userId, channelId));
+    }
+
     @Delete('channels/:id')
     async deleteChannel(@Param('id', ParseIntPipe) id: number) {
         return (await this.channelService.deleteChannel(id));
