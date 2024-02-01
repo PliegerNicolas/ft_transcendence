@@ -1,4 +1,7 @@
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
+import { MyContext } from "../utils/contexts";
+
+import { useContext } from "react";
 
 import "../styles/header.css";
 
@@ -6,9 +9,7 @@ import ft_logo from "../assets/42.svg";
 import check from "../assets/check.svg";
 import loginIcon from "../assets/login.svg";
 
-import { MyInfoType } from "../utils/types";
-
-function Header(props: {myInfo: MyInfoType})
+function Header()
 {
 	const redirectLinkParams = new URLSearchParams({
 		client_id: import.meta.env.VITE_FTAPI_CLIENTID,
@@ -18,6 +19,7 @@ function Header(props: {myInfo: MyInfoType})
 	const redirectLink
 		= "https://api.intra.42.fr/oauth/authorize?"
 		+ redirectLinkParams.toString();
+	const myInfo = useContext(MyContext);
 
 	return (
 		<header className="Header">
@@ -28,7 +30,7 @@ function Header(props: {myInfo: MyInfoType})
 				</div>
 			</Link>
 			{
-				props.myInfo.logged ?
+				myInfo.logged ?
 				<div className="Header__Login">
 					Logged In
 					<img src={check} />

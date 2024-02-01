@@ -1,6 +1,7 @@
-.App {
-	--test-color: #f0f;
-}
+
+/*
+** MainContent =================================================================
+*/
 
 .MainContent {
 	background: var(--bg-color-1);
@@ -16,42 +17,57 @@
 	transition: .1s;
 }
 
-@media (min-width: 1200px) {
-	.MainContent {
-		padding: 15px 50px 80px;
-	}
+@media (min-width: 1200px) { .MainContent { padding: 15px 50px 80px; }}
+
+@media (min-width: 1500px) { .MainContent { padding: 15px 100px 80px; }}
+
+@media (min-width: 1800px) { .MainContent { padding: 15px 150px 80px; }}
+
+@media (min-width: 2100px) { .MainContent { padding: 15px 200px 80px; }}
+
+@media (max-width: 1000px) { .MainContent { left: 66px; }}
+
+@media (max-width: 640px) { .MainContent { left: 0; bottom: 62px; }}
+
+/*
+** Spinner =====================================================================
+*/
+
+.Spinner {
+	display: flex;
+	justify-content: center;
+	height: 80px;
 }
 
-@media (min-width: 1500px) {
-	.MainContent {
-		padding: 15px 100px 80px;
-	}
+.Spinner > img {
+	width: 50px;
+	animation:
+		spin .8s ease-in-out infinite,
+		fadein 1s ease-in-out,
+		glow alternate ease-in-out .8s infinite;
 }
 
-@media (min-width: 1800px) {
-	.MainContent {
-		padding: 15px 150px 80px;
-	}
+@keyframes spin
+{
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(180deg); }
 }
 
-@media (min-width: 2100px) {
-	.MainContent {
-		padding: 15px 200px 80px;
-	}
+@keyframes fadein
+{
+	0% { opacity: 0; }
+	100% { opacity: 1; }
 }
 
-@media (max-width: 1000px) {
-	.MainContent {
-		left: 66px;
-	}
+@keyframes glow
+{
+	0% { filter: drop-shadow(0 0 8px #fff6); }
+	100% { filter: brightness(2) (0 0 8px #ffff); }
 }
 
-@media (max-width: 640px) {
-	.MainContent {
-		left: 0;
-		bottom: 62px;
-	}
-}
+/*
+** GenericList =================================================================
+*/
 
 .genericList {
 	background: var(--bg-color-3);

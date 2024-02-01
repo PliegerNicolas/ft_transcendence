@@ -13,9 +13,7 @@ export class ReplaceUserDto {
     @IsNotEmpty()
     username: string;
 
-    @IsDefined()
-    @IsNotEmpty()
-    password: string;
+
 
     @ValidateNested()
     @Type(() => ReplaceProfileDto)

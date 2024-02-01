@@ -5,6 +5,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constant';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/User.entity';
+import { UsersModule } from 'src/users/users.module';
+import { PassportModule } from '@nestjs/passport';
+import { LocalStrategy } from './local.strategy';
 
 @Module({
 
@@ -12,8 +15,9 @@ import { User } from 'src/users/entities/User.entity';
 	global:true,
 	secret:jwtConstants.secret
   }), 
-  TypeOrmModule.forFeature([User])],
+  TypeOrmModule.forFeature([User]),
+	UsersModule, PassportModule],
   controllers: [AuthController],
-  providers: [AuthService]
+  providers: [AuthService, LocalStrategy]
 })
 export class AuthModule {}

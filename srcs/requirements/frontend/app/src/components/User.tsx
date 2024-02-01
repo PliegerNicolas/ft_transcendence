@@ -6,6 +6,8 @@ import { FriendshipContext } from "../utils/contexts.ts";
 import { FriendshipType } from "../utils/types.ts"
 import Api from "../utils/Api";
 
+import Spinner from "./Spinner.tsx";
+
 import "../styles/user.css";
 
 import defaultPicture from "../assets/default_profile.png";
@@ -22,7 +24,7 @@ export default function User()
 	const userGet = useQuery({
 		queryKey: ["users", id],
 		queryFn: () => api.get("/users/" + id),
-		retry: (count, error) => !error.message.includes("404") || count < 0
+		retry: (count, error) => !error.message.includes("404") && count < 3
 	});
 
 	const userDel = useMutation({
@@ -34,7 +36,7 @@ export default function User()
 		queryKey: ["users", id, "friends"],
 		queryFn: () => api.get("/users/" + id + "/relationships"),
 		enabled: userGet.isSuccess,
-		retry: (count, error) => !error.message.includes("404") || count < 0
+		retry: (count, error) => !error.message.includes("404") && count < 3
 	});
 
 	const friendshipAccept = useMutation({
@@ -54,8 +56,8 @@ export default function User()
 		<main className="MainContent">
 		{
 			userGet.isPending ?
-			<div className="p-style notice-msg">
-				Loading...
+			<div className="p-style">
+				<Spinner />
 			</div> :
 			<div className="p-style error-msg">
 				Failed to load user #{id}: {userGet.error.message}
@@ -82,7 +84,7 @@ export default function User()
 				<h2>
 					{
 						user.profile.firstName
-						+ " «" + user.username + "» "
+						+ " « " + user.username + " » "
 						+ user.profile.lastName
 					}
 				</h2>
@@ -122,8 +124,8 @@ function Friendships(props: {
 })
 {
 	if (props.query.isPending) return (
-		<div className="p-style notice-msg">
-			Loading...
+		<div className="p-style">
+			<Spinner />
 		</div>
 	);
 
