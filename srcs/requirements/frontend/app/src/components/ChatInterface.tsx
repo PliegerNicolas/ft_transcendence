@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { Routes, Route, Link, useParams, useLocation } from "react-router-dom";
-import { UseQueryResult, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import Api from "../utils/Api"
 import { ChanType, MsgType } from "../utils/types";
