@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useContext } from "react";
-import { Routes, Route, useNavigate, Link, useParams, useLocation } from "react-router-dom";
+import { Routes, Route, Link, useParams, useLocation } from "react-router-dom";
 
 import { ChanType, MsgType } from "../utils/types";
 import { ChatContext } from "../utils/contexts";
@@ -130,18 +130,6 @@ export default function ChatTest()
 
 	const [showSidebar, setShowSidebar] = useState(1);
 
-	/*
-	** Naviguer automatiquement vers /chattest/1 si pas d'id spécifié.
-	** Cette logique est pourrie et devra être à terme être bazardée. Il faudrait
-	** stocker qqpart le dernier chan actif et rediriger vers celui-ci.
-	*/
-	const loc = useLocation();
-	const navigate = useNavigate();
-	useEffect(() => {
-		if (!loc.pathname.match(/\/[^/]*$/)?.length)
-			navigate("/chattest/1")
-	}, []);
-
 	return (
 		<main className="MainContent Chat">
 			<ChatContext.Provider value={{showSidebar, setShowSidebar, chanList}}>
@@ -167,7 +155,7 @@ function ChatSidebar()
 
 	return (
 		<div className={
-			`ChatSidebar ${showSidebar < 0 && " collapse"} ${showSidebar > 1 && "expand"}`
+			`ChatSidebar ${showSidebar < 0 && "collapse"} ${showSidebar > 1 && "expand"}`
 		}>
 			<h3 className="ChatSidebar__Title">
 				Your channels
