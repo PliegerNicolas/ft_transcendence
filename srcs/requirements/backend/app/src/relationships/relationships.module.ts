@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { RelationshipsService } from './services/relationships/relationships.service';
 import { RelationshipsController } from './controllers/relationships/relationships.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Relationship } from './entities/Relationship';
-import { User } from 'src/users/entities/User';
+import { Relationship } from './entities/Relationship.entity';
+import { User } from 'src/users/entities/User.entity';
 
 @Module({
   imports: [

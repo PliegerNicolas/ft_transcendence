@@ -1,5 +1,5 @@
 import { IsArray, IsEnum, IsNotEmpty, ValidateNested } from "class-validator";
-import { GameType } from "../entities/Gamelog";
+import { GameType } from "../entities/Gamelog.entity";
 import { UserResult } from "./UserResult.dto";
 import { Transform, Type } from "class-transformer";
 
