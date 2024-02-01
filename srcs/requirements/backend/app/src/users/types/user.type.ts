@@ -7,20 +7,17 @@ import { UpdateProfileDto } from "src/profiles/dtos/UpdateProfile.dto";
 export type CreateUserParams = {
     username: string;
     email: string;
-    password: string;
     profile: CreateProfileDto;
 };
 
 export type ReplaceUserParams = {
     username: string;
     email: string;
-    password: string;
     profile: ReplaceProfileDto;
 };
 
 export type UpdateUserParams = {
     username?: string;
     email?: string;
-    password?: string;
     profile?: UpdateProfileDto;
 };

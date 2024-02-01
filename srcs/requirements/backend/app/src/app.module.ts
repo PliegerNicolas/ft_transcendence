@@ -16,27 +16,27 @@ import { Channel } from './chats/channels/entities/Channel.entity';
 import { Message } from './chats/messages/entities/Message.entity';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'database',
-      port: 5432,
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      entities: [User, Profile, Relationship, Gamelog, UserToGamelog, Channel, Message],
-      synchronize: true,
-      //logging: true, // TEMP
-    }),
-    UsersModule,
-    ProfilesModule,
-    RelationshipsModule,
-    GamelogsModule,
-	AuthModule,
-	ChatsModule,
-  ],
-  controllers: [],
-  providers: [],
+	imports: [
+		ConfigModule.forRoot(),
+		TypeOrmModule.forRoot({
+			type: 'postgres',
+			host: 'database',
+			port: 5432,
+			username: process.env.POSTGRES_USER,
+			password: process.env.POSTGRES_PASSWORD,
+			database: process.env.POSTGRES_DB,
+			entities: [User, Profile, Relationship, Gamelog, UserToGamelog, Channel, Message],
+			synchronize: true,
+			//logging: true, // TEMP
+		}),
+		UsersModule,
+		ProfilesModule,
+		RelationshipsModule,
+		GamelogsModule,
+		AuthModule,
+		ChatsModule,
+	],
+	controllers: [],
+	providers: [],
 })
 export class AppModule {}

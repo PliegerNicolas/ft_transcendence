@@ -21,7 +21,7 @@ export class MessagesService {
     async getChannelMessages(userId: number, channelId: number): Promise<Message[]> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
-            relations: ['users', 'messages'],
+            relations: ['members', 'messages'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -35,7 +35,7 @@ export class MessagesService {
     async getChannelMessage(userId: number, channelId: number, messageId: number): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
-            relations: ['users', 'messages'],
+            relations: ['members', 'messages'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -52,16 +52,16 @@ export class MessagesService {
     }
 
     async createChannelMessage(userId: number, channelId: number, messageDetails: CreateMessageParams): Promise<Message> {
-        const user = await this.userRepository.findOne({
-            where: { id: userId },
-            relations: ['channels', 'messages'],
+        const channel = await this.channelRepository.findOne({
+            where: { id: channelId },
+            relations: ['members', 'messages'],
         });
 
-        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
-        const channel = user.channels.find((channel) => channel.id == channelId);
+        const user = channel.members.find((member) => member.id == userId);
 
-        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found in user's channels`);
+        if (!user) throw new NotFoundException(`User with ID ${userId} is not member of channel with ID ${channelId}`);
 
         const message = this.messageRepository.create({
             user: user,
@@ -75,7 +75,7 @@ export class MessagesService {
     async replaceChannelMessage(userId: number, channelId: number, messageId: number, messageDetails: ReplaceMessageParams): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
-            relations: ['members', 'messages'],
+            relations: ['messages.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -83,7 +83,8 @@ export class MessagesService {
         const message = channel.messages.find((message) => message.id == messageId);
 
         if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in channel with ID ${channelId}`);
-        else if (message.user.id != userId) {
+    
+        if (message.user.id != userId) {
             throw new BadRequestException(`User with ID ${userId} isn't author of message with ID ${messageId} in channel with ID ${channelId}`);
         }
 
@@ -97,7 +98,7 @@ export class MessagesService {
     async updateChannelMessage(userId: number, channelId: number, messageId: number, messageDetails: UpdateMessageParams): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
-            relations: ['members', 'messages'],
+            relations: ['messages.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -105,7 +106,8 @@ export class MessagesService {
         const message = channel.messages.find((message) => message.id == messageId);
 
         if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in channel with ID ${channelId}`);
-        else if (message.user.id != userId) {
+
+        if (message.user.id != userId) {
             throw new BadRequestException(`User with ID ${userId} isn't author of message with ID ${messageId} in channel with ID ${channelId}`);
         }
 
