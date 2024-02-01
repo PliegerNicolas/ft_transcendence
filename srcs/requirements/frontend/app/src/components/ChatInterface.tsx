@@ -1,10 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { Routes, Route, useNavigate, Link, useParams, useLocation } from "react-router-dom";
 
-import { MsgType, ChanType } from "../utils/types";
+import { ChanType, MsgType } from "../utils/types";
+import { ChatContext } from "../utils/contexts";
 
 import closeLeft from "../assets/close-left.svg";
 import openLeft from "../assets/open-left.svg";
+import add from "../assets/add.svg";
 import defaultPicture from "../assets/default_profile.png";
 
 import "../styles/chat.css";
@@ -127,57 +129,57 @@ export default function ChatTest()
 	];
 
 	const [showSidebar, setShowSidebar] = useState(1);
-	const navigate = useNavigate();
 
-	useEffect(() => {navigate("/chattest/1")}, []);
+	/*
+	** Naviguer automatiquement vers /chattest/1 si pas d'id spécifié.
+	** Cette logique est pourrie et devra être à terme être bazardée. Il faudrait
+	** stocker qqpart le dernier chan actif et rediriger vers celui-ci.
+	*/
+	const loc = useLocation();
+	const navigate = useNavigate();
+	useEffect(() => {
+		if (!loc.pathname.match(/\/[^/]*$/)?.length)
+			navigate("/chattest/1")
+	}, []);
 
 	return (
 		<main className="MainContent Chat">
-		{
-			!!showSidebar &&
-			<ChatSidebar show={showSidebar} setShow={setShowSidebar} list={chanList}/>
-		}
-			<Routes>
-				<Route path="/:id" element={
-					<ChatContent
-						showSidebar={showSidebar}
-						setShowSidebar={setShowSidebar}
-						chanList={chanList}
-						setMsgs={setMsgList}/>
-				}/>
-			</Routes>
+			<ChatContext.Provider value={{showSidebar, setShowSidebar, chanList}}>
+				{ !!showSidebar && <ChatSidebar /> }
+				<Routes>
+					<Route path="/:id" element={ <ChatContent setMsgs={setMsgList}/> } />
+					<Route path="/new" element={ <NewChan /> } />
+				</Routes>
+			</ChatContext.Provider>
 		</main>
 	);
 }
 
 // <ChatSidebar /> =============================================================
 
-function ChatSidebar(
-	{show, setShow, list} : {show: number, setShow: Function, list: ChanType[]}
-)
+function ChatSidebar()
 {
 	const loc = useLocation();
 	const idArray = loc.pathname.match(/\/[^/]*$/);
 	const id = idArray?.length ? +idArray[0].slice(1) : 0;
 
+	const {showSidebar, chanList} = useContext(ChatContext);
+
 	return (
 		<div className={
-			`ChatSidebar ${show < 0 && " collapse"} ${show > 1 && "expand"}`
+			`ChatSidebar ${showSidebar < 0 && " collapse"} ${showSidebar > 1 && "expand"}`
 		}>
 			<h3 className="ChatSidebar__Title">
 				Your channels
-				<div
-					className="Chat__Collapse"
-					onClick={() => { setShow(-1); setTimeout(() => setShow(0), 200); }}
-				>
-					<img src={closeLeft} />
-				</div>
+				<Link to="new" className="ChatSidebar__Add">
+					<img src={add} />
+				</Link>
 			</h3>
 			<div className="Chat__ChanList">
 			{
-				list.map(item =>
+				chanList.map(item =>
 					<Link
-						to={`/chattest/${item.id}`}
+						to={`${item.id}`}
 						key={item.id}
 						className={`Chat__ChanListItem ${id === item.id && "curr"}`}
 					>
@@ -192,33 +194,72 @@ function ChatSidebar(
 				)
 			}
 			</div>
+			{/* Just a test to see how we could display public channels*/}
+			<h4 className="ChatSidebar__Title">
+				Public channels:
+			</h4>
+			<div className="Chat__ChanList">
+				<div className="Chat__ChanListItem">
+					<div className="Chat__ChanListItemName"> General </div>
+					<div className="Chat__ChanListItemSize"> 69 members </div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+// <NewChat /> =================================================================
+
+function NewChan()
+{
+	const [newChan, setNewChan] = useState({
+		id: -1,
+		name: "New Channel",
+		size: 1,
+		msgs: []
+	});
+
+	function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+		setNewChan({...newChan, name:e.currentTarget.value});
+	}
+
+	return (
+		<div className="NewChan">
+			<ChatHeader chan={newChan} />
+			<label htmlFor="channel-name">Name</label>
+			<input
+				type="text"
+				id="channel-name"
+				name="channel-name"
+				value={newChan.name}
+				onChange={handleNameChange}
+				placeholder="Channel name cannot be empty!"
+			/>
 		</div>
 	);
 }
 
 // <ChatContent /> =============================================================
 
-function ChatContent(
-	{showSidebar, setShowSidebar, chanList, setMsgs}:
-	{showSidebar: number, setShowSidebar: Function, chanList: ChanType[], setMsgs: Function}
-)
+function ChatContent({setMsgs}: {setMsgs: Function})
 {
+	const {chanList} = useContext(ChatContext);
+
 	const params = useParams();
 	const chan = chanList.filter(item => item.id === +params.id!)[0];
-
-	const [inputValue, setInputValue] = useState("");
 
 	/*
 	** These lines are desirable to auto-scroll at bottom of chat.
 	*/
 	const anchorRef = useRef<HTMLDivElement>(null);
-	useEffect(() => anchorRef.current?.scrollIntoView(), [chan.msgs]);
+	useEffect(() => anchorRef.current?.scrollIntoView(), [chan?.msgs]);
 
 	/*
 	** Manage the input. If the last char is "\n", the textarea is cleared and the
 	** message is added to the list. Of course, it should be send to the server
 	** instead!
 	*/
+	const [inputValue, setInputValue] = useState("");
 	function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
 
 		if (e.currentTarget.value.slice(-1) !== "\n") {
@@ -235,22 +276,16 @@ function ChatContent(
 		setInputValue("");
 	}
 
+	if (!chan) return (
+		<div style={{margin: "24px"}}>
+			<span className="error-msg">404: this chan doesn't seem to exist</span>
+			<span style={{marginLeft: "8px"}}>😢</span>
+		</div>
+	);
+
 	return (
 		<div className="Chat__Content">
-			<div className="Chat__Header">
-			{
-				showSidebar < 1 &&
-				<div className="Chat__Collapse Chat__Expand" onClick={() => {
-					setShowSidebar(2);
-					setTimeout(() => {setShowSidebar(1)}, 200);
-				}}>
-					<img src={openLeft} />
-				</div>
-			}
-				<div className="Chat__Title">
-					{chan.name}
-				</div>
-			</div>
+			<ChatHeader chan={chan} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
 					{
@@ -283,6 +318,27 @@ function ChatContent(
 	);
 }
 
+// <ChatHeader /> ==============================================================
+
+function ChatHeader({chan}: {chan: ChanType})
+{
+	const {showSidebar, setShowSidebar} = useContext(ChatContext);
+
+	return (
+		<div className="Chat__Header">
+			<div className="Chat__Collapse" onClick={() => {
+				setShowSidebar(showSidebar < 1 ? 2 : -1);
+				setTimeout(() => {setShowSidebar(showSidebar < 1 ? 1 : 0)}, 200);
+			}}>
+				<img src={showSidebar < 1 ? openLeft : closeLeft} />
+			</div>
+			<div className="Chat__Title">
+				{chan.name}
+			</div>
+		</div>
+	);
+}
+
 // <Msg /> =====================================================================
 
 function Msg(
@@ -301,17 +357,20 @@ function Msg(
 			${connectNext && "connectNext"}`
 		}>
 			<div className="Msg__PictureDiv">
-				<img src={defaultPicture} />
+				<Link to={"/user/" + data.uid}>
+					<img src={defaultPicture} />
+				</Link>
 			</div>
 			<div>
 			{
 				<div className="Msg__Info">
-					<span
+					<Link
+						to={"/user/" + data.uid}
 						className="Msg__Sender"
 						style={{color: `hsl(${(360 / size) * data.uid} 80% 80%)`}}
 					>
 						{data.username}
-					</span>
+					</Link>
 					<span className="notice-msg Msg__Date">
 						{data.date}
 					</span>
