@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty } from "class-validator";
-import { GameResult } from "../entities/UserToGamelog";
+import { GameResult } from "../entities/UserToGamelog.entity";
 
 export class UserResult {
 

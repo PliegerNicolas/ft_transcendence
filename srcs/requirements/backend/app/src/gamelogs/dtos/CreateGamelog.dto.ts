@@ -1,5 +1,5 @@
 import { IsArray, IsEnum, IsNotEmpty, ValidateNested } from "class-validator";
-import { GameType } from "../entities/Gamelog";
+import { GameType } from "../entities/Gamelog.entity";
 import { UserResult } from "./UserResult.dto";
 import { Transform, Type } from "class-transformer";
 
@@ -15,11 +15,5 @@ export class CreateGamelogDto {
     @IsNotEmpty()
     @IsEnum(GameType, { message: 'Invalid game type' })
     gameType: GameType;
-
-    /* Helper Function */
-
-    private sortUserResults(): void {
-        this.userResults.sort((a, b) => a.id - b.id);
-    }
 
 }
