@@ -1,0 +1,16 @@
+Canvas {
+	border: 10px solid var(--bg-color-1);
+	width: 800px;
+	height: 400px;
+	box-sizing: border-box;
+	border-image-slice: 1;
+	border-color: var(--border-color-1);
+}
+
+Game {
+	width:100%auto;
+	display:flex;
+	align-items: center;
+	outline: none;
+	flex-direction: column;
+}
