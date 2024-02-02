@@ -1,10 +1,39 @@
-.Sandbox__UserList {
-	margin: 50px;
-	border: 1px solid var(--bg-color-4);
-	border-radius: 7px;
-	background: var(--bg-color-2);
-	padding: 0 20px 15px;
-	position: relative;
+.Sandbox__ContextList {
+	overflow: hidden;
+}
+
+.Sandbox__ContextItem {
+	display: flex;
+	flex-direction: row;
+}
+
+.Sandbox__ContextItem>div {
+	white-space: nowrap;
+}
+
+.Sandbox__ContextItem>div:first-child {
+	width: 180px;
+	border-right: 1px solid var(--bg-color-5);
+}
+
+.Sandbox__ContextItem>div:nth-child(2) {
+	padding-left: 12px;
+	flex: 1;
+}
+
+.Sandbox__ContextItem button {
+	border: none;
+	padding: 4px 8px;
+	margin: 0 8px;
+	color: var(--text-accent);
+	background-color: var(--error-bg);
+}
+.Sandbox__ContextItem button:hover {
+	background-color: var(--error-bg);
+	filter: brightness(1.4);
+}
+.Sandbox__ContextItem button:active {
+	filter: none;
 }
 
 .Sandbox__Scrollable {

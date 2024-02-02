@@ -2,6 +2,7 @@ import "./App.css";
 
 import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
 
@@ -29,8 +30,6 @@ function Auth(props: {setMyInfo: Function})
 
 	const navigate = useNavigate();
 	const redirectPath = localStorage.getItem("auth_redirect");
-
-	console.log("Should send this code to the backend API: " + code);
 
 	async function connect() {
 		api
@@ -75,7 +74,7 @@ function App()
 {
 	const [myInfo, setMyInfo] = useState(() => {
 
-		const data = localStorage.getItem("my_info");
+//		const data = localStorage.getItem("my_info");
 
 		/*
 		**	Instead of directly returning the data retrieved from the storage, we
@@ -83,8 +82,8 @@ function App()
 		**	what we're going to do when possible.
 		*/
 
-		if (data)
-			return (JSON.parse(data));
+//		if (data)
+//			return (JSON.parse(data));
 
 		return ({
 			logged: false,
@@ -92,9 +91,16 @@ function App()
 		});
 
 	});
+	const api = new Api(`http://${location.hostname}:3450`);
 
 	return (
-		<MyContext.Provider value={myInfo}>
+		<MyContext.Provider value={{
+			...myInfo,
+			allChans: useQuery({
+				queryKey: ["allChans"],
+				queryFn: () => api.get("/channels")
+			}),
+		}}>
 			<Router>
 				<Header/>
 				<Navbar />

@@ -1,32 +1,22 @@
 import { createContext, Dispatch, SetStateAction } from "react";
 
 import { FriendshipType, ChanType } from "./types";
-
-interface FriendshipContextType {
-	id: string,
-	friendships: FriendshipType[],
-	action: Function
-}
+import { UseQueryResult } from "@tanstack/react-query";
 
 export const FriendshipContext = createContext({
 	id: "0",
-	friendships: [],
-	action: () => {}
-} as FriendshipContextType);
+	friendships: [] as FriendshipType[],
+	action: (() => {}) as Function
+});
 
 export const MyContext = createContext({
 	logged: false,
-	token: ""
+	token: "",
+	allChans: null as UseQueryResult<any, null> | null,
 });
-
-interface ChatContextType {
-	showSidebar: number,
-	setShowSidebar: Dispatch<SetStateAction<number>>,
-	chanList: ChanType[]
-}
 
 export const ChatContext = createContext({
 	showSidebar: 1,
-	setShowSidebar: () => {},
-	chanList: [],
-} as ChatContextType);
+	setShowSidebar: (() => {}) as Dispatch<SetStateAction<number>>,
+	chanList: [] as ChanType[],
+});

@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { Routes, Route, Link, useParams, useLocation } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import Api from "../utils/Api"
 import { ChanType, MsgType } from "../utils/types";
-import { ChatContext } from "../utils/contexts";
+import { ChatContext, MyContext } from "../utils/contexts";
 
 import closeLeft from "../assets/close-left.svg";
 import openLeft from "../assets/open-left.svg";
@@ -153,6 +155,8 @@ function ChatSidebar()
 
 	const {showSidebar, chanList} = useContext(ChatContext);
 
+	const context = useContext(MyContext);
+
 	return (
 		<div className={
 			`ChatSidebar ${showSidebar < 0 && "collapse"} ${showSidebar > 1 && "expand"}`
@@ -184,14 +188,21 @@ function ChatSidebar()
 			</div>
 			{/* Just a test to see how we could display public channels*/}
 			<h4 className="ChatSidebar__Title">
-				Public channels:
+				All channels:
 			</h4>
-			<div className="Chat__ChanList">
-				<div className="Chat__ChanListItem">
-					<div className="Chat__ChanListItemName"> General </div>
-					<div className="Chat__ChanListItemSize"> 69 members </div>
+			{
+				context.allChans?.isSuccess &&
+				<div className="Chat__Chanlist">
+				{
+					context.allChans.data.map((chan : {id: number, name: string}) =>
+						<div className="Chat__ChanListItem" key={chan.id}>
+							<div className="Chat__ChanListItemName">{chan.name}</div>
+							<div className="Chat__ChanListItemSize">?? members</div>
+						</div>
+					)
+				}
 				</div>
-			</div>
+			}
 		</div>
 	);
 }
@@ -207,14 +218,33 @@ function NewChan()
 		msgs: []
 	});
 
+	const api = new Api(`http://${location.hostname}:3450`);
+
+	const queryClient = useQueryClient();
+
+	const chanPost = useMutation({
+		mutationFn: (name: string) => api.post("/users/1/channels", {name}),
+		onSettled: () => invalidateQuery(["allChans"])
+	});
+
+	function invalidateQuery(key: string[]) {
+		queryClient.invalidateQueries({queryKey: key});
+	}
+
 	function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
 		setNewChan({...newChan, name:e.currentTarget.value});
+	}
+
+	function handleSubmit() {
+		chanPost.mutate(newChan.name);
+		setNewChan({...newChan, name: ""});
 	}
 
 	return (
 		<div className="NewChan">
 			<ChatHeader chan={newChan} />
-			<label htmlFor="channel-name">Name</label>
+			<label htmlFor="channel-name">Name:</label>
+			<br />
 			<input
 				type="text"
 				id="channel-name"
@@ -223,6 +253,8 @@ function NewChan()
 				onChange={handleNameChange}
 				placeholder="Channel name cannot be empty!"
 			/>
+			<br />
+			<button onClick={handleSubmit}>Submit</button>
 		</div>
 	);
 }
