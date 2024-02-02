@@ -2,8 +2,8 @@ import {Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { profile } from 'console';
-import { Profile } from 'src/profiles/entities/Profile';
-import { User } from 'src/users/entities/User';
+import { Profile } from 'src/profiles/entities/Profile.entity';
+import { User } from 'src/users/entities/User.entity';
 import { DataSource, InsertQueryBuilder } from 'typeorm';
 
 
@@ -58,8 +58,9 @@ export class AuthService
 			}).then(
 				(data) => data.json()
 			)
-			if ((await this.checkUser(Object.values(info)[0].toString())).users === null){
-				this.dataSource
+			const user_id = (await this.checkUser(Object.values(info)[0].toString())).users
+			if (user_id === null){
+				const users = await this.dataSource
 				.createQueryBuilder()
 				.insert()
 				.into(User)
@@ -74,8 +75,15 @@ export class AuthService
 					}
 				])
 				.execute()
+				.then(
+					(data) => data
+				)
+				console.log(users)
+				payload.user_id = Object.values(Object.values(users.generatedMaps)[0])[0]
 			}
-			payload.user_id = info.id
+			else{
+				payload.user_id = Object.values(user_id)[0]
+			}
 			console.log(JSON.stringify(payload))
 			const access_token = await this.jwtService.signAsync(payload)
 		return {

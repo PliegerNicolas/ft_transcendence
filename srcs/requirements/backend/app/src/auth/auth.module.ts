@@ -8,7 +8,7 @@ import { User } from 'src/users/entities/User.entity';
 import { UsersModule } from 'src/users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { Oauth42Strategy } from './local.strategy';
-import { Profile } from 'src/profiles/entities/Profile';
+import { Profile } from 'src/profiles/entities/Profile.entity';
 
 @Module({
 
