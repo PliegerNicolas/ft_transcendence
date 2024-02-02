@@ -8,7 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/User';
 import { UsersModule } from 'src/users/users.module';
 import { PassportModule } from '@nestjs/passport';
-// import { Oauth42Strategy } from './local.strategy';
+import { Oauth42Strategy } from './local.strategy';
 import { Profile } from 'src/profiles/entities/Profile';
 
 @Module({
