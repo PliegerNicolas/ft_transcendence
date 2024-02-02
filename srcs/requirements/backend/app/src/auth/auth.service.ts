@@ -1,8 +1,10 @@
 import {Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { profile } from 'console';
+import { Profile } from 'src/profiles/entities/Profile';
 import { User } from 'src/users/entities/User';
-import { DataSource } from 'typeorm';
+import { DataSource, InsertQueryBuilder } from 'typeorm';
 
 
 @Injectable()
@@ -30,6 +32,10 @@ export class AuthService
 		};
 	}
 
+	async verify(){
+
+	}
+
 	async signIn(oauthToken : JSON ): Promise<any> {
 		const token = Object.values(oauthToken)
 		let payload = await fetch("https://api.intra.42.fr/oauth/token", {method : "POST", headers: {
@@ -44,7 +50,9 @@ export class AuthService
 			}).then(
 				(data) => data.json()
 			)
+			console.log(payload);
 			const access = (Object.values(payload)[0]).toString();
+			const refresh = (Object.values(payload)[1]).toString();
 			const info = await fetch("https://api.intra.42.fr/v2/me", {method : "GET", headers: {
 			"Authorization" : "Bearer " + access},
 			}).then(
@@ -58,7 +66,11 @@ export class AuthService
 				.values([
 					{"email" : Object.values(info)[1].toString(),
 					"oauth_id" :Number(Object.values(info)[0].toString()),
-					"username" : Object.values(info)[2].toString()
+					"username" : Object.values(info)[2].toString(),
+					"profile" : {
+						"firstName" : Object.values(info)[3].toString(),
+						"lastName" : Object.values(info)[4].toString(),
+						}
 					}
 				])
 				.execute()

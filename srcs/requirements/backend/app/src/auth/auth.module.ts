@@ -8,7 +8,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/User';
 import { UsersModule } from 'src/users/users.module';
 import { PassportModule } from '@nestjs/passport';
-import { Oauth42Strategy } from './local.strategy';
+// import { Oauth42Strategy } from './local.strategy';
+import { Profile } from 'src/profiles/entities/Profile';
 
 @Module({
 
@@ -16,9 +17,9 @@ import { Oauth42Strategy } from './local.strategy';
 	global:true,
 	secret:jwtConstants.secret
   }), 
-  TypeOrmModule.forFeature([User]),
+  TypeOrmModule.forFeature([User, Profile]),
 	UsersModule, PassportModule],
-  controllers: [],
-  providers: [AuthService, Oauth42Strategy]
+  controllers: [AuthController],
+  providers: [AuthService]
 })
 export class AuthModule {}
