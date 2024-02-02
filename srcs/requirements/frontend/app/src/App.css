@@ -77,6 +77,7 @@
 	border-radius: 7px;
 	overflow-x: auto;
 	box-shadow: 0 0 8px -3px #0008;
+	font-size: .92rem;
 }
 
 .genericList > * {
@@ -89,6 +90,13 @@
 	overflow-x: visible;
 	min-width: fit-content;
 	transition: filter .1s, color .2s, text-shadow .2s, border .2s;
+}
+
+.genericListHead {
+	border-bottom: 1px solid var(--text-faint);
+}
+.genericListHead>* {
+	font-weight: bold;
 }
 
 .genericList > *:nth-child(odd) {
@@ -127,12 +135,8 @@
 	z-index: 50;
 }
 .genericList > * > *:first-child {
-	border: 2px solid #0000;
-	padding: 6px;
 	border-radius: 7px 0 0 7px;
 }
 .genericList > * > *:last-child {
-	border: 2px solid #0000;
-	padding: 6px;
 	border-radius: 0 7px 7px 0;
 }

@@ -1,6 +1,8 @@
+import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UseQueryResult, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { MyContext } from "../utils/contexts.ts";
 import { UserType, UserPostType } from "../utils/types.ts"
 import Api from "../utils/Api.ts";
 
@@ -15,6 +17,8 @@ export default function Sandbox()
 	const api = new Api(`http://${location.hostname}:3450`);
 	const queryClient = useQueryClient();
 
+	const context = useContext(MyContext);
+
 	const usersGet = useQuery({
 		queryKey: ["users"],
 		queryFn: () => api.get("/users")
@@ -22,24 +26,42 @@ export default function Sandbox()
 
 	const usersPost = useMutation({
 		mutationFn: (user: UserPostType) => api.post("/users", user),
-		onSettled: invalidateUsers
+		onSettled: () => invalidateQuery(["users"])
+	});
+
+	const chanPost = useMutation({
+		mutationFn: (name: string) => api.post("/users/1/channels", {name}),
+		onSettled: () => invalidateQuery(["allChans"])
+	});
+
+	const chanDel = useMutation({
+		mutationFn: (id: number) => api.delete("/channels/" + id),
+		onSettled: () => invalidateQuery(["allChans"])
 	});
 
 	const usersDel = useMutation({
 		mutationFn: (id: string) => api.delete("/users/" + id),
-		onSettled: invalidateUsers
+		onSettled: () => invalidateQuery(["users"])
 	});
 
-	function invalidateUsers() {
-		queryClient.invalidateQueries({queryKey: ["users"]});
+	function invalidateQuery(key: string[]) {
+		queryClient.invalidateQueries({queryKey: key});
+	}
+
+	function random_id() {
+		return (Math.random().toString().slice(-10, -1));
 	}
 
 	function genUser() {
-		const uid = Math.random().toString().slice(-10, -1);
+		const uid = random_id();
 
 		return {
-			username: "mayeul_" + uid, email: "mayeul_" + uid + "@example.com",
-			profile: { firstName: "Mayeul", lastName: "Laneyrie" },
+			username: uid,
+			email: uid + "@example.com",
+			profile: {
+				firstName: "Mayeul",
+				lastName: "Laneyrie"
+			},
 			password: "some random password I guess",
 			oauth_id: uid
 		};
@@ -51,7 +73,54 @@ export default function Sandbox()
 	return (
 		<main className="MainContent">
 			<h2>Sandbox</h2>
-			<div className="Sandbox__UserList p-style">
+			<section>
+				<h3>Global context:</h3>
+				<div className="genericList Sandbox__ContextList">
+					<div className="Sandbox__ContextItem">
+						<div>Logged</div>
+						<div>{context.logged ? "Yes" : "No"}</div>
+					</div>
+					<div className="Sandbox__ContextItem">
+						<div>Token</div>
+						<div>{context.token}</div>
+					</div>
+					<div className="Sandbox__ContextItem">
+						<div>Channels loaded ?</div>
+						<div>{context.allChans?.status}</div>
+					</div>
+				</div>
+				<h4>All channels:</h4>
+				<button onClick={() => chanPost.mutate(random_id())}>
+					Add new chan
+				</button>
+				<hr />
+				{
+					context.allChans?.isSuccess &&
+					<div className="genericList">
+					<div className="Sandbox__ContextItem genericListHead">
+						<div>ID</div>
+						<div>NAME</div>
+					</div>
+					{
+						context.allChans.data.map((chan: {id: number, name: string}) =>
+							<div key={chan.id} className="Sandbox__ContextItem">
+								<div>#{chan.id}</div>
+								<div>
+									<span>{chan.name}</span>
+								</div>
+								<div>
+									<button className="deleteChan" onClick={() => chanDel.mutate(chan.id)}>
+										Delete
+									</button>
+								</div>
+
+							</div>
+						)
+					}
+					</div>
+				}
+			</section>
+			<section>
 				<h3>User list:</h3>
 				<div>
 					<button
@@ -66,13 +135,13 @@ export default function Sandbox()
 					>
 						Delete a user
 					</button>
-					<button onClick={invalidateUsers}>
+					<button onClick={() => invalidateQuery(["users"])}>
 						Reload
 					</button>
 				</div>
 				<hr />
 				<UserListRender query={usersGet}/>
-			</div>
+			</section>
 		</main>
 	);
 }
@@ -100,6 +169,11 @@ function UserListRender(
 	return (
 		<div className="Sandbox__Scrollable">
 			<div className="genericList">
+			<div className="Sandbox__UserItem genericListHead">
+				<div>ID</div>
+				<div>USERNAME</div>
+				<div>MAIL</div>
+			</div>
 			{
 				!query.data.length ?
 				<div><div>No user...</div></div> :
