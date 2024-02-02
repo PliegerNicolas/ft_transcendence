@@ -34,3 +34,17 @@ export interface MyInfoType {
 	logged: boolean,
 	token: string
 }
+
+export interface MsgType {
+	uid: number,
+	username: string,
+	content: string,
+	date: string
+}
+
+export interface ChanType {
+	id: number,
+	name: string,
+	size: number,
+	msgs: MsgType[]
+}

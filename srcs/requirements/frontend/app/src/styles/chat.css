@@ -1,0 +1,349 @@
+.Messages__Sender {
+	position: relative;
+	padding-left: 15px;
+	margin-left: 2px;
+	margin-right: 5px;
+	font-size: 0.9rem;
+}
+
+.Messages__Content {
+	display:flex
+}
+
+.Messages__Date {
+	font-size: 0.65rem;
+	opacity: 0.5;
+}
+
+.UserList__name {
+	display: inline flex;
+	margin: 10px 5px;
+	padding: 5px 10px;
+	background: var(--bg-color-2);
+	border: 1px solid var(--bg-color-4);
+	border-radius: 3px;
+	line-height: 1em;
+	box-shadow: 0 0 12px -4px #000a;
+}
+
+.UserList__name:hover {
+	cursor: pointer;
+	background: var(--bg-color-3);
+	color: var(--text-accent);
+	border: 1px solid var(--bg-color-3);
+}
+
+/*
+** Section used in ChatInterface.tsx: ==========================================
+*/
+
+.Chat {
+	padding: 0;
+	display: flex;
+}
+
+.ChatSidebar {
+	width: 240px;
+	padding: 0;
+
+	overflow-y: scroll;
+
+	background-color: var(--bg-color-2);
+	border-right: 1px solid var(--bg-color-3);
+
+	overflow-x: hidden;
+
+	z-index: 50;
+	box-shadow: 0 0 12px #000a;
+}
+
+.ChatSidebar.collapse {
+	animation: collapse .2s ease-in-out forwards;
+}
+
+.ChatSidebar.expand {
+	animation: expand .2s ease-in-out forwards;
+}
+
+@keyframes collapse {
+	0% { width: 240px; }
+	100% { width: 0px; }
+}
+
+@keyframes expand {
+	0% { width: 0px; }
+	100% { width: 240px; }
+}
+
+.ChatSidebar__Title {
+	height: 54px;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-left: 18px;
+	user-select: none;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.ChatSidebar__Add {
+	margin: 4px;
+	padding: 4px;
+	border-radius: 7px;
+	display: flex;
+	transition: .1s;
+}
+.ChatSidebar__Add:hover {
+	cursor: pointer;
+	background-color: var(--bg-color-3);
+}
+.ChatSidebar__Add:active {
+	background-color: var(--bg-color-4);
+}
+
+.Chat__ChanList {
+	border: none;
+	border-bottom: 1px solid var(--bg-color-4);
+	border-radius: 0;
+	overflow-x: hidden;
+}
+
+.Chat__ChanListItem {
+	height: 36px;
+	width: calc(100% - 32px - 12px);
+
+	margin: 4px 6px;
+	padding: 4px 16px 2px;
+	border-radius: 7px;
+
+	user-select: none;
+
+	transition: .1s;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	color: var(--text-normal);
+}
+.Chat__ChanListItem:visited {
+	color: var(--text-normal);
+}
+
+.Chat__ChanListItem:hover {
+	cursor: pointer;
+	background-color: var(--bg-color-3);
+	color: var(--text-accent);
+}
+
+.Chat__ChanListItem:active {
+	background-color: var(--bg-color-4);
+}
+
+.Chat__ChanListItem.curr {
+	color: var(--text-accent);
+	background-color: var(--bg-color-4);
+}
+
+.Chat__ChanListItem.curr:hover {
+	cursor: pointer;
+}
+
+.Chat__ChanListItemName {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-size: .92rem;
+}
+
+.Chat__ChanListItemSize {
+	margin-top: 1px;
+	font-size: .64rem;
+	overflow-x: hidden;
+	white-space: nowrap;
+	color: var(--text-faint);
+}
+
+.Chat__Content {
+	position: relative;
+	flex: 1;
+	padding-top: 54px;
+	padding-bottom: 100px;
+	display: flex;
+	flex-direction: column;
+	justify-content: end;
+	overflow: hidden;
+}
+
+.Chat__Header {
+	font-size: 1.1rem;
+	font-weight: 600;
+	height: 54px;
+	display: flex;
+	align-items: center;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	font-style: italic;
+	background: var(--bg-color-2);
+	border-bottom: 1px solid var(--bg-color-3);
+	box-shadow: 0 0 12px #000a;
+}
+
+.Chat__Collapse {
+	width: 48px;
+	height: 54px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-right: 1px solid var(--bg-color-4);
+	transition: .1s;
+}
+.Chat__Collapse:hover {
+	cursor: pointer;
+	background: var(--bg-color-3);
+}
+.Chat__Collapse:active {
+	background: var(--bg-color-4);
+}
+
+.Chat__Collapse>img {
+	height: 28px;
+}
+
+.Chat__Title {
+	padding-left: 18px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.Chat__Convo {
+	overflow-y: auto;
+	padding-bottom: 2px;
+}
+
+.Chat__Start {
+	font-size: .92rem;
+	margin: 32px 24px;
+}
+
+.Chat__Input {
+	position: absolute;
+	height: 100px;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: var(--bg-color-3);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	box-shadow: 0 0 12px #000a;
+}
+
+.Chat__Input>textarea {
+	padding: 12px;
+	margin: 0;
+	width: calc(100% - 40px);
+	height: calc(100% - 40px);
+	resize: none;
+	background: var(--bg-color-2);
+	border: 1px solid var(--bg-color-4);
+	border-radius: 12px;
+	color: var(--text-normal);
+	font-size: .92rem;
+	font-family: sans-serif;
+	box-shadow: inset 0 0 8px #0004;
+}
+
+.Chat__Input>textarea:focus {
+	outline: none;
+	padding: 11px;
+	border: 2px solid var(--bg-color-5);
+}
+
+/*
+** .Msg ========================================================================
+*/
+
+.Msg {
+	background: var(--bg-color-2);
+	border-radius: 18px 18px 18px 0;
+	margin: 6px 8px;
+	padding: 6px 8px;
+	font-size: .9rem;
+	display: flex;
+}
+.Msg.me {
+	background: var(--bg-color-3);
+	border-radius: 18px 18px 0 18px;
+}
+
+.Msg.connectPrev {
+	margin-top: 0;
+	border-top: 1px solid var(--bg-color-3);
+	border-radius: 0 0 18px 0;
+}
+.Msg.connectPrev.me {
+	border-top: 1px solid var(--bg-color-4);
+	border-radius: 0 0 0 18px;
+}
+
+.Msg.connectNext {
+	margin-bottom: 0;
+	border-radius: 18px 18px 0 0;
+}
+
+.Msg.connectNext.Msg.connectPrev {
+	border-radius: 0px;
+}
+
+.Msg__PictureDiv {
+	width: 48px;
+	height: 50px;
+	margin-right: 12px;
+}
+.Msg.connectPrev>.Msg__PictureDiv {
+	height: 0;
+}
+
+.Msg__PictureDiv img {
+	width: 48px;
+	height: 48px;
+
+	border-radius: 12px;
+	border: 1px solid var(--bg-color-5);
+}
+.Msg.connectPrev>.Msg__PictureDiv img {
+	display: none;
+}
+
+.Msg__Info {
+	margin-bottom: 4px;
+}
+.Msg.connectPrev>div>.Msg__Info {
+	display: none;
+}
+
+.Msg__Sender {
+	font-size: .92rem;
+	margin-bottom: 4px;
+}
+
+.Msg__Date {
+	margin-left: 8px;
+	font-size: .72rem;
+}
+
+/*
+** .NewChan ====================================================================
+*/
+
+.NewChan {
+	position: relative;
+	flex: 1;
+	padding: 24px;
+	padding-top: calc(54px + 24px);
+}

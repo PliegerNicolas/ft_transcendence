@@ -1,4 +1,4 @@
-import { RelationshipStatus } from "../entities/Relationship";
+import { RelationshipStatus } from "../entities/Relationship.entity";
 
 export type CreateRelationshipParams = {
     targetId: number;

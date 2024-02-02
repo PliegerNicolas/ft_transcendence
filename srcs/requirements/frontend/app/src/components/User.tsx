@@ -84,7 +84,7 @@ export default function User()
 				<h2>
 					{
 						user.profile.firstName
-						+ " «" + user.username + "» "
+						+ " « " + user.username + " » "
 						+ user.profile.lastName
 					}
 				</h2>

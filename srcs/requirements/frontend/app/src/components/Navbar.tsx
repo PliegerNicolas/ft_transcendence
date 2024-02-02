@@ -10,6 +10,12 @@ import settingsIcon from "../assets/settings.svg";
 import aboutIcon from "../assets/about.svg";
 import sandboxIcon from "../assets/sandbox.svg";
 
+function firstPathSegment(fullPath: string)
+{
+	const pathArray = fullPath.match(/^\/[^/]*/);
+	return (pathArray?.length ? pathArray[0] : "");
+}
+
 function Navbar()
 {
 	const options = [
@@ -17,15 +23,19 @@ function Navbar()
 		{ name: "Play",	path: "/play", img: playIcon },
 		{ name: "Stats", path: "/stats", img: statsIcon },
 		{ name: "Chat", path: "/chat", img: chatIcon },
+		{ name: "Chat Test", path: "/chattest/1", img: chatIcon },
 		{ name: "Settings", path: "/settings", img: settingsIcon },
 		{ name: "About", path: "/about", img: aboutIcon },
 		{ name: "Sandbox", path: "/sandbox", img: sandboxIcon }
 	];
-	let loc = useLocation();
+	const loc = useLocation();
+	const path = firstPathSegment(loc.pathname)
 
 	const navHtml = options.map((elem, index) =>
 		<Link to={elem.path} key={index} className={
-			`Navbar__Link Navbar__Button${elem.path === loc.pathname ? "--Curr" : ""}`
+			`Navbar__Link Navbar__Button${
+				firstPathSegment(elem.path) === path ? "--Curr" : ""
+			}`
 		}>
 			<img src={elem.img}/>
 			<div className="Navbar__Text">
@@ -34,7 +44,11 @@ function Navbar()
 		</Link>
 	);
 
-	return (<nav className="Navbar"> {navHtml} </nav>);
+	return (
+		<nav className="Navbar">
+			{navHtml}
+		</nav>
+	);
 }
 
 export default Navbar;

@@ -1,6 +1,6 @@
-import {createContext} from "react";
+import { createContext, Dispatch, SetStateAction } from "react";
 
-import { FriendshipType } from "./types";
+import { FriendshipType, ChanType } from "./types";
 
 interface FriendshipContextType {
 	id: string,
@@ -8,6 +8,25 @@ interface FriendshipContextType {
 	action: Function
 }
 
-export const FriendshipContext = createContext(
-	{id: "0", friendships: [], action: () => {}} as FriendshipContextType
-);
+export const FriendshipContext = createContext({
+	id: "0",
+	friendships: [],
+	action: () => {}
+} as FriendshipContextType);
+
+export const MyContext = createContext({
+	logged: false,
+	token: ""
+});
+
+interface ChatContextType {
+	showSidebar: number,
+	setShowSidebar: Dispatch<SetStateAction<number>>,
+	chanList: ChanType[]
+}
+
+export const ChatContext = createContext({
+	showSidebar: 1,
+	setShowSidebar: () => {},
+	chanList: [],
+} as ChatContextType);

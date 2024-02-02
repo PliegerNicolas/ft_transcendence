@@ -20,10 +20,11 @@
 	align-items: center;
 	gap: 10px;
 	transition: filter .1s;
+	filter: drop-shadow(3px 3px 0px #000);
 }
 
 .Header__Title:hover {
-	filter: drop-shadow(0 0 10px #fff8);
+	filter: drop-shadow(3px 3px 0px #000) drop-shadow(0 0 10px #fff8);
 }
 
 .Header__Title:active {
