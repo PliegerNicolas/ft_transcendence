@@ -1,5 +1,5 @@
 import React, { forwardRef } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
 
 import "../styles/play.css";
 
@@ -9,7 +9,6 @@ function Play()
 {
 	return (
 		<main className="MainContent">
-			<h2>Play</h2>
 			<Game />
 		</main>
 	);
@@ -25,13 +24,15 @@ const Game: React.FC<GameProps> = ({}) => {
 
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
-	const draw = (ctx: CanvasRenderingContext2D) => {
-		ctx.rect(0, 0, 900, 450);
+	const { playerOne, playerTwo, onKeyDownHandler } = GameLogic();
+
+	const drawGame = (ctx: CanvasRenderingContext2D) => {
+		draw({ ctx, playerOne, playerTwo});
 	}
 
 	return (
-		<div className="Game">
-			<Canvas ref={canvasRef} draw={draw}/>
+		<div className="Game" tabIndex={0} onKeyDown={onKeyDownHandler}>
+			<Canvas ref={canvasRef} draw={drawGame}/>
 		</div>
 	)
 }
@@ -43,19 +44,44 @@ interface Position {
 	y: number;
 }
 
+enum Direction {
+	UP,
+	DOWN
+}
+
 const GameLogic = () => {
-	const [playerOne, setPlayerOne] = useState<Position>({
-		x: 0,
-		y: 0
+	const[direction, setDirection] = useState<Direction>();
+
+	const [playerOne] = useState<Position>({
+		x: 50,
+		y: 200
 	});
 
-	const [playerTwo, setPlayerTwo] = useState<Position>({
-		x: 0,
-		y: 0
+	const [playerTwo] = useState<Position>({
+		x: 850,
+		y: 200
 	});
+
+	const onKeyDownHandler = (event: React.KeyboardEvent<HTMLDivElement>) => {
+		switch (event.code) {
+			case 'keyS':
+				setDirection(Direction.DOWN);
+				break;
+			case 'keyW':
+				setDirection(Direction.UP);
+				break;
+		}
+	}
+
+	const movePlayer = () => {
+
+	}
+
+	useInterval(movePlayer, 75);
 
 	return {
-		playerOne, playerTwo
+		playerOne, playerTwo,
+		onKeyDownHandler,
 	};
 }
 
@@ -89,7 +115,7 @@ const Canvas = forwardRef<HTMLCanvasElement, CanvasProps>(({draw, ...props}, can
 	}
 
 	return (
-		<canvas width={400} height={200} className="Canvas" ref={canvasRef} {...props} >Canvas</canvas>
+		<canvas width={900} height={600} className="Canvas" ref={canvasRef} {...props} >Canvas</canvas>
 	)
 });
 
@@ -102,7 +128,28 @@ interface DrawArgs {
 }
 
 const draw = ({ ctx, playerOne, playerTwo }: DrawArgs) => {
-	
+	ctx.fillStyle = 'rgb(200, 0, 0)';
+	ctx.fillRect(playerOne.x, playerOne.y, 15, 100);
+	ctx.fillRect(playerTwo.x, playerTwo.y, 15, 100);
+}
+
+// useInterval ====================================================================
+
+function useInterval(callback: () => void, delay: number | null) {
+	const savedCallback = useRef(callback);
+
+	useLayoutEffect(() => {
+		savedCallback.current = callback;
+	}, [callback])
+
+	useEffect(() => {
+		if (!delay && delay !== 0) {
+			return ;
+		}
+
+		const id = setInterval(() => savedCallback.current(), delay);
+		return () => clearInterval(id);
+	}, [delay]);
 }
 
 export default Play;
