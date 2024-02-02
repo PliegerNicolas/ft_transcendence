@@ -46,7 +46,7 @@
 	width: 240px;
 	padding: 0;
 
-	overflow-y: scroll;
+	overflow-y: auto;
 
 	background-color: var(--bg-color-2);
 	border-right: 1px solid var(--bg-color-3);

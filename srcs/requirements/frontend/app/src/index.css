@@ -111,6 +111,8 @@ button:disabled {
 
 hr {
 	color: var(--text-faint);
+	border-color: var(--text-faint);
+	background-color: var(--text-faint);
 	margin: 20px 80px;
 }
 

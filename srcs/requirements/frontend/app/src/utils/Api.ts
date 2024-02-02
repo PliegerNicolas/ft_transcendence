@@ -17,6 +17,7 @@ class Api
 	}
 
 	async get(endpoint: string) {
+		console.log(endpoint + " " + this.headers.Authorization);
 		const response = await fetch(this.base_url + endpoint, {
 			headers: this.headers
 		});
@@ -54,7 +55,7 @@ class Api
 
 	constructor(base_url = "http://localhost", token = "") {
 		this.base_url = base_url;
-		this.headers.Authorization = "Bearer" + token;
+		this.headers.Authorization = "Bearer " + token;
 	}
 }
 

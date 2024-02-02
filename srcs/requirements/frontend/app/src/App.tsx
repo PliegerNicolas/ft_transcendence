@@ -1,6 +1,6 @@
 import "./App.css";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
@@ -21,7 +21,7 @@ import User from "./components/User.tsx";
 
 import Api from "./utils/Api";
 
-function Auth(props: {setMyInfo: Function})
+function Auth()
 {
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
@@ -31,31 +31,25 @@ function Auth(props: {setMyInfo: Function})
 	const navigate = useNavigate();
 	const redirectPath = localStorage.getItem("auth_redirect");
 
-	async function connect() {
+	useEffect(() => {
+		console.log(code);
 		api
 			.post("/auth", {
 				"code": code,
 				"redirect_uri": `http://${location.host}/auth`
 			})
 			.then((data: any) => {
-				console.log("SUCCESS");
-				console.log(data);
-				props.setMyInfo({logged: true, token: data.access_token});
 				localStorage.setItem(
 					"my_info", JSON.stringify({logged: true, token: data.access_token})
 				);
 			})
-			.catch(err => {
-				console.log("FAIL");
-				console.log(err);
-				props.setMyInfo({logged: false, token: ""});
+			.catch(() => {
 				localStorage.removeItem("my_info")
 			})
 			.finally(() =>
 				navigate(redirectPath ? redirectPath : "/", {replace: true})
 			);
-	};
-	useEffect(() => {connect()}, []);
+	}, []);
 
 	return (<div />);
 }
@@ -74,7 +68,7 @@ function App()
 {
 	const [myInfo, setMyInfo] = useState(() => {
 
-//		const data = localStorage.getItem("my_info");
+		const data = localStorage.getItem("my_info");
 
 		/*
 		**	Instead of directly returning the data retrieved from the storage, we
@@ -82,23 +76,24 @@ function App()
 		**	what we're going to do when possible.
 		*/
 
-//		if (data)
-//			return (JSON.parse(data));
+		if (data)
+				return (JSON.parse(data));
 
 		return ({
+			stop: false,
 			logged: false,
+			api: new Api(`http://${location.hostname}:3450`),
 			token: "",
 		});
 
 	});
-	const api = new Api(`http://${location.hostname}:3450`);
 
 	return (
 		<MyContext.Provider value={{
 			...myInfo,
 			allChans: useQuery({
 				queryKey: ["allChans"],
-				queryFn: () => api.get("/channels")
+				queryFn: () => myInfo.api.get("/channels")
 			}),
 		}}>
 			<Router>
@@ -114,7 +109,7 @@ function App()
 					<Route path="/about" element={<About />} />
 					<Route path="/sandbox" element={<Sandbox />} />
 					<Route path="/user/:id" element={<User />} />
-					<Route path="/auth" element={<Auth setMyInfo={setMyInfo} />} />
+					<Route path="/auth" element={<Auth />} />
 					<Route path="*" element={<NotFound />} />
 				</Routes>
 			</Router>

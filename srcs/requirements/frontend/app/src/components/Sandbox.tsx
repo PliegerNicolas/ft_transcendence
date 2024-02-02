@@ -4,7 +4,6 @@ import { UseQueryResult, useQuery, useMutation, useQueryClient } from "@tanstack
 
 import { MyContext } from "../utils/contexts.ts";
 import { UserType, UserPostType } from "../utils/types.ts"
-import Api from "../utils/Api.ts";
 
 import Spinner from "./Spinner.tsx";
 
@@ -14,33 +13,32 @@ import "../styles/sandbox.css";
 
 export default function Sandbox()
 {
-	const api = new Api(`http://${location.hostname}:3450`);
 	const queryClient = useQueryClient();
 
 	const context = useContext(MyContext);
 
 	const usersGet = useQuery({
 		queryKey: ["users"],
-		queryFn: () => api.get("/users")
+		queryFn: () => context.api.get("/users")
 	});
 
 	const usersPost = useMutation({
-		mutationFn: (user: UserPostType) => api.post("/users", user),
+		mutationFn: (user: UserPostType) => context.api.post("/users", user),
 		onSettled: () => invalidateQuery(["users"])
 	});
 
 	const chanPost = useMutation({
-		mutationFn: (name: string) => api.post("/users/1/channels", {name}),
+		mutationFn: (name: string) => context.api.post("/users/1/channels", {name}),
 		onSettled: () => invalidateQuery(["allChans"])
 	});
 
 	const chanDel = useMutation({
-		mutationFn: (id: number) => api.delete("/channels/" + id),
+		mutationFn: (id: number) => context.api.delete("/channels/" + id),
 		onSettled: () => invalidateQuery(["allChans"])
 	});
 
 	const usersDel = useMutation({
-		mutationFn: (id: string) => api.delete("/users/" + id),
+		mutationFn: (id: string) => context.api.delete("/users/" + id),
 		onSettled: () => invalidateQuery(["users"])
 	});
 
@@ -83,10 +81,6 @@ export default function Sandbox()
 					<div className="Sandbox__ContextItem">
 						<div>Token</div>
 						<div>{context.token}</div>
-					</div>
-					<div className="Sandbox__ContextItem">
-						<div>Channels loaded ?</div>
-						<div>{context.allChans?.status}</div>
 					</div>
 				</div>
 				<h4>All channels:</h4>
