@@ -78,7 +78,7 @@ export class AuthService
 				.then(
 					(data) => data
 				)
-				console.log(users)
+				// console.log(users)
 				payload.user_id = Object.values(Object.values(users.generatedMaps)[0])[0]
 			}
 			else{
