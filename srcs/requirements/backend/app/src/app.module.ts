@@ -14,6 +14,7 @@ import { UserToGamelog } from './gamelogs/entities/UserToGamelog.entity';
 import { ChatsModule } from './chats/chats.module';
 import { Channel } from './chats/channels/entities/Channel.entity';
 import { Message } from './chats/messages/entities/Message.entity';
+import { GameModule } from './game/game.module';
 
 @Module({
 	imports: [
@@ -35,6 +36,7 @@ import { Message } from './chats/messages/entities/Message.entity';
 		GamelogsModule,
 		AuthModule,
 		ChatsModule,
+		GameModule
 	],
 	controllers: [],
 	providers: [],

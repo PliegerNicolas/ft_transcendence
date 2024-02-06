@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 import "../../styles/play.css";
 
@@ -14,12 +14,26 @@ const BALL_SIZE = 10;
 
 const MAX_SCORE = 5;
 
-interface Props {
-	socket: Socket;
-	opponent_name: string;
-  }
+type Ball = {
+	x: number,
+	y: number,
+	speedX: number,
+	speedY: number
+}
 
-const OnlineGame: React.FC<Props> = ({ socket, opponent_name }) => {
+type Player = {
+	x: number,
+	y: number,
+	speed: number
+}
+
+export const socket = io(`http://${location.hostname}:3450/game`);
+
+const OnlineGame = () => {
+	const [lobby, setLobby] = useState('');
+	const [player_number, setPlayerNumber] = useState(1);
+	const [opponent_name, setOpponentName] = useState('');
+
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const [gameState, setGameState] = useState(false);
 	const [score, setScore] = useState({ player1: 0, player2: 0 });
@@ -37,11 +51,54 @@ const OnlineGame: React.FC<Props> = ({ socket, opponent_name }) => {
 		speedY: Math.random() > 0.5 ? 3 : -3 };
 	const [ball, setBall] = useState(initialBallState);
   
+	//Socket listeners
+	if (socket) {
+		socket.on('createdLobby', (lobby_id: string) => {
+			console.log('Lobby ' + lobby_id + ' created');
+		});
+		socket.on('userJoinedLobby', (newUserId: string) => {
+			console.log('New user connected:', newUserId);
+			setOpponentName(newUserId);
+		});
+		socket.on('userLeftLobby', (disconnectedUserId: string) => {
+			console.log('User disconnected:', disconnectedUserId);
+			setOpponentName('');
+		});
+
+		socket.on('joinedLobby', (lobby_id: string) => {
+			console.log('Lobby ' + lobby_id + ' joined');
+			setLobby(lobby_id);
+		});
+		socket.on('pausedGame', () => {
+			console.log('Pause game');
+			setGameState(false);
+		});
+		socket.on('startedGame', () => {
+			console.log('Start game');
+			setGameState(true);
+		});
+		socket.on('restartedGame', () => {
+			setBall(initialBallState);
+			setPlayer1(initialPlayer1State);
+			setPlayer2(initialPlayer2State);
+		});
+		socket.on('updatedGame', (s_ball: Ball, s_player1: Player, s_player2: Player) => {
+			setBall(s_ball);
+			if (player_number === 1) {
+				setPlayer2(s_player2);
+			}
+			else if (player_number === 2) {
+				setPlayer1(s_player1);
+			}
+		});
+	}
+
 	useEffect(() => {
 		const gameCanvas = canvasRef.current;
-		const gameContext = gameCanvas?.getContext('2d');
-	
+		const gameContext = gameCanvas?.getContext('2d');		
+		
 		if (gameContext) {
+			// Draw functions
 			const drawBoardDetails = () => {
 				for (var i = 0; i < WINDOW_HEIGHT; i += 30) {
 					gameContext!.fillStyle = "#fff";
@@ -51,17 +108,23 @@ const OnlineGame: React.FC<Props> = ({ socket, opponent_name }) => {
 				gameContext!.fillText(score.player1.toString(), (WINDOW_WIDTH / 2) - 50, 60);
 				gameContext!.fillText(score.player2.toString(), (WINDOW_WIDTH / 2) + 30, 60);
 				gameContext!.font = "30px Orbitron";
-				gameContext!.fillText("You", 150, 40);
-				gameContext!.fillText(opponent_name, (WINDOW_WIDTH / 2) + 150, 40);
+				if (player_number === 1) {
+					gameContext!.fillText("You", 150, 40);
+					gameContext!.fillText(opponent_name, (WINDOW_WIDTH / 2) + 150, 40);
+				}
+				else if (player_number === 2) {
+					gameContext!.fillText(opponent_name, 150, 40);
+					gameContext!.fillText("You", (WINDOW_WIDTH / 2) + 150, 40);
+				}
 			}
 
 			const drawGameOver = () => {
 				gameContext!.font = "80px Orbitron";
 				gameContext!.fillStyle = "#fff";
-				if (score.player1 >= MAX_SCORE) {
+				if ((score.player1 >= MAX_SCORE && player_number === 1) || (score.player2 >= MAX_SCORE && player_number === 2)) {
 					gameContext!.fillText("You won", (WINDOW_WIDTH / 2) - 200, (WINDOW_HEIGHT / 2));
 				}
-				else if (score.player2 >= MAX_SCORE) {
+				else {
 					gameContext!.fillText("You lost", (WINDOW_WIDTH / 2) - 200, (WINDOW_HEIGHT / 2));
 				}
 			}
@@ -117,7 +180,7 @@ const OnlineGame: React.FC<Props> = ({ socket, opponent_name }) => {
 		setBall((prev) => ({ ...prev, x: prev.x + prev.speedX, y: prev.y + prev.speedY }));
 		movePlayer1();
 		movePlayer2();
-		socket.emit('updateGame', ball, player1, player2, );
+		socket.emit('updateGame', {ball, player1, player2});
 		
 		if (
 			ball.x - BALL_SIZE <= player1.x + PADDLE_WIDTH &&
@@ -170,16 +233,28 @@ const OnlineGame: React.FC<Props> = ({ socket, opponent_name }) => {
 	const keyDownHandler = (event: KeyboardEvent) => {
 		switch (event.key) {
 			case 'w':
-				if (player1.y - PADDLE_SPEED > PADDLE_SPEED)
-					setPlayer1((prev) => ({ ...prev, speed: -PADDLE_SPEED }));
+				if (player_number === 1) {
+					if (player1.y - PADDLE_SPEED > PADDLE_SPEED)
+						setPlayer1((prev) => ({ ...prev, speed: -PADDLE_SPEED }));
+				}
+				else if (player_number === 2) {
+					if (player2.y - PADDLE_SPEED > PADDLE_SPEED)
+						setPlayer2((prev) => ({ ...prev, speed: -PADDLE_SPEED }));
+				}
 				event.preventDefault();
 				break;
 			case 's':
-				if (player1.y + PADDLE_SPEED < (WINDOW_HEIGHT - PADDLE_HEIGHT))
-					setPlayer1((prev) => ({ ...prev, speed: PADDLE_SPEED }));
+				if (player_number === 1) {
+					if (player1.y + PADDLE_SPEED < (WINDOW_HEIGHT - PADDLE_HEIGHT))
+						setPlayer1((prev) => ({ ...prev, speed: PADDLE_SPEED }));
+				}
+				else if (player_number === 2) {
+					if (player2.y + PADDLE_SPEED < (WINDOW_HEIGHT - PADDLE_HEIGHT))
+						setPlayer2((prev) => ({ ...prev, speed: PADDLE_SPEED }));
+				}
 				event.preventDefault();
 				break;
-			case 'ArrowUp':
+			/*case 'ArrowUp':
 				if (player2.y - PADDLE_SPEED > PADDLE_SPEED)
 					setPlayer2((prev) => ({ ...prev, speed: -PADDLE_SPEED }));
 				event.preventDefault();
@@ -188,7 +263,7 @@ const OnlineGame: React.FC<Props> = ({ socket, opponent_name }) => {
 				if (player2.y + PADDLE_SPEED < (WINDOW_HEIGHT - PADDLE_HEIGHT))
 					setPlayer2((prev) => ({ ...prev, speed: PADDLE_SPEED }));
 				event.preventDefault();
-				break;
+				break;*/
 			default:
 				break;
 		}
@@ -197,21 +272,31 @@ const OnlineGame: React.FC<Props> = ({ socket, opponent_name }) => {
 	const keyUpHandler = (event: KeyboardEvent) => {
 		switch (event.key) {
 			case 'w':
+				if (player_number === 1) {
 					setPlayer1((prev) => ({ ...prev, speed: 0 }));
-					event.preventDefault();
+				}
+				else if (player_number === 2 ) {
+					setPlayer2((prev) => ({ ...prev, speed: 0 }));
+				}
+				event.preventDefault();
 				break;
 			case 's':
+				if (player_number === 1) {
 					setPlayer1((prev) => ({ ...prev, speed: 0 }));
-					event.preventDefault();
+				}
+				else if (player_number === 2 ) {
+					setPlayer2((prev) => ({ ...prev, speed: 0 }));
+				}
+				event.preventDefault();
 				break;
-			case 'ArrowUp':
+			/*case 'ArrowUp':
 					setPlayer2((prev) => ({ ...prev, speed: 0 }));
 					event.preventDefault();
 				break;
 			case 'ArrowDown':
 					setPlayer2((prev) => ({ ...prev, speed: 0 }));
 					event.preventDefault();
-				break;
+				break;*/
 			default:
 				break;
 		}
@@ -231,37 +316,40 @@ const OnlineGame: React.FC<Props> = ({ socket, opponent_name }) => {
 		setBall(initialBallState);
 		setPlayer1(initialPlayer1State);
 		setPlayer2(initialPlayer2State);
-		if (gameOver) {
-			setScore({ player1: 0, player2: 0 });
-		}
-		setGameOver(false);
 		socket.emit('restartGame');
 	}
 
-	const resetGame = () => {
-		setGameState(false);
-		setBall(initialBallState);
-		setPlayer1(initialPlayer1State);
-		setPlayer2(initialPlayer2State);
-		setScore({ player1: 0, player2: 0 });
-		setGameOver(false);
-		socket.emit('resetGame');
+	const lobbyCreateHandler = () => {
+		socket.emit('createLobby', 'lobby1');
+		setLobby('lobby1');
+		setPlayerNumber(1);
+	}
+
+	const lobbyJoinHandler = () => {
+		socket.emit('joinLobby', 'lobby1');
+		setLobby('lobby1');
+		setPlayerNumber(2);
 	}
 
 	return (
 		<div>
-	  		<canvas
-				ref={canvasRef}
-				width={WINDOW_WIDTH} // Set your canvas width
-				height={WINDOW_HEIGHT} // Set your canvas height
-				className="Canvas"></canvas>
-	  		<div>
-				<div className="controls">
-        		<button onClick={startGame}>Start</button>
-        		<button onClick={pauseGame}>Pause</button>
-				<button onClick={resetGame}>Reset</button>
-      		</div>
-		  </div>
+			{lobby.length === 0 ? <div>
+				<button onClick={lobbyCreateHandler}>Create Lobby</button>
+				<button onClick={lobbyJoinHandler}>Join Lobby</button>
+			</div> : <div>
+				<canvas
+					ref={canvasRef}
+					width={WINDOW_WIDTH}
+					height={WINDOW_HEIGHT}
+					className="Canvas"></canvas>
+	  			<div>
+					<div className="controls">
+        				<button onClick={startGame}>Start</button>
+        				<button onClick={pauseGame}>Pause</button>
+      				</div>
+				</div>
+			</div> }
+
 		</div>
 	);
 };

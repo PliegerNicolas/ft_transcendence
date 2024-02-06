@@ -1,7 +1,7 @@
 import { OnModuleInit } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io'
-import { InputPayloads } from '../types/inputPayloads'
+import { Ball, Player, InputPayloads } from '../types/inputPayloads'
 
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway implements OnModuleInit {
@@ -11,10 +11,10 @@ export class GameGateway implements OnModuleInit {
 
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
-			this.server.emit('newUser', socket.id);
-	
+			this.server.to(socket.id).emit('connected', socket.id);
+			console.log(socket.id);
 			socket.on('disconnect', () => {
-				this.server.emit('userDisconnected', socket.id);
+				this.server.emit('userLeftLobby', socket.id);
 			});
 		});
 	}
@@ -32,8 +32,23 @@ export class GameGateway implements OnModuleInit {
 		this.server.to(lobby_name).emit('userJoinedLobby', client.id);
 	}
 
-	@SubscribeMessage('gameInput')
-	handleGameInput(@MessageBody() input: InputPayloads, @ConnectedSocket() client: Socket) {
-		
+	@SubscribeMessage('updateGame')
+	handleUpdateGame(@MessageBody() game_props: InputPayloads, @ConnectedSocket() client: Socket) {
+		this.server.emit('updatedGame', game_props.ball, game_props.player1, game_props.player2);
+	}
+
+	@SubscribeMessage('pauseGame')
+	handlePauseGame() {
+		this.server.emit('pausedGame');
+	}
+
+	@SubscribeMessage('startGame')
+	handleStartGame() {
+		this.server.emit('startedGame');
+	}
+
+	@SubscribeMessage('restartGame')
+	handleRestartGame() {
+		this.server.emit('restartedGame');
 	}
 }
