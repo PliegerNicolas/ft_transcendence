@@ -17,7 +17,6 @@ class Api
 	}
 
 	async get(endpoint: string) {
-		console.log(endpoint + " " + this.headers.Authorization);
 		const response = await fetch(this.base_url + endpoint, {
 			headers: this.headers
 		});

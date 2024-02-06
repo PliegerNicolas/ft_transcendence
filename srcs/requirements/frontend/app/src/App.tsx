@@ -1,8 +1,7 @@
 import "./App.css";
 
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
 
@@ -18,10 +17,11 @@ import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
 import User from "./components/User.tsx";
+import Notifs from "./components/Notifs.tsx";
 
 import Api from "./utils/Api";
 
-function Auth()
+function Auth({setLogInfo}: {setLogInfo: Function})
 {
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
@@ -31,8 +31,12 @@ function Auth()
 	const navigate = useNavigate();
 	const redirectPath = localStorage.getItem("auth_redirect");
 
+	const called = useRef(false);
+
 	useEffect(() => {
-		console.log(code);
+		if (called.current)
+			return ;
+		called.current = true;
 		api
 			.post("/auth", {
 				"code": code,
@@ -42,6 +46,7 @@ function Auth()
 				localStorage.setItem(
 					"my_info", JSON.stringify({logged: true, token: data.access_token})
 				);
+				setLogInfo({logged: true, token: data.access_token});
 			})
 			.catch(() => {
 				localStorage.removeItem("my_info")
@@ -66,35 +71,25 @@ function NotFound()
 
 function App()
 {
-	const [myInfo, setMyInfo] = useState(() => {
+	const data = localStorage.getItem("my_info");
 
-		const data = localStorage.getItem("my_info");
-
-		/*
-		**	Instead of directly returning the data retrieved from the storage, we
-		**	should send an API request to check if the token is still valid. That's
-		**	what we're going to do when possible.
-		*/
-
+	const [logInfo, setLogInfo] = useState(() => {
 		if (data)
-				return (JSON.parse(data));
-
-		return ({
-			stop: false,
-			logged: false,
-			api: new Api(`http://${location.hostname}:3450`),
-			token: "",
-		});
-
+			return (JSON.parse(data))
+		return { logged: false, token: ""};
 	});
+
+	const [notifs, setNotifs] = useState<{type: number, content: string}[]>([]);
+
+	function addNotif(add: {type: number, content: string}) {
+		setNotifs(prev => [...prev, add]);
+	}
 
 	return (
 		<MyContext.Provider value={{
-			...myInfo,
-			allChans: useQuery({
-				queryKey: ["allChans"],
-				queryFn: () => myInfo.api.get("/channels")
-			}),
+			...logInfo,
+			addNotif,
+			api: new Api(`http://${location.hostname}:3450`, logInfo.token)
 		}}>
 			<Router>
 				<Header/>
@@ -109,9 +104,10 @@ function App()
 					<Route path="/about" element={<About />} />
 					<Route path="/sandbox" element={<Sandbox />} />
 					<Route path="/user/:id" element={<User />} />
-					<Route path="/auth" element={<Auth />} />
+					<Route path="/auth" element={<Auth setLogInfo={setLogInfo} />} />
 					<Route path="*" element={<NotFound />} />
 				</Routes>
+				<Notifs list={notifs} setList={setNotifs} />
 			</Router>
 		</MyContext.Provider>
 	);
