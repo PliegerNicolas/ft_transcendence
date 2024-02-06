@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { Routes, Route, Link, useParams, useLocation } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 
 import Api from "../utils/Api"
 import { ChanType, MsgType } from "../utils/types";
@@ -157,6 +157,11 @@ function ChatSidebar()
 
 	const context = useContext(MyContext);
 
+	const getChans = useQuery({
+		queryKey: ["allChans"],
+		queryFn: () => context.api.get("/channels")
+	});
+
 	return (
 		<div className={
 			`ChatSidebar ${showSidebar < 0 && "collapse"} ${showSidebar > 1 && "expand"}`
@@ -191,10 +196,10 @@ function ChatSidebar()
 				All channels:
 			</h4>
 			{
-				context.allChans?.isSuccess &&
+				getChans?.isSuccess &&
 				<div className="Chat__Chanlist">
 				{
-					context.allChans.data.map((chan : {id: number, name: string}) =>
+					getChans.data.map((chan : {id: number, name: string}) =>
 						<div className="Chat__ChanListItem" key={chan.id}>
 							<div className="Chat__ChanListItemName">{chan.name}</div>
 							<div className="Chat__ChanListItemSize">?? members</div>
