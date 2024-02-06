@@ -3,7 +3,7 @@ import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSo
 import { Server, Socket } from 'socket.io'
 import { MessagePayloads } from '../types/messagePayloads.type';
 
-@WebSocketGateway({ cors: true, namespace: 'chats' })
+@WebSocketGateway({ cors: true, namespace: 'chat' })
 export class ChatGateway implements OnModuleInit {
 
 	@WebSocketServer()
