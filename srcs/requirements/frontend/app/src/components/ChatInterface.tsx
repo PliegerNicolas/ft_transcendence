@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useContext } from "react";
 import { Routes, Route, Link, useParams, useLocation } from "react-router-dom";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 
+import Spinner from "./Spinner.tsx";
+
 import Api from "../utils/Api"
 import { ChanType, MsgType } from "../utils/types";
 import { ChatContext, MyContext } from "../utils/contexts";
@@ -196,7 +198,7 @@ function ChatSidebar()
 				All channels:
 			</h4>
 			{
-				getChans?.isSuccess &&
+				getChans.isSuccess &&
 				<div className="Chat__Chanlist">
 				{
 					getChans.data.map((chan : {id: number, name: string}) =>
@@ -206,6 +208,14 @@ function ChatSidebar()
 						</div>
 					)
 				}
+				</div> ||
+
+				getChans.isPending &&
+				<Spinner /> ||
+
+				getChans.isError &&
+				<div className="error-msg" style={{marginLeft: "25px"}}>
+					{getChans.error.message}
 				</div>
 			}
 		</div>

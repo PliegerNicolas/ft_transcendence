@@ -150,21 +150,20 @@ function UserListRender(
 	{query}: {query: UseQueryResult<any, Error>}
 )
 {
-	if (query.isPending) return (
+	return (
+		query.isPending &&
 		<div className="genericList">
 			<div><Spinner /></div>
-		</div>
-	);
+		</div> ||
 
-	if (query.isError) return (
+		query.isError &&
 		<div>
 			<span className="error-msg">
-				Failed to load user list: {query.error.message}
+				Failed to load user list: {query.error?.message}
 			</span><br />
-		</div>
-	);
+		</div> ||
 
-	return (
+		query.isSuccess &&
 		<div className="Sandbox__Scrollable">
 			<div className="genericList">
 			<div className="Sandbox__UserItem genericListHead">
@@ -173,9 +172,9 @@ function UserListRender(
 				<div>MAIL</div>
 			</div>
 			{
-				!query.data.length ?
+				!query.data?.length ?
 				<div><div>No user...</div></div> :
-				query.data.map((user: UserType) =>
+				query.data?.map((user: UserType) =>
 					<Link
 						key={user.id}
 						to={"/user/" + user.id}
