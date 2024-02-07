@@ -87,6 +87,7 @@ export class AuthService
 					{
 						"firstName" : Object.values(info)[3].toString(),
 						"lastName" : Object.values(info)[4].toString(),
+						"image" : Object.values(info)[7].toString(),
 						"user" : {
 							id : 1,
 						}
