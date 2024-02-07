@@ -14,6 +14,8 @@ import { UserToGamelog } from './gamelogs/entities/UserToGamelog.entity';
 import { ChatsModule } from './chats/chats.module';
 import { Channel } from './chats/channels/entities/Channel.entity';
 import { Message } from './chats/messages/entities/Message.entity';
+import { AppController } from './app.controller';
+import { AuthService } from './auth/auth.service';
 import { GameModule } from './game/game.module';
 
 @Module({
@@ -39,6 +41,6 @@ import { GameModule } from './game/game.module';
 		GameModule
 	],
 	controllers: [],
-	providers: [],
+	providers: [AuthService],
 })
 export class AppModule {}

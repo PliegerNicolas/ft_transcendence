@@ -105,7 +105,6 @@
 .Chat__ChanList {
 	border: none;
 	border-bottom: 1px solid var(--bg-color-4);
-	border-radius: 0;
 	overflow-x: hidden;
 }
 

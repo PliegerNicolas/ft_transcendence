@@ -80,12 +80,12 @@ export default function User()
 
 	return (
 		<main className="MainContent">
-			<div className="p-style">
+			<section>
 				<h2>
 					{
-						user.profile.firstName
+						user.profile?.firstName
 						+ " « " + user.username + " » "
-						+ user.profile.lastName
+						+ user.profile?.lastName
 					}
 				</h2>
 				<div className="User__Infos">
@@ -97,14 +97,14 @@ export default function User()
 						<div><div>Id</div> <div>{"#" + user.id}</div></div>
 						<div><div>Username</div> <div>{"@" + user.username}</div></div>
 						<div><div>Email</div> <div>{user.email}</div></div>
-						<div><div>First Name</div> <div>{user.profile.firstName}</div></div>
-						<div><div>Last Name</div> <div>{user.profile.lastName}</div></div>
+						<div><div>First Name</div> <div>{user.profile?.firstName}</div></div>
+						<div><div>Last Name</div> <div>{user.profile?.lastName}</div></div>
 					</div>
 				</div>
 				<hr />
 				<h3>User friendships:</h3>
 				<Friendships id={id} query={friendshipsGet} action={friendshipAction}/>
-			</div>
+			</section>
 			<button
 				style={{margin: "0 15px", color: "#f9c"}}
 				onClick={() => userDel.mutate()}
@@ -124,25 +124,25 @@ function Friendships(props: {
 })
 {
 	if (props.query.isPending) return (
-		<div className="p-style">
+		<section>
 			<Spinner />
-		</div>
+		</section>
 	);
 
 	if (props.query.isError) return (
-		<div className="p-style error-msg">
+		<p className="error-msg">
 			Failed to load friendships: {props.query.error.message}
-		</div>
+		</p>
 	);
 
 	if (!props.query.data.length) return (
-		<div className="p-style notice-msg">
+		<p className="notice-msg">
 			No friendship for this user...
-		</div>
+		</p>
 	);
 
 	return (
-		<FriendshipContext.Provider	value={{...props,	friendships: props.query.data}}>
+		<FriendshipContext.Provider	value={{...props, friendships: props.query.data}}>
 			<FriendshipList
 				title="Accepted friendships"
 				filter={

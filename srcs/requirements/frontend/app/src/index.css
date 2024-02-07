@@ -53,7 +53,7 @@ body {
 	margin: 0;
 }
 
-p, .p-style {
+p, .p-style, section {
 	margin: 5px 15px 15px;
 	padding: 10px 15px;
 	background: var(--bg-color-2);
@@ -81,7 +81,6 @@ a:visited {
 button {
 	padding: 5px 10px;
 	margin-right: 8px;
-	margin-top: 6px;
 	background: var(--bg-color-3);
 	border: 1px solid var(--bg-color-5);
 	color: var(--text-normal);
@@ -112,7 +111,6 @@ button:disabled {
 	color: var(--error);
 	font-style: italic;
 }
-
 
 hr {
 	color: var(--text-faint);
