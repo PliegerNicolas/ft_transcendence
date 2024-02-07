@@ -43,7 +43,7 @@ export interface MsgType {
 }
 
 export interface ChanType {
-	id: number,
+	id: string,
 	name: string,
 	size: number,
 	msgs: MsgType[]

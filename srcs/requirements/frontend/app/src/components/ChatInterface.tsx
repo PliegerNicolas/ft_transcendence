@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { Routes, Route, Link, useParams, useLocation } from "react-router-dom";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import Spinner from "./Spinner.tsx";
 
+import { useInvalidate } from "../utils/utils.ts";
 import Api from "../utils/Api"
 import { ChanType, MsgType } from "../utils/types";
 import { ChatContext, MyContext } from "../utils/contexts";
@@ -19,127 +20,14 @@ import "../styles/chat.css";
 
 export default function ChatTest()
 {
-	const [msgList, setMsgList] = useState([
-		{
-			uid: 1,
-			username: "mama",
-			content: "Coucou, ceci est un test de message dans le chat",
-			date: "18:04"
-		},
-		{
-			uid: 2,
-			username: "Momo",
-			content: "Oui, effectiovement, bien le coucou mdrrrr",
-			date: "18:05"
-		},
-		{
-			uid: 1,
-			username: "mama",
-			content: "Et bien du coup ça a l'air de marcher",
-			date: "18:04"
-		},
-		{
-			uid: 3,
-			username: "Mimi",
-			content: `sdssfqsdfsdfqsdfqf
-			sqfqdfkljdsgldfkgldfkgn
-			dfgdffffffffffffff
-			
-			dfgsdfgsfdgdsfg`,
-			date: "18:04"
-		},
-		{
-			uid: 3,
-			username: "Mimi",
-			content: `ertryurtyutyutyrrte`,
-			date: "18:04"
-		},
-		{
-			uid: 3,
-			username: "Mimi",
-			content: `wncbwxcnbvxc,nwb<v`,
-			date: "18:04"
-		},
-		{
-			uid: 1,
-			username: "mama",
-			content: "Tu racontes de la merde @Mimi",
-			date: "18:06"
-		},
-		{
-			uid: 1,
-			username: "mama",
-			content: "Et il faut pas.",
-			date: "18:06"
-		},
-		{
-			uid: 2,
-			username: "Momo",
-			content: "Oui, c'est pas bieeeen",
-			date: "18:07"
-		},
-		{
-			uid: 3,
-			username: "Mimi",
-			content: "Ah bon d'accord",
-			date: "18:07"
-		},
-		{
-			uid: 3,
-			username: "Mimi",
-			content: `Ce message ne se connecte pas avec le précédent parce que la
-			date est différente`,
-			date: "18:08"
-		},
-	]);
-
-	const chanList = [
-		{
-			id: 1,
-			name: "Un channel",
-			size: 7,
-			msgs: msgList
-		},
-		{
-			id: 2,
-			name: "julboyer, PliegerNicolas, Jonatesp, mayeul",
-			size: 4,
-			msgs: msgList
-		},
-		{
-			id: 3,
-			name: "PliegerNicolas",
-			size: 2,
-			msgs: msgList
-		},
-		{
-			id: 4,
-			name: "Jonatesp",
-			size: 2,
-			msgs: msgList
-		},
-		{
-			id: 5,
-			name: "La meilleure convo",
-			size: 42,
-			msgs: msgList
-		},
-		{
-			id: 6,
-			name: " julboyer",
-			size: 2,
-			msgs: msgList
-		}
-	];
-
 	const [showSidebar, setShowSidebar] = useState(1);
 
 	return (
 		<main className="MainContent Chat">
-			<ChatContext.Provider value={{showSidebar, setShowSidebar, chanList}}>
+			<ChatContext.Provider value={{showSidebar, setShowSidebar}}>
 				{ !!showSidebar && <ChatSidebar /> }
 				<Routes>
-					<Route path="/:id" element={ <ChatContent setMsgs={setMsgList}/> } />
+					<Route path="/:id" element={ <ChatContent/> } />
 					<Route path="/new" element={ <NewChan /> } />
 				</Routes>
 			</ChatContext.Provider>
@@ -153,9 +41,9 @@ function ChatSidebar()
 {
 	const loc = useLocation();
 	const idArray = loc.pathname.match(/\/[^/]*$/);
-	const id = idArray?.length ? +idArray[0].slice(1) : 0;
+	const id = idArray?.length ? idArray[0].slice(1) : 0;
 
-	const {showSidebar, chanList} = useContext(ChatContext);
+	const { showSidebar } = useContext(ChatContext);
 
 	const context = useContext(MyContext);
 
@@ -174,49 +62,30 @@ function ChatSidebar()
 					<img src={add} />
 				</Link>
 			</h3>
-			<div className="Chat__ChanList">
-			{
-				chanList.map(item =>
-					<Link
-						to={`${item.id}`}
-						key={item.id}
-						className={`Chat__ChanListItem ${id === item.id && "curr"}`}
-					>
-						<div className="Chat__ChanListItemName">{item.name}</div>
-						{
-							item.size > 2 &&
-							<div className="Chat__ChanListItemSize">
-								{item.size} members
-							</div>
-						}
-					</Link>
-				)
-			}
-			</div>
-			{/* Just a test to see how we could display public channels*/}
 			<h4 className="ChatSidebar__Title">
 				All channels:
 			</h4>
 			{
 				getChans.isSuccess &&
-				<div className="Chat__Chanlist">
-				{
-					getChans.data.map((chan : {id: number, name: string}) =>
-						<div className="Chat__ChanListItem" key={chan.id}>
-							<div className="Chat__ChanListItemName">{chan.name}</div>
-							<div className="Chat__ChanListItemSize">?? members</div>
-						</div>
-					)
-				}
-				</div> ||
-
-				getChans.isPending &&
-				<Spinner /> ||
-
-				getChans.isError &&
-				<div className="error-msg" style={{marginLeft: "25px"}}>
-					{getChans.error.message}
-				</div>
+					<div className="Chat__Chanlist">
+					{
+						getChans.data.map((chan : {id: string, name: string}) =>
+							<Link
+								to={chan.id}
+								className={`Chat__ChanListItem ${id === chan.id && "curr"}`}
+								key={chan.id}
+							>
+								<div className="Chat__ChanListItemName">{chan.name}</div>
+								<div className="Chat__ChanListItemSize">?? members</div>
+							</Link>)
+					}
+					</div>
+				|| getChans.isPending &&
+					<Spinner />
+				|| getChans.isError &&
+					<div className="error-msg" style={{marginLeft: "25px"}}>
+						{getChans.error.message}
+					</div>
 			}
 		</div>
 	);
@@ -227,24 +96,19 @@ function ChatSidebar()
 function NewChan()
 {
 	const [newChan, setNewChan] = useState({
-		id: -1,
+		id: "",
 		name: "New Channel",
 		size: 1,
 		msgs: []
 	});
 
 	const api = new Api(`http://${location.hostname}:3450`);
-
-	const queryClient = useQueryClient();
+	const invalidate = useInvalidate();
 
 	const chanPost = useMutation({
 		mutationFn: (name: string) => api.post("/users/1/channels", {name}),
-		onSettled: () => invalidateQuery(["allChans"])
+		onSettled: () => invalidate(["allChans"])
 	});
-
-	function invalidateQuery(key: string[]) {
-		queryClient.invalidateQueries({queryKey: key});
-	}
 
 	function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
 		setNewChan({...newChan, name:e.currentTarget.value});
@@ -276,24 +140,42 @@ function NewChan()
 
 // <ChatContent /> =============================================================
 
-function ChatContent({setMsgs}: {setMsgs: Function})
+function ChatContent()
 {
-	const {chanList} = useContext(ChatContext);
+	const {api, addNotif} = useContext(MyContext);
+	const invalidate = useInvalidate();
 
 	const params = useParams();
-	const chan = chanList.filter(item => item.id === +params.id!)[0];
+	const id = params.id!;
+
+	const getChan = useQuery({
+		queryKey: ["channels", id],
+		queryFn: () => api.get("/users/1/channels/"),
+	});
+
+	const getMsgs = useQuery({
+		queryKey: ["channels", id, "messages"],
+		queryFn: () => api.get("/users/1/channels/" + id + "/messages"),
+	});
+
+	const postMsg = useMutation({
+		mutationFn: (content: string) =>
+			api.post("/users/1/channels/" + id + "/messages", {content}),
+		onSettled: () => invalidate(["channels", id, "messages"]),
+		onError: error => addNotif(error.message),
+	});
+
+	const chan =
+		getChan.isSuccess ?
+			getChan.data.filter((item: ChanType) => (item.id === id))[0] :
+			undefined;
 
 	/*
 	** These lines are desirable to auto-scroll at bottom of chat.
 	*/
 	const anchorRef = useRef<HTMLDivElement>(null);
-	useEffect(() => anchorRef.current?.scrollIntoView(), [chan?.msgs]);
+	useEffect(() => anchorRef.current?.scrollIntoView(), [getMsgs]);
 
-	/*
-	** Manage the input. If the last char is "\n", the textarea is cleared and the
-	** message is added to the list. Of course, it should be send to the server
-	** instead!
-	*/
 	const [inputValue, setInputValue] = useState("");
 	function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
 
@@ -305,51 +187,54 @@ function ChatContent({setMsgs}: {setMsgs: Function})
 		if (!inputValue)
 			return ;
 
-		setMsgs((prev: MsgType[]) =>
-			[...prev, {uid: 1, username: "mama", content: inputValue, date: "00:00"}]
-		);
+		postMsg.mutate(inputValue);
 		setInputValue("");
 	}
 
-	if (!chan) return (
-		<div style={{margin: "24px"}}>
-			<span className="error-msg">404: this chan doesn't seem to exist</span>
-			<span style={{marginLeft: "8px"}}>😢</span>
-		</div>
-	);
-
 	return (
-		<div className="Chat__Content">
-			<ChatHeader chan={chan} />
-			<div className="Chat__Convo">
-				<div className="notice-msg Chat__Start">
+		getChan.isPending &&
+			<div style={{width: "calc(100% - 240px)", marginTop: "30px"}}>
+				<Spinner />
+			</div>
+		|| getChan.isError &&
+			<div className="error-msg" style={{margin: "30px"}}>
+				Failed to load: {getChan.error.message}
+			</div>
+		|| getChan.isSuccess &&
+		(
+			getMsgs.isSuccess &&
+			<div className="Chat__Content">
+				<ChatHeader chan={chan} />
+				<div className="Chat__Convo">
+					<div className="notice-msg Chat__Start">
+						{
+							chan.size === 2 ?
+							`Start of your conversation with ${chan.name}` :
+							`Start of channel « ${chan.name} »`
+						}
+						<hr />
+					</div>
 					{
-						chan.size === 2 ?
-						`Start of your conversation with ${chan.name}` :
-						`Start of channel « ${chan.name} »`
+					getMsgs.data.map((item: any, index: any) =>
+						<Msg
+							key={index}
+							data={item}
+							prev={index ? getMsgs.data[index - 1] : null}
+							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
+							size={42}
+						/>)
 					}
-					<hr />
+					<div ref={anchorRef} />
 				</div>
-				{
-				chan.msgs.map((item, index) =>
-					<Msg
-						key={index}
-						data={item}
-						prev={index ? chan.msgs[index - 1] : null}
-						next={index < chan.msgs.length ? chan.msgs[index + 1] : null}
-						size={chan.size}
-					/>)
-				}
-				<div ref={anchorRef} />
+				<div className="Chat__Input">
+					<textarea
+						placeholder={`Send a message to « ${chan.name} »`}
+						value={inputValue}
+						onChange={handleInputChange}
+					/>
+				</div>
 			</div>
-			<div className="Chat__Input">
-				<textarea
-					placeholder={`Send a message to « ${chan.name} »`}
-					value={inputValue}
-					onChange={handleInputChange}
-				/>
-			</div>
-		</div>
+		)
 	);
 }
 

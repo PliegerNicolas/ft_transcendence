@@ -1,10 +1,12 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { UseQueryResult, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { UseQueryResult, useQuery, useMutation } from "@tanstack/react-query";
 import { MyContext } from "../utils/contexts.ts";
 import { UserType, UserPostType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
+
+import { useInvalidate } from "../utils/utils.ts";
 
 import "../styles/sandbox.css";
 
@@ -12,8 +14,9 @@ import "../styles/sandbox.css";
 
 export default function Sandbox()
 {
-	const queryClient = useQueryClient();
 	const context = useContext(MyContext);
+
+	const invalidate = useInvalidate();
 
 	const getChans = useQuery({
 		queryKey: ["allChans"],
@@ -27,31 +30,27 @@ export default function Sandbox()
 	
 	const postUser = useMutation({
 		mutationFn: (user: UserPostType) => context.api.post("/users", user),
-		onSettled: () => invalidateQuery(["users"]),
-		onError: (error) => context.addNotif({type: 2, content: error.message}),
+		onSettled: () => invalidate(["users"]),
+		onError: error => context.addNotif({type: 2, content: error.message}),
 	});
 
 	const postChan = useMutation({
 		mutationFn: (name: string) => context.api.post("/users/1/channels", {name}),
-		onSettled: () => invalidateQuery(["allChans"]),
-		onError: (error) => context.addNotif({type: 2, content: error.message}),
+		onSettled: () => invalidate(["allChans"]),
+		onError: error => context.addNotif({type: 2, content: error.message}),
 	});
 
 	const delChan = useMutation({
 		mutationFn: (id: number) => context.api.delete("/channels/" + id),
-		onSettled: () => invalidateQuery(["allChans"]),
-		onError: (error) => context.addNotif({type: 2, content: error.message}),
+		onSettled: () => invalidate(["allChans"]),
+		onError: error => context.addNotif({type: 2, content: error.message}),
 	});
 
 	const delUser = useMutation({
 		mutationFn: (id: string) => context.api.delete("/users/" + id),
-		onSettled: () => invalidateQuery(["users"]),
-		onError: (error) => context.addNotif({type: 2, content: error.message}),
+		onSettled: () => invalidate(["users"]),
+		onError: error => context.addNotif({type: 2, content: error.message}),
 	});
-
-	function invalidateQuery(key: string[]) {
-		queryClient.invalidateQueries({queryKey: key});
-	}
 
 	function random_id() {
 		return (Math.random().toString().slice(-10, -1));
@@ -133,7 +132,7 @@ export default function Sandbox()
 					>
 						Delete a user
 					</button>
-					<button onClick={() => invalidateQuery(["users"])}>
+					<button onClick={() => invalidate(["users"])}>
 						Reload
 					</button>
 				</div>
