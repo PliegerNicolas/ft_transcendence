@@ -11,8 +11,16 @@ export type Player = {
 	speed: number
 }
 
-export type InputPayloads = {
+export type Score = {
+	player1: number,
+	player2: number
+}
+
+export type gameState = {
 	ball: Ball,
 	player1: Player,
-	player2: Player
+	player2: Player,
+	player1ID: string,
+	player2ID: string,
+	score: Score
 }
