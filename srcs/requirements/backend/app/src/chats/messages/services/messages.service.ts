@@ -18,6 +18,7 @@ export class MessagesService {
         private readonly userRepository: Repository<User>,
     ) {}
 
+    /*
     async getChannelMessages(userId: number, channelId: number): Promise<Message[]> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
@@ -134,5 +135,6 @@ export class MessagesService {
         await this.userRepository.delete(messageId);
         return (`Message with ID ${messageId} successfully deleted`);
     }
+    */
 
 }

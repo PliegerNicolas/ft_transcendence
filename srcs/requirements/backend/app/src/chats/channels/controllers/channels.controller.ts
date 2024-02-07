@@ -11,57 +11,64 @@ export class ChannelsController {
 
     @Get('channels')
     async getChannels() {
-        return (await this.channelService.getChannels());
+        // Should pass userId (if user is connected and passport validated or null)
+        // For this moment userId is passed as 1.
+        return (await this.channelService.getChannels(1));
     }
 
-    @Get('users/:userId/channels')
-    async getUserChannels(@Param('userId', ParseIntPipe) userId: number) {
-        return (await this.channelService.getUserChannels(userId));
+    @Get('channels/:channelId/members')
+    async getChannelMembers(@Param('channelId', ParseIntPipe) channelId: number,) {
+        // Should pass userId (if user is connected and passport validated or null).
+        // For this moment userId is passed as 1.
+        return (await this.channelService.getChannelMembers(1, channelId));
     }
 
-    @Post('users/:userId/channels')
+    @Post('channels')
     async createChannel(
-        @Param('userId', ParseIntPipe) userId: number,
         @Body(new ValidationPipe) createChannelDto: CreateChannelDto
     ) {
-        return (await this.channelService.createChannel(userId, createChannelDto));
+        // For this moment userId is passed as 1. Need passport to set a significant value.
+        return (await this.channelService.createChannel(1, createChannelDto));
     }
 
-    @Put('channels/:id')
+    @Put('channels/:channelId')
     async replaceChannel(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('channelId', ParseIntPipe) channelId: number,
         @Body(new ValidationPipe) replaceChannelDto: ReplaceChannelDto
     ) {
-        return (await this.channelService.replaceChannel(id, replaceChannelDto));
+        // For this moment userId is passed as 1. Need passport.
+        return (await this.channelService.replaceChannel(1, channelId, replaceChannelDto));
     }
 
-    @Patch('channels/:id')
+    @Patch('channels/:channelId')
     async updateChannel(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('channelId', ParseIntPipe) channelId: number,
         @Body(new ValidationPipe) updateChannelDto: UpdateChannelDto
     ) {
-        return (await this.channelService.updateChannel(id, updateChannelDto));
+        // For this moment userId is passed as 1. Need passport.
+        return (await this.channelService.updateChannel(1, channelId, updateChannelDto));
     }
 
-    @Patch('users/:userId/channels/:id/join')
+    @Patch('channels/:channelId/join')
     async joinChannel(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('id', ParseIntPipe) channelId: number,
+        @Param('channelId', ParseIntPipe) channelId: number,
     ) {
-        return (await this.channelService.joinChannel(userId, channelId));
+        // For this moment userId is passed as 2. Need passport.
+        return (await this.channelService.joinChannel(2, channelId));
     }
 
-    @Patch('users/:userId/channels/:id/leave')
+    @Patch('channels/:channelId/leave')
     async leaveChannel(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('id', ParseIntPipe) channelId: number,
+        @Param('channelId', ParseIntPipe) channelId: number,
     ) {
-        return (await this.channelService.leaveChannel(userId, channelId));
+        // For this moment userId is passed as 2. Need passport.
+        return (await this.channelService.leaveChannel(2, channelId));
     }
 
-    @Delete('channels/:id')
-    async deleteChannel(@Param('id', ParseIntPipe) id: number) {
-        return (await this.channelService.deleteChannel(id));
+    @Delete('channels/:channelId')
+    async deleteChannel(@Param('channelId', ParseIntPipe) channelId: number) {
+        // For this moment userId is passed as 2. Need passport.
+        return (await this.channelService.deleteChannel(2, channelId));
     }
 
 }

@@ -8,6 +8,7 @@ export class MessagesController {
 
     constructor(private messageService: MessagesService) {}
 
+    /*
     @Get('users/:userId/channels/:channelId/messages')
     async getChannelMessages(
         @Param('userId', ParseIntPipe) userId: number,
@@ -62,5 +63,6 @@ export class MessagesController {
     ) {
         return (await this.messageService.deleteChannelMessage(userId, channelId, messageId));
     }
+    */
 
 }

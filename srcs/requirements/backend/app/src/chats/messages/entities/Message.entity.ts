@@ -1,12 +1,16 @@
 import { Channel } from "src/chats/channels/entities/Channel.entity";
 import { User } from "src/users/entities/User.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 @Entity({ name: 'messages' })
+@Unique(['channelId', 'messageId'])
 export class Message {
 
-    @PrimaryGeneratedColumn({ type: 'bigint' })
-    id: number;
+    @PrimaryColumn({ type: 'bigint' })
+    channelId: number;
+
+    @PrimaryColumn({ type: 'bigint' })
+    messageId: number;
 
     @Column()
     content: string;
