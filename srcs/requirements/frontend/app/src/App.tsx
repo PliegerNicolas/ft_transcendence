@@ -1,8 +1,7 @@
 import "./App.css";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
 
@@ -18,10 +17,11 @@ import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
 import User from "./components/User.tsx";
+import Notifs from "./components/Notifs.tsx";
 
 import Api from "./utils/Api";
 
-function Auth(props: {setMyInfo: Function})
+function Auth({setLogInfo}: {setLogInfo: Function})
 {
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
@@ -31,31 +31,30 @@ function Auth(props: {setMyInfo: Function})
 	const navigate = useNavigate();
 	const redirectPath = localStorage.getItem("auth_redirect");
 
-	async function connect() {
+	const called = useRef(false);
+
+	useEffect(() => {
+		if (called.current)
+			return ;
+		called.current = true;
 		api
 			.post("/auth", {
 				"code": code,
 				"redirect_uri": `http://${location.host}/auth`
 			})
 			.then((data: any) => {
-				console.log("SUCCESS");
-				console.log(data);
-				props.setMyInfo({logged: true, token: data.access_token});
 				localStorage.setItem(
 					"my_info", JSON.stringify({logged: true, token: data.access_token})
 				);
+				setLogInfo({logged: true, token: data.access_token});
 			})
-			.catch(err => {
-				console.log("FAIL");
-				console.log(err);
-				props.setMyInfo({logged: false, token: ""});
+			.catch(() => {
 				localStorage.removeItem("my_info")
 			})
 			.finally(() =>
 				navigate(redirectPath ? redirectPath : "/", {replace: true})
 			);
-	};
-	useEffect(() => {connect()}, []);
+	}, []);
 
 	return (<div />);
 }
@@ -72,34 +71,25 @@ function NotFound()
 
 function App()
 {
-	const [myInfo, setMyInfo] = useState(() => {
+	const data = localStorage.getItem("my_info");
 
-//		const data = localStorage.getItem("my_info");
-
-		/*
-		**	Instead of directly returning the data retrieved from the storage, we
-		**	should send an API request to check if the token is still valid. That's
-		**	what we're going to do when possible.
-		*/
-
-//		if (data)
-//			return (JSON.parse(data));
-
-		return ({
-			logged: false,
-			token: "",
-		});
-
+	const [logInfo, setLogInfo] = useState(() => {
+		if (data)
+			return (JSON.parse(data))
+		return { logged: false, token: ""};
 	});
-	const api = new Api(`http://${location.hostname}:3450`);
+
+	const [notifs, setNotifs] = useState<{type: number, content: string}[]>([]);
+
+	function addNotif(add: {type: number, content: string}) {
+		setNotifs(prev => [...prev, add]);
+	}
 
 	return (
 		<MyContext.Provider value={{
-			...myInfo,
-			allChans: useQuery({
-				queryKey: ["allChans"],
-				queryFn: () => api.get("/channels")
-			}),
+			...logInfo,
+			addNotif,
+			api: new Api(`http://${location.hostname}:3450`, logInfo.token)
 		}}>
 			<Router>
 				<Header/>
@@ -114,9 +104,10 @@ function App()
 					<Route path="/about" element={<About />} />
 					<Route path="/sandbox" element={<Sandbox />} />
 					<Route path="/user/:id" element={<User />} />
-					<Route path="/auth" element={<Auth setMyInfo={setMyInfo} />} />
+					<Route path="/auth" element={<Auth setLogInfo={setLogInfo} />} />
 					<Route path="*" element={<NotFound />} />
 				</Routes>
+				<Notifs list={notifs} setList={setNotifs} />
 			</Router>
 		</MyContext.Provider>
 	);

@@ -140,3 +140,41 @@
 .genericList > * > *:last-child {
 	border-radius: 0 7px 7px 0;
 }
+
+/*
+** Notifs ======================================================================
+*/
+
+.Notifs {
+	position: fixed;
+	bottom: 10px;
+	left: 10px;
+	z-index: 100;
+	pointer-events: none;
+}
+
+.Notifs__Notif {
+	font-size: .92rem;
+	color: var(--text-accent);
+	background-color: #464c60cc;
+	border: 1px solid var(--text-faint);
+	padding: 10px 15px;
+	margin-top: 3px;
+	width: 240px;
+	border-radius: 7px;
+}
+
+.Notifs__Notif.err {
+	background: #d35c;
+	border-color: #f9a;
+}
+
+.Notifs__Notif.rm {
+	animation: fadeout 1s ease-in-out forwards;
+}
+
+@keyframes fadeout
+{
+	0% { opacity: 1; }
+	100% { opacity: 0; }
+}

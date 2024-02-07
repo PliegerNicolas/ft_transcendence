@@ -31,10 +31,14 @@ function Header()
 			</Link>
 			{
 				myInfo.logged ?
-				<div className="Header__Login">
+				<a
+					href={redirectLink}
+					onClick={() => localStorage.setItem("auth_redirect", location.pathname)}
+					className="Header__Login"
+				>
 					Logged In
 					<img src={check} />
-				</div> :
+				</a> :
 				<a
 					href={redirectLink}
 					onClick={() => localStorage.setItem("auth_redirect", location.pathname)}

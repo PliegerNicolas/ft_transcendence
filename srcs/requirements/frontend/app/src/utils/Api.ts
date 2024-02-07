@@ -54,7 +54,7 @@ class Api
 
 	constructor(base_url = "http://localhost", token = "") {
 		this.base_url = base_url;
-		this.headers.Authorization = "Bearer" + token;
+		this.headers.Authorization = token;
 	}
 }
 
