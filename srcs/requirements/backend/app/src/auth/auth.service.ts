@@ -2,9 +2,10 @@ import {Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { profile } from 'console';
+import { query } from 'express';
 import { Profile } from 'src/profiles/entities/Profile.entity';
 import { User } from 'src/users/entities/User.entity';
-import { DataSource, InsertQueryBuilder } from 'typeorm';
+import { DataSource, Entity, InsertQueryBuilder, QueryBuilder, createQueryBuilder } from 'typeorm';
 
 
 @Injectable()
@@ -74,10 +75,24 @@ export class AuthService
 						}
 					}
 				])
+
 				.execute()
 				.then(
 					(data) => data
 				)
+				this.dataSource.createQueryBuilder()
+				.insert()
+				.into(Profile)
+				.values([
+					{
+						"firstName" : Object.values(info)[3].toString(),
+						"lastName" : Object.values(info)[4].toString(),
+						"user" : {
+							id : 1,
+						}
+					}
+				])
+				.execute()
 				// console.log(users)
 				payload.user_id = Object.values(Object.values(users.generatedMaps)[0])[0]
 			}
