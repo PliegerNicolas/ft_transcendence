@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UseQueryResult, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
 import { MyContext } from "../utils/contexts.ts";
 import { UserType, UserPostType } from "../utils/types.ts"
 
@@ -14,7 +13,6 @@ import "../styles/sandbox.css";
 export default function Sandbox()
 {
 	const queryClient = useQueryClient();
-
 	const context = useContext(MyContext);
 
 	const getChans = useQuery({
@@ -26,7 +24,7 @@ export default function Sandbox()
 		queryKey: ["users"],
 		queryFn: () => context.api.get("/users")
 	});
-
+	
 	const postUser = useMutation({
 		mutationFn: (user: UserPostType) => context.api.post("/users", user),
 		onSettled: () => invalidateQuery(["users"]),
