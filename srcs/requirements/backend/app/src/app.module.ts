@@ -38,7 +38,7 @@ import { AuthService } from './auth/auth.service';
 		AuthModule,
 		ChatsModule,
 	],
-	controllers: [AppController],
+	controllers: [],
 	providers: [AuthService],
 })
 export class AppModule {}

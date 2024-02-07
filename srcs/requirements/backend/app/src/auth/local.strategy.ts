@@ -1,22 +1,25 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import {Strategy} from 'passport-42'
+import {ExtractJwt, Strategy} from 'passport-jwt'
 import { AuthService } from './auth.service';
+import { JwtService } from '@nestjs/jwt';
+import { Auth } from 'typeorm';
 
 @Injectable()
-export class Oauth42Strategy extends PassportStrategy(Strategy, '42'){
-	constructor(private authService : AuthService) {
+export class JwtStrategy extends PassportStrategy(Strategy){
+	constructor(private authService : AuthService, private jwtService : JwtService) {
 		super({
-			clientID: process.env.API_CLIENT_ID,
-			clientSecret: process.env.API_SECRET,
-			callbackURL: "/auth"
+			jwtFromRequest : ExtractJwt.fromAuthHeaderAsBearerToken(),
+			secretOrKey : process.env.API_SECRET
 		});
 	}
 
-	async sign(oauthToken : JSON) : Promise<any>{
+	async sign(oauthToken : string) : Promise<any>{
 		console.log("sign")
-		const token = await this.authService.signIn(oauthToken);
-		if (!token.access_token)
+		const decode = this.jwtService.decode(oauthToken) as JSON;
+		console.log(Object.values(decode))
+		const token = await this.authService.checkUser(oauthToken);
+		if (!token.users)
 		{
 			throw new UnauthorizedException();
 		}
