@@ -17,8 +17,8 @@ import { Profile } from 'src/profiles/entities/Profile.entity';
 	secret:jwtConstants.secret
   }), 
   TypeOrmModule.forFeature([User, Profile]),
-	UsersModule, PassportModule],
-  controllers: [AuthController],
-  providers: [AuthService]
+	UsersModule],
+//   controllers: [AuthController],
+  providers: [AuthService, Oauth42Strategy]
 })
 export class AuthModule {}
