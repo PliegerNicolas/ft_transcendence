@@ -62,6 +62,7 @@ function ChatSidebar()
 					<img src={add} />
 				</Link>
 			</h3>
+			<hr />
 			<h4 className="ChatSidebar__Title">
 				All channels:
 			</h4>
@@ -91,15 +92,18 @@ function ChatSidebar()
 	);
 }
 
-// <NewChat /> =================================================================
+// <NewChan /> =================================================================
 
 function NewChan()
 {
 	const [newChan, setNewChan] = useState({
 		id: "",
-		name: "New Channel",
 		size: 1,
-		msgs: []
+		name: "New Channel",
+		mode: "public",
+		password: "",
+		allowed: [],
+		admins: [],
 	});
 
 	const api = new Api(`http://${location.hostname}:3450`);
@@ -110,8 +114,11 @@ function NewChan()
 		onSettled: () => invalidate(["allChans"])
 	});
 
-	function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
-		setNewChan({...newChan, name:e.currentTarget.value});
+	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+		setNewChan({
+			...newChan,
+			[e.target.name]: e.currentTarget.value
+		});
 	}
 
 	function handleSubmit() {
@@ -120,21 +127,40 @@ function NewChan()
 	}
 
 	return (
-		<div className="NewChan">
+		<form className="NewChan">
 			<ChatHeader chan={newChan} />
-			<label htmlFor="channel-name">Name:</label>
-			<br />
+			<label className="NewChan__NameLabel" htmlFor="channelName">Name</label>
 			<input
 				type="text"
-				id="channel-name"
-				name="channel-name"
+				id="channelName"
+				name="name"
 				value={newChan.name}
-				onChange={handleNameChange}
+				onChange={handleChange}
 				placeholder="Channel name cannot be empty!"
 			/>
-			<br />
+			<h4 className="NewChan__Title">Mode</h4>
+			<div className="NewChan__Mode">
+			<label htmlFor="modePublic">Public</label>
+			<input
+				type="radio"
+				id="modePublic"
+				name="mode"
+				value="public"
+				onChange={handleChange}
+				checked={newChan.mode === "public"}
+			/>
+			<label htmlFor="modePrivate">Private</label>
+			<input
+				type="radio"
+				id="modePrivate"
+				name="mode"
+				value="private"
+				onChange={handleChange}
+				checked={newChan.mode === "private"}
+			/>
+			</div>
 			<button onClick={handleSubmit}>Submit</button>
-		</div>
+		</form>
 	);
 }
 

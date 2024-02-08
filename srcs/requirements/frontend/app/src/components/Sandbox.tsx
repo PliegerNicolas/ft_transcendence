@@ -8,6 +8,8 @@ import Spinner from "./Spinner.tsx";
 
 import { useInvalidate } from "../utils/utils.ts";
 
+import close from "../assets/close.svg";
+
 import "../styles/sandbox.css";
 
 // <Sandbox /> =================================================================
@@ -66,7 +68,6 @@ export default function Sandbox()
 				firstName: "Mayeul",
 				lastName: "Laneyrie"
 			},
-			password: "some random password I guess",
 			oauth_id: uid
 		};
 	}
@@ -103,11 +104,13 @@ export default function Sandbox()
 							<div key={chan.id} className="Sandbox__ContextItem">
 								<div>#{chan.id}</div>
 								<div>
-									<span>{chan.name}</span>
+									<Link to={"/chattest/" + chan.id}>
+										<span>{chan.name}</span>
+									</Link>
 								</div>
 								<div>
 									<button className="deleteChan" onClick={() => delChan.mutate(chan.id)}>
-										Delete
+										<img src={close} alt="delete"/>
 									</button>
 								</div>
 
