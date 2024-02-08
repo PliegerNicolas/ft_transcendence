@@ -11,8 +11,7 @@ export class AppController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('users/*')
-  async login(@Request() req) {
-	console.log('test')
+  getProfile(@Request() req) {
     return req.user
   }
 }
