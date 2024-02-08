@@ -151,11 +151,11 @@ input {
 	border: 1px solid var(--bg-color-5);
 	color: var(--text-normal);
 	border-radius: 6px;
-	padding: 7px;
+	padding: 8px 12px;
 	font-size: .92rem;
+	margin: 4px 0;
 }
 input:focus {
-	border: 2px solid var(--text-faint);
-	padding: 6px;
+	border: 1px solid var(--text-faint);
 	outline: none;
 }

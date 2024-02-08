@@ -1,11 +1,10 @@
 import { useState, useRef, useEffect, useContext } from "react";
-import { Routes, Route, Link, useParams, useLocation } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Routes, Route, Link, useParams, useLocation, useNavigate } from "react-router-dom";
+import { MutationFunction, useMutation, useQuery } from "@tanstack/react-query";
 
 import Spinner from "./Spinner.tsx";
 
 import { useInvalidate } from "../utils/utils.ts";
-import Api from "../utils/Api"
 import { ChanType, MsgType } from "../utils/types";
 import { ChatContext, MyContext } from "../utils/contexts";
 
@@ -102,16 +101,21 @@ function NewChan()
 		name: "New Channel",
 		mode: "public",
 		password: "",
+		passwordRepeat: "",
 		allowed: [],
 		admins: [],
 	});
 
-	const api = new Api(`http://${location.hostname}:3450`);
+	const { api } = useContext(MyContext);
 	const invalidate = useInvalidate();
+	const navigate = useNavigate();
 
-	const chanPost = useMutation({
-		mutationFn: (name: string) => api.post("/users/1/channels", {name}),
-		onSettled: () => invalidate(["allChans"])
+	const postChan = useMutation({
+		mutationFn:
+			((name: string) => api.post("/users/1/channels", {name})) as
+			MutationFunction<ChanType>,
+		onSettled: () => invalidate(["allChans"]),
+		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
 	});
 
 	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -121,13 +125,13 @@ function NewChan()
 		});
 	}
 
-	function handleSubmit() {
-		chanPost.mutate(newChan.name);
-		setNewChan({...newChan, name: ""});
+	function handleSubmit(e: React.FormEvent) {
+		e.preventDefault();
+		postChan.mutate(newChan.name);
 	}
 
 	return (
-		<form className="NewChan">
+		<form className="NewChan" onSubmit={handleSubmit}>
 			<ChatHeader chan={newChan} />
 			<label className="NewChan__NameLabel" htmlFor="channelName">Name</label>
 			<input
@@ -136,30 +140,74 @@ function NewChan()
 				name="name"
 				value={newChan.name}
 				onChange={handleChange}
-				placeholder="Channel name cannot be empty!"
+				placeholder="Cannot be empty!"
+				required
 			/>
 			<h4 className="NewChan__Title">Mode</h4>
-			<div className="NewChan__Mode">
-			<label htmlFor="modePublic">Public</label>
-			<input
-				type="radio"
-				id="modePublic"
-				name="mode"
-				value="public"
-				onChange={handleChange}
-				checked={newChan.mode === "public"}
-			/>
-			<label htmlFor="modePrivate">Private</label>
-			<input
-				type="radio"
-				id="modePrivate"
-				name="mode"
-				value="private"
-				onChange={handleChange}
-				checked={newChan.mode === "private"}
-			/>
+			<div className="NewChan__Subsection">
+				<label className="NewChan__ModeLabel" htmlFor="modePublic">Public</label>
+				<input
+					type="radio"
+					id="modePublic"
+					name="mode"
+					value="public"
+					onChange={handleChange}
+					checked={newChan.mode === "public"}
+				/>
+				{
+					newChan.mode === "public" &&
+					<div className="NewChan__Subsection">
+						<h5 className="NewChan__h5Title">Password:</h5>
+						<input
+							type="password"
+							id="channelPassword"
+							name="password"
+							value={newChan.password}
+							onChange={handleChange}
+							placeholder="Leave blank for no password"
+						/>
+						<input
+							type="password"
+							id="channelPasswordRepeat"
+							name="passwordRepeat"
+							value={newChan.passwordRepeat}
+							onChange={handleChange}
+							placeholder="Repeat password"
+						/>
+						{
+							!!newChan.password.length
+								&& !!newChan.passwordRepeat.length
+								&& newChan.password != newChan.passwordRepeat
+								&& <span className="error-msg">Passwords do not match!</span>
+						}
+					</div>
+				}
+				<br />
+				<label htmlFor="modePrivate">Private</label>
+				<input
+					type="radio"
+					id="modePrivate"
+					name="mode"
+					value="private"
+					onChange={handleChange}
+					checked={newChan.mode === "private"}
+				/>
+				{
+					newChan.mode === "private" &&
+					<div className="NewChan__Subsection">
+						<h5 className="NewChan__h5Title">Allowed users:</h5>
+					</div>
+				}
 			</div>
-			<button onClick={handleSubmit}>Submit</button>
+			<h4 className="NewChan__Title">Admins</h4>
+			<button
+				disabled={
+					newChan.mode === "public"
+					&& newChan.password !== newChan.passwordRepeat
+				}
+			>
+				Submit
+			</button>
 		</form>
 	);
 }

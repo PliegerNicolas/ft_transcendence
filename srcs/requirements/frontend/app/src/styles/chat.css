@@ -192,6 +192,7 @@
 }
 
 .Chat__Collapse {
+	min-width: 48px;
 	width: 48px;
 	height: 54px;
 	display: flex;
@@ -355,9 +356,15 @@
 
 .NewChan__Title {
 	font-size: 1.1rem;
-	margin-bottom: 5px;
+	margin: 5px 0;
 }
 
-.NewChan__Mode {
+.NewChan__Subsection {
 	margin-left: 20px;
+}
+
+.NewChan__h5Title {
+	font-size: 1rem;
+	font-weight: 500;
+	margin: 5px 0;
 }
