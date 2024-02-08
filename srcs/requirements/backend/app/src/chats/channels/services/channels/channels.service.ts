@@ -20,8 +20,8 @@ export class ChannelsService {
 
         const channels = await this.channelRepository.find({
             where: [
-                { status: ChannelStatus.PUBLIC },
                 { members: { id: userId } },
+                { status: ChannelStatus.PUBLIC },
             ],
         });
 
@@ -34,16 +34,13 @@ export class ChannelsService {
         // Verify if user is member of that channel and validated with passport. Should we show the user's list only in certain cases ?
 
         const channel = await this.channelRepository.findOne({
-            where: {
-                id: channelId,
-            },
+            where: { id: channelId },
             relations: ['members'],
         });
 
-        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-
-        if (!channel.members.find((member) => member.id == userId)) {
-            throw new BadRequestException(`You need to be member of channel to see it's members`); // handle this directly in the findOne ?
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found.`);
+        else if (!channel.members.some((member) => member.id == userId)) {
+            throw new BadRequestException(`User with ID ${userId} isn't member of channel with ID ${channelId}`);
         }
 
         return (channel.members);
@@ -78,6 +75,8 @@ export class ChannelsService {
             ...channelDetails,
             ...channel,
         }));
+
+        // check user count here ?
     }
 
     async updateChannel(userId: number = -1, channelId: number, channelDetails: UpdateChannelParams): Promise<Channel> {
@@ -92,49 +91,48 @@ export class ChannelsService {
             ...channelDetails,
             ...channel,
         }));
+
+        // check user count here ?
     }
 
     async joinChannel(userId: number = -1, channelId: number) {
-        const targetChannel = await this.channelRepository.findOne({
-            where: {
-                id: channelId,
-                members: {
-                    id: Not(userId),
-                },
-            },
+        const channel = await this.channelRepository.findOne({
+            where: { id: channelId },
             relations: ['members'],
         });
 
-        if (!targetChannel) throw new NotFoundException(`Channel with ID ${channelId} not found or User with ID ${userId} already member of it`);
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
         const user = await this.userRepository.findOne({
-            where: { id: userId},
-        });
+            where: { id: userId },
+        })
+    
+        if (channel.members.some((member) => member.id == userId)) {
+            throw new BadRequestException(`User with ID ${userId} is already member of channel with ID ${channelId}`);
+        }
 
-        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+        channel.members.push(user);
+        channel.updateMembersCount();
 
-        targetChannel.members.push(user);
-
-        return (await this.channelRepository.save(targetChannel));
+        return (await this.channelRepository.save(channel));
     }
 
     async leaveChannel(userId: number = -1, channelId: number) {
-        const targetChannel = await this.channelRepository.findOne({
-            where: {
-                id: channelId,
-            },
+        const channel = await this.channelRepository.findOne({
+            where: { id: channelId },
             relations: ['members'],
         });
 
-        if (!targetChannel) throw new NotFoundException(`Channel with ID ${channelId} not found or User with ID ${userId} not member of it`);
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
-        if (!targetChannel.members.find((member) => member.id == userId)) {
-            throw new BadRequestException(`You need to be member of channel to leave it`); // handle this directly in the findOne ?
+        if (!channel.members.some((member) => member.id == userId)) {
+            throw new BadRequestException(`User with ID ${userId} is not member of channel with ID ${channelId}`);
         }
 
-        targetChannel.members = targetChannel.members.filter((member) => member.id != userId);
+        channel.members = channel.members.filter((member) => member.id != userId);
+        channel.updateMembersCount();
 
-        return (await this.channelRepository.save(targetChannel));
+        return (await this.channelRepository.save(channel));
     }
 
     async deleteChannel(userId: number, channelId: number): Promise<string> {

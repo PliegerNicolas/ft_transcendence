@@ -12,15 +12,15 @@ export class ChannelsController {
     @Get('channels')
     async getChannels() {
         // Should pass userId (if user is connected and passport validated or null)
-        // For this moment userId is passed as 1.
-        return (await this.channelService.getChannels(1));
+        // For this moment userId is passed as 2.
+        return (await this.channelService.getChannels(2));
     }
 
     @Get('channels/:channelId/members')
     async getChannelMembers(@Param('channelId', ParseIntPipe) channelId: number,) {
         // Should pass userId (if user is connected and passport validated or null).
-        // For this moment userId is passed as 1.
-        return (await this.channelService.getChannelMembers(1, channelId));
+        // For this moment userId is passed as 2.
+        return (await this.channelService.getChannelMembers(2, channelId));
     }
 
     @Post('channels')
