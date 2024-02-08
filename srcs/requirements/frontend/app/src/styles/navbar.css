@@ -1,18 +1,18 @@
 .Navbar {
 	position: fixed;
 	z-index: 50;
-	top: 60px;
+	top: 56px;
 	left: 0;
 	bottom: 0;
 
 	padding: 20px 10px;
-	width: 180px;
+	width: 160px;
 
 	background: var(--bg-color-2);
 
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 3px;
 
 	transition: .1s;
 
@@ -22,29 +22,29 @@
 }
 
 .Navbar__Link {
-	width: calc(100% - 36px);
+	width: calc(100% - 32px);
 	border: none;
-	border-radius: 7px;
-	font-size: 1.1rem;
-	padding: 6px 18px;
+	border-radius: 6px;
+	font-size: 1rem;
+	padding: 5px 16px;
 	text-align: left;
 	text-decoration: none;
 	display: flex;
 	align-items: center;
 	justify-content: left;
-	gap: 10px;
+	gap: 8px;
 	transition: .1s;
 }
 
 .Navbar__Link>img {
-	height: 100%;
+	height: 90%;
 }
 
 /*
 ** CONDENSED NAVBAR (ONLY ICONS):
 */
 
-@media (max-width: 1000px) {
+@media (max-width: 900px) {
 	.Navbar__Text {
 		display: none;
 	}
@@ -65,14 +65,14 @@
 
 	.Navbar__Link {
 		justify-content: center;
-		padding: 6px;
+		padding: 5px;
 		height: 40px;
 		width: calc(100% - 12px);
 		transition: none;
 	}
 
 	.Navbar__Link>img {
-		height: calc(100% - 12px);
+		height: calc(95% - 12px);
 	}
 }
 
@@ -80,7 +80,7 @@
 ** MOBILE NAVBAR (AT BOTTOM):
 */
 
-@media (max-width: 640px) {
+@media (max-width: 600px) {
 	.Navbar {
 		position: fixed;
 		top: unset;
@@ -91,7 +91,7 @@
 		padding: 4px;
 
 		width: calc(100% - 8px);
-		height: 54px;
+		height: 50px;
 		flex-direction: row;
 		justify-content: space-around;
 
@@ -106,7 +106,7 @@
 	}
 
 	.Navbar__Link>img {
-		height: calc(100% - 16px);
+		height: calc(95% - 16px);
 		transition: none;
 	}
 }
