@@ -9,7 +9,7 @@ import Header from "./components/Header.tsx";
 import Navbar from "./components/Navbar.tsx";
 
 import Home from "./components/Home.tsx";
-import Play from "./components/Play.tsx";
+import Play from "./components/Game/Play.tsx";
 import Stats from "./components/Stats.tsx";
 import Chat from "./components/Chat.tsx";
 import ChatInterface from "./components/ChatInterface.tsx";

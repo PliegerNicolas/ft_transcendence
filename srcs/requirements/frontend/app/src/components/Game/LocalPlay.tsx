@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 
-import "../styles/play.css";
+import "../../styles/play.css";
 
 const WINDOW_WIDTH = 900;
 const WINDOW_HEIGHT = 600;
@@ -13,18 +13,7 @@ const BALL_SIZE = 10;
 
 const MAX_SCORE = 5;
 
-// <Play /> ====================================================================
-
-function Play()
-{
-	return (
-		<main className="MainContent">
-			<Game/>
-		</main>
-	);
-}
-
-const Game = () => {
+const LocalGame = () => {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const [gameState, setGameState] = useState(false);
 	const [score, setScore] = useState({ player1: 0, player2: 0 });
@@ -264,4 +253,4 @@ const Game = () => {
 	);
 };
 
-export default Play;
+export default LocalGame;
