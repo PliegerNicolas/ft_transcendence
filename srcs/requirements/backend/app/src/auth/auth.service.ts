@@ -75,11 +75,11 @@ export class AuthService
 						}
 					}
 				])
-
 				.execute()
 				.then(
 					(data) => data
 				)
+				payload.user_id = Object.values(Object.values(users.generatedMaps)[0])[0]
 				this.dataSource.createQueryBuilder()
 				.insert()
 				.into(Profile)
@@ -89,13 +89,13 @@ export class AuthService
 						"lastName" : Object.values(info)[4].toString(),
 						"image" : Object.values(info)[7].toString(),
 						"user" : {
-							id : 1,
+						id : payload.user_id,
 						}
 					}
 				])
 				.execute()
 				// console.log(users)
-				payload.user_id = Object.values(Object.values(users.generatedMaps)[0])[0]
+	
 			}
 			else{
 				payload.user_id = Object.values(user_id)[0]

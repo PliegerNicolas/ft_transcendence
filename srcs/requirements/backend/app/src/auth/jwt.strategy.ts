@@ -10,19 +10,13 @@ export class JwtStrategy extends PassportStrategy(Strategy){
 	constructor(private authService : AuthService, private jwtService : JwtService) {
 		super({
 			jwtFromRequest : ExtractJwt.fromAuthHeaderAsBearerToken(),
-			secretOrKey : process.env.API_SECRET
+			secretOrKey : process.env.API_SECRET,
+			ignoreExpiration : true
 		});
 	}
 
-	async sign(oauthToken : string) : Promise<any>{
+	async validate(payload : any) : Promise<any>{
 		console.log("sign")
-		const decode = this.jwtService.decode(oauthToken) as JSON;
-		console.log(Object.values(decode))
-		const token = await this.authService.checkUser(oauthToken);
-		if (!token.users)
-		{
-			throw new UnauthorizedException();
-		}
-		return token;
+		return (payload)
 	}
 }

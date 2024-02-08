@@ -10,9 +10,9 @@ export class AppController {
 	constructor(private authService: AuthService) {}
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('user')
+  @Get('users/*')
   async login(@Request() req) {
 	console.log('test')
-    return this.authService.signIn(req)
+    return req.user
   }
 }
