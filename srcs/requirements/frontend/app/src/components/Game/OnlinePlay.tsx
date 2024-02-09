@@ -17,7 +17,8 @@ type Ball = {
 	x: number,
 	y: number,
 	speedX: number,
-	speedY: number
+	speedY: number,
+	maxSpeedY: number
 }
 
 type Player = {

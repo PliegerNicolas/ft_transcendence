@@ -7,8 +7,9 @@ export function createGameState() {
 		ball: {
 			x: (WINDOW_WIDTH - BALL_SIZE) / 2 + Math.random() * 50 - 50 / 2,
 			y: (WINDOW_HEIGHT - BALL_SIZE) / 2 + Math.random() * 50 - 50 / 2,
-			speedX: Math.random() > 0.5 ? 3 : -3,
-			speedY: Math.random() > 0.5 ? 3 : -3 },
+			speedX: Math.random() > 0.5 ? 5 : -5,
+			speedY: Math.random() > 0.5 ? 2 : -2,
+			maxSpeedY: 5},
 		player1: { x: 20, y: 200, speed: 0 },
 		player2: { x: 860, y: 200, speed: 0 },
 		player1ID: null,
@@ -21,8 +22,9 @@ function resetGameState(gameState: gameState) {
 	gameState.ball = {
 			x: (WINDOW_WIDTH - BALL_SIZE) / 2 + Math.random() * 50 - 50 / 2,
 			y: (WINDOW_HEIGHT - BALL_SIZE) / 2 + Math.random() * 50 - 50 / 2,
-			speedX: Math.random() > 0.5 ? 3 : -3,
-			speedY: Math.random() > 0.5 ? 3 : -3 };
+			speedX: Math.random() > 0.5 ? 5 : -5,
+			speedY: Math.random() > 0.5 ? 2 : -2,
+			maxSpeedY: 5};
 	gameState.player1 = { x: 20, y: 200, speed: 0 };
 	gameState.player2 = { x: 860, y: 200, speed: 0 };
 }
@@ -30,16 +32,14 @@ function resetGameState(gameState: gameState) {
 export function startGameInterval(lobby: string, gameState: gameState, socket: Server) {
 	const intervalId = setInterval(() => {
 		const winner = gameLoop(gameState);
-		
+
 		if (winner === 1) {
 			gameState.score.player1 += 1;
 			resetGameState(gameState);
-			console.log(gameState);
 		}
 		if (winner === 2) {
 			gameState.score.player2 += 1;
 			resetGameState(gameState);
-			console.log(gameState);
 		}
 		//console.log(gameState);
 		socket.to(lobby).emit('updateGame', gameState);
@@ -78,6 +78,10 @@ function gameLoop(gameState: gameState) {
 		ball.y - BALL_SIZE <= player1.y + PADDLE_HEIGHT
 	) {
 		ball.speedX = Math.abs(ball.speedX) + BALL_SPEED;
+		const coef = (ball.y - (player1.y + (PADDLE_HEIGHT / 2))) / (PADDLE_HEIGHT * 0.5);
+		console.log(coef);
+		ball.speedY = ball.maxSpeedY * coef;
+		ball.maxSpeedY += 0.4;
 	}
 	if (
 		ball.x + BALL_SIZE >= player2.x &&
@@ -85,6 +89,10 @@ function gameLoop(gameState: gameState) {
 		ball.y - BALL_SIZE <= player2.y + PADDLE_HEIGHT
 	) {
 		ball.speedX = -(Math.abs(ball.speedX) + BALL_SPEED);
+		const coef = (ball.y - (player2.y + (PADDLE_HEIGHT / 2))) / (PADDLE_HEIGHT * 0.5);
+		console.log(coef);
+		ball.speedY = ball.maxSpeedY * coef;
+		ball.maxSpeedY += 0.4;
 	}
 
 	//Ball collision with walls
