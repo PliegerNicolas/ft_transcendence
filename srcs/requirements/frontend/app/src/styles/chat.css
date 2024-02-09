@@ -43,7 +43,7 @@
 }
 
 .ChatSidebar {
-	width: 200px;
+	width: 220px;
 	padding: 0;
 
 	overflow-y: auto;
@@ -58,21 +58,21 @@
 }
 
 .ChatSidebar.collapse {
-	animation: collapse .2s ease-in-out forwards;
+	animation: collapse .4s ease-in-out forwards;
 }
 
 .ChatSidebar.expand {
-	animation: expand .2s ease-in-out forwards;
+	animation: expand .4s ease-in-out forwards;
 }
 
 @keyframes collapse {
-	0% { width: 240px; }
+	0% { width: 220px; }
 	100% { width: 0px; }
 }
 
 @keyframes expand {
 	0% { width: 0px; }
-	100% { width: 240px; }
+	100% { width: 220px; }
 }
 
 .ChatSidebar__Title {
@@ -90,7 +90,7 @@
 .ChatSidebar__Add {
 	margin: 4px;
 	padding: 4px;
-	border-radius: 6px;
+	border-radius: 7px;
 	display: flex;
 	transition: .1s;
 }
@@ -114,7 +114,7 @@
 
 	margin: 4px 6px;
 	padding: 4px 16px 2px;
-	border-radius: 6px;
+	border-radius: 7px;
 
 	user-select: none;
 
@@ -163,6 +163,10 @@
 	white-space: nowrap;
 	color: var(--text-faint);
 }
+
+/*
+** .Chat__Content ==============================================================
+*/
 
 .Chat__Content {
 	position: relative;
@@ -343,28 +347,82 @@
 
 .NewChan {
 	position: relative;
+	top: auto;
+	left: auto;
+	right: auto;
+	bottom: auto;
 	flex: 1;
-	padding: 24px;
 	padding-top: calc(54px + 24px);
 }
 
 .NewChan__NameLabel {
-	font-size: 1.1rem;
+	font-size: 1rem;
 	font-weight: bold;
-	margin-right: 15px;
+	margin-right: 20px;
 }
 
 .NewChan__Title {
-	font-size: 1.1rem;
-	margin: 5px 0;
-}
-
-.NewChan__Subsection {
-	margin-left: 20px;
-}
-
-.NewChan__h5Title {
 	font-size: 1rem;
-	font-weight: 500;
+	font-weight: bold;
 	margin: 5px 0;
+}
+
+.NewChan__ModeButtons {
+	margin-left: 20px;
+	display: inline-flex;
+	gap: 5px;
+}
+
+.NewChan__ModeButtons>label {
+	border-radius: 7px;
+	display: flex;
+	gap: 6px;
+	justify-content: center;
+	align-items: center;
+	font-size: .96rem;
+	width: 120px;
+	height: 36px;
+}
+.NewChan__ModeButtons>label:hover {
+	cursor: pointer;
+	background-color: var(--bg-color-3);
+}
+.NewChan__ModeButtons>label:active {
+	background-color: var(--bg-color-4);
+}
+
+.NewChan__ModeButtons>label>img {
+	height: 20px;
+}
+
+.NewChan__ModeButtons>label.true {
+	background-color: var(--bg-color-4);
+}
+
+.NewChan__ModeButtons>input {
+	display: none;
+}
+
+.NewChan__PasswdFields {
+	margin-left: 40px;
+	display: flex;
+	flex-direction: column;
+}
+
+.NewChan__PasswdFields>.error-msg {
+	font-size: .86rem;
+}
+
+.NewChan__UserList {
+	margin-left: 40px;
+	font-size: .95rem;
+}
+
+.NewChan__UserList>div {
+	display: flex;
+}
+
+@media (max-width: 900px)
+{
+	.NewChan__PasswdFields, .NewChan__UserList { margin-left: 20px; }
 }

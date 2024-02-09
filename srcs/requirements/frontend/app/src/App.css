@@ -1,3 +1,24 @@
+/*
+** Animations ==================================================================
+*/
+
+@keyframes spin
+{
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(180deg); }
+}
+
+@keyframes fadein
+{
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@keyframes glow
+{
+	0% { filter: drop-shadow(0 0 8px #fff6); }
+	100% { filter: brightness(2) drop-shadow(0 0 8px #ffff); }
+}
 
 /*
 ** MainContent =================================================================
@@ -9,7 +30,7 @@
 	position: fixed;
 	z-index: 1;
 	top: 56px;
-	left: 180px;
+	left: 200px;
 	right: 0;
 	bottom: 0;
 
@@ -47,24 +68,6 @@
 		glow alternate ease-in-out .8s infinite;
 }
 
-@keyframes spin
-{
-	0% { transform: rotate(0deg); }
-	100% { transform: rotate(180deg); }
-}
-
-@keyframes fadein
-{
-	0% { opacity: 0; }
-	100% { opacity: 1; }
-}
-
-@keyframes glow
-{
-	0% { filter: drop-shadow(0 0 8px #fff6); }
-	100% { filter: brightness(2) drop-shadow(0 0 8px #ffff); }
-}
-
 /*
 ** GenericList =================================================================
 */
@@ -74,7 +77,7 @@
 	border: 1px solid var(--bg-color-5);
 	padding: 0px;
 	margin: 0px;
-	border-radius: 6px;
+	border-radius: 7px;
 	overflow-x: auto;
 	box-shadow: 0 0 8px -3px #0008;
 	font-size: .92rem;
@@ -104,7 +107,7 @@
 }
 
 .genericList > *:first-child {
-	border-radius: 6px 7px 0 0;
+	border-radius: 7px 7px 0 0;
 }
 
 .genericList > *:last-child {
@@ -112,7 +115,7 @@
 }
 
 .genericList > *:first-child:last-child {
-	border-radius: 6px;
+	border-radius: 7px;
 }
 
 .genericList > *.clickable:hover, .genericList > * > *.clickable:hover {
@@ -136,7 +139,7 @@
 	z-index: 50;
 }
 .genericList > * > *:first-child {
-	border-radius: 6px 0 0 7px;
+	border-radius: 7px 0 0 7px;
 }
 .genericList > * > *:last-child {
 	border-radius: 0 7px 7px 0;
@@ -162,7 +165,7 @@
 	padding: 10px 15px;
 	margin-top: 3px;
 	width: 240px;
-	border-radius: 6px;
+	border-radius: 7px;
 }
 
 .Notifs__Notif.err {

@@ -8,6 +8,9 @@ import { useInvalidate } from "../utils/utils.ts";
 import { ChanType, MsgType } from "../utils/types";
 import { ChatContext, MyContext } from "../utils/contexts";
 
+import close from "../assets/close.svg";
+import radioChecked from "../assets/radio-checked.svg";
+import radioUnchecked from "../assets/radio-unchecked.svg";
 import closeLeft from "../assets/close-left.svg";
 import openLeft from "../assets/open-left.svg";
 import add from "../assets/add.svg";
@@ -19,7 +22,8 @@ import "../styles/chat.css";
 
 export default function ChatTest()
 {
-	const [showSidebar, setShowSidebar] = useState(1);
+	const [showSidebar, setShowSidebar] =
+		useState(+(document.body.clientWidth > 900));
 
 	return (
 		<main className="MainContent Chat">
@@ -131,8 +135,9 @@ function NewChan()
 	}
 
 	return (
-		<form className="NewChan" onSubmit={handleSubmit}>
+		<form className="NewChan MainContent" onSubmit={handleSubmit}>
 			<ChatHeader chan={newChan} />
+			<section>
 			<label className="NewChan__NameLabel" htmlFor="channelName">Name</label>
 			<input
 				type="text"
@@ -143,9 +148,14 @@ function NewChan()
 				placeholder="Cannot be empty!"
 				required
 			/>
-			<h4 className="NewChan__Title">Mode</h4>
-			<div className="NewChan__Subsection">
-				<label className="NewChan__ModeLabel" htmlFor="modePublic">Public</label>
+			</section>
+			<section>
+			<span className="NewChan__Title">Mode</span>
+			<span className="NewChan__ModeButtons">
+				<label htmlFor="modePublic" className={`${newChan.mode === "public"}`}>
+					Public
+					<img src={newChan.mode === "public" ? radioChecked : radioUnchecked}/>
+				</label>
 				<input
 					type="radio"
 					id="modePublic"
@@ -154,10 +164,25 @@ function NewChan()
 					onChange={handleChange}
 					checked={newChan.mode === "public"}
 				/>
-				{
-					newChan.mode === "public" &&
-					<div className="NewChan__Subsection">
-						<h5 className="NewChan__h5Title">Password:</h5>
+				<label htmlFor="modePrivate" className={`${newChan.mode === "private"}`}>
+					Private
+					<img src={newChan.mode === "private" ? radioChecked : radioUnchecked}/>
+				</label>
+				<input
+					type="radio"
+					id="modePrivate"
+					name="mode"
+					value="private"
+					onChange={handleChange}
+					checked={newChan.mode === "private"}
+				/>
+			</span>
+			</section>
+			{
+				newChan.mode === "public" &&
+				<section>
+					<div className="NewChan__Title">Password</div>
+					<div className="NewChan__PasswdFields">
 						<input
 							type="password"
 							id="channelPassword"
@@ -166,6 +191,7 @@ function NewChan()
 							onChange={handleChange}
 							placeholder="Leave blank for no password"
 						/>
+						<br />
 						<input
 							type="password"
 							id="channelPasswordRepeat"
@@ -181,26 +207,44 @@ function NewChan()
 								&& <span className="error-msg">Passwords do not match!</span>
 						}
 					</div>
-				}
-				<br />
-				<label htmlFor="modePrivate">Private</label>
-				<input
-					type="radio"
-					id="modePrivate"
-					name="mode"
-					value="private"
-					onChange={handleChange}
-					checked={newChan.mode === "private"}
-				/>
-				{
-					newChan.mode === "private" &&
-					<div className="NewChan__Subsection">
-						<h5 className="NewChan__h5Title">Allowed users:</h5>
+				</section>
+			}
+			{
+				newChan.mode === "private" &&
+				<section>
+					<div className="NewChan__Title">Allowed users</div>
+					<div className="NewChan__UserList">
+
 					</div>
-				}
-			</div>
-			<h4 className="NewChan__Title">Admins</h4>
+				</section>
+			}
+			<section>
+				<div className="NewChan__Title">Admins</div>
+				<div className="NewChan__UserList">
+					<div>
+						<div>mlaneyri</div>
+						<img src={close}/>
+					</div>
+					<div>
+						<div>julboyer</div>
+						<img src={close}/>
+					</div>
+					<div>
+						<div>anbourge</div>
+						<img src={close}/>
+					</div>
+					<div>
+						<div>nplieger</div>
+						<img src={close}/>
+					</div>
+					<div>
+						<div><input type="text"/></div>
+						<img src={add}/>
+					</div>
+				</div>
+			</section>
 			<button
+				style={{marginLeft: "15px"}}
 				disabled={
 					newChan.mode === "public"
 					&& newChan.password !== newChan.passwordRepeat
@@ -322,7 +366,7 @@ function ChatHeader({chan}: {chan: ChanType})
 		<div className="Chat__Header">
 			<div className="Chat__Collapse" onClick={() => {
 				setShowSidebar(showSidebar < 1 ? 2 : -1);
-				setTimeout(() => {setShowSidebar(showSidebar < 1 ? 1 : 0)}, 200);
+				setTimeout(() => {setShowSidebar(showSidebar < 1 ? 1 : 0)}, 400);
 			}}>
 				<img src={showSidebar < 1 ? openLeft : closeLeft} />
 			</div>

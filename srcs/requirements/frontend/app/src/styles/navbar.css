@@ -6,7 +6,7 @@
 	bottom: 0;
 
 	padding: 20px 10px;
-	width: 160px;
+	width: 180px;
 
 	background: var(--bg-color-2);
 
@@ -24,7 +24,7 @@
 .Navbar__Link {
 	width: calc(100% - 32px);
 	border: none;
-	border-radius: 6px;
+	border-radius: 7px;
 	font-size: 1rem;
 	padding: 5px 16px;
 	text-align: left;

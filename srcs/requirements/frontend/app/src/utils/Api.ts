@@ -17,7 +17,6 @@ class Api
 	}
 
 async get(endpoint: string) {
-	console.log(this.headers);
 	const response = await fetch(this.base_url + endpoint, {
 		headers: this.headers
 	});
@@ -27,8 +26,6 @@ async get(endpoint: string) {
 };
 
 	async post(endpoint: string, body: any) {
-		console.log(this.headers);
-		console.log(body);
 		const response = await fetch(this.base_url + endpoint, {
 			method: "POST",
 			headers: this.headers,
@@ -38,8 +35,6 @@ async get(endpoint: string) {
 	};
 
 	async delete(endpoint: string, body = {}) {
-		console.log(this.headers);
-		console.log(body);
 		const response = await fetch(this.base_url + endpoint, {
 			method: "DELETE",
 			headers: this.headers,
@@ -49,8 +44,6 @@ async get(endpoint: string) {
 	};
 
 	async patch(endpoint: string, body: any) {
-		console.log(this.headers);
-		console.log(body);
 		const response = await fetch(this.base_url + endpoint, {
 			method: "PATCH",
 			headers: this.headers,
