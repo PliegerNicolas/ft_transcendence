@@ -19,7 +19,7 @@ export class GameGateway implements OnModuleInit {
 		this.server.on('connection', (socket) => {
 			console.log('new connection : ' + socket.id)
 			socket.on('disconnect', () => {
-				this.server.emit('userLeftLobby', socket.id);
+				this.server.emit('userLeftServer', socket.id);
 			});
 		});
 	}
@@ -30,30 +30,68 @@ export class GameGateway implements OnModuleInit {
 		this.server.to(lobby_name).emit('createdLobby', lobby_name);
 		player1ID = client.id;
 	}
+
+	@SubscribeMessage('getLobbyList')
+	handleGetLobbyList(@ConnectedSocket() client: Socket) {
+		client.emit('lobbyList', this.server.sockets.adapter.rooms);
+	}
   
 	@SubscribeMessage('joinLobby')
 	handleLobbyJoin(@MessageBody() lobby_name: string, @ConnectedSocket() client: Socket) {
-		client.join(lobby_name);
-		client.emit('joinedLobby', lobby_name);
-		this.server.to(lobby_name).emit('userJoinedLobby', client.id);
-		player2ID = client.id;
+		//if (player1ID && player2ID) {
+		//	client.emit('lobbyFull', lobby_name);
+		//}
+		//else {
+			client.join(lobby_name);
+			client.emit('joinedLobby', lobby_name);
+			this.server.to(lobby_name).emit('userJoinedLobby', client.id);
+			player2ID = client.id;
+		//}
+	}
+
+	@SubscribeMessage('leftLobby')
+	handleLobbyLeft(@MessageBody() lobby_name: string, @ConnectedSocket() client: Socket) {
+		client.leave(lobby_name);
+		this.server.to(lobby_name).emit('userLeftLobby', client.id);
+		if (player1ID === client.id) {
+			player1ID = null;
+		}
+		else if (player2ID === client.id) {
+			player2ID = null;
+		}
+	}
+
+	@SubscribeMessage('playerDisconnect')
+	handlePlayerDisconnect(@MessageBody() userId: string, @ConnectedSocket() client: Socket) {
+		if (player1ID === userId) {
+			if (state) {
+				state.score.player2 = 5;
+			}
+			player1ID = null;
+		}
+		else if (player2ID === userId) {
+			if (state) {
+				state.score.player1 = 5;
+			}
+			player2ID = null;
+		}
 	}
 
 	@SubscribeMessage('initGame')
 	handleInitGame(@MessageBody() lobby: string, @ConnectedSocket() client: Socket) {
-		this.server.to(lobby).emit('startedGame');
-		state = createGameState();
-		state.player1ID = player1ID;
-		state.player2ID = player2ID;
-		startGameInterval(lobby, state, this.server);
+		if (player1ID && player2ID) {
+			this.server.to(lobby).emit('startedGame');
+			state = createGameState();
+			state.player1ID = player1ID;
+			state.player2ID = player2ID;
+			startGameInterval(lobby, state, this.server);
+		}
 	}
 
 	@SubscribeMessage('keyDown')
 	handleKeyDown(@MessageBody() key: string, @ConnectedSocket() client: Socket) {
-		console.log(client.id);
 		if (key === 'w') {
 			if (state.player1ID === client.id && state.player1.y - PADDLE_SPEED > 0) {
-				console.log(state.player1.y);
 				state.player1.speed = -Math.abs(PADDLE_SPEED);
 			}
 			else if (state.player2ID === client.id && state.player2.y - PADDLE_SPEED > 0) {
@@ -62,7 +100,6 @@ export class GameGateway implements OnModuleInit {
 		}
 		else if (key === 's') {
 			if (state.player1ID === client.id && state.player1.y + PADDLE_SPEED < WINDOW_HEIGHT) {
-				console.log(state.player1.y);
 				state.player1.speed = Math.abs(PADDLE_SPEED);
 			}
 			else if (state.player2ID === client.id && state.player2.y + PADDLE_SPEED < WINDOW_HEIGHT) {

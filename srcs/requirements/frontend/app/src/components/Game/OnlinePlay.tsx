@@ -43,8 +43,10 @@ type Score = {
 export const socket = io(`http://${location.hostname}:3450/game`);
 
 const OnlineGame = () => {
+	const [lobbyList, setLobbyList] = useState<Map<string, Set<string>>>();
 	const [lobby, setLobby] = useState('');
-	const [player_number, setPlayerNumber] = useState(1);
+	const [playerNumber, setPlayerNumber] = useState(1);
+	const [oppId, setOppId] = useState('');
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const [gameState, setGameState] = useState(false);
@@ -76,11 +78,11 @@ const OnlineGame = () => {
 				gameContext!.fillText(new_gameState.score.player1.toString(), (WINDOW_WIDTH / 2) - 50, 60);
 				gameContext!.fillText(new_gameState.score.player2.toString(), (WINDOW_WIDTH / 2) + 30, 60);
 				gameContext!.font = "30px Orbitron";
-				if (player_number === 1) {
+				if (playerNumber === 1) {
 					gameContext!.fillText("You", 150, 40);
 					gameContext!.fillText(new_gameState.player2ID, (WINDOW_WIDTH / 2) + 150, 40);
 				}
-				else if (player_number === 2) {
+				else if (playerNumber === 2) {
 					gameContext!.fillText(new_gameState.player1ID, 150, 40);
 					gameContext!.fillText("You", (WINDOW_WIDTH / 2) + 150, 40);
 				}
@@ -89,7 +91,7 @@ const OnlineGame = () => {
 			const drawGameOver = () => {
 				gameContext!.font = "80px Orbitron";
 				gameContext!.fillStyle = "#fff";
-				if ((new_gameState.score.player1 >= MAX_SCORE && player_number === 1) || (new_gameState.score.player2 >= MAX_SCORE && player_number === 2)) {
+				if ((new_gameState.score.player1 >= MAX_SCORE && playerNumber === 1) || (new_gameState.score.player2 >= MAX_SCORE && playerNumber === 2)) {
 					gameContext!.fillText("You won", (WINDOW_WIDTH / 2) - 200, (WINDOW_HEIGHT / 2));
 				}
 				else {
@@ -124,20 +126,32 @@ const OnlineGame = () => {
 
 		//Create socket listeners
 		if (socket) {
+			socket.on('lobbyList', (lobby_list: Map<string, Set<string>>) => {
+				setLobbyList(lobby_list);
+				console.log(lobbyList);
+			});
 			socket.on('createdLobby', (lobby_id: string) => {
 				console.log(lobby_id + ' created');
 				setLobby(lobby_id)
 			});
 			socket.on('userJoinedLobby', (newUserId: string) => {
 				console.log('New user connected:', newUserId);
+				setOppId(newUserId);
 			});
-			socket.on('userLeftLobby', (disconnectedUserId: string) => {
-				console.log('User disconnected:', disconnectedUserId);
+			socket.on('userLeftServer', (userId: string) => {
+				console.log('User disconnected:', userId);
+				if (userId === oppId) {
+					socket.emit('playerDisconnect', userId);
+				}
 			});
 	
 			socket.on('joinedLobby', (lobby_id: string) => {
 				console.log(lobby_id + ' joined');
 				setLobby(lobby_id);
+				setPlayerNumber(2);
+			});
+			socket.on('lobbyFull', (lobby_id: string) => {
+				console.log(lobby_id + ' is full');
 			});
 			socket.on('startedGame', () => {
 				console.log('Start game');
@@ -147,8 +161,9 @@ const OnlineGame = () => {
 				if (gameContext)
 					requestAnimationFrame(() => drawGame(new_gameState));
 			});
-			socket.on('gameOver', () => {
+			socket.on('gameOver', (new_gameState: InputPayloads) => {
 				setGameOver(true);
+				requestAnimationFrame(() => drawGame(new_gameState));
 			});
 		}
 		
@@ -182,11 +197,13 @@ const OnlineGame = () => {
 		setLobby('lobby1');
 		setPlayerNumber(1);
 	}
-
+/*
+	const lobbyListHandler = () => {
+		socket.emit('getLobbyList');
+	}
+*/
 	const lobbyJoinHandler = () => {
 		socket.emit('joinLobby', 'lobby1');
-		setLobby('lobby1');
-		setPlayerNumber(2);
 	}
 
 	const initGameHandler = () => {

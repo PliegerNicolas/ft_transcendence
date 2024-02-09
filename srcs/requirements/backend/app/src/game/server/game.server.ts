@@ -13,7 +13,7 @@ export function createGameState() {
 		player2: { x: 860, y: 200, speed: 0 },
 		player1ID: null,
 		player2ID: null,
-		score: { player1: 0, player2: 0}
+		score: { player1: 0, player2: 0},
 	})
 }
 
@@ -30,7 +30,7 @@ function resetGameState(gameState: gameState) {
 export function startGameInterval(lobby: string, gameState: gameState, socket: Server) {
 	const intervalId = setInterval(() => {
 		const winner = gameLoop(gameState);
-
+		
 		if (winner === 1) {
 			gameState.score.player1 += 1;
 			resetGameState(gameState);
@@ -44,12 +44,12 @@ export function startGameInterval(lobby: string, gameState: gameState, socket: S
 		//console.log(gameState);
 		socket.to(lobby).emit('updateGame', gameState);
 		if (gameState.score.player1 === MAX_SCORE) {
-			socket.to(lobby).emit('gameOver', 1);
-			clearInterval(intervalId);
+			socket.to(lobby).emit('gameOver', gameState);
+			setTimeout(() => {clearInterval(intervalId)}, 50);
 		}
 		else if (gameState.score.player2 === MAX_SCORE) {
-			socket.to(lobby).emit('gameOver', 2);
-			clearInterval(intervalId);
+			socket.to(lobby).emit('gameOver', gameState);
+			setTimeout(() => {clearInterval(intervalId)}, 50);
 		}
 	}, 1000 / FRAME_RATE);
 }
