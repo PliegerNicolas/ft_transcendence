@@ -16,16 +16,19 @@ class Api
 			return ({});
 	}
 
-	async get(endpoint: string) {
-		const response = await fetch(this.base_url + endpoint, {
-			headers: this.headers
-		});
-		if (!response.ok)
-			return (Promise.reject(new Error(response.status + " " + response.statusText)));
-		return (response.json());
-	};
+async get(endpoint: string) {
+	console.log(this.headers);
+	const response = await fetch(this.base_url + endpoint, {
+		headers: this.headers
+	});
+	if (!response.ok)
+		return (Promise.reject(new Error(response.status + " " + response.statusText)));
+	return (response.json());
+};
 
 	async post(endpoint: string, body: any) {
+		console.log(this.headers);
+		console.log(body);
 		const response = await fetch(this.base_url + endpoint, {
 			method: "POST",
 			headers: this.headers,
@@ -35,6 +38,8 @@ class Api
 	};
 
 	async delete(endpoint: string, body = {}) {
+		console.log(this.headers);
+		console.log(body);
 		const response = await fetch(this.base_url + endpoint, {
 			method: "DELETE",
 			headers: this.headers,
@@ -44,6 +49,8 @@ class Api
 	};
 
 	async patch(endpoint: string, body: any) {
+		console.log(this.headers);
+		console.log(body);
 		const response = await fetch(this.base_url + endpoint, {
 			method: "PATCH",
 			headers: this.headers,
@@ -54,7 +61,7 @@ class Api
 
 	constructor(base_url = "http://localhost", token = "") {
 		this.base_url = base_url;
-		this.headers.Authorization = token;
+		this.headers["Authorization"] = token;
 	}
 }
 

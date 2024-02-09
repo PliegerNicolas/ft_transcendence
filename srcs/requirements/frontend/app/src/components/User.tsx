@@ -2,9 +2,8 @@ import { useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { FriendshipContext } from "../utils/contexts.ts";
+import { FriendshipContext, MyContext } from "../utils/contexts.ts";
 import { FriendshipType } from "../utils/types.ts"
-import Api from "../utils/Api";
 
 import Spinner from "./Spinner.tsx";
 
@@ -19,7 +18,7 @@ export default function User()
 	const params = useParams();
 	const id = params.id!;
 	const queryClient = useQueryClient();
-	const api = new Api(`http://${location.hostname}:3450`);
+	const {api} = useContext(MyContext);
 
 	const userGet = useQuery({
 		queryKey: ["users", id],

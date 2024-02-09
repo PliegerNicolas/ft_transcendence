@@ -1,19 +1,23 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Patch, Post, Put, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CreateUserDto } from '../../dtos/CreateUser.dto';
 import { UsersService } from 'src/users/services/users/users.service';
 import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
 import { ReplaceUserDto } from 'src/users/dtos/ReplaceUser.dto';
+import { AuthService } from 'src/auth/auth.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('users')
 export class UsersController {
 
     constructor(private userService: UsersService) {}
 
+	// @UseGuards(AuthGuard('jwt'))
     @Get()
     async getUsers() {
         return (await this.userService.getUsers());
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Get(':id')
     async getUser(@Param('id', ParseIntPipe) id: number) {
         return (await this.userService.getUser(id));
