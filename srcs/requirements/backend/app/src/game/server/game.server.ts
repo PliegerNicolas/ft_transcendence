@@ -1,5 +1,5 @@
-import { Ball, Player, gameState } from '../types/inputPayloads'
-import { Socket, Server } from 'socket.io'
+import { Players, gameState } from '../types/inputPayloads'
+import { Server } from 'socket.io'
 import { WINDOW_WIDTH, WINDOW_HEIGHT, BALL_SIZE, MAX_SCORE, FRAME_RATE, PADDLE_WIDTH, PADDLE_HEIGHT, BALL_SPEED, PADDLE_SPEED } from './game.constants'
 
 export function createGameState() {
@@ -112,4 +112,40 @@ function gameLoop(gameState: gameState) {
 	}
 
 	return (0);
+}
+
+export function eloCalculator(player1: Players, player2: Players, gameOutcome: number) {
+	const player1ExpectedOutcome = 1 / (1 + Math.pow(10, (player2.elo - player1.elo) / 400));
+	const player2ExpectedOutcome = 1 / (1 + Math.pow(10, (player1.elo - player2.elo) / 400));
+	if (gameOutcome === 1) {
+		player1.elo = player1.elo + 32 * (1 - player1ExpectedOutcome);
+		player2.elo = player2.elo + 32 * (0 - player2ExpectedOutcome);
+		console.log('player1 elo : ' + player1.elo + ' | player2 elo : ' + player2.elo);
+	}
+	else if (gameOutcome === 2) {
+		player1.elo = player1.elo + 32 * (0 - player1ExpectedOutcome);
+		player2.elo = player2.elo + 32 * (1 - player2ExpectedOutcome);
+		console.log('player1 elo : ' + player1.elo + ' | player2 elo : ' + player2.elo);
+	}
+}
+
+export function matchmakingSystem(playersInQueue: Players[]) {
+	var skillReference = 0.02;
+	for (var i = 0; playersInQueue[i]; i++) {
+		for (var j = 0; playersInQueue[j]; ++j) {
+			const player1ExpectedOutcome = 1 / (1 + Math.pow(10, (playersInQueue[j].elo - playersInQueue[i].elo) / 400));
+			const player2ExpectedOutcome = 1 / (1 + Math.pow(10, (playersInQueue[i].elo - playersInQueue[j].elo) / 400));
+			const skillDifference = Math.abs(player1ExpectedOutcome - player2ExpectedOutcome);
+			if (skillDifference <= skillReference) {
+				//create the lobby for the 2 players
+				playersInQueue.splice(j, 1);
+				playersInQueue.splice(i, 1);
+			}
+			if (i === (j + 1))
+				j++;
+		}
+		if (playersInQueue.length < 2)
+			return ;
+		setTimeout(() => {skillReference += 0.01}, 1000);
+	}
 }

@@ -1,7 +1,7 @@
 import { OnModuleInit } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io'
-import { Ball, Player, gameState } from '../types/inputPayloads'
+import { gameState } from '../types/inputPayloads'
 import { createGameState, startGameInterval } from '../server/game.server'
 import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../server/game.constants'
 

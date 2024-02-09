@@ -25,3 +25,8 @@ export type gameState = {
 	player2ID: string,
 	score: Score
 }
+
+export type Players = {
+	id: string,
+	elo: number
+}
