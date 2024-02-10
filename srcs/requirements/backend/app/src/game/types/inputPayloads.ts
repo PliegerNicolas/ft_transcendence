@@ -2,7 +2,8 @@ export type Ball = {
 	x: number,
 	y: number,
 	speedX: number,
-	speedY: number
+	speedY: number,
+	maxSpeedY: number
 }
 
 export type Player = {
@@ -23,4 +24,9 @@ export type gameState = {
 	player1ID: string,
 	player2ID: string,
 	score: Score
+}
+
+export type Players = {
+	id: string,
+	elo: number
 }
