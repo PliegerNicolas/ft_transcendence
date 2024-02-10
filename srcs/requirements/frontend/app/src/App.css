@@ -48,7 +48,10 @@
 
 @media (max-width: 900px) { .MainContent { left: 66px; }}
 
-@media (max-width: 600px) { .MainContent { left: 0; bottom: 58px; }}
+@media (max-width: 600px)
+{
+	.MainContent { padding: 15px 0px 80px; left: 0; bottom: 58px; }
+}
 
 /*
 ** Spinner =====================================================================

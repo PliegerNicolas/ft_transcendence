@@ -12,7 +12,7 @@ import Home from "./components/Home.tsx";
 import Play from "./components/Game/Play.tsx";
 import Stats from "./components/Stats.tsx";
 import Chat from "./components/Chat.tsx";
-import ChatInterface from "./components/ChatInterface.tsx";
+import ChatTest from "./components/Chat/Chat.tsx";
 import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
@@ -99,7 +99,7 @@ function App()
 					<Route path="/play" element={<Play />} />
 					<Route path="/stats" element={<Stats />} />
 					<Route path="/chat" element={<Chat />} />
-					<Route path="/chattest/*" element={<ChatInterface />} />
+					<Route path="/chattest/*" element={<ChatTest />} />
 					<Route path="/settings" element={<Settings />} />
 					<Route path="/about" element={<About />} />
 					<Route path="/sandbox" element={<Sandbox />} />

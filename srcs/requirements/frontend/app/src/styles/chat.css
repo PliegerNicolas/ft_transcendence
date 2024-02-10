@@ -355,10 +355,19 @@
 	padding-top: calc(54px + 24px);
 }
 
+.NewChan__NameSection {
+	display: flex;
+	align-items: center;
+}
+
 .NewChan__NameLabel {
 	font-size: 1rem;
 	font-weight: bold;
 	margin-right: 20px;
+}
+
+.NewChan__NameSection>input {
+	width: 100%;
 }
 
 .NewChan__Title {
@@ -371,6 +380,7 @@
 	margin-left: 20px;
 	display: inline-flex;
 	gap: 5px;
+	user-select: none;
 }
 
 .NewChan__ModeButtons>label {
@@ -382,6 +392,7 @@
 	font-size: .96rem;
 	width: 120px;
 	height: 36px;
+	transition: .1s;
 }
 .NewChan__ModeButtons>label:hover {
 	cursor: pointer;
@@ -404,6 +415,7 @@
 }
 
 .NewChan__PasswdFields {
+	margin-top: 12px;
 	margin-left: 40px;
 	display: flex;
 	flex-direction: column;
@@ -414,15 +426,53 @@
 }
 
 .NewChan__UserList {
+	margin-top: 16px;
 	margin-left: 40px;
 	font-size: .95rem;
-}
-
-.NewChan__UserList>div {
-	display: flex;
 }
 
 @media (max-width: 900px)
 {
 	.NewChan__PasswdFields, .NewChan__UserList { margin-left: 20px; }
+}
+
+.UserList__Item {
+	width: 250px;
+	display: flex;
+
+	justify-content: space-between;
+	align-items: center;
+	border: 1px solid var(--bg-color-5);
+	border-radius: 7px;
+	margin: 4px 0;
+	padding: 2px;
+	padding-left: 8px;
+	background: var(--bg-color-3);
+}
+.UserList__Item:last-child {
+	border: none;
+	width: 258px;
+	padding: 0;
+	padding-right: 2px;
+	background: none;
+}
+
+.UserList__Item input {
+	margin: 0;
+	height: 18px;
+	width: 200px;
+}
+
+.UserList__Item>button {
+	all: unset;
+	display: flex;
+	border-radius: 7px;
+	padding: 2px;
+	width: 24px;
+}
+.UserList__Item>button:hover {
+	background-color: var(--bg-color-4);
+}
+.UserList__Item>button:active {
+	background-color: var(--bg-color-5);
 }
