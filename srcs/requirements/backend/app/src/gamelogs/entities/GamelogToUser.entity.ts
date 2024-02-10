@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Gamelog } from "./Gamelog.entity";
 import { IsEnum } from "class-validator";
 import { User } from "src/users/entities/User.entity";
@@ -10,8 +10,8 @@ export enum GameResult {
     UNDEFINED = 'undefined',
 }
 
-@Entity({ name: 'user_to_gamelogs' })
-export class UserToGamelog {
+@Entity({ name: 'gamelog_to_users' })
+export class GamelogToUser {
 
     @PrimaryGeneratedColumn({ type: 'bigint' })
     id: number;
@@ -20,10 +20,10 @@ export class UserToGamelog {
     @Column({ type: 'enum', enum: GameResult, default: GameResult.UNDEFINED })
     result: GameResult;
 
-    @ManyToOne(() => Gamelog, (gamelog) => gamelog.userToGamelogs, { onDelete: 'CASCADE' })
-    gamelog: Gamelog;
-
-    @ManyToOne(() => User, (user) => user.userToGamelogs, { cascade: true, onDelete: 'CASCADE' })
+    @ManyToOne(() => User, (user) => user.userToGamelogs, { onDelete: 'CASCADE' })
     user: User;
+
+    @ManyToOne(() => Gamelog, (gamelog) => gamelog.gamelogToUsers, { onDelete: 'CASCADE' })
+    gamelog: Gamelog;
 
 }

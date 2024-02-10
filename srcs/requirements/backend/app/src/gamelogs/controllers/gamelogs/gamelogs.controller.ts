@@ -24,25 +24,28 @@ export class GamelogsController {
         return (await this.gamelogService.createGamelog(createGamelogDto));
     }
 
-    @Put('gamelogs/:id')
+    @Put('gamelogs/:gamelogId')
     async replaceGamelog(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('gamelogId', ParseIntPipe) gamelogId: number,
         @Body(new ValidationPipe) replaceGamelogDto: ReplaceGamelogDto
     ) {
-        return (await this.gamelogService.replaceGamelog(id, replaceGamelogDto));
+        // Verify permission
+        return (await this.gamelogService.replaceGamelog(gamelogId, replaceGamelogDto));
     }
 
-    @Patch('gamelogs/:id')
+    @Patch('gamelogs/:gamelogId')
     async updateGamelog(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('gamelogId', ParseIntPipe) gamelogId: number,
         @Body(new ValidationPipe) updateGamelogDto: UpdateGamelogDto
     ) {
-        return (await this.gamelogService.updateGamelog(id, updateGamelogDto));
+        // Verify permission
+        return (await this.gamelogService.updateGamelog(gamelogId, updateGamelogDto));
     }
 
-    @Delete('gamelogs/:id')
-    async deleteGamelog(@Param('id', ParseIntPipe) id: number) {
-        return (await this.gamelogService.deleteGamelog(id));
+    @Delete('gamelogs/:gamelogId')
+    async deleteGamelog(@Param('gamelogId', ParseIntPipe) gamelogId: number) {
+        // Verify permission
+        return (await this.gamelogService.deleteGamelog(gamelogId));
     }
 
 }

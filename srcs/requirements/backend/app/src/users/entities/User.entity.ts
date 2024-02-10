@@ -1,7 +1,7 @@
 import { Channel } from "src/chats/channels/entities/Channel.entity";
 import { Message } from "src/chats/messages/entities/Message.entity";
 import { Gamelog } from "src/gamelogs/entities/Gamelog.entity";
-import { UserToGamelog } from "src/gamelogs/entities/UserToGamelog.entity";
+import { GamelogToUser } from "src/gamelogs/entities/GamelogToUser.entity";
 import { Profile } from "src/profiles/entities/Profile.entity";
 import { Relationship } from "src/relationships/entities/Relationship.entity";
 import { Column, CreateDateColumn, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
@@ -43,11 +43,8 @@ export class User {
 
     /* Gamelogs */
 
-    @OneToMany(() => UserToGamelog, (userToGamelog) => userToGamelog.user)
-    userToGamelogs?: UserToGamelog[];
-
-    @ManyToMany(() => Gamelog, (gamelog) => gamelog.users)
-    gamelogs?: Gamelog[];
+    @OneToMany(() => GamelogToUser, (userToGamelogs) => userToGamelogs.user)
+    userToGamelogs?: GamelogToUser[];
 
     /* Chat */
 

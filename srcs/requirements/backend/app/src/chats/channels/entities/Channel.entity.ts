@@ -36,10 +36,7 @@ export class Channel {
     @BeforeInsert()
     @BeforeUpdate()
     updateMembersCount(): void {
-        console.log('-----');
-        console.log(this);
         this.membersCount = this.members.length;
-        console.log('-----');
     }
 
 }
