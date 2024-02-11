@@ -27,3 +27,5 @@ export class GamelogToUser {
     gamelog: Gamelog;
 
 }
+
+// Add SOFT DELETE ?

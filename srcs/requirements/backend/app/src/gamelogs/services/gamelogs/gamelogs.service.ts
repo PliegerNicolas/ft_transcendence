@@ -20,16 +20,31 @@ export class GamelogsService {
     ) {}
 
     async getGamelogs(): Promise<Gamelog[]> {
+        // Public
+
         return (await this.gamelogRepository.find({
             relations: ['gamelogToUsers.user'],
         }));
     }
 
     async getUserGamelogs(userId: number): Promise <Gamelog[]> {
-        return (null);
+        // Public
+
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: ['userToGamelogs.gamelog.gamelogToUsers.user'],
+        });
+    
+        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+    
+        const gamelogs = user.userToGamelogs.map((userToGamelog) => userToGamelog.gamelog);
+    
+        return (gamelogs);
     }
 
     async createGamelog(gamelogDetails: CreateGamelogParams): Promise<Gamelog> {
+        // Only the server should be autorized to access this.
+
         const gamelogToUsers = await this.createGamelogToUsers(gamelogDetails.userResults, null);
         delete gamelogDetails.userResults;
 
@@ -42,6 +57,8 @@ export class GamelogsService {
     }
 
     async replaceGamelog(gamelogId: number, gamelogDetails: ReplaceGamelogParams): Promise<Gamelog> {
+        // Only the server should be autorized to access this.
+
         const gamelog = await this.gamelogRepository.findOne({
             where: { id: gamelogId },
             relations: ['gamelogToUsers.user'],
@@ -60,6 +77,8 @@ export class GamelogsService {
     }
 
     async updateGamelog(gamelogId: number, gamelogDetails: UpdateGamelogParams): Promise<Gamelog> {
+        // Only the server should be autorized to access this.
+
         const gamelog = await this.gamelogRepository.findOne({
             where: { id: gamelogId },
             relations: ['gamelogToUsers.user'],
@@ -78,7 +97,10 @@ export class GamelogsService {
     }
 
     async deleteGamelog(gamelogId: number): Promise<string> {
-        return (null);
+        // verify user permissions. You shouldn't be able to delete. Maybe hide your name ?
+
+        await this.gamelogRepository.delete(gamelogId);
+        return (`Gamelog with ID ${gamelogId} successfully deleted`);
     }
 
     /* Helper Functions */
