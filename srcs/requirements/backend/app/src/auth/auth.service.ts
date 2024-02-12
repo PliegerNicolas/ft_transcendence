@@ -1,4 +1,4 @@
-import {Injectable } from '@nestjs/common';
+import {Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { profile } from 'console';
@@ -49,6 +49,10 @@ export class AuthService
 				(data) => data.json()
 			)
 			console.log(payload);
+			if(Object.keys(payload)[0] != "access_token")
+			{
+				throw new UnauthorizedException()
+			}
 			const access = (Object.values(payload)[0]).toString();
 			const refresh = (Object.values(payload)[1]).toString();
 			const info = await fetch("https://api.intra.42.fr/v2/me", {method : "GET", headers: {
@@ -56,7 +60,7 @@ export class AuthService
 			}).then(
 				(data) => data.json()
 			)
-			console.log(info)
+			// console.log(info)
 			const user_id = (await this.checkUser(Object.values(info)[0].toString())).users
 			if (user_id === null){
 				const users = await this.dataSource

@@ -23,11 +23,13 @@ export class UsersController {
         return (await this.userService.getUser(id));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Post()
     async createUser(@Body(new ValidationPipe) createUserDto: CreateUserDto) {
         return (await this.userService.createUser(createUserDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Put(':id')
     async replaceUserById(
         @Param('id', ParseIntPipe) id: number,
@@ -36,7 +38,8 @@ export class UsersController {
         return (await this.userService.updateUser(id, replaceUserDto));
     }
 
-    @Patch(':id')
+	@UseGuards(AuthGuard('jwt'))
+	@Patch(':id')
     async updateUserById(
         @Param('id', ParseIntPipe) id: number,
         @Body(new ValidationPipe) updateUserDto: UpdateUserDto,
