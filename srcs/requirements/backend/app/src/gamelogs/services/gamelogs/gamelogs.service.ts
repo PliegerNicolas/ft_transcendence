@@ -108,7 +108,13 @@ export class GamelogsService {
     }
 
     async deleteGamelog(gamelogId: number): Promise<string> {
-        // verify user permissions. You shouldn't be able to delete. Maybe hide your name ?
+        // verify user permissions. You shouldn't be able to delete a gamelog. Maybe hide your name / soft delete ?
+
+        const gamelog = await this.gamelogRepository.findOne({
+            where: { id: gamelogId },
+        });
+
+        if (!gamelog) throw new NotFoundException(`Gamelog with ID ${gamelogId} not found`);
 
         await this.gamelogRepository.delete(gamelogId);
         return (`Gamelog with ID ${gamelogId} successfully deleted`);

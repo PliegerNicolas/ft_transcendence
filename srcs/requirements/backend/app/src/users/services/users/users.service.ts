@@ -94,8 +94,8 @@ export class UsersService {
 
         if (!user) throw new NotFoundException(`User with ID ${userId}`);
 
-        await this.userRepository.delete(user.id);
-        return (`User with ID ${user.id} successfully deleted`);
+        await this.userRepository.delete(userId);
+        return (`User with ID ${userId} successfully deleted`);
     }
 
     /* Helper Functions */

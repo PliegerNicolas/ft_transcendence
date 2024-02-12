@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel, ChannelStatus } from '../../entities/Channel.entity';
-import { In, Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateChannelParams, ReplaceChannelParams, UpdateChannelParams } from '../../types/channel.type';
 import { User } from 'src/users/entities/User.entity';
 import { ChannelMember, ChannelRole } from '../../entities/ChannelMember.entity';
@@ -149,7 +149,17 @@ export class ChannelsService {
     }
 
     async deleteChannel(userId: number, channelId: number): Promise<string> {
-        // Need maybe to add a creator or moderator to ensure I can delete it ? I'll see that later wasup.
+        const channel = await this.channelRepository.findOne({
+            where: { id: channelId },
+            relations: ['members.user'],
+        });
+
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+
+        const user = channel.members.find((member) => member.user.id == userId)
+
+        if (!user) throw new BadRequestException(`User with ID ${userId} isn't member of channel with ID ${channelId}`);
+        else if (user.role !== ChannelRole.ADMIN) throw new BadRequestException(`User with ID ${userId} hasn't got enough permissions to delete Channel with ID ${channelId}`);
 
         await this.channelRepository.delete(channelId);
         return (`Channel with ID ${channelId} successfully deleted`);
