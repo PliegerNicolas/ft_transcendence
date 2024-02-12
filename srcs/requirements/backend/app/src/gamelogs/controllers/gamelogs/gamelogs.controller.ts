@@ -11,16 +11,19 @@ export class GamelogsController {
 
     @Get('gamelogs')
     async getGamelogs() {
+        // public
         return (await this.gamelogService.getGamelogs());
     }
 
     @Get('users/:userId/gamelogs')
     async getUserGamelogs(@Param('userId', ParseIntPipe) userId: number) {
+        // public ?
         return (await this.gamelogService.getUserGamelogs(userId));
     }
 
     @Post('gamelogs')
     async createGamelog(@Body(new ValidationPipe) createGamelogDto: CreateGamelogDto) {
+        // server permission only
         return (await this.gamelogService.createGamelog(createGamelogDto));
     }
 
@@ -29,7 +32,7 @@ export class GamelogsController {
         @Param('gamelogId', ParseIntPipe) gamelogId: number,
         @Body(new ValidationPipe) replaceGamelogDto: ReplaceGamelogDto
     ) {
-        // Verify permission
+        // server permission only
         return (await this.gamelogService.replaceGamelog(gamelogId, replaceGamelogDto));
     }
 
@@ -38,13 +41,13 @@ export class GamelogsController {
         @Param('gamelogId', ParseIntPipe) gamelogId: number,
         @Body(new ValidationPipe) updateGamelogDto: UpdateGamelogDto
     ) {
-        // Verify permission
+        // server permission only
         return (await this.gamelogService.updateGamelog(gamelogId, updateGamelogDto));
     }
 
     @Delete('gamelogs/:gamelogId')
     async deleteGamelog(@Param('gamelogId', ParseIntPipe) gamelogId: number) {
-        // Verify permission
+        // server permission only
         return (await this.gamelogService.deleteGamelog(gamelogId));
     }
 

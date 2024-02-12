@@ -1,13 +1,13 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Gamelog } from "./Gamelog.entity";
 import { IsEnum } from "class-validator";
 import { User } from "src/users/entities/User.entity";
+import { Exclude } from "class-transformer";
 
 export enum GameResult {
     VICTORY = 'victory',
     DEFEAT = 'defeat',
     TIE = 'tie',
-    UNDEFINED = 'undefined',
 }
 
 @Entity({ name: 'gamelog_to_users' })
@@ -17,7 +17,7 @@ export class GamelogToUser {
     id: number;
 
     @IsEnum(GameResult)
-    @Column({ type: 'enum', enum: GameResult, default: GameResult.UNDEFINED })
+    @Column({ type: 'enum', enum: GameResult, default: GameResult.TIE })
     result: GameResult;
 
     @ManyToOne(() => User, (user) => user.userToGamelogs, { onDelete: 'CASCADE' })

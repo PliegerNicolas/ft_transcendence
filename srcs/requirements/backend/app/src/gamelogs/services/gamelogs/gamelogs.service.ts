@@ -27,7 +27,7 @@ export class GamelogsService {
         }));
     }
 
-    async getUserGamelogs(userId: number): Promise <Gamelog[]> {
+    async getUserGamelogs(userId: number): Promise<{ gamelogs: Gamelog[]; userResultCounts: Record<GameResult, number> }> {
         // Public
 
         const user = await this.userRepository.findOne({
@@ -38,8 +38,19 @@ export class GamelogsService {
         if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
     
         const gamelogs = user.userToGamelogs.map((userToGamelog) => userToGamelog.gamelog);
-    
-        return (gamelogs);
+
+        const userResultCounts: Record<GameResult, number> = {} as Record<GameResult, number>;
+        Object.values(GameResult).forEach((result) => { userResultCounts[result] = 0 });
+
+        gamelogs.forEach((gamelog) => {
+            gamelog.gamelogToUsers
+                .filter((gamelogToUser) => gamelogToUser.user.id == userId)
+                .forEach((gamelogToUser) => {
+                    userResultCounts[gamelogToUser.result]++;
+                });
+        });
+
+        return ({ userResultCounts, gamelogs });
     }
 
     async createGamelog(gamelogDetails: CreateGamelogParams): Promise<Gamelog> {
@@ -110,8 +121,8 @@ export class GamelogsService {
 
         if (userIds.length !== new Set(userIds).size) {
             const duplicateUserIds = userIds.filter((id, index) => userIds.indexOf(id) !== index);
-            if (duplicateUserIds.length > 1) throw new BadRequestException(`Following user IDs are duplicate: ${duplicateUserIds}`);
-            else throw new BadRequestException(`Following user ID is duplicate: ${duplicateUserIds}`);
+            const errMessage = duplicateUserIds.length > 1 ? `Following user IDs are duplicate: ${duplicateUserIds}` : `Following user ID is duplicate: ${duplicateUserIds}`;
+            throw new BadRequestException(errMessage);
         }
 
         const users = await this.userRepository.find({
@@ -120,25 +131,20 @@ export class GamelogsService {
 
         if (users.length !== userIds.length) {
             const missingUserIds = userIds.filter((id) => !users.some((user) => user.id == id));
-            if (missingUserIds.length > 1) throw new NotFoundException(`Following users not found : ${missingUserIds}`);
-            else throw new NotFoundException(`Following user not found : ${missingUserIds}`);
+            const errMessage = missingUserIds.length > 1 ? `Following users not found : ${missingUserIds}` : `Following user not found : ${missingUserIds}`;
+            throw new NotFoundException(errMessage);
         }
 
         const gamelogToUsers = userResults.map((userResult) => {
             const existingGtu = gamelog?.gamelogToUsers.find((gamelogToUser) => gamelogToUser.user?.id == userResult.id);
 
-            if (existingGtu) {
-                return ({
-                    ...userResult,
-                    ...existingGtu
-                });
-            } else {
-                const user = users.find((user) => user.id == userResult.id);
-                return (this.gamelogToUserRepository.create({
-                    user: user,
-                    result: userResult.result,
-                }));
-            }
+            return (existingGtu ? {
+                ...existingGtu,
+                result: userResult.result,
+            } : this.gamelogToUserRepository.create({
+                ...userResult,
+                user: users.find((user) => user.id == userResult.id),
+            }));
         });
 
         return (gamelogToUsers);
