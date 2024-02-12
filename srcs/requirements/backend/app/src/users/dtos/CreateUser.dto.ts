@@ -11,10 +11,12 @@ export class CreateUserDto {
     @IsNotEmpty()
     username: string;
 
+    @IsNotEmpty()
+    oauthId: number;
 
+    @IsOptional()
     @ValidateNested()
     @Type(() => CreateProfileDto)
-    @IsOptional()
     profile: CreateProfileDto;
 
 }

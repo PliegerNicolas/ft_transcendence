@@ -15,6 +15,7 @@ import { Channel } from './chats/channels/entities/Channel.entity';
 import { Message } from './chats/messages/entities/Message.entity';
 import { AuthService } from './auth/auth.service';
 import { GamelogToUser } from './gamelogs/entities/GamelogToUser.entity';
+import { ChannelMember } from './chats/channels/entities/ChannelMember.entity';
 
 @Module({
 	imports: [
@@ -26,7 +27,7 @@ import { GamelogToUser } from './gamelogs/entities/GamelogToUser.entity';
 			username: process.env.POSTGRES_USER,
 			password: process.env.POSTGRES_PASSWORD,
 			database: process.env.POSTGRES_DB,
-			entities: [User, Profile, Relationship, Gamelog, GamelogToUser, Channel, Message],
+			entities: [User, Profile, Relationship, Gamelog, GamelogToUser, Channel, ChannelMember, Message],
 			synchronize: true,
 			//logging: true, // TEMP
 		}),

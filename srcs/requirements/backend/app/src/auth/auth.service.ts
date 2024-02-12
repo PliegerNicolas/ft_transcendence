@@ -14,7 +14,7 @@ export class AuthService
 	
 	constructor(private jwtService : JwtService, private dataSource : DataSource) {}
 
-	async checkUser(oauth_id : string) {
+	async checkUser(oauthId : string) {
 
 
 		const users = await this.dataSource
@@ -22,7 +22,7 @@ export class AuthService
 		.createQueryBuilder()
 		.select("user.id")
 		.from(User, "user")
-		.where("user.oauth_id = :id", { id: Number(oauth_id) })
+		.where("user.oauthId = :id", { id: Number(oauthId) })
 		.getOne()
 		.then(
 			(data) => data
@@ -67,7 +67,7 @@ export class AuthService
 				.into(User)
 				.values([
 					{"email" : Object.values(info)[1].toString(),
-					"oauth_id" :Number(Object.values(info)[0].toString()),
+					"oauthId" :Number(Object.values(info)[0].toString()),
 					"username" : Object.values(info)[2].toString(),
 					"profile" : {
 						"firstName" : Object.values(info)[3].toString(),

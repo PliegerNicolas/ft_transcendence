@@ -32,7 +32,7 @@ export class ProfilesService {
         if (!profile) throw new NotFoundException(`Profile of User with ID ${userId} not found`);
 
         return (await this.profileRepository.save({
-            ... profile,
+            ...profile,
             ...profileDetails,
         }));        
     }

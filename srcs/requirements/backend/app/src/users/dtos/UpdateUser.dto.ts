@@ -6,15 +6,17 @@ export class UpdateUserDto {
 
     @IsEmail()
     @IsOptional()
-    email: string;
+    email?: string;
 
     @IsOptional()
-    username: string;
+    username?: string;
 
+    @IsOptional()
+    oauthId?: number;
 
+    @IsOptional()
     @ValidateNested()
     @Type(() => UpdateProfileDto)
-    @IsOptional()
-    profile: UpdateProfileDto;
+    profile?: UpdateProfileDto;
 
 }
