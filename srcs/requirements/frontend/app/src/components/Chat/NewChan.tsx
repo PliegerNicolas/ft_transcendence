@@ -20,8 +20,6 @@ import ChatHeader from "./ChatHeader.tsx";
 export default function NewChan()
 {
 	const [newChan, setNewChan] = useState({
-		id: "",
-		size: 1,
 		name: "New Channel",
 		mode: "public",
 		password: "",
@@ -44,8 +42,7 @@ export default function NewChan()
 
 	const postChan = useMutation({
 		mutationFn:
-			((name: string) => api.post("/users/1/channels", {name})) as
-			MutationFunction<ChanType>,
+			(() => api.post("/users/1/channels", newChan)) as unknown as MutationFunction<ChanType>,
 		onSettled: () => invalidate(["allChans"]),
 		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
 	});
@@ -67,7 +64,7 @@ export default function NewChan()
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		postChan.mutate(newChan.name);
+		postChan.mutate(newChan);
 	}
 
 	function preventSubmit(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -76,7 +73,7 @@ export default function NewChan()
 
 	return (
 		<form className="NewChan MainContent" onSubmit={handleSubmit}>
-			<ChatHeader chan={newChan} />
+			<ChatHeader chan={{...newChan, id: "", size: 1}} />
 			<section className="NewChan__NameSection">
 				<label className="NewChan__NameLabel" htmlFor="channelName">
 					Name
