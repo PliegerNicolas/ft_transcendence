@@ -2,6 +2,7 @@ import "./App.css";
 
 import { useEffect, useState, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
 
@@ -12,7 +13,7 @@ import Home from "./components/Home.tsx";
 import Play from "./components/Game/Play.tsx";
 import Stats from "./components/Stats.tsx";
 import Chat from "./components/Chat.tsx";
-import ChatInterface from "./components/ChatInterface.tsx";
+import ChatTest from "./components/Chat/Chat.tsx";
 import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
@@ -31,32 +32,39 @@ function Auth({setLogInfo}: {setLogInfo: Function})
 	const navigate = useNavigate();
 	const redirectPath = localStorage.getItem("auth_redirect");
 
-	const called = useRef(false);
+	const guard = useRef(false);
+
+	const postAuth = useMutation({
+
+		mutationFn: ((code: string) =>
+			api.post("/auth", {code, redirect_uri: `http://${location.host}/auth`})) as
+			MutationFunction<{access_token: string}>,
+
+		onSuccess: (data: {access_token: string}) => {
+				localStorage.setItem(
+					"my_info", JSON.stringify({logged: true, token: data?.access_token}));
+				setLogInfo({logged: true, token: data.access_token});
+			},
+
+		onError: () => localStorage.removeItem("my_info"),
+
+		onSettled: () => navigate(redirectPath ? redirectPath : "/")
+	});
 
 	useEffect(() => {
-		if (called.current)
-			return ;
-		called.current = true;
-		api
-			.post("/auth", {
-				"code": code,
-				"redirect_uri": `http://${location.host}/auth`
-			})
-			.then((data: any) => {
-				localStorage.setItem(
-					"my_info", JSON.stringify({logged: true, token: data.access_token})
-				);
-				setLogInfo({logged: true, token: data.access_token});
-			})
-			.catch(() => {
-				localStorage.removeItem("my_info")
-			})
-			.finally(() =>
-				navigate(redirectPath ? redirectPath : "/", {replace: true})
-			);
+		if (guard.current) return ;
+		guard.current = true;
+
+		postAuth.mutate(code);
 	}, []);
 
-	return (<div />);
+	return (
+		<div className="MainContent">
+			<h3>
+				Please wait...
+			</h3>
+		</div>
+	);
 }
 
 function NotFound()
@@ -99,7 +107,7 @@ function App()
 					<Route path="/play" element={<Play />} />
 					<Route path="/stats" element={<Stats />} />
 					<Route path="/chat" element={<Chat />} />
-					<Route path="/chattest/*" element={<ChatInterface />} />
+					<Route path="/chattest/*" element={<ChatTest />} />
 					<Route path="/settings" element={<Settings />} />
 					<Route path="/about" element={<About />} />
 					<Route path="/sandbox" element={<Sandbox />} />

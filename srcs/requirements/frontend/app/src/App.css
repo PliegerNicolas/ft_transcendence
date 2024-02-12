@@ -1,51 +1,6 @@
-
 /*
-** MainContent =================================================================
+** Animations ==================================================================
 */
-
-.MainContent {
-	background: var(--bg-color-1);
-	padding: 15px 25px 80px;
-	position: fixed;
-	z-index: 1;
-	top: 56px;
-	left: 180px;
-	right: 0;
-	bottom: 0;
-
-	overflow-y: auto;
-	transition: .1s;
-}
-
-@media (min-width: 1100px) { .MainContent { padding: 15px 50px 80px; }}
-
-@media (min-width: 1400px) { .MainContent { padding: 15px 100px 80px; }}
-
-@media (min-width: 1700px) { .MainContent { padding: 15px 150px 80px; }}
-
-@media (min-width: 2000px) { .MainContent { padding: 15px 200px 80px; }}
-
-@media (max-width: 900px) { .MainContent { left: 66px; }}
-
-@media (max-width: 600px) { .MainContent { left: 0; bottom: 58px; }}
-
-/*
-** Spinner =====================================================================
-*/
-
-.Spinner {
-	display: flex;
-	justify-content: center;
-	height: 80px;
-}
-
-.Spinner > img {
-	width: 50px;
-	animation:
-		spin .8s ease-in-out infinite,
-		fadein 1s ease-in-out,
-		glow alternate ease-in-out .8s infinite;
-}
 
 @keyframes spin
 {
@@ -66,6 +21,57 @@
 }
 
 /*
+** MainContent =================================================================
+*/
+
+.MainContent {
+	background: var(--bg-color-1);
+	padding: 15px 25px 80px;
+	position: fixed;
+	z-index: 1;
+	top: 56px;
+	left: 200px;
+	right: 0;
+	bottom: 0;
+
+	overflow-y: auto;
+	transition: .1s;
+}
+
+@media (min-width: 1100px) { .MainContent { padding: 15px 50px 80px; }}
+
+@media (min-width: 1400px) { .MainContent { padding: 15px 100px 80px; }}
+
+@media (min-width: 1700px) { .MainContent { padding: 15px 150px 80px; }}
+
+@media (min-width: 2000px) { .MainContent { padding: 15px 200px 80px; }}
+
+@media (max-width: 900px) { .MainContent { left: 66px; }}
+
+@media (max-width: 600px)
+{
+	.MainContent { padding: 15px 0px 80px; left: 0; bottom: 58px; }
+}
+
+/*
+** Spinner =====================================================================
+*/
+
+.Spinner {
+	display: flex;
+	justify-content: center;
+	height: 80px;
+}
+
+.Spinner > img {
+	width: 50px;
+	animation:
+		spin .8s ease-in-out infinite,
+		fadein 1s ease-in-out,
+		glow alternate ease-in-out .8s infinite;
+}
+
+/*
 ** GenericList =================================================================
 */
 
@@ -74,7 +80,7 @@
 	border: 1px solid var(--bg-color-5);
 	padding: 0px;
 	margin: 0px;
-	border-radius: 6px;
+	border-radius: 7px;
 	overflow-x: auto;
 	box-shadow: 0 0 8px -3px #0008;
 	font-size: .92rem;
@@ -104,7 +110,7 @@
 }
 
 .genericList > *:first-child {
-	border-radius: 6px 7px 0 0;
+	border-radius: 7px 7px 0 0;
 }
 
 .genericList > *:last-child {
@@ -112,7 +118,7 @@
 }
 
 .genericList > *:first-child:last-child {
-	border-radius: 6px;
+	border-radius: 7px;
 }
 
 .genericList > *.clickable:hover, .genericList > * > *.clickable:hover {
@@ -136,7 +142,7 @@
 	z-index: 50;
 }
 .genericList > * > *:first-child {
-	border-radius: 6px 0 0 7px;
+	border-radius: 7px 0 0 7px;
 }
 .genericList > * > *:last-child {
 	border-radius: 0 7px 7px 0;
@@ -162,7 +168,7 @@
 	padding: 10px 15px;
 	margin-top: 3px;
 	width: 240px;
-	border-radius: 6px;
+	border-radius: 7px;
 }
 
 .Notifs__Notif.err {
