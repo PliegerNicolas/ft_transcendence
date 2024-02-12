@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { MutationFunction, useMutation } from "@tanstack/react-query";
 
@@ -6,10 +6,10 @@ import { useInvalidate } from "../../utils/utils.ts";
 import { ChanType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
-import close from "../../assets/close.svg";
+import closeIcon from "../../assets/close.svg";
 import radioChecked from "../../assets/radio-checked.svg";
 import radioUnchecked from "../../assets/radio-unchecked.svg";
-import add from "../../assets/add.svg";
+import addIcon from "../../assets/add.svg";
 
 import "../../styles/chat.css";
 
@@ -26,16 +26,17 @@ export default function NewChan()
 		mode: "public",
 		password: "",
 		passwordRepeat: "",
-		allowed: [],
-		admins: [],
+		allowed: [
+			{username: "mlaneyri", id: 1},
+		],
+		banned: [],
+		admins: [
+			{username: "mlaneyri", id: 1},
+			{username: "julboyer", id: 2},
+			{username: "nplieger", id: 3},
+			{username: "anbourge", id: 4},
+		],
 	});
-
-	const dummyUsers = [
-		"mlaneyri",
-		"julboyer",
-		"nplieger",
-		"anbourge"
-	];
 
 	const { api } = useContext(MyContext);
 	const invalidate = useInvalidate();
@@ -49,16 +50,28 @@ export default function NewChan()
 		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
 	});
 
+	function updateField(field: string, value: unknown) {
+		return ({ ...newChan, [field]: value });
+	}
+
 	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-		setNewChan({
-			...newChan,
-			[e.target.name]: e.currentTarget.value
-		});
+		if (e.target.name === "password" && e.target.value === "") {
+			setNewChan({
+				...newChan,
+				password: "",
+				passwordRepeat: "",
+			});
+		}
+		else setNewChan(updateField(e.target.name, e.target.value));
 	}
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 		postChan.mutate(newChan.name);
+	}
+
+	function preventSubmit(e: React.KeyboardEvent<HTMLInputElement>) {
+		if (e.key === 'Enter') e.preventDefault();
 	}
 
 	return (
@@ -69,13 +82,9 @@ export default function NewChan()
 					Name
 				</label>
 				<input
-					type="text"
-					id="channelName"
-					name="name"
-					value={newChan.name}
-					onChange={handleChange}
+					type="text" id="channelName" name="name"
+					value={newChan.name} onChange={handleChange} onKeyDown={preventSubmit}
 					placeholder="Cannot be empty!"
-					required
 				/>
 			</section>
 			<section>
@@ -86,11 +95,8 @@ export default function NewChan()
 						<img src={newChan.mode === "public" ? radioChecked : radioUnchecked}/>
 					</label>
 					<input
-						type="radio"
-						id="modePublic"
-						name="mode"
-						value="public"
-						onChange={handleChange}
+						type="radio" id="modePublic" name="mode"
+						value="public" onChange={handleChange}
 						checked={newChan.mode === "public"}
 					/>
 					<label htmlFor="modePrivate" className={`${newChan.mode === "private"}`}>
@@ -98,36 +104,33 @@ export default function NewChan()
 						<img src={newChan.mode === "private" ? radioChecked : radioUnchecked}/>
 					</label>
 					<input
-						type="radio"
-						id="modePrivate"
-						name="mode"
-						value="private"
-						onChange={handleChange}
+						type="radio" id="modePrivate" name="mode"
+						value="private" onChange={handleChange}
 						checked={newChan.mode === "private"}
 					/>
 				</span>
 			</section>
 			{
 				newChan.mode === "public" &&
-				<section>
+				<div className="NewChan__PublicModeDiv">
+				<section className="NewChan__PublicModeSection">
 					<div className="NewChan__Title">Password</div>
 					<div className="NewChan__PasswdFields">
 						<input
-							type="password"
-							id="channelPassword"
-							name="password"
-							value={newChan.password}
-							onChange={handleChange}
+							type="password" id="channelPassword" name="password"
+							value={newChan.password} onChange={handleChange}
+							onKeyDown={preventSubmit}
 							placeholder="Leave blank for no password"
 						/>
-						<input
-							type="password"
-							id="channelPasswordRepeat"
-							name="passwordRepeat"
-							value={newChan.passwordRepeat}
-							onChange={handleChange}
-							placeholder="Repeat password"
-						/>
+						{
+							!!newChan.password.length &&
+							<input
+								type="password" id="channelPasswordRepeat" name="passwordRepeat"
+								value={newChan.passwordRepeat} onChange={handleChange}
+								onKeyDown={preventSubmit}
+								placeholder="Repeat password"
+							/>
+						}
 						{
 							!!newChan.password.length
 								&& !!newChan.passwordRepeat.length
@@ -136,41 +139,41 @@ export default function NewChan()
 						}
 					</div>
 				</section>
+				<section className="NewChan__PublicModeSection">
+					<UserList
+						title="Banned users"
+						list={newChan.banned}
+						update={(value: {username: string, id: number}) =>
+							setNewChan(updateField("banned", value))}
+						owner={null}
+					/>
+				</section>
+				</div>
 			}
 			{
 				newChan.mode === "private" &&
 				<section>
-					<div className="NewChan__Title">Allowed users</div>
-					<div className="NewChan__UserList">
-
-					</div>
+					<UserList
+						title="Allowed users"
+						list={newChan.allowed}
+						update={(value: {username: string, id: number}) =>
+							setNewChan(updateField("allowed", value))}
+						owner={newChan.allowed[0]}
+					/>
 				</section>
 			}
 			<section>
-				<div className="NewChan__Title">Admins</div>
-				<div className="NewChan__UserList">
-				{
-					dummyUsers.map((user, index) =>
-						<div className="UserList__Item" key={index}>
-							<div>{user}</div>
-							<button type="button"><img src={close}/></button>
-						</div>)
-				}
-					<div className="UserList__Item">
-						<div>
-							<input
-								type="text"
-								placeholder="Add an admin"
-							/>
-						</div>
-						<button type="button" className="add">
-							<img src={add}/>
-						</button>
-					</div>
-				</div>
+				<UserList
+					title="Admins"
+					list={newChan.admins}
+					update={(value: {username: string, id: number}) =>
+						setNewChan(updateField("admins", value))}
+					owner={newChan.admins[0]}
+				/>
 			</section>
 			<button
 				style={{marginLeft: "15px"}}
+				onClick={(e) => {handleSubmit(e)}}
 				disabled={
 					newChan.mode === "public"
 					&& newChan.password !== newChan.passwordRepeat
@@ -179,5 +182,96 @@ export default function NewChan()
 				Submit
 			</button>
 		</form>
+	);
+}
+
+function UserList(
+	{title, list, update, owner}:
+	{title: string, list: {username: string, id: number}[], update: Function, owner: {username: string, id: number} | null}
+)
+{
+	const listFilter = owner ? list.filter(user => user.id != owner.id) : list;
+
+	const listHTML = listFilter.map(user =>
+		<div className="UserList__Item" key={user.id}>
+			<div>{user.username}</div>
+			<button type="button" onClick={() => rm(user.id)}>
+				<img src={closeIcon}/>
+			</button>
+		</div>);
+
+	const [newAdmin, setNewAdmin] = useState("");
+
+	const anchorRef = useRef<HTMLDivElement>(null);
+
+	function add() {
+		update([
+			...list,
+			{username: newAdmin, id: +Math.random().toString().slice(-10, -1)}
+		]);
+		setNewAdmin("");
+		setTimeout(() =>
+			anchorRef.current?.scrollIntoView({block: "end", inline: "nearest"}),
+			100
+		);
+	}
+
+	function rm(id: number) {
+		update(list.filter(user => user.id != id));
+	}
+
+	return (
+		<div>
+		<div className="NewChan__Title">
+			{title}
+			<span className="notice-msg" style={{marginLeft: "6px"}}>
+				({listFilter.length + (owner ? 1 : 0)})
+			</span>
+		</div>
+		<div className="UserList">
+		{
+			(!!owner || !!listFilter.length) &&
+			<div className="UserList__Box">
+				<div className="genericList">
+					{
+						owner &&
+						<div className="UserList__Item">
+							<div>{owner.username}</div>
+							<div className="notice-msg">
+								(You)
+							</div>
+						</div>
+					}
+					{listHTML}
+					<div ref={anchorRef} style={{height: "0", border: "none"}} />
+				</div>
+			</div>
+		}
+			<div className="UserList__Add">
+				<div className="UserList__InputContainer">
+					<input
+						type="text"
+						value={newAdmin}
+						onChange={e => setNewAdmin(e.target.value)}
+						onKeyDown={e => {
+							if (e.key !== 'Enter')
+								return;
+							e.preventDefault();
+							if (newAdmin.length)
+								add();
+						}}
+						placeholder="Add a user"
+					/>
+				</div>
+				<button
+					type="button" className="add"
+					onClick={add}
+					disabled={!newAdmin.length}
+				>
+					<img src={addIcon}/>
+				</button>
+			</div>
+		</div>
+		</div>
 	);
 }

@@ -414,6 +414,20 @@
 	display: none;
 }
 
+.NewChan__PublicModeDiv {
+	display: flex;
+	flex-direction: column;
+}
+
+.NewChan__PublicModeSection {
+	flex: 1;
+}
+
+@media (min-width: 1400px)
+{
+	.NewChan__PublicModeDiv { flex-direction: row; }
+}
+
 .NewChan__PasswdFields {
 	margin-top: 12px;
 	margin-left: 40px;
@@ -425,10 +439,26 @@
 	font-size: .86rem;
 }
 
-.NewChan__UserList {
+/*
+** UserList ====================================================================
+*/
+
+.UserList {
 	margin-top: 16px;
 	margin-left: 40px;
+	margin-bottom: 16px;
 	font-size: .95rem;
+}
+
+.UserList__Box {
+	max-height: 200px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding-right: 10px;
+	margin-right: -10px;
+	width: calc(100% - 24px);
+	max-width: 600px;
+	margin-bottom: 18px;
 }
 
 @media (max-width: 900px)
@@ -437,42 +467,65 @@
 }
 
 .UserList__Item {
-	width: 250px;
 	display: flex;
-
 	justify-content: space-between;
 	align-items: center;
-	border: 1px solid var(--bg-color-5);
-	border-radius: 7px;
-	margin: 4px 0;
-	padding: 2px;
-	padding-left: 8px;
-	background: var(--bg-color-3);
 }
-.UserList__Item:last-child {
+
+.UserList__Add {
+	display: flex;
+	font-size: .92rem;
+	justify-content: space-between;
+	align-items: center;
+	margin: 4px 0;
 	border: none;
-	width: 258px;
+	width: calc(100% - 28px);
+	max-width: 608px;
 	padding: 0;
 	padding-right: 2px;
 	background: none;
 }
 
-.UserList__Item input {
+.UserList__InputContainer {
+	width: calc(100% - 54px);
+}
+
+.UserList__Add input {
 	margin: 0;
 	height: 18px;
-	width: 200px;
+	width: 100%;
 }
 
 .UserList__Item>button {
+	all: unset;
+	display: flex;
+	border-radius: 7px !important;
+	margin-right: 4px;
+	padding: 2px;
+	width: 24px;
+	height: 100%;
+}
+.UserList__Item>button:hover {
+	background-color: var(--bg-color-5);
+}
+.UserList__Item>button:active {
+	background-color: var(--bg-color-4);
+}
+
+.UserList__Add>button {
 	all: unset;
 	display: flex;
 	border-radius: 7px;
 	padding: 2px;
 	width: 24px;
 }
-.UserList__Item>button:hover {
+.UserList__Add>button:hover {
 	background-color: var(--bg-color-4);
 }
-.UserList__Item>button:active {
+.UserList__Add>button:active {
 	background-color: var(--bg-color-5);
+}
+.UserList__Add>button:disabled {
+	background: none;
+	opacity: .7;
 }

@@ -153,8 +153,8 @@ input {
 	border: 1px solid var(--bg-color-5);
 	color: var(--text-normal);
 	border-radius: 7px;
-	padding: 8px 12px;
-	font-size: .92rem;
+	padding: 7px 10px;
+	font-size: .96rem;
 	margin: 4px 0;
 	box-shadow: 0 0 6px inset #0008;
 }
