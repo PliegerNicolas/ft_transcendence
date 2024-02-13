@@ -10,7 +10,7 @@ import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGenerated
 export class User {
 
     @PrimaryGeneratedColumn({ type: 'bigint' })
-    id: number;
+    id: bigint;
 
     @Column()
     email: string;
@@ -19,7 +19,7 @@ export class User {
     username: string;
 
 	@Column({ type: 'bigint', unique: true })
-	oauthId: number;
+	oauthId: bigint;
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
@@ -49,14 +49,6 @@ export class User {
 
     @OneToMany(() => ChannelMember, (member) => member.user)
     channelMembers?: ChannelMember[];
-
-    /*
-    @ManyToMany(() => Channel, (channel) => channel.members)
-    channels?: Channel[];
-    */
-
-    @OneToMany(() => Message, (message) => message.user, { cascade: true })
-    messages?: Message[];
 
     /* Helper Function */
 

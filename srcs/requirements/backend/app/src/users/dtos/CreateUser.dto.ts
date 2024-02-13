@@ -12,7 +12,7 @@ export class CreateUserDto {
     username: string;
 
     @IsNotEmpty()
-    oauthId: number;
+    oauthId: bigint;
 
     @IsOptional()
     @ValidateNested()

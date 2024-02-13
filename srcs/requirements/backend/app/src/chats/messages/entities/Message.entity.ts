@@ -1,24 +1,30 @@
 import { Channel } from "src/chats/channels/entities/Channel.entity";
-import { User } from "src/users/entities/User.entity";
-import { Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { ChannelMember } from "src/chats/channels/entities/ChannelMember.entity";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, Unique, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: 'messages' })
-@Unique(['channelId', 'messageId'])
+@Unique(['id', 'channelId'])
 export class Message {
 
     @PrimaryColumn({ type: 'bigint' })
-    channelId: number;
+    id: bigint;
 
     @PrimaryColumn({ type: 'bigint' })
-    messageId: number;
+    channelId: bigint;
 
     @Column()
     content: string;
 
+    @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    createdAt: Date;
+
+    @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    updatedAt: Date;
+
     @ManyToOne(() => Channel, (channel) => channel.messages)
     channel: Channel;
 
-    @ManyToOne(() => User, (user) => user.messages)
-    user: User;
+    @ManyToOne(() => ChannelMember, (channelMember) => channelMember.messages)
+    channelMember: ChannelMember;
 
 }

@@ -14,7 +14,7 @@ export enum GameResult {
 export class GamelogToUser {
 
     @PrimaryGeneratedColumn({ type: 'bigint' })
-    id: number;
+    id: bigint;
 
     @IsEnum(GameResult)
     @Column({ type: 'enum', enum: GameResult, default: GameResult.TIE })

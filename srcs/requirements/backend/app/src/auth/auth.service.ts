@@ -22,7 +22,7 @@ export class AuthService
 		.createQueryBuilder()
 		.select("user.id")
 		.from(User, "user")
-		.where("user.oauthId = :id", { id: Number(oauthId) })
+		.where("user.oauthId = :id", { id: BigInt(oauthId) })
 		.getOne()
 		.then(
 			(data) => data
@@ -67,7 +67,7 @@ export class AuthService
 				.into(User)
 				.values([
 					{"email" : Object.values(info)[1].toString(),
-					"oauthId" :Number(Object.values(info)[0].toString()),
+					"oauthId" :BigInt(Object.values(info)[0].toString()),
 					"username" : Object.values(info)[2].toString(),
 					"profile" : {
 						"firstName" : Object.values(info)[3].toString(),
@@ -88,7 +88,7 @@ export class AuthService
 						"firstName" : Object.values(info)[3].toString(),
 						"lastName" : Object.values(info)[4].toString(),
 						"user" : {
-							id : 1,
+							id : BigInt(1),
 						}
 					}
 				])

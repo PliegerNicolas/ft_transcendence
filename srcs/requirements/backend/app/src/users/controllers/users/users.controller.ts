@@ -3,6 +3,7 @@ import { CreateUserDto } from '../../dtos/CreateUser.dto';
 import { UsersService } from 'src/users/services/users/users.service';
 import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
 import { ReplaceUserDto } from 'src/users/dtos/ReplaceUser.dto';
+import { ParseBigIntPipe } from 'src/common/pipes/parsebigint/parsebigint.pipe';
 
 @Controller('users')
 export class UsersController {
@@ -14,9 +15,9 @@ export class UsersController {
         return (await this.userService.getUsers());
     }
 
-    @Get(':id')
-    async getUser(@Param('id', ParseIntPipe) id: number) {
-        return (await this.userService.getUser(id));
+    @Get(':userId')
+    async getUser(@Param('userId', ParseBigIntPipe) userId: bigint) {
+        return (await this.userService.getUser(userId));
     }
 
     @Post()
@@ -24,25 +25,25 @@ export class UsersController {
         return (await this.userService.createUser(createUserDto));
     }
 
-    @Put(':id')
+    @Put(':userId')
     async replaceUserById(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('userId', ParseBigIntPipe) userId: bigint,
         @Body(new ValidationPipe) replaceUserDto: ReplaceUserDto,
     ) {
-        return (await this.userService.updateUser(id, replaceUserDto));
+        return (await this.userService.updateUser(userId, replaceUserDto));
     }
 
-    @Patch(':id')
+    @Patch(':userId')
     async updateUserById(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('userId', ParseBigIntPipe) userId: bigint,
         @Body(new ValidationPipe) updateUserDto: UpdateUserDto,
     ) {
-        return (await this.userService.updateUser(id, updateUserDto));
+        return (await this.userService.updateUser(userId, updateUserDto));
     }
 
-    @Delete(':id')
-    async deleteUserById(@Param('id', ParseIntPipe) id: number) {
-        return (await this.userService.deleteUser(id));
+    @Delete(':userId')
+    async deleteUserById(@Param('userId', ParseBigIntPipe) userId: bigint) {
+        return (await this.userService.deleteUser(userId));
     }
 
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel, ChannelStatus } from '../../entities/Channel.entity';
 import { Repository } from 'typeorm';
@@ -16,7 +16,7 @@ export class ChannelsService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    async getChannels(userId: number = -1): Promise<Channel[]> {
+    async getChannels(userId: bigint = undefined): Promise<Channel[]> {
         return await this.channelRepository.find({
             where: [
                 { members: { id: userId } },
@@ -25,7 +25,7 @@ export class ChannelsService {
         });
     }
 
-    async getChannelMembers(userId: number = -1, channelId: number): Promise<ChannelMember[]> {
+    async getChannelMembers(userId: bigint = undefined, channelId: bigint): Promise<ChannelMember[]> {
         const channel = await this.channelRepository.findOne({
             where: {
                 id: channelId,
@@ -35,14 +35,14 @@ export class ChannelsService {
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
         else if (!channel.members.some((member) => member.user.id == userId)) {
-            throw new BadRequestException(`User with ID ${userId} isn't member of channel with ID ${channelId}`);
+            throw new ForbiddenException(`User with ID ${userId} isn't member of channel with ID ${channelId}`);
         }
 
         return (channel.members);
     }
 
-    async createChannel(userId: number, channelDetails: CreateChannelParams): Promise<Channel> {
-        if (!userId) throw new BadRequestException('You should be logged in to create a Channel'); // Temp ?
+    async createChannel(userId: bigint, channelDetails: CreateChannelParams): Promise<Channel> {
+        if (!userId) throw new ForbiddenException('You should be logged in to create a Channel'); // Temp ?
 
         const user = await this.userRepository.findOne({
             where: { id: userId },
@@ -58,8 +58,8 @@ export class ChannelsService {
         return (await this.channelRepository.save(channel))
     }
 
-    async replaceChannel(userId: number, channelId: number, channelDetails: ReplaceChannelParams): Promise<Channel> {
-        if (!userId) throw new BadRequestException('You should be logged in to replace a Channel'); // Temp ?
+    async replaceChannel(userId: bigint, channelId: bigint, channelDetails: ReplaceChannelParams): Promise<Channel> {
+        if (!userId) throw new ForbiddenException('You should be logged in to replace a Channel'); // Temp ?
 
         const  channel = await this.channelRepository.findOne({
             where: { id: channelId },
@@ -68,7 +68,7 @@ export class ChannelsService {
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
         else if (!channel.members.some((member) => member.id == userId)) {
-            throw new BadRequestException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
+            throw new ForbiddenException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
 
         return (await this.channelRepository.save({
@@ -77,8 +77,8 @@ export class ChannelsService {
         }));
     }
 
-    async updateChannel(userId: number, channelId: number, channelDetails: UpdateChannelParams): Promise<Channel> {
-        if (!userId) throw new BadRequestException('You should be logged in to update a Channel'); // Temp ?
+    async updateChannel(userId: bigint, channelId: bigint, channelDetails: UpdateChannelParams): Promise<Channel> {
+        if (!userId) throw new ForbiddenException('You should be logged in to update a Channel'); // Temp ?
 
         const  channel = await this.channelRepository.findOne({
             where: { id: channelId },
@@ -87,7 +87,7 @@ export class ChannelsService {
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
         else if (!channel.members.some((member) => member.id == userId)) {
-            throw new BadRequestException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
+            throw new ForbiddenException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
 
         return (await this.channelRepository.save({
@@ -96,8 +96,8 @@ export class ChannelsService {
         }));
     }
 
-    async joinChannel(userId: number = -1, channelId: number) {
-        if (!userId) throw new BadRequestException('You should be logged in to join a Channel'); // Temp ?
+    async joinChannel(userId: bigint = undefined, channelId: bigint) {
+        if (!userId) throw new ForbiddenException('You should be logged in to join a Channel'); // Temp ?
 
         const user = await this.userRepository.findOne({
             where: { id: userId },
@@ -112,7 +112,7 @@ export class ChannelsService {
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
         else if (channel.members.some((member) => member.user.id == userId)) {
-            throw new BadRequestException(`User with ID ${userId} is already member of channel with ID ${channelId}`);
+            throw new ForbiddenException(`User with ID ${userId} is already member of channel with ID ${channelId}`);
         }
 
         return (await this.channelRepository.save({
@@ -122,7 +122,7 @@ export class ChannelsService {
         }));
     }
 
-    async leaveChannel(userId: number = -1, channelId: number) {
+    async leaveChannel(userId: bigint = undefined, channelId: bigint) {
         if (!userId) throw new BadRequestException('You should be logged in to join a Channel'); // Temp ?
 
         const user = await this.userRepository.findOne({
@@ -148,7 +148,7 @@ export class ChannelsService {
         }));
     }
 
-    async deleteChannel(userId: number, channelId: number): Promise<string> {
+    async deleteChannel(userId: bigint, channelId: bigint): Promise<string> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
             relations: ['members.user'],
@@ -161,7 +161,7 @@ export class ChannelsService {
         if (!user) throw new BadRequestException(`User with ID ${userId} isn't member of channel with ID ${channelId}`);
         else if (user.role !== ChannelRole.ADMIN) throw new BadRequestException(`User with ID ${userId} hasn't got enough permissions to delete Channel with ID ${channelId}`);
 
-        await this.channelRepository.delete(channelId);
+        await this.channelRepository.delete(channelId.toString());
         return (`Channel with ID ${channelId} successfully deleted`);
     }
 

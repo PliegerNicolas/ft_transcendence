@@ -1,7 +1,6 @@
 import { IsEnum } from "class-validator";
 import { Message } from "src/chats/messages/entities/Message.entity";
-import { User } from "src/users/entities/User.entity";
-import { BeforeInsert, BeforeUpdate, Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { ChannelMember } from "./ChannelMember.entity";
 
 export enum ChannelStatus {
@@ -13,7 +12,7 @@ export enum ChannelStatus {
 export class Channel {
 
     @PrimaryGeneratedColumn({ type: 'bigint' })
-    id: number;
+    id: bigint;
 
     @Column()
     name: string;
@@ -25,11 +24,11 @@ export class Channel {
     @Column({ type: 'enum', enum: ChannelStatus, default: ChannelStatus.PRIVATE })
     status: ChannelStatus;
 
-    @OneToMany(() => Message, (message) => message.channel, { cascade: true })
-    messages?: Message[];
-
     @OneToMany(() => ChannelMember, (member) => member.channel, { cascade: true })
     members?: ChannelMember[];
+
+    @OneToMany(() => Message, (messages) => messages.channel, { cascade: true }) // soft deletion ?
+    messages?: Message[];
 
     /* Helper Functions */
 

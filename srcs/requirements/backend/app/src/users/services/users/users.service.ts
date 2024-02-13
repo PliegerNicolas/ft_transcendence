@@ -17,17 +17,17 @@ export class UsersService {
 
     async getUsers(): Promise<User[]> {
         // Public ?
-        return (this.userRepository.find({}));
+        return (this.userRepository.find());
     }
 
-    async getUser(id: number): Promise<User> {
+    async getUser(userId: bigint): Promise<User> {
         // Public ?
         const user = await this.userRepository.findOne({
-            where: { id },
+            where: { id: userId },
             relations: ['profile']
         });
 
-        if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
 
         return (user);
     }
@@ -44,7 +44,7 @@ export class UsersService {
         return (await this.userRepository.save(newUser));
     }
 
-    async replaceUser(userId: number, userDetails: ReplaceUserParams): Promise<User> {
+    async replaceUser(userId: bigint, userDetails: ReplaceUserParams): Promise<User> {
         // Only if you're the target user.
         await this.verifyUserUnicity(userDetails.username, userDetails.oauthId);
 
@@ -65,7 +65,7 @@ export class UsersService {
         }));
     }
 
-    async updateUser(userId: number, userDetails: UpdateUserParams): Promise<User> {
+    async updateUser(userId: bigint, userDetails: UpdateUserParams): Promise<User> {
         // Only if you're the target user.
         await this.verifyUserUnicity(userDetails.username, userDetails.oauthId);
 
@@ -86,7 +86,7 @@ export class UsersService {
         }));
     }
 
-    async deleteUser(userId: number): Promise<string> {
+    async deleteUser(userId: bigint): Promise<string> {
         // Only if you're the target user.
         const user = await this.userRepository.findOne({
             where: { id: userId },
@@ -94,13 +94,13 @@ export class UsersService {
 
         if (!user) throw new NotFoundException(`User with ID ${userId}`);
 
-        await this.userRepository.delete(userId);
+        await this.userRepository.delete(userId.toString());
         return (`User with ID ${userId} successfully deleted`);
     }
 
     /* Helper Functions */
 
-    private async verifyUserUnicity(username: string, oauthId: number) {
+    private async verifyUserUnicity(username: string, oauthId: bigint) {
         const existingUser = await this.userRepository.findOne({
             where: [
                 { username },

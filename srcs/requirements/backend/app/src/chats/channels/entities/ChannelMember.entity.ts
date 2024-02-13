@@ -1,7 +1,8 @@
 import { IsEnum } from "class-validator";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "src/users/entities/User.entity";
 import { Channel } from "./Channel.entity";
+import { Message } from "src/chats/messages/entities/Message.entity";
 
 export enum ChannelRole {
     ADMIN = 'admin',
@@ -13,7 +14,7 @@ export enum ChannelRole {
 export class ChannelMember {
 
     @PrimaryGeneratedColumn({ type: 'bigint' })
-    id: number;
+    id: bigint;
 
     @IsEnum(ChannelRole)
     @Column({ type: 'enum', enum: ChannelRole, default: ChannelRole.MEMBER })
@@ -24,5 +25,8 @@ export class ChannelMember {
 
     @ManyToOne(() => User, (user) => user.channelMembers, { onDelete: 'CASCADE' })
     user: User;
+
+    @OneToMany(() => Message, (messages) => messages.channelMember, { onDelete: 'CASCADE' }) // soft deletion ?
+    messages?: Message[];
 
 }

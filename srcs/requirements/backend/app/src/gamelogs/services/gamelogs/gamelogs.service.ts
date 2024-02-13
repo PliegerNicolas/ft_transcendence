@@ -27,7 +27,7 @@ export class GamelogsService {
         }));
     }
 
-    async getUserGamelogs(userId: number): Promise<{ gamelogs: Gamelog[]; userResultCounts: Record<GameResult, number> }> {
+    async getUserGamelogs(userId: bigint): Promise<{ gamelogs: Gamelog[]; userResultCounts: Record<GameResult, number> }> {
         // Public
 
         const user = await this.userRepository.findOne({
@@ -67,7 +67,7 @@ export class GamelogsService {
         return (await this.gamelogRepository.save(gamelog));
     }
 
-    async replaceGamelog(gamelogId: number, gamelogDetails: ReplaceGamelogParams): Promise<Gamelog> {
+    async replaceGamelog(gamelogId: bigint, gamelogDetails: ReplaceGamelogParams): Promise<Gamelog> {
         // Only the server should be autorized to access this.
 
         const gamelog = await this.gamelogRepository.findOne({
@@ -87,7 +87,7 @@ export class GamelogsService {
         }));
     }
 
-    async updateGamelog(gamelogId: number, gamelogDetails: UpdateGamelogParams): Promise<Gamelog> {
+    async updateGamelog(gamelogId: bigint, gamelogDetails: UpdateGamelogParams): Promise<Gamelog> {
         // Only the server should be autorized to access this.
 
         const gamelog = await this.gamelogRepository.findOne({
@@ -107,7 +107,7 @@ export class GamelogsService {
         }));
     }
 
-    async deleteGamelog(gamelogId: number): Promise<string> {
+    async deleteGamelog(gamelogId: bigint): Promise<string> {
         // verify user permissions. You shouldn't be able to delete a gamelog. Maybe hide your name / soft delete ?
 
         const gamelog = await this.gamelogRepository.findOne({
@@ -116,7 +116,7 @@ export class GamelogsService {
 
         if (!gamelog) throw new NotFoundException(`Gamelog with ID ${gamelogId} not found`);
 
-        await this.gamelogRepository.delete(gamelogId);
+        await this.gamelogRepository.delete(gamelogId.toString());
         return (`Gamelog with ID ${gamelogId} successfully deleted`);
     }
 
@@ -136,20 +136,20 @@ export class GamelogsService {
         });
 
         if (users.length !== userIds.length) {
-            const missingUserIds = userIds.filter((id) => !users.some((user) => user.id == id));
+            const missingUserIds = userIds.filter((id) => !users.some((user) => user.id === id));
             const errMessage = missingUserIds.length > 1 ? `Following users not found : ${missingUserIds}` : `Following user not found : ${missingUserIds}`;
             throw new NotFoundException(errMessage);
         }
 
         const gamelogToUsers = userResults.map((userResult) => {
-            const existingGtu = gamelog?.gamelogToUsers.find((gamelogToUser) => gamelogToUser.user?.id == userResult.id);
+            const existingGtu = gamelog?.gamelogToUsers.find((gamelogToUser) => gamelogToUser.user?.id === userResult.id);
 
             return (existingGtu ? {
                 ...existingGtu,
                 result: userResult.result,
             } : this.gamelogToUserRepository.create({
                 ...userResult,
-                user: users.find((user) => user.id == userResult.id),
+                user: users.find((user) => user.id === userResult.id),
             }));
         });
 

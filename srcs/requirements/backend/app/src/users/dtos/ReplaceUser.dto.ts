@@ -15,7 +15,7 @@ export class ReplaceUserDto {
 
     @IsDefined()
     @IsNotEmpty()
-    oauthId: number;
+    oauthId: bigint;
 
     @IsOptional()
     @ValidateNested()

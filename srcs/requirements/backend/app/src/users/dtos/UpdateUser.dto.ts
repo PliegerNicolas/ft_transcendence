@@ -12,7 +12,7 @@ export class UpdateUserDto {
     username?: string;
 
     @IsOptional()
-    oauthId?: number;
+    oauthId?: bigint;
 
     @IsOptional()
     @ValidateNested()

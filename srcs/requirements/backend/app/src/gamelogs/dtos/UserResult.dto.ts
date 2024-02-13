@@ -4,7 +4,7 @@ import { GameResult } from "../entities/GamelogToUser.entity";
 export class UserResult {
 
     @IsNotEmpty()
-    id: number;
+    id: bigint;
 
     @IsNotEmpty()
     @IsEnum(GameResult, { message: 'Invalid game result' })

@@ -12,7 +12,7 @@ export enum GameType {
 export class Gamelog {
 
     @PrimaryGeneratedColumn({ type: 'bigint' })
-    id: number;
+    id: bigint;
 
     @IsEnum(GameType)
     @Column({ type: 'enum', enum: GameType, default: GameType.UNDEFINED })

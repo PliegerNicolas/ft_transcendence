@@ -15,7 +15,7 @@ export class ProfilesService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    async getProfileByUserId(userId: number): Promise <Profile> {
+    async getProfileByUserId(userId: bigint): Promise <Profile> {
         const user = await this.userRepository.findOne({
             where: { id: userId },
             relations: ['profile'],
@@ -26,8 +26,12 @@ export class ProfilesService {
         return (user.profile);
     }
 
-    async replaceProfile(userId: number, profileDetails: ReplaceProfileParams): Promise<Profile> {
-        const profile = await this.profileRepository.findOne({ where: { user: { id: userId } } });
+    async replaceProfile(userId: bigint, profileDetails: ReplaceProfileParams): Promise<Profile> {
+        const profile = await this.profileRepository.findOne({
+            where: {
+                user: { id: userId }
+            }
+        });
 
         if (!profile) throw new NotFoundException(`Profile of User with ID ${userId} not found`);
 
@@ -37,8 +41,12 @@ export class ProfilesService {
         }));        
     }
 
-    async updateProfile(userId: number, profileDetails: UpdateProfileParams): Promise<Profile> {
-        const profile = await this.profileRepository.findOne({ where: { user: { id: userId } } });
+    async updateProfile(userId: bigint, profileDetails: UpdateProfileParams): Promise<Profile> {
+        const profile = await this.profileRepository.findOne({
+            where: {
+                user: { id: userId }
+            }
+        });
 
         if (!profile) throw new NotFoundException(`Profile of User with ID ${userId} not found`);
 

@@ -2,44 +2,48 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, V
 import { MessagesService } from '../services/messages.service';
 import { CreateMessageDto } from '../dtos/CreateMessage.dto';
 import { ReplaceMessageDto } from '../dtos/ReplaceMessage.dto';
+import { ParseBigIntPipe } from 'src/common/pipes/parsebigint/parsebigint.pipe';
 
 @Controller()
 export class MessagesController {
 
     constructor(private messageService: MessagesService) {}
 
-    /*
-    @Get('users/:userId/channels/:channelId/messages')
+    @Get('channels/:channelId/messages')
     async getChannelMessages(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('channelId', ParseIntPipe) channelId: number,
+        @Param('channelId', ParseBigIntPipe) channelId: bigint,
     ) {
-        return (await this.messageService.getChannelMessages(userId, channelId));
+        // Should pass userId (if user is connected and passport validated or null)
+        // For this moment userId is passed as 1.
+        return (await this.messageService.getChannelMessages(BigInt(1), channelId));
     }
 
-    @Get('users/:userId/channels/:channelId/messages/:messageId')
+    @Get('channels/:channelId/messages/:messageId')
     async getChannelMessage(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('channelId', ParseIntPipe) channelId: number,
-        @Param('messageId', ParseIntPipe) messageId: number
+        @Param('channelId', ParseBigIntPipe) channelId: bigint,
+        @Param('messageId', ParseBigIntPipe) messageId: bigint
     ) {
-        return (await this.messageService.getChannelMessage(userId, channelId, messageId));
+        // Should pass userId (if user is connected and passport validated or null)
+        // For this moment userId is passed as 1.
+        return (await this.messageService.getChannelMessage(BigInt(1), channelId, messageId));
     }
 
-    @Post('users/:userId/channels/:channelId/messages')
+    @Post('channels/:channelId/messages')
     async createChannelMessage(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('channelId', ParseIntPipe) channelId: number,
+        @Param('channelId', ParseBigIntPipe) channelId: bigint,
         @Body(new ValidationPipe) createMessageDto: CreateMessageDto,
     ) {
-        return (await this.messageService.createChannelMessage(userId, channelId, createMessageDto));
+        // Should pass userId (if user is connected and passport validated or null)
+        // For this moment userId is passed as 1.
+        return (await this.messageService.createChannelMessage(BigInt(1), channelId, createMessageDto));
     }
 
+    /*
     @Put('users/:userId/channels/:channelId/messages/:id')
     async replaceChannelMessage(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('channelId', ParseIntPipe) channelId: number,
-        @Param('id', ParseIntPipe) messageId: number,
+        @Param('userId', ParseBigIntPipe) userId: bigint,
+        @Param('channelId', ParseBigIntPipe) channelId: bigint,
+        @Param('id', ParseBigIntPipe) messageId: bigint,
         @Body(new ValidationPipe) replaceMessageDto: ReplaceMessageDto,
     ) {
         return (await this.messageService.replaceChannelMessage(userId, channelId, messageId, replaceMessageDto));
@@ -47,9 +51,9 @@ export class MessagesController {
 
     @Patch('users/:userId/channels/:channelId/messages/:id')
     async updateChannelMessage(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('channelId', ParseIntPipe) channelId: number,
-        @Param('id', ParseIntPipe) messageId: number,
+        @Param('userId', ParseBigIntPipe) userId: bigint,
+        @Param('channelId', ParseBigIntPipe) channelId: bigint,
+        @Param('id', ParseBigIntPipe) messageId: bigint,
         @Body(new ValidationPipe) replaceMessageDto: ReplaceMessageDto,
     ) {
         return (await this.messageService.updateChannelMessage(userId, channelId, messageId, replaceMessageDto));
@@ -57,9 +61,9 @@ export class MessagesController {
 
     @Delete('users/:userId/channels/:channelId/messages/:id')
     async deleteChannelMessage(
-        @Param('userId', ParseIntPipe) userId: number,
-        @Param('channelId', ParseIntPipe) channelId: number,
-        @Param('id', ParseIntPipe) messageId: number,
+        @Param('userId', ParseBigIntPipe) userId: bigint,
+        @Param('channelId', ParseBigIntPipe) channelId: bigint,
+        @Param('id', ParseBigIntPipe) messageId: bigint,
     ) {
         return (await this.messageService.deleteChannelMessage(userId, channelId, messageId));
     }

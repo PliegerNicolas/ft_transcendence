@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, ValidationPipe } from '@nestjs/common';
+import { ParseBigIntPipe } from 'src/common/pipes/parsebigint/parsebigint.pipe';
 import { CreateGamelogDto } from 'src/gamelogs/dtos/CreateGamelog.dto';
 import { ReplaceGamelogDto } from 'src/gamelogs/dtos/ReplaceGamelog.dto';
 import { UpdateGamelogDto } from 'src/gamelogs/dtos/UpdateGamelog.dto';
@@ -16,7 +17,7 @@ export class GamelogsController {
     }
 
     @Get('users/:userId/gamelogs')
-    async getUserGamelogs(@Param('userId', ParseIntPipe) userId: number) {
+    async getUserGamelogs(@Param('userId', ParseBigIntPipe) userId: bigint) {
         // public ?
         return (await this.gamelogService.getUserGamelogs(userId));
     }
@@ -29,7 +30,7 @@ export class GamelogsController {
 
     @Put('gamelogs/:gamelogId')
     async replaceGamelog(
-        @Param('gamelogId', ParseIntPipe) gamelogId: number,
+        @Param('gamelogId', ParseBigIntPipe) gamelogId: bigint,
         @Body(new ValidationPipe) replaceGamelogDto: ReplaceGamelogDto
     ) {
         // server permission only
@@ -38,7 +39,7 @@ export class GamelogsController {
 
     @Patch('gamelogs/:gamelogId')
     async updateGamelog(
-        @Param('gamelogId', ParseIntPipe) gamelogId: number,
+        @Param('gamelogId', ParseBigIntPipe) gamelogId: bigint,
         @Body(new ValidationPipe) updateGamelogDto: UpdateGamelogDto
     ) {
         // server permission only
@@ -46,7 +47,7 @@ export class GamelogsController {
     }
 
     @Delete('gamelogs/:gamelogId')
-    async deleteGamelog(@Param('gamelogId', ParseIntPipe) gamelogId: number) {
+    async deleteGamelog(@Param('gamelogId', ParseBigIntPipe) gamelogId: bigint) {
         // server permission only
         return (await this.gamelogService.deleteGamelog(gamelogId));
     }
