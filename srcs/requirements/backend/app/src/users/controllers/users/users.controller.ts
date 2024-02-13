@@ -3,7 +3,7 @@ import { CreateUserDto } from '../../dtos/CreateUser.dto';
 import { UsersService } from 'src/users/services/users/users.service';
 import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
 import { ReplaceUserDto } from 'src/users/dtos/ReplaceUser.dto';
-import { ParseBigIntPipe } from 'src/common/pipes/parsebigint/parsebigint.pipe';
+import { ParseIdPipe } from 'src/common/pipes/parseid/parseid.pipe';
 
 @Controller('users')
 export class UsersController {
@@ -16,7 +16,7 @@ export class UsersController {
     }
 
     @Get(':userId')
-    async getUser(@Param('userId', ParseBigIntPipe) userId: bigint) {
+    async getUser(@Param('userId', ParseIdPipe) userId: bigint) {
         return (await this.userService.getUser(userId));
     }
 
@@ -27,7 +27,7 @@ export class UsersController {
 
     @Put(':userId')
     async replaceUserById(
-        @Param('userId', ParseBigIntPipe) userId: bigint,
+        @Param('userId', ParseIdPipe) userId: bigint,
         @Body(new ValidationPipe) replaceUserDto: ReplaceUserDto,
     ) {
         return (await this.userService.updateUser(userId, replaceUserDto));
@@ -35,14 +35,14 @@ export class UsersController {
 
     @Patch(':userId')
     async updateUserById(
-        @Param('userId', ParseBigIntPipe) userId: bigint,
+        @Param('userId', ParseIdPipe) userId: bigint,
         @Body(new ValidationPipe) updateUserDto: UpdateUserDto,
     ) {
         return (await this.userService.updateUser(userId, updateUserDto));
     }
 
     @Delete(':userId')
-    async deleteUserById(@Param('userId', ParseBigIntPipe) userId: bigint) {
+    async deleteUserById(@Param('userId', ParseIdPipe) userId: bigint) {
         return (await this.userService.deleteUser(userId));
     }
 

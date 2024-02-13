@@ -24,6 +24,9 @@ export class MessagesService {
             relations: ['messages', 'members.user'],
         });
 
+        console.log(typeof(channel.members[0].user.id));
+        console.log(typeof(userId));
+        
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
         else if (!channel.members.find((member) => member.user.id == userId)) {
             throw new ForbiddenException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);

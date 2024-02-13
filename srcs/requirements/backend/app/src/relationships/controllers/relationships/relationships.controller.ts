@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, ValidationPipe } from '@nestjs/common';
-import { ParseBigIntPipe } from 'src/common/pipes/parsebigint/parsebigint.pipe';
+import { ParseIdPipe } from 'src/common/pipes/parseid/parseid.pipe';
 import { CreateRelationshipDto } from 'src/relationships/dtos/CreateRelationship.dto';
 import { ReplaceRelationshipDto } from 'src/relationships/dtos/ReplaceRelationship.dto';
 import { UpdateRelationshipDto } from 'src/relationships/dtos/UpdateRelationship.dto';
@@ -17,15 +17,15 @@ export class RelationshipsController {
 
     @Get(':targetId')
     async getRelationship(
-        @Param('userId', ParseBigIntPipe) userId: bigint,
-        @Param('targetId', ParseBigIntPipe) targetId: bigint
+        @Param('userId', ParseIdPipe) userId: bigint,
+        @Param('targetId', ParseIdPipe) targetId: bigint
     ) {
         return (await this.relationshipService.getUserRelationship(userId, targetId));
     }
 
     @Post()
     async createRelationship(
-        @Param('userId', ParseBigIntPipe) userId: bigint,
+        @Param('userId', ParseIdPipe) userId: bigint,
         @Body(new ValidationPipe) createRelationshipDto: CreateRelationshipDto,
     ) {
         return (this.relationshipService.createUserRelationship(userId, createRelationshipDto));
@@ -33,8 +33,8 @@ export class RelationshipsController {
 
     @Put(':targetId')
     async replaceRelationship(
-        @Param('userId', ParseBigIntPipe) userId: bigint,
-        @Param('targetId', ParseBigIntPipe) targetId: bigint,
+        @Param('userId', ParseIdPipe) userId: bigint,
+        @Param('targetId', ParseIdPipe) targetId: bigint,
         @Body(new ValidationPipe) replaceRelationshipDto: ReplaceRelationshipDto,
     ) {
         return (this.relationshipService.replaceUserRelationship(userId, targetId, replaceRelationshipDto));
@@ -42,8 +42,8 @@ export class RelationshipsController {
 
     @Patch(':targetId')
     async updateRelationship(
-        @Param('userId', ParseBigIntPipe) userId: bigint,
-        @Param('targetId', ParseBigIntPipe) targetId: bigint,
+        @Param('userId', ParseIdPipe) userId: bigint,
+        @Param('targetId', ParseIdPipe) targetId: bigint,
         @Body(new ValidationPipe) updateRelationshipDto: UpdateRelationshipDto,
     ) {
         return (this.relationshipService.updateUserRelationship(userId, targetId, updateRelationshipDto));
@@ -51,8 +51,8 @@ export class RelationshipsController {
 
     @Delete(':targetId')
     async deleteUserById(
-        @Param('userId', ParseBigIntPipe) userId: bigint,
-        @Param('targetId', ParseBigIntPipe) targetId: bigint,
+        @Param('userId', ParseIdPipe) userId: bigint,
+        @Param('targetId', ParseIdPipe) targetId: bigint,
     ) {
         return (await this.relationshipService.deleteRelationship(userId, targetId));
     }

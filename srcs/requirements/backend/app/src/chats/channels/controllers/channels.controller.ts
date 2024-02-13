@@ -3,7 +3,7 @@ import { ChannelsService } from '../services/channels/channels.service';
 import { CreateChannelDto } from '../dtos/CreateChannel.dto';
 import { UpdateChannelDto } from '../dtos/UpdateChannel.dto';
 import { ReplaceChannelDto } from '../dtos/ReplaceChannel.dto';
-import { ParseBigIntPipe } from 'src/common/pipes/parsebigint/parsebigint.pipe';
+import { ParseIdPipe } from 'src/common/pipes/parseid/parseid.pipe';
 
 @Controller()
 export class ChannelsController {
@@ -18,7 +18,7 @@ export class ChannelsController {
     }
 
     @Get('channels/:channelId/members')
-    async getChannelMembers(@Param('channelId', ParseBigIntPipe) channelId: bigint,) {
+    async getChannelMembers(@Param('channelId', ParseIdPipe) channelId: bigint,) {
         // Should pass userId (if user is connected and passport validated or null).
         // For this moment userId is passed as 2.
         return (await this.channelService.getChannelMembers(BigInt(2), channelId));
@@ -34,7 +34,7 @@ export class ChannelsController {
 
     @Put('channels/:channelId')
     async replaceChannel(
-        @Param('channelId', ParseBigIntPipe) channelId: bigint,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
         @Body(new ValidationPipe) replaceChannelDto: ReplaceChannelDto
     ) {
         // For this moment userId is passed as 1. Need passport.
@@ -43,7 +43,7 @@ export class ChannelsController {
 
     @Patch('channels/:channelId')
     async updateChannel(
-        @Param('channelId', ParseBigIntPipe) channelId: bigint,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
         @Body(new ValidationPipe) updateChannelDto: UpdateChannelDto
     ) {
         // For this moment userId is passed as 1. Need passport.
@@ -52,7 +52,7 @@ export class ChannelsController {
 
     @Patch('channels/:channelId/join')
     async joinChannel(
-        @Param('channelId', ParseBigIntPipe) channelId: bigint,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
     ) {
         // For this moment userId is passed as 2. Need passport.
         return (await this.channelService.joinChannel(BigInt(2), channelId));
@@ -60,14 +60,14 @@ export class ChannelsController {
 
     @Patch('channels/:channelId/leave')
     async leaveChannel(
-        @Param('channelId', ParseBigIntPipe) channelId: bigint,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
     ) {
         // For this moment userId is passed as 2. Need passport.
         return (await this.channelService.leaveChannel(BigInt(2), channelId));
     }
 
     @Delete('channels/:channelId')
-    async deleteChannel(@Param('channelId', ParseBigIntPipe) channelId: bigint) {
+    async deleteChannel(@Param('channelId', ParseIdPipe) channelId: bigint) {
         // For this moment userId is passed as 2. Need passport.
         return (await this.channelService.deleteChannel(BigInt(2), channelId));
     }

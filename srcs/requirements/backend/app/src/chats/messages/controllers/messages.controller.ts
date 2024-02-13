@@ -1,8 +1,7 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, ValidationPipe } from '@nestjs/common';
 import { MessagesService } from '../services/messages.service';
 import { CreateMessageDto } from '../dtos/CreateMessage.dto';
-import { ReplaceMessageDto } from '../dtos/ReplaceMessage.dto';
-import { ParseBigIntPipe } from 'src/common/pipes/parsebigint/parsebigint.pipe';
+import { ParseIdPipe } from 'src/common/pipes/parseid/parseid.pipe';
 
 @Controller()
 export class MessagesController {
@@ -11,7 +10,7 @@ export class MessagesController {
 
     @Get('channels/:channelId/messages')
     async getChannelMessages(
-        @Param('channelId', ParseBigIntPipe) channelId: bigint,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
     ) {
         // Should pass userId (if user is connected and passport validated or null)
         // For this moment userId is passed as 1.
@@ -20,8 +19,8 @@ export class MessagesController {
 
     @Get('channels/:channelId/messages/:messageId')
     async getChannelMessage(
-        @Param('channelId', ParseBigIntPipe) channelId: bigint,
-        @Param('messageId', ParseBigIntPipe) messageId: bigint
+        @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Param('messageId', ParseIdPipe) messageId: bigint
     ) {
         // Should pass userId (if user is connected and passport validated or null)
         // For this moment userId is passed as 1.
@@ -30,7 +29,7 @@ export class MessagesController {
 
     @Post('channels/:channelId/messages')
     async createChannelMessage(
-        @Param('channelId', ParseBigIntPipe) channelId: bigint,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
         @Body(new ValidationPipe) createMessageDto: CreateMessageDto,
     ) {
         // Should pass userId (if user is connected and passport validated or null)
@@ -41,9 +40,9 @@ export class MessagesController {
     /*
     @Put('users/:userId/channels/:channelId/messages/:id')
     async replaceChannelMessage(
-        @Param('userId', ParseBigIntPipe) userId: bigint,
-        @Param('channelId', ParseBigIntPipe) channelId: bigint,
-        @Param('id', ParseBigIntPipe) messageId: bigint,
+        @Param('userId', ParseIdPipe) userId: bigint,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Param('id', ParseIdPipe) messageId: bigint,
         @Body(new ValidationPipe) replaceMessageDto: ReplaceMessageDto,
     ) {
         return (await this.messageService.replaceChannelMessage(userId, channelId, messageId, replaceMessageDto));
@@ -51,9 +50,9 @@ export class MessagesController {
 
     @Patch('users/:userId/channels/:channelId/messages/:id')
     async updateChannelMessage(
-        @Param('userId', ParseBigIntPipe) userId: bigint,
-        @Param('channelId', ParseBigIntPipe) channelId: bigint,
-        @Param('id', ParseBigIntPipe) messageId: bigint,
+        @Param('userId', ParseIdPipe) userId: bigint,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Param('id', ParseIdPipe) messageId: bigint,
         @Body(new ValidationPipe) replaceMessageDto: ReplaceMessageDto,
     ) {
         return (await this.messageService.updateChannelMessage(userId, channelId, messageId, replaceMessageDto));
@@ -61,9 +60,9 @@ export class MessagesController {
 
     @Delete('users/:userId/channels/:channelId/messages/:id')
     async deleteChannelMessage(
-        @Param('userId', ParseBigIntPipe) userId: bigint,
-        @Param('channelId', ParseBigIntPipe) channelId: bigint,
-        @Param('id', ParseBigIntPipe) messageId: bigint,
+        @Param('userId', ParseIdPipe) userId: bigint,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Param('id', ParseIdPipe) messageId: bigint,
     ) {
         return (await this.messageService.deleteChannelMessage(userId, channelId, messageId));
     }
