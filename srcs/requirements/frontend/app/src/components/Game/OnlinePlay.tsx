@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { io } from 'socket.io-client';
+import uuid from 'react-uuid'
 
 import "../../styles/play.css";
 
@@ -45,13 +46,15 @@ export const socket = io(`http://${location.hostname}:3450/game`);
 
 const OnlineGame = () => {
 	const [lobbyList, setLobbyList] = useState<Map<string, Set<string>>>();
-	const [lobby, setLobby] = useState('');
+	const [lobby, setLobby] = useState<string>('');
 	const [playerNumber, setPlayerNumber] = useState(1);
 	const [oppId, setOppId] = useState('');
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const [gameState, setGameState] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
+
+	const [value, setValue] = useState('');
   
 	const destroySocketListeners = () => {
 		socket.off('createdLobby');
@@ -70,6 +73,7 @@ const OnlineGame = () => {
 		const gameContext = gameCanvas?.getContext('2d');
 		
 		const drawGame = (new_gameState: InputPayloads) => {
+
 			const drawBoardDetails = () => {
 				for (var i = 0; i < WINDOW_HEIGHT; i += 30) {
 					gameContext!.fillStyle = "#fff";
@@ -125,6 +129,28 @@ const OnlineGame = () => {
 			//gameContext!.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 		}
 
+		const drawTimer = () => {
+			gameContext!.fillStyle = "#000";
+			gameContext!.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+			gameContext!.fillStyle = "#fff";
+			gameContext!.font = "150px Orbitron";
+			gameContext!.fillText("3", WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+			setTimeout(() => {
+				gameContext!.fillStyle = "#000";
+				gameContext!.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+				gameContext!.fillStyle = "#fff";
+				gameContext!.font = "150px Orbitron";
+				gameContext!.fillText("2", WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+				setTimeout(() => {
+					gameContext!.fillStyle = "#000";
+					gameContext!.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+					gameContext!.fillStyle = "#fff";
+					gameContext!.font = "150px Orbitron";
+					gameContext!.fillText("1", WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+				}, 1000);
+			}, 1000);
+		}
+
 		//Create socket listeners
 		if (socket) {
 			socket.on('lobbyList', (lobby_list: Map<string, Set<string>>) => {
@@ -133,7 +159,8 @@ const OnlineGame = () => {
 			});
 			socket.on('createdLobby', (lobby_id: string) => {
 				console.log(lobby_id + ' created');
-				setLobby(lobby_id)
+				setLobby(lobby_id);
+				setPlayerNumber(1);
 			});
 			socket.on('userJoinedLobby', (newUserId: string) => {
 				console.log('New user connected:', newUserId);
@@ -142,13 +169,15 @@ const OnlineGame = () => {
 			socket.on('userLeftServer', (userId: string) => {
 				console.log('User disconnected:', userId);
 				if (userId === oppId) {
-					socket.emit('playerDisconnect', userId);
+					socket.emit('playerDisconnect', {userId, lobby});
+					setOppId('');
 				}
 			});
 	
-			socket.on('joinedLobby', (lobby_id: string) => {
+			socket.on('joinedLobby', (lobby_id: string, opp_id: string) => {
 				console.log(lobby_id + ' joined');
 				setLobby(lobby_id);
+				setOppId(opp_id);
 				setPlayerNumber(2);
 			});
 			socket.on('lobbyFull', (lobby_id: string) => {
@@ -156,6 +185,7 @@ const OnlineGame = () => {
 			});
 			socket.on('startedGame', () => {
 				console.log('Start game');
+				drawTimer();
 				setGameState(true);
 			});
 			socket.on('updateGame', (new_gameState: InputPayloads) => {
@@ -165,6 +195,7 @@ const OnlineGame = () => {
 			socket.on('gameOver', (new_gameState: InputPayloads) => {
 				setGameOver(true);
 				requestAnimationFrame(() => drawGame(new_gameState));
+				setOppId('');
 			});
 		}
 		
@@ -181,30 +212,31 @@ const OnlineGame = () => {
 
 	const keyDownHandler = (event: KeyboardEvent) => {
 		if (event.key === 'w' || event.key === 's') {
-			socket.emit('keyDown', event.key);
+			const key = event.key;
+			socket.emit('keyDown', {key, lobby});
 			event.preventDefault();
 		}
 	}
 
 	const keyUpHandler = (event: KeyboardEvent) => {
 		if (event.key === 'w' || event.key === 's') {
-			socket.emit('keyUp', event.key);
+			const key = event.key;
+			socket.emit('keyUp', {key, lobby});
 			event.preventDefault();
 		}
 	}
 
 	const lobbyCreateHandler = () => {
-		socket.emit('createLobby', 'lobby1');
-		setLobby('lobby1');
-		setPlayerNumber(1);
+		socket.emit('createLobby', uuid());
 	}
 /*
 	const lobbyListHandler = () => {
 		socket.emit('getLobbyList');
 	}
 */
-	const lobbyJoinHandler = () => {
-		socket.emit('joinLobby', 'lobby1');
+	const lobbyJoinHandler = (lobby: string) => {
+		socket.emit('joinLobby', lobby);
+		setValue('');
 	}
 
 	const initGameHandler = () => {
@@ -215,7 +247,16 @@ const OnlineGame = () => {
 		<div>
 			{lobby.length === 0 ? <div>
 				<button onClick={lobbyCreateHandler}>Create Lobby</button>
-				<button onClick={lobbyJoinHandler}>Join Lobby</button>
+				<div>
+					<span>Lobby name : </span>
+					<input
+						type="text"
+						value={value}
+						onChange={(e) => setValue(e.target.value)}
+						id="lobby-join-form"
+					/>
+					<button onClick={() => lobbyJoinHandler(value)}>Join Lobby</button>
+				</div>
 			</div> : <div>
 				<canvas
 					ref={canvasRef}
@@ -223,6 +264,7 @@ const OnlineGame = () => {
 					height={WINDOW_HEIGHT}
 					className="Canvas"></canvas>
 					<button onClick={initGameHandler}>Start game</button>
+					<p>Lobby name : {lobby}</p>
 			</div> }
 
 		</div>
