@@ -19,6 +19,7 @@ import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
 import User from "./components/User.tsx";
 import Notifs from "./components/Notifs.tsx";
+import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
 
@@ -106,11 +107,17 @@ function App()
 					<Route path="/"	element={<Home />} />
 					<Route path="/play" element={<Play />} />
 					<Route path="/stats" element={<Stats />} />
-					<Route path="/chat" element={<Chat />} />
-					<Route path="/chattest/*" element={<ChatTest />} />
+					<Route path="/chat" element={
+						<RequireAuth elem={<Chat />} />
+					}/>
+					<Route path="/chattest/*" element={
+						<RequireAuth elem={<ChatTest />} />
+					}/>
 					<Route path="/settings" element={<Settings />} />
 					<Route path="/about" element={<About />} />
-					<Route path="/sandbox" element={<Sandbox />} />
+					<Route path="/sandbox" element={
+						<RequireAuth elem={<Sandbox />} />
+					}/>
 					<Route path="/user/:id" element={<User />} />
 					<Route path="/auth" element={<Auth setLogInfo={setLogInfo} />} />
 					<Route path="*" element={<NotFound />} />
