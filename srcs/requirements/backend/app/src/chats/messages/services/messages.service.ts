@@ -24,11 +24,8 @@ export class MessagesService {
             relations: ['messages', 'members.user'],
         });
 
-        console.log(typeof(channel.members[0].user.id));
-        console.log(typeof(userId));
-        
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (!channel.members.find((member) => member.user.id == userId)) {
+        else if (!channel.members.find((member) => BigInt(member.user.id) === userId)) {
             throw new ForbiddenException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
 
@@ -41,15 +38,12 @@ export class MessagesService {
             relations: ['messages', 'members.user'],
         });
 
-        console.log(typeof(userId));
-        console.log(typeof(channel.members[0].user.id));
-
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (!channel.members.find((member) => member.user.id === userId)) {
+        else if (!channel.members.find((member) => BigInt(member.user.id) === userId)) {
             throw new ForbiddenException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
 
-        const message = channel.messages.find((message) => message.id === messageId);
+        const message = channel.messages.find((message) => BigInt(message.id) === messageId);
 
         if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in Channel with ID ${channelId}`);
         
@@ -59,12 +53,12 @@ export class MessagesService {
     async createChannelMessage(userId: bigint, channelId: bigint, messageDetails: CreateMessageParams): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
-            relations: ['members.user'],
+            relations: ['members.user', 'messages'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`)
 
-        const channelMember = channel.members.find((member) => member.user.id === userId);
+        const channelMember = channel.members.find((member) => BigInt(member.user.id) === userId);
 
         if (!channelMember) throw new NotFoundException(`User with ID ${userId} is not member of channel with ID ${channelId}`);
 
@@ -93,12 +87,14 @@ export class MessagesService {
     /* Helper Functions */
 
     public generateNextMessageId(channel: Channel): bigint {
-        const highestMessageId = channel.messages.reduce<bigint>((maxId, message) => {
+        if (!channel.messages) return (BigInt(1));
+
+        const highestMessageId: bigint = channel.messages.reduce<bigint>((maxId, message) => {
             const messageId = BigInt(message.id);
             return (messageId > maxId ? messageId : maxId);
         }, BigInt(0));
-        
-        return (highestMessageId + BigInt(0)); 
+
+        return (highestMessageId + BigInt(1));
     }
 
 }

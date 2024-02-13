@@ -16,6 +16,8 @@ import { Message } from './chats/messages/entities/Message.entity';
 import { AuthService } from './auth/auth.service';
 import { GamelogToUser } from './gamelogs/entities/GamelogToUser.entity';
 import { ChannelMember } from './chats/channels/entities/ChannelMember.entity';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { BigIntSerializationInterceptor } from './common/interceptors/big-int-serialization/big-int-serialization.interceptor';
 
 @Module({
 	imports: [
@@ -39,6 +41,12 @@ import { ChannelMember } from './chats/channels/entities/ChannelMember.entity';
 		ChatsModule,
 	],
 	controllers: [],
-	providers: [AuthService],
+	providers: [
+		AuthService,
+		{
+			provide: APP_INTERCEPTOR,
+			useClass: BigIntSerializationInterceptor,
+		},
+	],
 })
 export class AppModule {}
