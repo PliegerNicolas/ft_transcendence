@@ -8,12 +8,13 @@ import { Relationship } from 'src/relationships/entities/Relationship.entity';
 import { Gamelog } from 'src/gamelogs/entities/Gamelog.entity';
 import { Channel } from 'diagnostics_channel';
 import { Message } from 'src/chats/messages/entities/Message.entity';
+import { AuthService } from 'src/auth/auth.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Profile, Relationship, Gamelog, Channel, Message])
   ],
   controllers: [UsersController],
-  providers: [UsersService]
+  providers: [UsersService, AuthService]
 })
 export class UsersModule {}

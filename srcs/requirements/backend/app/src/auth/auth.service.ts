@@ -1,11 +1,8 @@
-import {Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { profile } from 'console';
-import { query } from 'express';
 import { Profile } from 'src/profiles/entities/Profile.entity';
 import { User } from 'src/users/entities/User.entity';
-import { DataSource, Entity, InsertQueryBuilder, QueryBuilder, createQueryBuilder } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 
 @Injectable()
@@ -33,12 +30,9 @@ export class AuthService
 		};
 	}
 
-	async verify(){
-
-	}
-
 	async signIn(oauthToken : JSON ): Promise<any> {
 		const token = Object.values(oauthToken)
+		console.log(token)
 		let payload = await fetch("https://api.intra.42.fr/oauth/token", {method : "POST", headers: {
 			"Content-Type": "application/json"},
 			body:
@@ -52,6 +46,10 @@ export class AuthService
 				(data) => data.json()
 			)
 			console.log(payload);
+			if(Object.keys(payload)[0] != "access_token")
+			{
+				throw new UnauthorizedException()
+			}
 			const access = (Object.values(payload)[0]).toString();
 			const refresh = (Object.values(payload)[1]).toString();
 			const info = await fetch("https://api.intra.42.fr/v2/me", {method : "GET", headers: {
@@ -59,6 +57,7 @@ export class AuthService
 			}).then(
 				(data) => data.json()
 			)
+			// console.log(info)
 			const user_id = (await this.checkUser(Object.values(info)[0].toString())).users
 			if (user_id === null){
 				const users = await this.dataSource
@@ -75,11 +74,11 @@ export class AuthService
 						}
 					}
 				])
-
 				.execute()
 				.then(
 					(data) => data
 				)
+				payload.user_id = Object.values(Object.values(users.generatedMaps)[0])[0]
 				this.dataSource.createQueryBuilder()
 				.insert()
 				.into(Profile)
@@ -87,18 +86,21 @@ export class AuthService
 					{
 						"firstName" : Object.values(info)[3].toString(),
 						"lastName" : Object.values(info)[4].toString(),
+						"image" : Object.values(info)[7].toString(),
 						"user" : {
-							id : BigInt(1),
+							//id : BigInt(1),
+							id : payload.user_id,
 						}
 					}
 				])
 				.execute()
 				// console.log(users)
-				payload.user_id = Object.values(Object.values(users.generatedMaps)[0])[0]
+	
 			}
 			else{
 				payload.user_id = Object.values(user_id)[0]
 			}
+			payload.oauth_id = Object.values(info)[0].toString()
 			console.log(JSON.stringify(payload))
 			const access_token = await this.jwtService.signAsync(payload)
 		return {

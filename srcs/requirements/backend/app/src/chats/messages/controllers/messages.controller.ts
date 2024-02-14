@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post, ValidationPipe } from '@nestjs/common';
-import { MessagesService } from '../services/messages.service';
-import { CreateMessageDto } from '../dtos/CreateMessage.dto';
-import { ParseIdPipe } from 'src/common/pipes/parseid/parseid.pipe';
+import { Body, Controller, Get, Param, Post, UseGuards, ValidationPipe } from "@nestjs/common";
+import { MessagesService } from "../services/messages.service";
+import { ParseIdPipe } from "src/common/pipes/parseid/parseid.pipe";
+import { AuthGuard } from "@nestjs/passport";
+import { CreateMessageDto } from "../dtos/CreateMessage.dto";
 
 @Controller()
 export class MessagesController {
@@ -27,6 +28,7 @@ export class MessagesController {
         return (await this.messageService.getChannelMessage(BigInt(1), channelId, messageId));
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Post('channels/:channelId/messages')
     async createChannelMessage(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -38,6 +40,7 @@ export class MessagesController {
     }
 
     /*
+	@UseGuards(AuthGuard('jwt'))
     @Put('users/:userId/channels/:channelId/messages/:id')
     async replaceChannelMessage(
         @Param('userId', ParseIdPipe) userId: bigint,
@@ -48,6 +51,7 @@ export class MessagesController {
         return (await this.messageService.replaceChannelMessage(userId, channelId, messageId, replaceMessageDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Patch('users/:userId/channels/:channelId/messages/:id')
     async updateChannelMessage(
         @Param('userId', ParseIdPipe) userId: bigint,
@@ -58,6 +62,7 @@ export class MessagesController {
         return (await this.messageService.updateChannelMessage(userId, channelId, messageId, replaceMessageDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Delete('users/:userId/channels/:channelId/messages/:id')
     async deleteChannelMessage(
         @Param('userId', ParseIdPipe) userId: bigint,

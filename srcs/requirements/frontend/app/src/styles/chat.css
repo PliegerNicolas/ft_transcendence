@@ -43,7 +43,7 @@
 }
 
 .ChatSidebar {
-	width: 240px;
+	width: 220px;
 	padding: 0;
 
 	overflow-y: auto;
@@ -58,21 +58,21 @@
 }
 
 .ChatSidebar.collapse {
-	animation: collapse .2s ease-in-out forwards;
+	animation: collapse .4s ease-in-out forwards;
 }
 
 .ChatSidebar.expand {
-	animation: expand .2s ease-in-out forwards;
+	animation: expand .4s ease-in-out forwards;
 }
 
 @keyframes collapse {
-	0% { width: 240px; }
+	0% { width: 220px; }
 	100% { width: 0px; }
 }
 
 @keyframes expand {
 	0% { width: 0px; }
-	100% { width: 240px; }
+	100% { width: 220px; }
 }
 
 .ChatSidebar__Title {
@@ -153,7 +153,7 @@
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	font-size: .92rem;
+	font-size: .86rem;
 }
 
 .Chat__ChanListItemSize {
@@ -163,6 +163,10 @@
 	white-space: nowrap;
 	color: var(--text-faint);
 }
+
+/*
+** .Chat__Content ==============================================================
+*/
 
 .Chat__Content {
 	position: relative;
@@ -192,6 +196,7 @@
 }
 
 .Chat__Collapse {
+	min-width: 48px;
 	width: 48px;
 	height: 54px;
 	display: flex;
@@ -225,7 +230,7 @@
 }
 
 .Chat__Start {
-	font-size: .92rem;
+	font-size: .86rem !important;
 	margin: 32px 24px;
 }
 
@@ -252,7 +257,7 @@
 	border: 1px solid var(--bg-color-4);
 	border-radius: 12px;
 	color: var(--text-normal);
-	font-size: .92rem;
+	font-size: .86rem;
 	font-family: sans-serif;
 	box-shadow: inset 0 0 8px #0004;
 }
@@ -272,7 +277,7 @@
 	border-radius: 18px 18px 18px 0;
 	margin: 6px 8px;
 	padding: 6px 8px;
-	font-size: .9rem;
+	font-size: .84rem;
 	display: flex;
 }
 .Msg.me {
@@ -327,13 +332,13 @@
 }
 
 .Msg__Sender {
-	font-size: .92rem;
+	font-size: .86rem;
 	margin-bottom: 4px;
 }
 
 .Msg__Date {
 	margin-left: 8px;
-	font-size: .72rem;
+	font-size: .68rem;
 }
 
 /*
@@ -342,7 +347,185 @@
 
 .NewChan {
 	position: relative;
+	top: auto;
+	left: auto;
+	right: auto;
+	bottom: auto;
 	flex: 1;
-	padding: 24px;
 	padding-top: calc(54px + 24px);
+}
+
+.NewChan__NameSection {
+	display: flex;
+	align-items: center;
+}
+
+.NewChan__NameLabel {
+	font-size: 1rem;
+	font-weight: bold;
+	margin-right: 20px;
+}
+
+.NewChan__NameSection>input {
+	width: 100%;
+}
+
+.NewChan__Title {
+	font-size: 1rem;
+	font-weight: bold;
+	margin: 5px 0;
+}
+
+.NewChan__ModeButtons {
+	margin-left: 20px;
+	display: inline-flex;
+	gap: 5px;
+	user-select: none;
+}
+
+.NewChan__ModeButtons>label {
+	border-radius: 7px;
+	display: flex;
+	gap: 6px;
+	justify-content: center;
+	align-items: center;
+	font-size: .96rem;
+	width: 120px;
+	height: 36px;
+	transition: .1s;
+}
+.NewChan__ModeButtons>label:hover {
+	cursor: pointer;
+	background-color: var(--bg-color-3);
+}
+.NewChan__ModeButtons>label:active {
+	background-color: var(--bg-color-4);
+}
+
+.NewChan__ModeButtons>label>img {
+	height: 20px;
+}
+
+.NewChan__ModeButtons>label.true {
+	background-color: var(--bg-color-4);
+}
+
+.NewChan__ModeButtons>input {
+	display: none;
+}
+
+.NewChan__PublicModeDiv {
+	display: flex;
+	flex-direction: column;
+}
+
+.NewChan__PublicModeSection {
+	flex: 1;
+}
+
+@media (min-width: 1400px)
+{
+	.NewChan__PublicModeDiv { flex-direction: row; }
+}
+
+.NewChan__PasswdFields {
+	margin-top: 12px;
+	margin-left: 40px;
+	display: flex;
+	flex-direction: column;
+}
+
+.NewChan__PasswdFields>.error-msg {
+	font-size: .86rem;
+}
+
+/*
+** UserList ====================================================================
+*/
+
+.UserList {
+	margin-top: 16px;
+	margin-left: 40px;
+	margin-bottom: 16px;
+	font-size: .95rem;
+}
+
+.UserList__Box {
+	max-height: 200px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding-right: 10px;
+	margin-right: -10px;
+	width: calc(100% - 24px);
+	max-width: 600px;
+	margin-bottom: 18px;
+}
+
+@media (max-width: 900px)
+{
+	.NewChan__PasswdFields, .NewChan__UserList { margin-left: 20px; }
+}
+
+.UserList__Item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.UserList__Add {
+	display: flex;
+	font-size: .92rem;
+	justify-content: space-between;
+	align-items: center;
+	margin: 4px 0;
+	border: none;
+	width: calc(100% - 28px);
+	max-width: 600px;
+	padding: 0;
+	padding-right: 2px;
+	background: none;
+}
+
+.UserList__InputContainer {
+	width: calc(100% - 54px);
+}
+
+.UserList__Add input {
+	margin: 0;
+	height: 18px;
+	width: 100%;
+}
+
+.UserList__Item>button {
+	all: unset;
+	display: flex;
+	border-radius: 7px !important;
+	margin-right: 4px;
+	padding: 2px;
+	width: 24px;
+	height: 100%;
+}
+.UserList__Item>button:hover {
+	background-color: var(--bg-color-5);
+}
+.UserList__Item>button:active {
+	background: none;
+}
+
+.UserList__Add>button {
+	all: unset;
+	display: flex;
+	border-radius: 7px;
+	padding: 2px;
+	width: 24px;
+}
+.UserList__Add>button:hover {
+	background-color: var(--bg-color-4);
+}
+.UserList__Add>button:active {
+	background-color: var(--bg-color-5);
+}
+.UserList__Add>button:disabled {
+	background: none;
+	opacity: .7;
 }

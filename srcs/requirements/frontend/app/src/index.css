@@ -18,6 +18,7 @@
 
 	--error: #f9a;
 	--error-bg: #d35;
+	--error-bg-hover: #712;
 
 	--border-color-1: #6177c7;
 	--border-color-2: #475a9e;
@@ -31,6 +32,7 @@
 	--bg-color-4: #d8d8ff;
 	--bg-color-5: #cacaff;
 
+	--text-faint: #558;
 	--text-normal: #336;
 	--text-middle: #2a2a4a;
 	--text-accent: #224;
@@ -84,7 +86,7 @@ button {
 	background: var(--bg-color-3);
 	border: 1px solid var(--bg-color-5);
 	color: var(--text-normal);
-	font-size: 1rem;
+	font-size: .92rem;
 	border-radius: 7px;
 	transition: .1s;
 }
@@ -104,11 +106,13 @@ button:disabled {
 
 .notice-msg {
 	color: var(--text-faint);
+	font-size: .92rem;
 	font-style: italic;
 }
 
 .error-msg {
 	color: var(--error);
+	font-size: .92rem;
 	font-style: italic;
 }
 
@@ -119,13 +123,42 @@ hr {
 	margin: 20px 80px;
 }
 
+h2 {
+	margin-top: 20px;
+	margin-bottom: 20px;
+	font-size: 1.3rem;
+}
+
 h3 {
 	margin-top: 20px;
 	margin-bottom: 20px;
+	font-size: 1.1rem;
 }
 
 h4 {
 	margin-top: 20px;
 	margin-bottom: 20px;
+	margin-left: 0px;
+	font-size: 1rem;
+}
+
+h5 {
+	margin-top: 20px;
+	margin-bottom: 20px;
 	margin-left: 5px;
+}
+
+input {
+	background: var(--bg-color-3);
+	border: 1px solid var(--bg-color-5);
+	color: var(--text-normal);
+	border-radius: 7px;
+	padding: 7px 10px;
+	font-size: .96rem;
+	margin: 4px 0;
+	box-shadow: 0 0 6px inset #0008;
+}
+input:focus {
+	border: 1px solid var(--text-faint);
+	outline: none;
 }

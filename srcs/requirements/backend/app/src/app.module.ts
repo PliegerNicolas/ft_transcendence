@@ -18,6 +18,7 @@ import { GamelogToUser } from './gamelogs/entities/GamelogToUser.entity';
 import { ChannelMember } from './chats/channels/entities/ChannelMember.entity';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { BigIntSerializationInterceptor } from './common/interceptors/big-int-serialization/big-int-serialization.interceptor';
+import { GameModule } from './game/game.module';
 
 @Module({
 	imports: [
@@ -39,6 +40,7 @@ import { BigIntSerializationInterceptor } from './common/interceptors/big-int-se
 		GamelogsModule,
 		AuthModule,
 		ChatsModule,
+		GameModule
 	],
 	controllers: [],
 	providers: [

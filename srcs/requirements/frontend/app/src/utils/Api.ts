@@ -16,14 +16,14 @@ class Api
 			return ({});
 	}
 
-	async get(endpoint: string) {
-		const response = await fetch(this.base_url + endpoint, {
-			headers: this.headers
-		});
-		if (!response.ok)
-			return (Promise.reject(new Error(response.status + " " + response.statusText)));
-		return (response.json());
-	};
+async get(endpoint: string) {
+	const response = await fetch(this.base_url + endpoint, {
+		headers: this.headers
+	});
+	if (!response.ok)
+		return (Promise.reject(new Error(response.status + " " + response.statusText)));
+	return (response.json());
+};
 
 	async post(endpoint: string, body: any) {
 		const response = await fetch(this.base_url + endpoint, {
@@ -54,7 +54,7 @@ class Api
 
 	constructor(base_url = "http://localhost", token = "") {
 		this.base_url = base_url;
-		this.headers.Authorization = token;
+		this.headers["Authorization"] = token;
 	}
 }
 

@@ -1,3 +1,24 @@
+/*
+** Animations ==================================================================
+*/
+
+@keyframes spin
+{
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(180deg); }
+}
+
+@keyframes fadein
+{
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@keyframes glow
+{
+	0% { filter: drop-shadow(0 0 8px #fff6); }
+	100% { filter: brightness(2) drop-shadow(0 0 8px #ffff); }
+}
 
 /*
 ** MainContent =================================================================
@@ -8,7 +29,7 @@
 	padding: 15px 25px 80px;
 	position: fixed;
 	z-index: 1;
-	top: 60px;
+	top: 56px;
 	left: 200px;
 	right: 0;
 	bottom: 0;
@@ -17,17 +38,20 @@
 	transition: .1s;
 }
 
-@media (min-width: 1200px) { .MainContent { padding: 15px 50px 80px; }}
+@media (min-width: 1100px) { .MainContent { padding: 15px 50px 80px; }}
 
-@media (min-width: 1500px) { .MainContent { padding: 15px 100px 80px; }}
+@media (min-width: 1400px) { .MainContent { padding: 15px 100px 80px; }}
 
-@media (min-width: 1800px) { .MainContent { padding: 15px 150px 80px; }}
+@media (min-width: 1700px) { .MainContent { padding: 15px 150px 80px; }}
 
-@media (min-width: 2100px) { .MainContent { padding: 15px 200px 80px; }}
+@media (min-width: 2000px) { .MainContent { padding: 15px 200px 80px; }}
 
-@media (max-width: 1000px) { .MainContent { left: 66px; }}
+@media (max-width: 900px) { .MainContent { left: 66px; }}
 
-@media (max-width: 640px) { .MainContent { left: 0; bottom: 62px; }}
+@media (max-width: 600px)
+{
+	.MainContent { padding: 15px 0px 80px; left: 0; bottom: 58px; }
+}
 
 /*
 ** Spinner =====================================================================
@@ -47,24 +71,6 @@
 		glow alternate ease-in-out .8s infinite;
 }
 
-@keyframes spin
-{
-	0% { transform: rotate(0deg); }
-	100% { transform: rotate(180deg); }
-}
-
-@keyframes fadein
-{
-	0% { opacity: 0; }
-	100% { opacity: 1; }
-}
-
-@keyframes glow
-{
-	0% { filter: drop-shadow(0 0 8px #fff6); }
-	100% { filter: brightness(2) (0 0 8px #ffff); }
-}
-
 /*
 ** GenericList =================================================================
 */
@@ -82,7 +88,7 @@
 
 .genericList > * {
 	margin: 0px;
-	border: 2px solid #0000;
+	border: 1px solid #0000;
 	animation: fadein .15s ease-in-out;
 	background: var(--bg-color-4);
 	border-radius: 0px;
@@ -116,7 +122,7 @@
 }
 
 .genericList > *.clickable:hover, .genericList > * > *.clickable:hover {
-	border: 2px solid var(--text-faint);
+	border: 1px solid var(--text-faint);
 
 	filter: brightness(1.1) saturate(1.4);
 	cursor: pointer;
@@ -129,9 +135,10 @@
 }
 
 .genericList > * > * {
+	font-size: .86rem;
 	border: 2px solid #0000;
 	margin: -1px;
-	padding: 6px;
+	padding: 5px;
 	z-index: 50;
 }
 .genericList > * > *:first-child {
