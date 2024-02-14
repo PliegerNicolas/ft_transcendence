@@ -35,9 +35,15 @@ export default function Msg(
 	
 		return (
 			sameDate(date, now) ?
-				`${date.getHours()}:${date.getMinutes()}` :
-				`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
-				+ ` at ${date.getHours()}:${date.getMinutes()}`);
+				pad(date.getHours()) + ":" + pad(date.getMinutes()) :
+				pad(date.getDate()) + "/" + pad(date.getMonth() + 1) + "/"
+				+ date.getFullYear() + " at " + pad(date.getHours()) + ":"
+				+ pad(date.getMinutes())
+		);
+	}
+
+	function pad(n: number) {
+		return ("" + String(n).padStart(2, "0"));
 	}
 
 	return (

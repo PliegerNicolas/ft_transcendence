@@ -21,7 +21,7 @@ export default function NewChan()
 {
 	const [newChan, setNewChan] = useState({
 		name: "New Channel",
-		mode: "public",
+		status: "public",
 		password: "",
 		passwordRepeat: "",
 		allowed: [
@@ -36,14 +36,15 @@ export default function NewChan()
 		],
 	});
 
-	const { api } = useContext(MyContext);
+	const { api, addNotif } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
 
 	const postChan = useMutation({
 		mutationFn:
-			(() => api.post("/users/1/channels", newChan)) as unknown as MutationFunction<ChanType>,
-		onSettled: () => invalidate(["allChans"]),
+			(() => api.post("/channels", newChan)) as unknown as MutationFunction<ChanType>,
+		onError: error => addNotif({content: error.message}),
+		onSettled: () => {console.log(newChan); invalidate(["allChans"])},
 		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
 	});
 
@@ -87,28 +88,28 @@ export default function NewChan()
 			<section>
 				<span className="NewChan__Title">Mode</span>
 				<span className="NewChan__ModeButtons">
-					<label htmlFor="modePublic" className={`${newChan.mode === "public"}`}>
+					<label htmlFor="modePublic" className={`${newChan.status === "public"}`}>
 						Public
-						<img src={newChan.mode === "public" ? radioChecked : radioUnchecked}/>
+						<img src={newChan.status === "public" ? radioChecked : radioUnchecked}/>
 					</label>
 					<input
-						type="radio" id="modePublic" name="mode"
+						type="radio" id="modePublic" name="status"
 						value="public" onChange={handleChange}
-						checked={newChan.mode === "public"}
+						checked={newChan.status === "public"}
 					/>
-					<label htmlFor="modePrivate" className={`${newChan.mode === "private"}`}>
+					<label htmlFor="modePrivate" className={`${newChan.status === "private"}`}>
 						Private
-						<img src={newChan.mode === "private" ? radioChecked : radioUnchecked}/>
+						<img src={newChan.status === "private" ? radioChecked : radioUnchecked}/>
 					</label>
 					<input
-						type="radio" id="modePrivate" name="mode"
+						type="radio" id="modePrivate" name="status"
 						value="private" onChange={handleChange}
-						checked={newChan.mode === "private"}
+						checked={newChan.status === "private"}
 					/>
 				</span>
 			</section>
 			{
-				newChan.mode === "public" &&
+				newChan.status === "public" &&
 				<div className="NewChan__PublicModeDiv">
 				<section className="NewChan__PublicModeSection">
 					<div className="NewChan__Title">Password</div>
@@ -148,7 +149,7 @@ export default function NewChan()
 				</div>
 			}
 			{
-				newChan.mode === "private" &&
+				newChan.status === "private" &&
 				<section>
 					<UserList
 						title="Allowed users"
@@ -172,7 +173,7 @@ export default function NewChan()
 				style={{marginLeft: "15px"}}
 				onClick={(e) => {handleSubmit(e)}}
 				disabled={
-					newChan.mode === "public"
+					newChan.status === "public"
 					&& newChan.password !== newChan.passwordRepeat
 				}
 			>

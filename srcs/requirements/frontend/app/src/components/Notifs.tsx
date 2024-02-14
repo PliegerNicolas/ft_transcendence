@@ -56,6 +56,10 @@ function Notif(
 		});
 	}, []);
 
+	function pad(n: number) {
+		return ("" + String(n).padStart(2, "0"));
+	}
+
 	return (
 		<div
 			className={`Notifs__Notif ${!notif.type && "err"} ${fade && "fadeout"}`}
@@ -63,7 +67,7 @@ function Notif(
 		>
 			<div>
 				<div className="Notif__Date">
-					{date.getHours()}:{date.getMinutes()}
+					{pad(date.getHours())}:{pad(date.getMinutes())}
 				</div>
 				{notif.content}
 			</div>

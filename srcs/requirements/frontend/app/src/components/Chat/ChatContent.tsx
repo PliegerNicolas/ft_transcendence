@@ -23,8 +23,8 @@ export default function ChatContent() {
 	const id = params.id!;
 
 	const getChan = useQuery({
-		queryKey: ["channels", id],
-		queryFn: () => api.get("/channels/"),
+		queryKey: ["allChans"],
+		queryFn: () => api.get("/channels"),
 	});
 
 	const getMsgs = useQuery({
@@ -42,7 +42,7 @@ export default function ChatContent() {
 	const chan =
 		getChan.isSuccess ?
 			getChan.data.filter((item: ChanType) => (item.id === id))[0] :
-			undefined;
+			null;
 
 	/*
 	** These lines are desirable to auto-scroll at bottom of chat.
@@ -64,6 +64,9 @@ export default function ChatContent() {
 		postMsg.mutate(inputValue);
 		setInputValue("");
 	}
+
+	console.log(getMsgs.status);
+	console.log(getMsgs.data);
 
 	return (
 		getChan.isPending &&
