@@ -12,8 +12,33 @@ export default function Msg(
 	{data: MsgType, prev: MsgType | null, next: MsgType | null, size: number}
 )
 {
-	const connectPrev = prev && prev.uid === data.uid && prev.date === data.date;
-	const connectNext = next && next.uid === data.uid && next.date === data.date;
+	const date = fmtDate(data.createdAt);
+
+	const connectPrev =
+		prev && prev.uid === data.uid && fmtDate(prev.createdAt) === date;
+	const connectNext =
+		next && next.uid === data.uid && fmtDate(next.createdAt) === date;
+
+	function sameDate(a: Date, b: Date) {
+		if (a.getDate() !== b.getDate())
+			return (false);
+		if (a.getMonth() !== b.getMonth())
+			return (false);
+		if (a.getFullYear() !== b.getFullYear())
+			return (false);
+		return (true);
+	}
+
+	function fmtDate(createdAt: string) {
+		const date = new Date(createdAt);
+		const now = new Date();
+	
+		return (
+			sameDate(date, now) ?
+				`${date.getHours()}:${date.getMinutes()}` :
+				`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+				+ ` at ${date.getHours()}:${date.getMinutes()}`);
+	}
 
 	return (
 		<div className={
@@ -37,8 +62,9 @@ export default function Msg(
 					>
 						{data.username}
 					</Link>
+					•
 					<span className="notice-msg Msg__Date">
-						{data.date}
+						{date}
 					</span>
 				</div>
 			}

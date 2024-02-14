@@ -342,7 +342,7 @@
 
 .Msg__Date {
 	margin-left: 8px;
-	font-size: .68rem;
+	font-size: .75rem !important;
 }
 
 /*

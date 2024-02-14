@@ -39,7 +39,8 @@ export interface MsgType {
 	uid: number,
 	username: string,
 	content: string,
-	date: string
+	date: string,
+	createdAt: string
 }
 
 export interface ChanType {
