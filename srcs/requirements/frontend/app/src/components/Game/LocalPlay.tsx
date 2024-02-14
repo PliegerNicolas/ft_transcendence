@@ -2,14 +2,14 @@ import { useEffect, useState, useRef } from "react";
 
 import "../../styles/play.css";
 
-const WINDOW_WIDTH = 900;
-const WINDOW_HEIGHT = 600;
+const WINDOW_WIDTH = 1280;
+const WINDOW_HEIGHT = 720;
 
-const PADDLE_HEIGHT = 100;
+const PADDLE_HEIGHT = 120;
 const PADDLE_WIDTH = 20;
 const PADDLE_SPEED = 12;
 
-const BALL_SIZE = 10;
+const BALL_SIZE = 15;
 
 const MAX_SCORE = 5;
 

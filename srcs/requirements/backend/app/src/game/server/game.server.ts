@@ -10,8 +10,8 @@ export function createGameState() {
 			speedX: Math.random() > 0.5 ? 5 : -5,
 			speedY: Math.random() > 0.5 ? 2 : -2,
 			maxSpeedY: 5},
-		player1: { x: 20, y: 200, speed: 0 },
-		player2: { x: 860, y: 200, speed: 0 },
+		player1: { x: 20, y: (WINDOW_HEIGHT / 2) - PADDLE_HEIGHT, speed: 0 },
+		player2: { x: WINDOW_WIDTH - PADDLE_WIDTH - 20, y: (WINDOW_HEIGHT / 2) - PADDLE_HEIGHT, speed: 0 },
 		player1ID: null,
 		player2ID: null,
 		score: { player1: 0, player2: 0},
@@ -25,8 +25,8 @@ function resetGameState(gameState: gameState) {
 			speedX: Math.random() > 0.5 ? 5 : -5,
 			speedY: Math.random() > 0.5 ? 2 : -2,
 			maxSpeedY: 5};
-	gameState.player1 = { x: 20, y: 200, speed: 0 };
-	gameState.player2 = { x: 860, y: 200, speed: 0 };
+	gameState.player1 = { x: 20, y: (WINDOW_HEIGHT / 2) - PADDLE_HEIGHT, speed: 0 };
+	gameState.player2 = { x: WINDOW_WIDTH - PADDLE_WIDTH - 20, y: (WINDOW_HEIGHT / 2) - PADDLE_HEIGHT, speed: 0 };
 }
 
 export function startGameInterval(lobby: string, gameState: gameState, socket: Server) {
