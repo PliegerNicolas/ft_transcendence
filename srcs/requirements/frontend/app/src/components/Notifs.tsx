@@ -1,4 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import closeIcon from "../assets/close.svg";
 
 /*
 ** This component is one big chunk of spaghetti shit.
@@ -8,39 +10,64 @@ import { useEffect } from "react";
 
 export default function Notifs(
 	{list, setList}:
-	{list: {type: number, content: string}[], setList: Function}
+	{list: {type: number, content: string, date: number}[], setList: Function}
 )
 {
-	useEffect(() => {
-		if (!list.length)
-			return ;
-
-		const fadeTimeout = setTimeout(() => {
-			setList((prev: any) => prev.map((item: any, index: any) =>
-				index ? item : {content: item.content, type: item.type + 2}
-			));
-			setTimeout(() => setList((prev: any) => prev.slice(1)), 1000);
-		}, 1000);
-
-		return (() => clearTimeout(fadeTimeout));
-	}, [list]);
+	function rmNotif(date: number) {
+		setList((prev: {type: number, content: string, date: number}[]) =>
+			prev.filter(notif => notif.date !== date));
+	}
 
 	return (
 		<div className="Notifs">
 		{
-			list.map((notif, index) => 
-				<div
-					key={index}
-					className={`Notifs__Notif ${!(notif.type % 2) && "err"} ${notif.type > 2 && "rm"}`}
-					onClick={
-						() => setList((prev: any) =>
-							prev.filter((item: any, i: any) => item && i != index))
-					}
-				>
-					{notif.content}
+			list.map((notif, index) =>
+				<div key={notif.date} style={{
+					opacity: "" + (1 - .33 * ((list.length - 3) - index)),
+					display: (index < list.length - 5) ? "none" : "auto"
+				}}>
+				<Notif
+					notif={notif}
+					rmSelf={() => rmNotif(notif.date)}
+				/>
 				</div>
 			)
 		}
 		</div>
 	);
+}
+
+function Notif(
+	{notif, rmSelf}:
+	{notif: {type: number, content: string, date: number}, rmSelf: Function}
+)
+{
+	const [fade, setFade] = useState(false);
+	const delta = 10000 + (notif.date - Date.now());
+	const date = new Date(notif.date);
+
+	useEffect(() => {
+		const fadeTO = setTimeout(() => setFade(true), delta);
+		const rmTO = setTimeout(rmSelf, delta + 1000);
+
+		return (() => {
+			clearTimeout(fadeTO);
+			clearTimeout(rmTO);
+		});
+	}, []);
+
+	return (
+		<div
+			className={`Notifs__Notif ${!notif.type && "err"} ${fade && "fadeout"}`}
+			onClick={() => rmSelf()}
+		>
+			<div>
+				<div className="Notif__Date">
+					{date.getHours()}:{date.getMinutes()}
+				</div>
+				{notif.content}
+			</div>
+			<button><img src={closeIcon} /></button>
+		</div>
+		);
 }

@@ -200,10 +200,30 @@
 	color: var(--text-accent);
 	background-color: #464c60cc;
 	border: 1px solid var(--text-faint);
-	padding: 10px 15px;
+	padding: 10px 10px;
 	margin-top: 3px;
 	width: 240px;
 	border-radius: 7px;
+	display: flex;
+	justify-content: space-between;
+}
+
+.Notif__Date {
+	color: var(--text-faint);
+	font-size: .74rem;
+	margin-bottom: 4px;
+}
+
+.Notifs__Notif button {
+	padding: 0;
+	margin: 0;
+	width: 24px;
+	height: 24px;
+	pointer-events: auto;
+}
+
+.Notifs__Notif img {
+	width: 100%;
 }
 
 .Notifs__Notif.err {
@@ -211,7 +231,7 @@
 	border-color: #f9a;
 }
 
-.Notifs__Notif.rm {
+.fadeout {
 	animation: fadeout 1s ease-in-out forwards;
 }
 

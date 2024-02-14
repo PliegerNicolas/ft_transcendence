@@ -37,7 +37,8 @@ export default function Sandbox()
 	});
 
 	const postChan = useMutation({
-		mutationFn: (name: string) => context.api.post("/users/1/channels", {name}),
+		mutationFn: (name: string) =>
+			context.api.post("/channels", {name, status: "public"}),
 		onSettled: () => invalidate(["allChans"]),
 		onError: error => context.addNotif({type: 2, content: error.message}),
 	});

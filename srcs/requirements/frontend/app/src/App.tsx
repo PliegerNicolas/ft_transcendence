@@ -88,9 +88,11 @@ function App()
 		return { logged: false, token: ""};
 	});
 
-	const [notifs, setNotifs] = useState<{type: number, content: string}[]>([]);
+	const [notifs, setNotifs] = useState<{type: number, content: string, date: number}[]>([]);
 
-	function addNotif(add: {type: number, content: string}) {
+	function addNotif(add: {type: number, content: string, date: number}) {
+		console.log(Date.now());
+		add.date = Date.now();
 		setNotifs(prev => [...prev, add]);
 	}
 

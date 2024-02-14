@@ -25,19 +25,21 @@ export default function ChatContent()
 
 	const getChan = useQuery({
 		queryKey: ["channels", id],
-		queryFn: () => api.get("/users/1/channels/"),
+		queryFn: () => api.get("/channels/"),
 	});
 
 	const getMsgs = useQuery({
 		queryKey: ["channels", id, "messages"],
-		queryFn: () => api.get("/users/1/channels/" + id + "/messages"),
+		queryFn: () => api.get("/channels/" + id + "/messages"),
 	});
 
 	const postMsg = useMutation({
-		mutationFn: (content: string) =>
-			api.post("/users/1/channels/" + id + "/messages", {content}),
+		mutationFn: (content: string) => {
+			addNotif({content})
+			return (api.post("/channels/" + id + "/messages", {content}));
+		},
 		onSettled: () => invalidate(["channels", id, "messages"]),
-		onError: error => addNotif(error.message),
+		onError: error => addNotif({content: error.message}),
 	});
 
 	const chan =
