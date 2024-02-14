@@ -16,7 +16,7 @@ export enum RelationshipStatus {
 export class Relationship {
 
     @PrimaryGeneratedColumn({ type: 'bigint' })
-    id: number;
+    id: bigint;
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
@@ -62,9 +62,9 @@ export class Relationship {
         return ([this.user1, this.user2]);
     }
 
-    setStatusById(userId: number, status: RelationshipStatus): void {
-        if (this.user1.id == userId) this.status1 = status;
-        else if (this.user2.id == userId) this.status2 = status;
+    setStatusById(userId: bigint, status: RelationshipStatus): void {
+        if (this.user1.id === userId) this.status1 = status;
+        else if (this.user2.id === userId) this.status2 = status;
     }
 
     setStatusOnCreation(status: RelationshipStatus): void {
@@ -87,17 +87,17 @@ export class Relationship {
         }
     }
 
-    isDeletionPermitted(userId: number): void {
+    isDeletionPermitted(userId: bigint): void {
         const isBlockedOrDeclined = [RelationshipStatus.BLOCKED, RelationshipStatus.DECLINED];
 
         switch (true) {
-            case (userId == this.user1.id): {
+            case (userId === this.user1.id): {
                 if (isBlockedOrDeclined.includes(this.status2)) {
                     throw new BadRequestException(`Relationship cannot be deleted due to counterpart's status (${this.status2})`);
                 }
                 break ;
             }
-            case (userId == this.user2.id): {
+            case (userId === this.user2.id): {
                 if (isBlockedOrDeclined.includes(this.status1)) {
                     throw new BadRequestException(`Relationship cannot be deleted due to counterpart's status (${this.status1})`);
                 }

@@ -3,6 +3,7 @@ import { CreateUserDto } from '../../dtos/CreateUser.dto';
 import { UsersService } from 'src/users/services/users/users.service';
 import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
 import { ReplaceUserDto } from 'src/users/dtos/ReplaceUser.dto';
+import { ParseIdPipe } from 'src/common/pipes/parseid/parseid.pipe';
 import { AuthService } from 'src/auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -17,10 +18,10 @@ export class UsersController {
         return (await this.userService.getUsers());
     }
 
-	@UseGuards(AuthGuard('jwt'))
-    @Get(':id')
-    async getUser(@Param('id', ParseIntPipe) id: number) {
-        return (await this.userService.getUser(id));
+    @UseGuards(AuthGuard('jwt'))
+    @Get(':userId')
+    async getUser(@Param('userId', ParseIdPipe) userId: bigint) {
+        return (await this.userService.getUser(userId));
     }
 
 	@UseGuards(AuthGuard('jwt'))
@@ -29,27 +30,27 @@ export class UsersController {
         return (await this.userService.createUser(createUserDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
-    @Put(':id')
+    @UseGuards(AuthGuard('jwt'))
+    @Put(':userId')
     async replaceUserById(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('userId', ParseIdPipe) userId: bigint,
         @Body(new ValidationPipe) replaceUserDto: ReplaceUserDto,
     ) {
-        return (await this.userService.updateUser(id, replaceUserDto));
+        return (await this.userService.updateUser(userId, replaceUserDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
-	@Patch(':id')
+    @UseGuards(AuthGuard('jwt'))
+    @Patch(':userId')
     async updateUserById(
-        @Param('id', ParseIntPipe) id: number,
+        @Param('userId', ParseIdPipe) userId: bigint,
         @Body(new ValidationPipe) updateUserDto: UpdateUserDto,
     ) {
-        return (await this.userService.updateUser(id, updateUserDto));
+        return (await this.userService.updateUser(userId, updateUserDto));
     }
 
-    @Delete(':id')
-    async deleteUserById(@Param('id', ParseIntPipe) id: number) {
-        return (await this.userService.deleteUser(id));
+    @Delete(':userId')
+    async deleteUserById(@Param('userId', ParseIdPipe) userId: bigint) {
+        return (await this.userService.deleteUser(userId));
     }
 
 }
