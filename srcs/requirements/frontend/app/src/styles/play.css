@@ -8,20 +8,6 @@
 	box-shadow: 0 0 12px #000a;
 }
 
-.Gamemode-Selectors {
-	width: 60vw;
-  	height: 70vh;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.Gamemode-button {
-	width: 50vw;
-  	height: 30vh;
-	font-size: 8vh;
-}
-
 .Create-lobby-button {
 	width: 10vw;
 	height: 5vh;
