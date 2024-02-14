@@ -18,6 +18,7 @@
 
 	--error: #f9a;
 	--error-bg: #d35;
+	--error-bg-hover: #712;
 
 	--border-color-1: #6177c7;
 	--border-color-2: #475a9e;
@@ -31,6 +32,7 @@
 	--bg-color-4: #d8d8ff;
 	--bg-color-5: #cacaff;
 
+	--text-faint: #558;
 	--text-normal: #336;
 	--text-middle: #2a2a4a;
 	--text-accent: #224;
@@ -58,7 +60,7 @@ p, .p-style, section {
 	padding: 10px 15px;
 	background: var(--bg-color-2);
 	border: 1px solid var(--bg-color-4);
-	border-radius: 6px;
+	border-radius: 7px;
 	line-height: 1.5em;
 	box-shadow: 0 0 12px -4px #000a;
 }
@@ -85,7 +87,7 @@ button {
 	border: 1px solid var(--bg-color-5);
 	color: var(--text-normal);
 	font-size: .92rem;
-	border-radius: 6px;
+	border-radius: 7px;
 	transition: .1s;
 }
 button:hover {
@@ -147,13 +149,14 @@ h5 {
 }
 
 input {
-	background: var(--bg-color-2);
+	background: var(--bg-color-3);
 	border: 1px solid var(--bg-color-5);
 	color: var(--text-normal);
-	border-radius: 6px;
-	padding: 8px 12px;
-	font-size: .92rem;
+	border-radius: 7px;
+	padding: 7px 10px;
+	font-size: .96rem;
 	margin: 4px 0;
+	box-shadow: 0 0 6px inset #0008;
 }
 input:focus {
 	border: 1px solid var(--text-faint);
