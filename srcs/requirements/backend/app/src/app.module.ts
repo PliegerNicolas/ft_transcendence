@@ -10,13 +10,15 @@ import { Relationship } from './relationships/entities/Relationship.entity';
 import { AuthModule } from './auth/auth.module';
 import { GamelogsModule } from './gamelogs/gamelogs.module';
 import { Gamelog } from './gamelogs/entities/Gamelog.entity';
-import { UserToGamelog } from './gamelogs/entities/UserToGamelog.entity';
 import { ChatsModule } from './chats/chats.module';
 import { Channel } from './chats/channels/entities/Channel.entity';
 import { Message } from './chats/messages/entities/Message.entity';
 import { AuthService } from './auth/auth.service';
+import { GamelogToUser } from './gamelogs/entities/GamelogToUser.entity';
+import { ChannelMember } from './chats/channels/entities/ChannelMember.entity';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { BigIntSerializationInterceptor } from './common/interceptors/big-int-serialization/big-int-serialization.interceptor';
 import { GameModule } from './game/game.module';
-import { UsersService } from './users/services/users/users.service';
 
 @Module({
 	imports: [
@@ -28,7 +30,7 @@ import { UsersService } from './users/services/users/users.service';
 			username: process.env.POSTGRES_USER,
 			password: process.env.POSTGRES_PASSWORD,
 			database: process.env.POSTGRES_DB,
-			entities: [User, Profile, Relationship, Gamelog, UserToGamelog, Channel, Message],
+			entities: [User, Profile, Relationship, Gamelog, GamelogToUser, Channel, ChannelMember, Message],
 			synchronize: true,
 			//logging: true, // TEMP
 		}),
@@ -41,6 +43,12 @@ import { UsersService } from './users/services/users/users.service';
 		GameModule
 	],
 	controllers: [],
-	providers: [AuthService],
+	providers: [
+		AuthService,
+		{
+			provide: APP_INTERCEPTOR,
+			useClass: BigIntSerializationInterceptor,
+		},
+	],
 })
 export class AppModule {}

@@ -1,66 +1,58 @@
-import { Channel } from "src/chats/channels/entities/Channel.entity";
-import { Message } from "src/chats/messages/entities/Message.entity";
-import { Gamelog } from "src/gamelogs/entities/Gamelog.entity";
-import { UserToGamelog } from "src/gamelogs/entities/UserToGamelog.entity";
-import { Profile } from "src/profiles/entities/Profile.entity";
-import { Relationship } from "src/relationships/entities/Relationship.entity";
-import { Column, CreateDateColumn, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+    import { ChannelMember } from "src/chats/channels/entities/ChannelMember.entity";
+    import { GamelogToUser } from "src/gamelogs/entities/GamelogToUser.entity";
+    import { Profile } from "src/profiles/entities/Profile.entity";
+    import { Relationship } from "src/relationships/entities/Relationship.entity";
+    import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 
-@Entity({ name: 'users' })
-export class User {
+    @Entity({ name: 'users' })
+    @Unique(['email', 'username'])
+    export class User {
 
-    @PrimaryGeneratedColumn({ type: 'bigint' })
-    id: number;
+        @PrimaryGeneratedColumn({ type: 'bigint' })
+        id: bigint;
 
-    @Column({ unique: true })
-    email: string;
+        @Column({ type: 'bigint', unique: true })
+        oauthId: bigint;
 
-    @Column({ unique: true })
-    username: string;
+        @Column()
+        email: string;
 
+        @Column({ unique: true })
+        username: string;
 
-	@Column({type: 'bigint', unique:true})
-	oauth_id: number;
+        @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+        createdAt: Date;
 
-    @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    created_at: Date;
+        @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+        updatedAt: Date;
 
-    @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    updated_at: Date;
+        /* Profile */
 
-    /* Profile */
+        @OneToOne(() => Profile, (profile) => profile.user, { cascade: true })
+        profile: Profile
 
-    @OneToOne(() => Profile, (profile) => profile.user, { cascade: true })
-    profile: Profile
+        /* Relationships */
 
-    /* Relationships */
+        @OneToMany(() => Relationship, (relationship) => relationship.user1, { cascade: true })
+        relationships1?: Relationship[];
 
-    @OneToMany(() => Relationship, (relationship) => relationship.user1, { cascade: true })
-    relationships1?: Relationship[];
+        @OneToMany(() => Relationship, (relationship) => relationship.user2, { cascade: true })
+        relationships2?: Relationship[];
 
-    @OneToMany(() => Relationship, (relationship) => relationship.user2, { cascade: true })
-    relationships2?: Relationship[];
+        /* Gamelogs */
 
-    /* Gamelogs */
+        @OneToMany(() => GamelogToUser, (userToGamelogs) => userToGamelogs.user)
+        userToGamelogs?: GamelogToUser[];
 
-    @OneToMany(() => UserToGamelog, (userToGamelog) => userToGamelog.user)
-    userToGamelogs?: UserToGamelog[];
+        /* Chat */
 
-    @ManyToMany(() => Gamelog, (gamelog) => gamelog.users)
-    gamelogs?: Gamelog[];
+        @OneToMany(() => ChannelMember, (member) => member.user)
+        channelMembers?: ChannelMember[];
 
-    /* Chat */
+        /* Helper Function */
 
-    @ManyToMany(() => Channel, (channel) => channel.members)
-    channels?: Channel[];
+        getRelationships(): Relationship[] {
+            return ([...this.relationships1, ...this.relationships2]);
+        }
 
-    @OneToMany(() => Message, (message) => message.user, { cascade: true })
-    messages?: Message[];
-
-    /* Helper Function */
-
-    getRelationships(): Relationship[] {
-        return ([...this.relationships1, ...this.relationships2]);
     }
-
-}
