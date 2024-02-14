@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards, ValidationPipe } from '@nestjs/common';
 import { ChannelsService } from '../services/channels/channels.service';
 import { CreateChannelDto } from '../dtos/CreateChannel.dto';
 import { UpdateChannelDto } from '../dtos/UpdateChannel.dto';
 import { ReplaceChannelDto } from '../dtos/ReplaceChannel.dto';
 import { ParseIdPipe } from 'src/common/pipes/parseid/parseid.pipe';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller()
 export class ChannelsController {
@@ -24,6 +25,7 @@ export class ChannelsController {
         return (await this.channelService.getChannelMembers(BigInt(2), channelId));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Post('channels')
     async createChannel(
         @Body(new ValidationPipe) createChannelDto: CreateChannelDto
@@ -32,6 +34,7 @@ export class ChannelsController {
         return (await this.channelService.createChannel(BigInt(1), createChannelDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Put('channels/:channelId')
     async replaceChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -41,6 +44,7 @@ export class ChannelsController {
         return (await this.channelService.replaceChannel(BigInt(1), channelId, replaceChannelDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId')
     async updateChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -50,6 +54,7 @@ export class ChannelsController {
         return (await this.channelService.updateChannel(BigInt(1), channelId, updateChannelDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId/join')
     async joinChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -58,6 +63,7 @@ export class ChannelsController {
         return (await this.channelService.joinChannel(BigInt(2), channelId));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId/leave')
     async leaveChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -66,6 +72,7 @@ export class ChannelsController {
         return (await this.channelService.leaveChannel(BigInt(2), channelId));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Delete('channels/:channelId')
     async deleteChannel(@Param('channelId', ParseIdPipe) channelId: bigint) {
         // For this moment userId is passed as 2. Need passport.
