@@ -21,6 +21,41 @@
 }
 
 /*
+** Login =======================================================================
+*/
+
+.Login {
+	font-size: 1rem;
+	color: var(--text-normal);
+	background: var(--bg-color-4);
+	border: 1px solid var(--bg-color-5);
+	padding: 5px 12px;
+	height: 26px;
+	width: fit-content;
+	border-radius: 7px;
+	transition: .1s;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+.Login:visited {
+	color: var(--text-normal);
+}
+.Login:hover {
+	background: var(--bg-color-5);
+	color: var(--text-accent);
+	cursor: pointer;
+}
+.Login:active {
+	background: var(--bg-color-4);
+}
+
+.Login > img {
+	height: 100%;
+}
+
+/*
 ** MainContent =================================================================
 */
 
@@ -50,7 +85,7 @@
 
 @media (max-width: 600px)
 {
-	.MainContent { padding: 15px 0px 80px; left: 0; bottom: 58px; }
+	.MainContent { padding: 15px 20px 80px 20px; left: 0; bottom: 58px; }
 }
 
 /*
@@ -184,4 +219,21 @@
 {
 	0% { opacity: 1; }
 	100% { opacity: 0; }
+}
+
+/*
+** RequireAuth
+*/
+
+.RequireAuth {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 40px 80px;
+	gap: 20px;
+}
+
+.RequireAuth > span {
+	font-weight: bold;
+	font-size: 1.15rem;
 }

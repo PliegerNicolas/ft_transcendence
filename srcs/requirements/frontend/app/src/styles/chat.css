@@ -179,6 +179,10 @@
 	overflow: hidden;
 }
 
+.Chat__Content.spinner {
+	justify-content: center;
+}
+
 .Chat__Header {
 	font-size: 1.1rem;
 	font-weight: 600;

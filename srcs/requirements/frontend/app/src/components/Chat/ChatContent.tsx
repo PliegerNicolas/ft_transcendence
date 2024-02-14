@@ -68,7 +68,7 @@ export default function ChatContent()
 
 	return (
 		getChan.isPending &&
-			<div style={{width: "calc(100% - 240px)", marginTop: "30px"}}>
+			<div className="Chat__Content spinner">
 				<Spinner />
 			</div>
 		|| getChan.isError &&
