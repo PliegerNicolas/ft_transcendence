@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Message } from '../entities/Message.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -18,121 +18,83 @@ export class MessagesService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    async getChannelMessages(userId: number, channelId: number): Promise<Message[]> {
+    async getChannelMessages(userId: bigint, channelId: bigint): Promise<Message[]> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
-            relations: ['members', 'messages'],
+            relations: ['messages', 'members.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (!channel.members.find((member) => member.id == userId)) {
-            throw new NotFoundException(`User with ID ${userId} not member of channel with ID ${channelId}`);
+        else if (!channel.members.find((member) => BigInt(member.user.id) === userId)) {
+            throw new ForbiddenException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
 
         return (channel.messages);
     }
 
-    async getChannelMessage(userId: number, channelId: number, messageId: number): Promise<Message> {
+    async getChannelMessage(userId: bigint, channelId: bigint, messageId: bigint): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
-            relations: ['members', 'messages'],
+            relations: ['messages', 'members.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-
-        if (!channel.members.find((member) => member.id == userId)) {
-            throw new NotFoundException(`User with ID ${userId} not member of channel with ID ${channelId}`);
+        else if (!channel.members.find((member) => BigInt(member.user.id) === userId)) {
+            throw new ForbiddenException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
 
-        const message = channel.messages.find((message) => message.id == messageId);
+        const message = channel.messages.find((message) => BigInt(message.id) === messageId);
 
-        if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in channel with ID ${channelId}`);
-
+        if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in Channel with ID ${channelId}`);
+        
         return (message);
     }
 
-    async createChannelMessage(userId: number, channelId: number, messageDetails: CreateMessageParams): Promise<Message> {
+    async createChannelMessage(userId: bigint, channelId: bigint, messageDetails: CreateMessageParams): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
-            relations: ['members', 'messages'],
+            relations: ['members.user', 'messages'],
         });
 
-        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`)
 
-        const user = channel.members.find((member) => member.id == userId);
+        const channelMember = channel.members.find((member) => BigInt(member.user.id) === userId);
 
-        if (!user) throw new NotFoundException(`User with ID ${userId} is not member of channel with ID ${channelId}`);
+        if (!channelMember) throw new NotFoundException(`User with ID ${userId} is not member of channel with ID ${channelId}`);
 
         const message = this.messageRepository.create({
-            user: user,
-            channel: channel,
+            id: this.generateNextMessageId(channel),
+            channelId: channel.id,
+            channelMember,
             ...messageDetails,
         });
 
         return (await this.messageRepository.save(message));
     }
 
-    async replaceChannelMessage(userId: number, channelId: number, messageId: number, messageDetails: ReplaceMessageParams): Promise<Message> {
-        const channel = await this.channelRepository.findOne({
-            where: { id: channelId },
-            relations: ['messages.user'],
-        });
-
-        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-
-        const message = channel.messages.find((message) => message.id == messageId);
-
-        if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in channel with ID ${channelId}`);
-    
-        if (message.user.id != userId) {
-            throw new BadRequestException(`User with ID ${userId} isn't author of message with ID ${messageId} in channel with ID ${channelId}`);
-        }
-
-        return (await this.messageRepository.save({
-            ...message,
-            ...messageDetails,
-        }));
-
+    async replaceChannelMessage(userId: bigint, channelId: bigint, messageId: bigint, messageDetails: ReplaceMessageParams): Promise<Message> {
+        return (null);
     }
 
-    async updateChannelMessage(userId: number, channelId: number, messageId: number, messageDetails: UpdateMessageParams): Promise<Message> {
-        const channel = await this.channelRepository.findOne({
-            where: { id: channelId },
-            relations: ['messages.user'],
-        });
-
-        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-
-        const message = channel.messages.find((message) => message.id == messageId);
-
-        if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in channel with ID ${channelId}`);
-
-        if (message.user.id != userId) {
-            throw new BadRequestException(`User with ID ${userId} isn't author of message with ID ${messageId} in channel with ID ${channelId}`);
-        }
-
-        return (await this.messageRepository.save({
-            ...message,
-            ...messageDetails,
-        }));
-
+    async updateChannelMessage(userId: bigint, channelId: bigint, messageId: bigint, messageDetails: UpdateMessageParams): Promise<Message> {
+        return (null);
     }
 
-    async deleteChannelMessage(userId: number, channelId: number, messageId: number): Promise<string> {
-        const channel = await this.channelRepository.findOne({
-            where: { id: channelId },
-            relations: ['messages'],
-        });
+    async deleteChannelMessage(userId: bigint, channelId: bigint, messageId: bigint): Promise<string> {
+        return (null);
+    }
 
-        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+    /* Helper Functions */
 
-        const message = channel.messages.find((message) => message.id == messageId);
+    public generateNextMessageId(channel: Channel): bigint {
+        if (!channel.messages) return (BigInt(1));
 
-        if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in Channel with ID ${channelId}`);
-        else if (message.id != userId) throw new BadRequestException(`User with ID ${userId} isn't author of message with ID ${messageId} in channel with ID ${channelId}`);
+        const highestMessageId: bigint = channel.messages.reduce<bigint>((maxId, message) => {
+            const messageId = BigInt(message.id);
+            return (messageId > maxId ? messageId : maxId);
+        }, BigInt(0));
 
-        await this.userRepository.delete(messageId);
-        return (`Message with ID ${messageId} successfully deleted`);
+        return (highestMessageId + BigInt(1));
     }
 
 }

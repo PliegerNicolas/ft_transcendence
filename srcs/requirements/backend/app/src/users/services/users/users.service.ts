@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'src/profiles/entities/Profile.entity';
 import { User } from 'src/users/entities/User.entity';
@@ -16,63 +16,108 @@ export class UsersService {
     ) {}
 
     async getUsers(): Promise<User[]> {
-        return (this.userRepository.find({}));
+        // Public ?
+        return (this.userRepository.find());
     }
 
-    async getUser(id: number): Promise<User> {
+    async getUser(userId: bigint): Promise<User> {
+        // Public ?
         const user = await this.userRepository.findOne({
-            where: { id },
+            where: { id: userId },
             relations: ['profile']
         });
 
-        if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
 
         return (user);
     }
 
     async createUser(userDetails: CreateUserParams): Promise<User> {
+        // Public
+        await this.verifyUserUnicity(userDetails.username, userDetails.oauthId);
+
         const newUser = this.userRepository.create({
             ...userDetails,
-            profile: await this.profileRepository.save(userDetails.profile || this.profileRepository.create()),
+            profile: userDetails.profile ? userDetails.profile : this.profileRepository.create(),
         });
 
         return (await this.userRepository.save(newUser));
     }
 
-    async replaceUser(id: number, userDetails: ReplaceUserParams): Promise<User> {
+    async replaceUser(userId: bigint, userDetails: ReplaceUserParams): Promise<User> {
+        // Only if you're the target user.
+        await this.verifyUserUnicity(userDetails.username, userDetails.oauthId);
+
         const user = await this.userRepository.findOne({
-            where: { id },
+            where: { id: userId },
             relations: ['profile'],
         });
 
-        if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
 
-        return (await this.userRepository.save({ ...userDetails }));
+        return (await this.userRepository.save({
+            ...user,
+            ...userDetails,
+            profile: {
+                ...user.profile,
+                ...userDetails.profile,
+            }
+        }));
     }
 
-    async updateUser(id: number, userDetails: UpdateUserParams): Promise<User> {
+    async updateUser(userId: bigint, userDetails: UpdateUserParams): Promise<User> {
+        // Only if you're the target user.
+        await this.verifyUserUnicity(userDetails.username, userDetails.oauthId);
+
         const user = await this.userRepository.findOne({
-            where: { id },
+            where: { id: userId },
             relations: ['profile'],
         });
 
-        if (!user) throw new NotFoundException(`User with ID ${id} not found`);
+        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
 
-        return (
-            await this.userRepository.save({
-                ...user,
-                ...userDetails,
-                profile: userDetails.profile? {
-                    ...user.profile,
-                    ...userDetails.profile
-                } : user.profile,
-            })
-        );
+        return (await this.userRepository.save({
+            ...user,
+            ...userDetails,
+            profile: {
+                ...user.profile,
+                ...userDetails.profile,
+            }
+        }));
     }
 
-    async deleteUser(id: number): Promise<string> {
-        await this.userRepository.delete(id);
-        return (`User with ID ${id} successfully deleted`);
+    async deleteUser(userId: bigint): Promise<string> {
+        // Only if you're the target user.
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+        });
+
+        if (!user) throw new NotFoundException(`User with ID ${userId}`);
+
+        await this.userRepository.delete(userId.toString());
+        return (`User with ID ${userId} successfully deleted`);
+    }
+
+    /* Helper Functions */
+
+    private async verifyUserUnicity(username: string, oauthId: bigint) {
+        const existingUser = await this.userRepository.findOne({
+            where: [
+                { username },
+                { oauthId },
+            ],
+        })
+
+        if (existingUser) {
+            let errorMessage = `User with `;
+            if (existingUser.username === username) {
+                errorMessage += `Username (${username}) `;
+            }
+            if (existingUser.oauthId == oauthId) {
+                errorMessage += `${existingUser.username === username ? 'and ' : ''}OauthId (${oauthId}) `;
+            }
+            throw new BadRequestException(errorMessage + `already exists.`);
+        }
     }
 
 }

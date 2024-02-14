@@ -15,7 +15,7 @@ export class RelationshipsService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    async getUserRelationships(userId: number): Promise<Relationship[]> {
+    async getUserRelationships(userId: bigint): Promise<Relationship[]> {
         const user = await this.userRepository.findOne({
             where: { id: userId },
             relations: [
@@ -29,7 +29,7 @@ export class RelationshipsService {
         return (user.getRelationships());
     }
 
-    async getUserRelationship(userId: number, targetId: number): Promise<Relationship> {
+    async getUserRelationship(userId: bigint, targetId: bigint): Promise<Relationship> {
         const relationship = await this.relationshipRepository.findOne({
             where: [
                 { user1: { id: userId }, user2: { id: targetId } },
@@ -43,7 +43,7 @@ export class RelationshipsService {
         return (relationship);
     }
 
-    async createUserRelationship(userId: number, relationshipDetails: CreateRelationshipParams): Promise<Relationship> {
+    async createUserRelationship(userId: bigint, relationshipDetails: CreateRelationshipParams): Promise<Relationship> {
         const newRelationship = this.relationshipRepository.create({
             user1: { id: userId },
             user2: { id: relationshipDetails.targetId },
@@ -55,8 +55,8 @@ export class RelationshipsService {
     }
 
     async replaceUserRelationship(
-        userId: number,
-        targetId: number,
+        userId: bigint,
+        targetId: bigint,
         relationshipDetails: ReplaceRelationshipParams
     ): Promise<Relationship> {
         const relationship = await this.relationshipRepository.findOne({
@@ -75,8 +75,8 @@ export class RelationshipsService {
     }
 
     async updateUserRelationship(
-        userId: number,
-        targetId: number,
+        userId: bigint,
+        targetId: bigint,
         relationshipDetails: UpdateRelationshipParams
     ): Promise<Relationship> {
         const relationship = await this.relationshipRepository.findOne({
@@ -94,7 +94,7 @@ export class RelationshipsService {
         return (await this.relationshipRepository.save(relationship));
     }
 
-    async deleteRelationship(userId: number, targetId: number): Promise<string> {
+    async deleteRelationship(userId: bigint, targetId: bigint): Promise<string> {
         const relationship = await this.relationshipRepository.findOne({
             where: [
                 { user1: { id: userId }, user2: { id: targetId } },
