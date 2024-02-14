@@ -25,21 +25,15 @@ function Play() {
 		setGameMode(Mode.ONLINE);
 	}
 
-	const backHandler = () => {
-		setGameMode(Mode.NONE);
-	}
-
 	return (
 		<main className="MainContent">
         		{ gameMode === Mode.NONE ? <div className='Gamemode-Selectors'>
-        			<button onClick={localHandler}>Local mode</button>
-					<button onClick={onlineHandler}>Online mode</button></div> : <div></div>}
+        			<button className='Gamemode-button' onClick={localHandler}>Local</button>
+					<button className='Gamemode-button' onClick={onlineHandler}>Online</button></div> : <div></div>}
 				{ gameMode === Mode.LOCAL ? <div className='Gamemode-Local'>
-					<LocalGame/>
-					<button onClick={backHandler}>Back</button></div> : <div></div>}
+					<LocalGame/> </div> : <div></div>}
 				{ gameMode === Mode.ONLINE ? <div className='Gamemode-Online'>
-						<OnlineGame />
-						<button onClick={backHandler}>Back</button></div> : <div></div>}
+					<OnlineGame /> </div>: <div></div>}
 			
 		</main>
 	);
