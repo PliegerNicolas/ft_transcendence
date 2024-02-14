@@ -4,7 +4,6 @@ import { UsersService } from 'src/users/services/users/users.service';
 import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
 import { ReplaceUserDto } from 'src/users/dtos/ReplaceUser.dto';
 import { ParseIdPipe } from 'src/common/pipes/parseid/parseid.pipe';
-import { AuthService } from 'src/auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('users')

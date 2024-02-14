@@ -5,6 +5,7 @@ import { UpdateChannelDto } from '../dtos/UpdateChannel.dto';
 import { ReplaceChannelDto } from '../dtos/ReplaceChannel.dto';
 import { ParseIdPipe } from 'src/common/pipes/parseid/parseid.pipe';
 import { AuthGuard } from '@nestjs/passport';
+import { RoleGuard } from 'src/role/role.guard';
 
 @Controller()
 export class ChannelsController {
@@ -35,6 +36,7 @@ export class ChannelsController {
     }
 
 	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(RoleGuard)
     @Put('channels/:channelId')
     async replaceChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
