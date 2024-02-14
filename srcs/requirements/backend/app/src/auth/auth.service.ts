@@ -1,11 +1,8 @@
 import {Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { profile } from 'console';
-import { query } from 'express';
 import { Profile } from 'src/profiles/entities/Profile.entity';
 import { User } from 'src/users/entities/User.entity';
-import { DataSource, Entity, InsertQueryBuilder, QueryBuilder, createQueryBuilder } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 
 @Injectable()
@@ -14,7 +11,7 @@ export class AuthService
 	
 	constructor(private jwtService : JwtService, private dataSource : DataSource) {}
 
-	async checkUser(oauth_id : string) {
+	async checkUser(oauthId : string) {
 
 
 		const users = await this.dataSource
@@ -22,13 +19,13 @@ export class AuthService
 		.createQueryBuilder()
 		.select("user.id")
 		.from(User, "user")
-		.where("user.oauth_id = :id", { id: Number(oauth_id) })
+		.where("user.oauthId = :id", { id: BigInt(oauthId) })
 		.getOne()
 		.then(
 			(data) => data
 		)
 
-		return{
+		return {
 			users
 		};
 	}
@@ -69,7 +66,7 @@ export class AuthService
 				.into(User)
 				.values([
 					{"email" : Object.values(info)[1].toString(),
-					"oauth_id" :Number(Object.values(info)[0].toString()),
+					"oauthId" :BigInt(Object.values(info)[0].toString()),
 					"username" : Object.values(info)[2].toString(),
 					"profile" : {
 						"firstName" : Object.values(info)[3].toString(),
@@ -91,7 +88,8 @@ export class AuthService
 						"lastName" : Object.values(info)[4].toString(),
 						"image" : Object.values(info)[7].toString(),
 						"user" : {
-						id : payload.user_id,
+							//id : BigInt(1),
+							id : payload.user_id,
 						}
 					}
 				])

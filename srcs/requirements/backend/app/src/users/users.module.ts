@@ -6,14 +6,13 @@ import { User } from './entities/User.entity';
 import { Profile } from 'src/profiles/entities/Profile.entity';
 import { Relationship } from 'src/relationships/entities/Relationship.entity';
 import { Gamelog } from 'src/gamelogs/entities/Gamelog.entity';
-import { UserToGamelog } from 'src/gamelogs/entities/UserToGamelog.entity';
 import { Channel } from 'diagnostics_channel';
 import { Message } from 'src/chats/messages/entities/Message.entity';
 import { AuthService } from 'src/auth/auth.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Profile, Relationship, Gamelog, UserToGamelog, Channel, Message])
+    TypeOrmModule.forFeature([User, Profile, Relationship, Gamelog, Channel, Message])
   ],
   controllers: [UsersController],
   providers: [UsersService, AuthService]

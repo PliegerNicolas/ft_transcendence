@@ -1,21 +1,41 @@
+import { IsEnum } from "class-validator";
 import { Message } from "src/chats/messages/entities/Message.entity";
-import { User } from "src/users/entities/User.entity";
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ChannelMember } from "./ChannelMember.entity";
+
+export enum ChannelStatus {
+    PUBLIC = 'public',
+    PRIVATE = 'private',
+}
 
 @Entity({ name: 'channels' })
 export class Channel {
 
     @PrimaryGeneratedColumn({ type: 'bigint' })
-    id: number;
+    id: bigint;
 
     @Column()
     name: string;
 
-    @OneToMany(() => Message, (message) => message.channel, { cascade: true })
+    @Column({ default: 0 })
+    membersCount: number;
+
+    @IsEnum(ChannelStatus)
+    @Column({ type: 'enum', enum: ChannelStatus, default: ChannelStatus.PRIVATE })
+    status: ChannelStatus;
+
+    @OneToMany(() => ChannelMember, (member) => member.channel, { cascade: true })
+    members?: ChannelMember[];
+
+    @OneToMany(() => Message, (messages) => messages.channel, { cascade: true }) // soft deletion ?
     messages?: Message[];
 
-    @ManyToMany(() => User, (member) => member.channels, { cascade: true })
-    @JoinTable({ name: 'channel_members' })
-    members?: User[];
+    /* Helper Functions */
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    updateMembersCount(): void {
+        this.membersCount = this.members.length;
+    }
 
 }
