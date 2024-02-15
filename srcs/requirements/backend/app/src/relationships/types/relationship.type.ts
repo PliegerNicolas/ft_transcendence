@@ -1,7 +1,7 @@
 import { RelationshipStatus } from "../entities/Relationship.entity";
 
 export type CreateRelationshipParams = {
-    targetId: bigint;
+    username: string;
     status?: RelationshipStatus;
 }
 

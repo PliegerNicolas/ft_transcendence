@@ -15,25 +15,25 @@ export class ProfilesService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    async getProfileByUserId(userId: bigint): Promise <Profile> {
+    async getProfileByUserId(username: string): Promise <Profile> {
         const user = await this.userRepository.findOne({
-            where: { id: userId },
+            where: { username: username },
             relations: ['profile'],
         });
 
-        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
 
         return (user.profile);
     }
 
-    async replaceProfile(userId: bigint, profileDetails: ReplaceProfileParams): Promise<Profile> {
+    async replaceProfile(username: string, profileDetails: ReplaceProfileParams): Promise<Profile> {
         const profile = await this.profileRepository.findOne({
             where: {
-                user: { id: userId }
+                user: { username: username }
             }
         });
 
-        if (!profile) throw new NotFoundException(`Profile of User with ID ${userId} not found`);
+        if (!profile) throw new NotFoundException(`Profile of User with Username '${username}' not found`);
 
         return (await this.profileRepository.save({
             ...profile,
@@ -41,14 +41,14 @@ export class ProfilesService {
         }));        
     }
 
-    async updateProfile(userId: bigint, profileDetails: UpdateProfileParams): Promise<Profile> {
+    async updateProfile(username: string, profileDetails: UpdateProfileParams): Promise<Profile> {
         const profile = await this.profileRepository.findOne({
             where: {
-                user: { id: userId }
+                user: { username: username }
             }
         });
 
-        if (!profile) throw new NotFoundException(`Profile of User with ID ${userId} not found`);
+        if (!profile) throw new NotFoundException(`Profile of User with Username '${username}' not found`);
 
         return (await this.profileRepository.save({
             ...profile,
