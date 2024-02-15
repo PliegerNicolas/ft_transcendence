@@ -21,6 +21,41 @@
 }
 
 /*
+** Login =======================================================================
+*/
+
+.Login {
+	font-size: 1rem;
+	color: var(--text-normal);
+	background: var(--bg-color-4);
+	border: 1px solid var(--bg-color-5);
+	padding: 5px 12px;
+	height: 26px;
+	width: fit-content;
+	border-radius: 7px;
+	transition: .1s;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+.Login:visited {
+	color: var(--text-normal);
+}
+.Login:hover {
+	background: var(--bg-color-5);
+	color: var(--text-accent);
+	cursor: pointer;
+}
+.Login:active {
+	background: var(--bg-color-4);
+}
+
+.Login > img {
+	height: 100%;
+}
+
+/*
 ** MainContent =================================================================
 */
 
@@ -50,7 +85,7 @@
 
 @media (max-width: 600px)
 {
-	.MainContent { padding: 15px 0px 80px; left: 0; bottom: 58px; }
+	.MainContent { padding: 15px 20px 80px 20px; left: 0; bottom: 58px; }
 }
 
 /*
@@ -165,10 +200,30 @@
 	color: var(--text-accent);
 	background-color: #464c60cc;
 	border: 1px solid var(--text-faint);
-	padding: 10px 15px;
+	padding: 10px 10px;
 	margin-top: 3px;
 	width: 240px;
 	border-radius: 7px;
+	display: flex;
+	justify-content: space-between;
+}
+
+.Notif__Date {
+	color: var(--text-faint);
+	font-size: .74rem;
+	margin-bottom: 4px;
+}
+
+.Notifs__Notif button {
+	padding: 0;
+	margin: 0;
+	width: 24px;
+	height: 24px;
+	pointer-events: auto;
+}
+
+.Notifs__Notif img {
+	width: 100%;
 }
 
 .Notifs__Notif.err {
@@ -176,12 +231,71 @@
 	border-color: #f9a;
 }
 
-.Notifs__Notif.rm {
-	animation: fadeout 1s ease-in-out forwards;
+.fadeout {
+	animation: fadeout 2s ease-in-out forwards;
 }
 
 @keyframes fadeout
 {
 	0% { opacity: 1; }
 	100% { opacity: 0; }
+}
+
+/*
+** RequireAuth
+*/
+
+.RequireAuth {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 40px 80px;
+	gap: 20px;
+}
+
+.RequireAuth > span {
+	font-weight: bold;
+	font-size: 1.15rem;
+}
+
+/*
+** Auth ========================================================================
+*/
+
+.Auth {
+	display: flex;
+	justify-content: center;
+	align-items: start;
+}
+
+.Auth__Done {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.Auth__Done img {
+	animation: fadein .5s ease-in-out forwards;
+	filter:
+		brightness(0) saturate(100%) invert(65%) sepia(38%) saturate(1474%)
+		hue-rotate(106deg) brightness(94%) contrast(101%);
+}
+
+.Auth__Fail {
+	display: flex;
+	align-items: center;
+	justify-content: start;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.Auth__Fail>h3 {
+	margin-bottom: 0;
+}
+
+.Auth__Fail img {
+	animation: fadein .5s ease-in-out forwards;
+	filter:
+		brightness(0) saturate(100%) invert(36%) sepia(75%) saturate(4156%)
+		hue-rotate(329deg) brightness(89%) contrast(94%);
 }

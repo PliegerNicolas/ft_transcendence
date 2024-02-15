@@ -36,14 +36,14 @@ export interface MyInfoType {
 }
 
 export interface MsgType {
-	uid: number,
-	username: string,
+	userId: number,
+	channelId: number,
 	content: string,
-	date: string
+	createdAt: string
 }
 
 export interface ChanType {
 	id: string,
 	name: string,
-	size: number,
+	membersCount: number,
 }

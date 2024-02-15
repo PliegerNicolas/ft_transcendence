@@ -19,8 +19,12 @@ import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
 import User from "./components/User.tsx";
 import Notifs from "./components/Notifs.tsx";
+import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
+
+import closeIcon from "./assets/close.svg";
+import check from "./assets/check.svg";
 
 function Auth({setLogInfo}: {setLogInfo: Function})
 {
@@ -34,21 +38,25 @@ function Auth({setLogInfo}: {setLogInfo: Function})
 
 	const guard = useRef(false);
 
-	const postAuth = useMutation({
+	const [status, setStatus] = useState("pending");
 
+	const postAuth = useMutation({
 		mutationFn: ((code: string) =>
 			api.post("/auth", {code, redirect_uri: `http://${location.host}/auth`})) as
 			MutationFunction<{access_token: string}>,
 
 		onSuccess: (data: {access_token: string}) => {
-				localStorage.setItem(
-					"my_info", JSON.stringify({logged: true, token: data?.access_token}));
-				setLogInfo({logged: true, token: data.access_token});
-			},
+			setStatus("success");
+			localStorage.setItem(
+				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
+			setLogInfo({logged: true, token: data.access_token});
+			setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
+		},
 
-		onError: () => localStorage.removeItem("my_info"),
-
-		onSettled: () => navigate(redirectPath ? redirectPath : "/")
+		onError: () => {
+			setStatus("error");
+			localStorage.removeItem("my_info");
+		},
 	});
 
 	useEffect(() => {
@@ -59,10 +67,27 @@ function Auth({setLogInfo}: {setLogInfo: Function})
 	}, []);
 
 	return (
-		<div className="MainContent">
+		<div className="MainContent Auth">
+		{
+			status === "success" &&
+			<h3 className="Auth__Done">
+				<img src={check}/> Done!
+			</h3>
+			|| status === "pending" &&
 			<h3>
 				Please wait...
 			</h3>
+			|| status === "error" &&
+			<div className="Auth__Fail">
+				<h3 className="Auth__Done">
+					<img src={closeIcon}/>
+					Something went wrong:<br />{ postAuth.error?.message }
+				</h3>
+				<button onClick={() => navigate(redirectPath ? redirectPath : "/")}>
+					Go back
+				</button>
+			</div>
+		}
 		</div>
 	);
 }
@@ -87,9 +112,10 @@ function App()
 		return { logged: false, token: ""};
 	});
 
-	const [notifs, setNotifs] = useState<{type: number, content: string}[]>([]);
+	const [notifs, setNotifs] = useState<{type: number, content: string, date: number}[]>([]);
 
-	function addNotif(add: {type: number, content: string}) {
+	function addNotif(add: {type: number, content: string, date: number}) {
+		add.date = Date.now();
 		setNotifs(prev => [...prev, add]);
 	}
 
@@ -106,11 +132,17 @@ function App()
 					<Route path="/"	element={<Home />} />
 					<Route path="/play" element={<Play />} />
 					<Route path="/stats" element={<Stats />} />
-					<Route path="/chat" element={<Chat />} />
-					<Route path="/chattest/*" element={<ChatTest />} />
+					<Route path="/chat" element={
+						<RequireAuth elem={<Chat />} />
+					}/>
+					<Route path="/chattest/*" element={
+						<RequireAuth elem={<ChatTest />} />
+					}/>
 					<Route path="/settings" element={<Settings />} />
 					<Route path="/about" element={<About />} />
-					<Route path="/sandbox" element={<Sandbox />} />
+					<Route path="/sandbox" element={
+						<RequireAuth elem={<Sandbox />} />
+					}/>
 					<Route path="/user/:id" element={<User />} />
 					<Route path="/auth" element={<Auth setLogInfo={setLogInfo} />} />
 					<Route path="*" element={<NotFound />} />
