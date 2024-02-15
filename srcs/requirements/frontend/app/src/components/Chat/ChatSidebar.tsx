@@ -9,6 +9,7 @@ import { ChatContext, MyContext } from "../../utils/contexts.ts";
 import add from "../../assets/add.svg";
 
 import "../../styles/chat.css";
+import { ChanType } from "../../utils/types.ts";
 
 // <ChatSidebar /> =============================================================
 
@@ -45,14 +46,18 @@ export default function ChatSidebar()
 				getChans.isSuccess &&
 					<div className="Chat__Chanlist">
 					{
-						getChans.data.map((chan : {id: string, name: string}) =>
+						getChans.data.map((chan : ChanType) =>
 							<Link
 								to={chan.id}
 								className={`Chat__ChanListItem ${id === chan.id && "curr"}`}
 								key={chan.id}
 							>
-								<div className="Chat__ChanListItemName">{chan.name}</div>
-								<div className="Chat__ChanListItemSize">?? members</div>
+								<div className="Chat__ChanListItemName">
+									{chan.name}
+								</div>
+								<div className="Chat__ChanListItemSize">
+									{chan.membersCount} members
+								</div>
 							</Link>)
 					}
 					</div>
