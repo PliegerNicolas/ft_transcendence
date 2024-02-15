@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards, ValidationPipe } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { ParseIdPipe } from "src/common/pipes/parseid/parseid.pipe";
+import { ParseIdPipe } from "src/common/pipes/parse-id/parse-id.pipe";
+import { ParseUsernamePipe } from "src/common/pipes/parse-username/parse-username.pipe";
 import { CreateGamelogDto } from "src/gamelogs/dtos/CreateGamelog.dto";
 import { ReplaceGamelogDto } from "src/gamelogs/dtos/ReplaceGamelog.dto";
 import { UpdateGamelogDto } from "src/gamelogs/dtos/UpdateGamelog.dto";
@@ -17,20 +18,20 @@ export class GamelogsController {
         return (await this.gamelogService.getGamelogs());
     }
 
-    @Get('users/:userId/gamelogs')
-    async getUserGamelogs(@Param('userId', ParseIdPipe) userId: bigint) {
+    @Get('users/:username/gamelogs')
+    async getUserGamelogs(@Param('username', ParseUsernamePipe) username: string) {
         // public ?
-        return (await this.gamelogService.getUserGamelogs(userId));
+        return (await this.gamelogService.getUserGamelogs(username));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	//@UseGuards(AuthGuard('jwt'))
     @Post('gamelogs')
     async createGamelog(@Body(new ValidationPipe) createGamelogDto: CreateGamelogDto) {
         // server permission only
         return (await this.gamelogService.createGamelog(createGamelogDto));
     }
 
-    @UseGuards(AuthGuard('jwt'))
+    //@UseGuards(AuthGuard('jwt'))
     @Put('gamelogs/:gamelogId')
     async replaceGamelog(
         @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
@@ -40,7 +41,7 @@ export class GamelogsController {
         return (await this.gamelogService.replaceGamelog(gamelogId, replaceGamelogDto));
     }
 
-    @UseGuards(AuthGuard('jwt'))
+    //@UseGuards(AuthGuard('jwt'))
     @Patch('gamelogs/:gamelogId')
     async updateGamelog(
         @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
@@ -50,7 +51,7 @@ export class GamelogsController {
         return (await this.gamelogService.updateGamelog(gamelogId, updateGamelogDto));
     }
 
-    @UseGuards(AuthGuard('jwt'))
+    //@UseGuards(AuthGuard('jwt'))
     @Delete('gamelogs/:gamelogId')
     async deleteGamelog(@Param('gamelogId', ParseIdPipe) gamelogId: bigint) {
         // server permission only

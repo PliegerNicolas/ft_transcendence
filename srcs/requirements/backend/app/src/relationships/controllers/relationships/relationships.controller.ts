@@ -1,60 +1,60 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, ValidationPipe } from '@nestjs/common';
-import { ParseIdPipe } from 'src/common/pipes/parseid/parseid.pipe';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, ValidationPipe } from '@nestjs/common';
+import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
 import { CreateRelationshipDto } from 'src/relationships/dtos/CreateRelationship.dto';
 import { ReplaceRelationshipDto } from 'src/relationships/dtos/ReplaceRelationship.dto';
 import { UpdateRelationshipDto } from 'src/relationships/dtos/UpdateRelationship.dto';
 import { RelationshipsService } from 'src/relationships/services/relationships/relationships.service';
 
-@Controller('users/:userId/relationships')
+@Controller('users/:username/relationships')
 export class RelationshipsController {
 
     constructor(private relationshipService: RelationshipsService) {}
 
     @Get()
-    async getRelationships(@Param('userId', ParseIntPipe) userId: bigint) {
-        return (await this.relationshipService.getUserRelationships(userId));
+    async getRelationships(@Param('username', ParseUsernamePipe) username: string) {
+        return (await this.relationshipService.getUserRelationships(username));
     }
 
-    @Get(':targetId')
+    @Get(':targetUsername')
     async getRelationship(
-        @Param('userId', ParseIdPipe) userId: bigint,
-        @Param('targetId', ParseIdPipe) targetId: bigint
+        @Param('username', ParseUsernamePipe) username: string,
+        @Param('targetUsername') targetUsername: string
     ) {
-        return (await this.relationshipService.getUserRelationship(userId, targetId));
+        return (await this.relationshipService.getUserRelationship(username, targetUsername));
     }
 
     @Post()
     async createRelationship(
-        @Param('userId', ParseIdPipe) userId: bigint,
+        @Param('username', ParseUsernamePipe) username: string,
         @Body(new ValidationPipe) createRelationshipDto: CreateRelationshipDto,
     ) {
-        return (this.relationshipService.createUserRelationship(userId, createRelationshipDto));
+        return (this.relationshipService.createUserRelationship(username, createRelationshipDto));
     }
 
-    @Put(':targetId')
+    @Put(':targetUsername')
     async replaceRelationship(
-        @Param('userId', ParseIdPipe) userId: bigint,
-        @Param('targetId', ParseIdPipe) targetId: bigint,
+        @Param('username', ParseUsernamePipe) username: string,
+        @Param('targetUsername') targetUsername: string,
         @Body(new ValidationPipe) replaceRelationshipDto: ReplaceRelationshipDto,
     ) {
-        return (this.relationshipService.replaceUserRelationship(userId, targetId, replaceRelationshipDto));
+        return (this.relationshipService.replaceUserRelationship(username, targetUsername, replaceRelationshipDto));
     }
 
-    @Patch(':targetId')
+    @Patch(':targetUsername')
     async updateRelationship(
-        @Param('userId', ParseIdPipe) userId: bigint,
-        @Param('targetId', ParseIdPipe) targetId: bigint,
+        @Param('username', ParseUsernamePipe) username: string,
+        @Param('targetUsername') targetUsername: string,
         @Body(new ValidationPipe) updateRelationshipDto: UpdateRelationshipDto,
     ) {
-        return (this.relationshipService.updateUserRelationship(userId, targetId, updateRelationshipDto));
+        return (this.relationshipService.updateUserRelationship(username, targetUsername, updateRelationshipDto));
     }
 
-    @Delete(':targetId')
+    @Delete(':targetUsername')
     async deleteUserById(
-        @Param('userId', ParseIdPipe) userId: bigint,
-        @Param('targetId', ParseIdPipe) targetId: bigint,
+        @Param('username', ParseUsernamePipe) username: string,
+        @Param('targetUsername') targetUsername: string,
     ) {
-        return (await this.relationshipService.deleteRelationship(userId, targetId));
+        return (await this.relationshipService.deleteRelationship(username, targetUsername));
     }
 
 }

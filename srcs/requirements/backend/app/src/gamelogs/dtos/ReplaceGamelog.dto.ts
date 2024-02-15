@@ -9,7 +9,7 @@ export class ReplaceGamelogDto {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => UserResult)
-    @Transform(({ value }) => value.sort((a: UserResult, b: UserResult) => a.id - b.id))
+    //@Transform(({ value }) => value.sort((a: UserResult, b: UserResult) => a.id - b.id))
     userResults: UserResult[];
 
     @IsNotEmpty()

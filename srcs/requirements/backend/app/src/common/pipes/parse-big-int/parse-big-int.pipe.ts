@@ -1,7 +1,7 @@
 import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 
 @Injectable()
-export class ParseBigIntPipe implements PipeTransform<string, bigint> {
+export class ParseBigIntPipe implements PipeTransform {
 
 	transform(value: string, metadata: ArgumentMetadata): bigint {
     	const parsedValue = BigInt(value);
@@ -16,4 +16,5 @@ export class ParseBigIntPipe implements PipeTransform<string, bigint> {
 	private isBigInt(value: any): value is bigint {
 		return (typeof value === 'bigint');
 	}
+
 }

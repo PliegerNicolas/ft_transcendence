@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsEmail, IsNotEmpty, IsOptional, ValidateNested } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
 import { UpdateProfileDto } from "src/profiles/dtos/UpdateProfile.dto";
 
 export class UpdateUserDto {
@@ -9,6 +9,8 @@ export class UpdateUserDto {
     email?: string;
 
     @IsOptional()
+    @IsString()
+    @MaxLength(25)
     username?: string;
 
     @IsOptional()
