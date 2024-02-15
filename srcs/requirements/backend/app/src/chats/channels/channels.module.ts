@@ -5,12 +5,13 @@ import { ChannelsService } from './services/channels/channels.service';
 import { ChannelsController } from './controllers/channels.controller';
 import { User } from 'src/users/entities/User.entity';
 import { ChannelMember } from './entities/ChannelMember.entity';
+import { AuthService } from 'src/auth/auth.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Channel, ChannelMember, User]),
   ],
   controllers: [ChannelsController],
-  providers: [ChannelsService]
+  providers: [ChannelsService, AuthService]
 })
 export class ChannelsModule {}
