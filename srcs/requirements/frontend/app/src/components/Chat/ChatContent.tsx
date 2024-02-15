@@ -6,7 +6,6 @@ import { Routes, Route } from "react-router-dom";
 import Spinner from "../Spinner.tsx";
 
 import { useInvalidate, stopOnHttp } from "../../utils/utils.ts";
-import { ChanType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts";
 
 import "../../styles/chat.css";
@@ -43,8 +42,8 @@ function ChatContent() {
 	const id = params.id!;
 
 	const getChan = useQuery({
-		queryKey: ["allChans"],
-		queryFn: () => api.get("/channels"),
+		queryKey: ["chan", id],
+		queryFn: () => api.get("/channels/" + id),
 		retry: stopOnHttp
 	});
 
@@ -60,11 +59,6 @@ function ChatContent() {
 		onSettled: () => invalidate(["channels", id, "messages"]),
 		onError: error => addNotif({ content: error.message }),
 	});
-
-	const chan =
-		getChan.isSuccess ?
-			getChan.data.filter((item: ChanType) => (item.id === id))[0] :
-			null;
 
 	/*
 	** These lines are desirable to auto-scroll at bottom of chat.
@@ -95,40 +89,34 @@ function ChatContent() {
 
 	if (getChan.isError) return (
 		<div className="ChatContent error">
-			Failed to load: {getChan.error.message}
-		</div>
-	);
-
-	if (getMsgs.isError) return (
-		<div className="ChatContent error">
-			Failed to load this channel: {getMsgs.error.message}
-		</div>
-	);
-
-	if (!chan) return (
-		<div className="ChatContent error">
-			This channel doesn't exist, or you may not have access to it.
+			Failed to load this channel: {getChan.error.message}
 		</div>
 	);
 
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
-				<ChatHeader chan={chan} edit={false} />
+				<ChatHeader chan={getChan.data} edit={false} />
 				<Spinner />
 			</div>
 		);
 	}
 
+	if (getMsgs.isError) return (
+		<div className="ChatContent error">
+			Failed to load this channel's messages: {getMsgs.error.message}
+		</div>
+	);
+
 	return (
 		<div className="ChatContent">
-			<ChatHeader chan={chan} edit={false} />
+			<ChatHeader chan={getChan.data} edit={false} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
 					{
-						chan.size === 2 ?
-							`Start of your conversation with ${chan.name}` :
-							`Start of channel « ${chan.name} »`
+						getChan.data.membersCount === 2 ?
+							`Start of your conversation with ${getChan.data.name}` :
+							`Start of channel « ${getChan.data.name} »`
 					}
 					<hr />
 				</div>
@@ -139,7 +127,7 @@ function ChatContent() {
 							data={item}
 							prev={index ? getMsgs.data[index - 1] : null}
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
-							size={chan.membersCount}
+							size={getChan.data.membersCount}
 						/>
 					)
 				}
@@ -147,7 +135,7 @@ function ChatContent() {
 			</div>
 			<div className="Chat__Input">
 				<textarea
-					placeholder={`Send a message to « ${chan.name} »`}
+					placeholder={`Send a message to « ${getChan.data.name} »`}
 					value={inputValue}
 					onChange={handleInputChange}
 				/>

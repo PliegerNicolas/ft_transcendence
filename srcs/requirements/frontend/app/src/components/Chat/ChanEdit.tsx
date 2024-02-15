@@ -1,8 +1,8 @@
-import { useState, useContext, useRef } from "react";
+import { useState, useContext, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { MutationFunction, useMutation } from "@tanstack/react-query";
+import { MutationFunction, useMutation, useQuery } from "@tanstack/react-query";
 
-import { useInvalidate } from "../../utils/utils.ts";
+import { useInvalidate, stopOnHttp } from "../../utils/utils.ts";
 import { ChanType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -13,6 +13,7 @@ import addIcon from "../../assets/add.svg";
 
 import "../../styles/chat.css";
 
+import Spinner from "../Spinner.tsx";
 import ChatHeader from "./ChatHeader.tsx";
 
 // <ChanEdit /> ================================================================
@@ -37,14 +38,31 @@ export default function ChanEdit({id}: {id: number})
 	const { api, addNotif } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
-/*
+
 	const getChan = useQuery({
-		queryKey[""]
-	});*/
+		queryKey: ["chan", "" + id],
+		queryFn: () => api.get("/channels/" + id),
+		retry: stopOnHttp,
+		enabled: !!id,
+	});
+
+	useEffect(() => {
+		if (!getChan.isSuccess)
+			return ;
+		setChan(prev => {return {...prev, ...getChan.data}});
+	}, [getChan.isSuccess]);
 
 	const postChan = useMutation({
 		mutationFn:
 			(() => api.post("/channels", chan)) as unknown as MutationFunction<ChanType>,
+		onError: error => addNotif({content: error.message}),
+		onSettled: () => invalidate(["allChans"]),
+		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
+	});
+
+	const putChan = useMutation({
+		mutationFn:
+			(() => api.put("/channels/" + id, chan)) as unknown as MutationFunction<ChanType>,
 		onError: error => addNotif({content: error.message}),
 		onSettled: () => invalidate(["allChans"]),
 		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
@@ -67,12 +85,27 @@ export default function ChanEdit({id}: {id: number})
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		postChan.mutate(chan);
+		if (id)
+			putChan.mutate(chan);
+		else
+			postChan.mutate(chan);
 	}
 
 	function preventSubmit(e: React.KeyboardEvent<HTMLInputElement>) {
 		if (e.key === 'Enter') e.preventDefault();
 	}
+
+	if (id && getChan.isPending) return (
+		<div className="ChatContent spinner">
+			<Spinner />
+		</div>
+	);
+
+	if (id && getChan.isError) return (
+		<div className="ChatContent error">
+			Failed to load this channel's data: {getChan.error.message}
+		</div>
+	);
 
 	return (
 		<form className="ChanEdit MainContent" onSubmit={handleSubmit}>
