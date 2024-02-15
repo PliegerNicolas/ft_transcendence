@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserResult } from 'src/gamelogs/dtos/UserResult.dto';
 import { Gamelog } from 'src/gamelogs/entities/Gamelog.entity';
@@ -9,6 +9,8 @@ import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class GamelogsService {
+
+    // To verify. It seems to work after changing ids as usernames
 
     constructor(
         @InjectRepository(Gamelog)
@@ -27,15 +29,15 @@ export class GamelogsService {
         }));
     }
 
-    async getUserGamelogs(userId: bigint): Promise<{ gamelogs: Gamelog[]; userResultCounts: Record<GameResult, number> }> {
+    async getUserGamelogs(username: string): Promise<{ gamelogs: Gamelog[]; userResultCounts: Record<GameResult, number> }> {
         // Public
 
         const user = await this.userRepository.findOne({
-            where: { id: userId },
+            where: { username: username },
             relations: ['userToGamelogs.gamelog.gamelogToUsers.user'],
         });
     
-        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
     
         const gamelogs = user.userToGamelogs.map((userToGamelog) => userToGamelog.gamelog);
 
@@ -44,7 +46,7 @@ export class GamelogsService {
 
         gamelogs.forEach((gamelog) => {
             gamelog.gamelogToUsers
-                .filter((gamelogToUser) => gamelogToUser.user.id == userId)
+                .filter((gamelogToUser) => gamelogToUser.user.username === username)
                 .forEach((gamelogToUser) => {
                     userResultCounts[gamelogToUser.result]++;
                 });
@@ -59,7 +61,21 @@ export class GamelogsService {
         const gamelogToUsers = await this.createGamelogToUsers(gamelogDetails.userResults, null);
         delete gamelogDetails.userResults;
 
-        const gamelog = this.gamelogRepository.create({
+        // CA MARCHE PAS ICI MAIS JE VERRAI PLUS TARD
+        let gamelog = await this.gamelogRepository.findOne({
+            where: {
+                gamelogToUsers: {
+                    user: In(gamelogToUsers.map((gamelogToUser) => gamelogToUser.user)),
+                },
+            },
+            relations: ['gamelogToUsers'],
+        });
+
+        if (gamelogToUsers.length !== gamelog.gamelogToUsers.length) {
+            throw new BadRequestException('test');
+        }
+
+        gamelog = this.gamelogRepository.create({
             ...gamelogDetails,
             gamelogToUsers,
         });
@@ -116,40 +132,40 @@ export class GamelogsService {
 
         if (!gamelog) throw new NotFoundException(`Gamelog with ID ${gamelogId} not found`);
 
-        await this.gamelogRepository.delete(gamelogId.toString());
+        await this.gamelogRepository.remove(gamelog);
         return (`Gamelog with ID ${gamelogId} successfully deleted`);
     }
 
     /* Helper Functions */
 
     private async createGamelogToUsers(userResults: UserResult[], gamelog: Gamelog): Promise<GamelogToUser[]> {
-        const userIds = userResults.map((userResult) => userResult.id);
+        const usernames = userResults.map((userResult) => userResult.username);
 
-        if (userIds.length !== new Set(userIds).size) {
-            const duplicateUserIds = userIds.filter((id, index) => userIds.indexOf(id) !== index);
-            const errMessage = duplicateUserIds.length > 1 ? `Following user IDs are duplicate: ${duplicateUserIds}` : `Following user ID is duplicate: ${duplicateUserIds}`;
+        if (usernames.length !== new Set(usernames).size) {
+            const duplicateUsernames = usernames.filter((username, index) => usernames.indexOf(username) !== index);
+            const errMessage = duplicateUsernames.length > 1 ? `Following user IDs are duplicate: ${duplicateUsernames}` : `Following user ID is duplicate: ${duplicateUsernames}`;
             throw new BadRequestException(errMessage);
         }
 
         const users = await this.userRepository.find({
-            where: { id: In(userIds) },
+            where: { username: In(usernames) },
         });
 
-        if (users.length !== userIds.length) {
-            const missingUserIds = userIds.filter((id) => !users.some((user) => user.id === id));
-            const errMessage = missingUserIds.length > 1 ? `Following users not found : ${missingUserIds}` : `Following user not found : ${missingUserIds}`;
+        if (users.length !== usernames.length) {
+            const missingUsernames = usernames.filter((username) => !users.some((user) => user.username === username));
+            const errMessage = missingUsernames.length > 1 ? `Following users not found : ${missingUsernames}` : `Following user not found : ${missingUsernames}`;
             throw new NotFoundException(errMessage);
         }
 
         const gamelogToUsers = userResults.map((userResult) => {
-            const existingGtu = gamelog?.gamelogToUsers.find((gamelogToUser) => gamelogToUser.user?.id === userResult.id);
+            const existingGtu = gamelog?.gamelogToUsers.find((gamelogToUser) => gamelogToUser.user?.username === userResult.username);
 
             return (existingGtu ? {
                 ...existingGtu,
                 result: userResult.result,
             } : this.gamelogToUserRepository.create({
                 ...userResult,
-                user: users.find((user) => user.id === userResult.id),
+                user: users.find((user) => user.username === userResult.username),
             }));
         });
 

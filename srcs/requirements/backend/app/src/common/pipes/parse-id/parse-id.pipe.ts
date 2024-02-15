@@ -1,8 +1,9 @@
 import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
-import { ParseBigIntPipe } from '../parsebigint/parsebigint.pipe';
+import { ParseBigIntPipe } from '../parse-big-int/parse-big-int.pipe';
 
 @Injectable()
-export class ParseIdPipe implements PipeTransform<string, bigint> {
+export class ParseIdPipe implements PipeTransform {
+
 	private readonly MIN_BIGINT = BigInt('-9223372036854775808');
 	private readonly MAX_BIGINT = BigInt('9223372036854775807');
 	private parseBigIntPipe = new ParseBigIntPipe();
@@ -23,4 +24,5 @@ export class ParseIdPipe implements PipeTransform<string, bigint> {
 			throw new BadRequestException('Invalid bigint format');
 		}
 	}
+
 }

@@ -32,7 +32,7 @@ import { GameModule } from './game/game.module';
 			database: process.env.POSTGRES_DB,
 			entities: [User, Profile, Relationship, Gamelog, GamelogToUser, Channel, ChannelMember, Message],
 			synchronize: true,
-			//logging: true, // TEMP
+			logging: true, // TEMP
 		}),
 		UsersModule,
 		ProfilesModule,

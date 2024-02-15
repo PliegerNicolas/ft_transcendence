@@ -3,7 +3,7 @@ import { ChannelsService } from '../services/channels/channels.service';
 import { CreateChannelDto } from '../dtos/CreateChannel.dto';
 import { UpdateChannelDto } from '../dtos/UpdateChannel.dto';
 import { ReplaceChannelDto } from '../dtos/ReplaceChannel.dto';
-import { ParseIdPipe } from 'src/common/pipes/parseid/parseid.pipe';
+import { ParseIdPipe } from 'src/common/pipes/parse-id/parse-id.pipe';
 
 @Controller()
 export class ChannelsController {
@@ -14,7 +14,14 @@ export class ChannelsController {
     async getChannels() {
         // Should pass userId (if user is connected and passport validated or null)
         // For this moment userId is passed as 2.
-        return (await this.channelService.getChannels(BigInt(2)));
+        return (await this.channelService.getChannels(BigInt(1)));
+    }
+
+    @Get('channels/:channelId')
+    async getChannel(@Param('channelId', ParseIdPipe) channelId: bigint,) {
+        // Should pass userId (if user is connected and passport validated or null).
+        // For this moment userId is passed as 2.
+        return (await this.channelService.getChannelMembers(BigInt(1), channelId));
     }
 
     @Get('channels/:channelId/members')
