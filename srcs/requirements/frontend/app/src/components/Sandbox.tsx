@@ -6,7 +6,7 @@ import { UserType, UserPostType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
 
-import { useInvalidate } from "../utils/utils.ts";
+import { useInvalidate, stopOnHttp } from "../utils/utils.ts";
 
 import close from "../assets/close.svg";
 
@@ -22,37 +22,39 @@ export default function Sandbox()
 
 	const getChans = useQuery({
 		queryKey: ["allChans"],
-		queryFn: () => context.api.get("/channels")
+		queryFn: () => context.api.get("/channels"),
+		retry: stopOnHttp,
 	});
 
 	const getUsers = useQuery({
 		queryKey: ["users"],
-		queryFn: () => context.api.get("/users")
+		queryFn: () => context.api.get("/users"),
+		retry: stopOnHttp,
 	});
 	
 	const postUser = useMutation({
 		mutationFn: (user: UserPostType) => context.api.post("/users", user),
 		onSettled: () => invalidate(["users"]),
-		onError: error => context.addNotif({type: 2, content: error.message}),
+		onError: error => context.addNotif({content: error.message}),
 	});
 
 	const postChan = useMutation({
 		mutationFn: (name: string) =>
 			context.api.post("/channels", {name, status: "public"}),
 		onSettled: () => invalidate(["allChans"]),
-		onError: error => context.addNotif({type: 2, content: error.message}),
+		onError: error => context.addNotif({content: error.message}),
 	});
 
 	const delChan = useMutation({
 		mutationFn: (id: number) => context.api.delete("/channels/" + id),
 		onSettled: () => invalidate(["allChans"]),
-		onError: error => context.addNotif({type: 2, content: error.message}),
+		onError: error => context.addNotif({content: error.message}),
 	});
 
 	const delUser = useMutation({
 		mutationFn: (id: string) => context.api.delete("/users/" + id),
 		onSettled: () => invalidate(["users"]),
-		onError: error => context.addNotif({type: 2, content: error.message}),
+		onError: error => context.addNotif({content: error.message}),
 	});
 
 	function random_id() {
@@ -66,10 +68,10 @@ export default function Sandbox()
 			username: uid,
 			email: uid + "@example.com",
 			profile: {
-				firstName: "Mayeul",
-				lastName: "Laneyrie"
+				firstName: "Mayeul_" + uid,
+				lastName: "Laneyrie_" + uid
 			},
-			oauth_id: uid
+			oauthId: uid
 		};
 	}
 

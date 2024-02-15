@@ -179,6 +179,13 @@
 	overflow: hidden;
 }
 
+.Chat__Content.error {
+	justify-content: start;
+	padding: 30px;
+	color: var(--error);
+	font-style: italic;
+}
+
 .Chat__Content.spinner {
 	justify-content: center;
 }
@@ -330,6 +337,7 @@
 
 .Msg__Info {
 	margin-bottom: 4px;
+	color: var(--text-faint)
 }
 .Msg.connectPrev>div>.Msg__Info {
 	display: none;
@@ -338,11 +346,13 @@
 .Msg__Sender {
 	font-size: .86rem;
 	margin-bottom: 4px;
+	margin-right: 4px;
 }
 
 .Msg__Date {
-	margin-left: 8px;
-	font-size: .75rem !important;
+	margin-left: 4px;
+	font-size: .75rem;
+	font-style: italic;
 }
 
 /*
@@ -430,6 +440,9 @@
 	margin-top: 0;
 	margin-bottom: 0;
 }
+.NewChan__PublicModeSection.banned {
+	border-color: var(--error-bg-hover);
+}
 
 @media (min-width: 1400px)
 {
@@ -441,6 +454,10 @@
 	margin-left: 40px;
 	display: flex;
 	flex-direction: column;
+}
+
+.NewChan__PasswdFields>input {
+	margin-bottom: 15px;
 }
 
 .NewChan__PasswdFields>.error-msg {

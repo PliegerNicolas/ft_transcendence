@@ -15,9 +15,9 @@ export default function Msg(
 	const date = fmtDate(data.createdAt);
 
 	const connectPrev =
-		prev && prev.uid === data.uid && fmtDate(prev.createdAt) === date;
+		prev && prev.userId === data.userId && fmtDate(prev.createdAt) === date;
 	const connectNext =
-		next && next.uid === data.uid && fmtDate(next.createdAt) === date;
+		next && next.userId === data.userId && fmtDate(next.createdAt) === date;
 
 	function sameDate(a: Date, b: Date) {
 		if (a.getDate() !== b.getDate())
@@ -49,12 +49,12 @@ export default function Msg(
 	return (
 		<div className={
 			`Msg
-			${data.uid === 1 && "me"}
+			${data.userId === 1 && "me"}
 			${connectPrev && "connectPrev"}
 			${connectNext && "connectNext"}`
 		}>
 			<div className="Msg__PictureDiv">
-				<Link to={"/user/" + data.uid}>
+				<Link to={"/user/" + data.userId}>
 					<img src={defaultPicture} />
 				</Link>
 			</div>
@@ -62,14 +62,14 @@ export default function Msg(
 			{
 				<div className="Msg__Info">
 					<Link
-						to={"/user/" + data.uid}
+						to={"/user/" + data.userId}
 						className="Msg__Sender"
-						style={{color: `hsl(${(360 / size) * data.uid} 80% 80%)`}}
+						style={{color: `hsl(${(360 / size) * data.userId} 80% 80%)`}}
 					>
-						{data.username}
+						Machin (remplacer ceci)
 					</Link>
 					•
-					<span className="notice-msg Msg__Date">
+					<span className="Msg__Date">
 						{date}
 					</span>
 				</div>

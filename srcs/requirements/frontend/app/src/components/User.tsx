@@ -7,6 +7,8 @@ import { FriendshipType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
 
+import { stopOnHttp } from "../utils/utils.ts";
+
 import "../styles/user.css";
 
 import defaultPicture from "../assets/default_profile.png";
@@ -23,7 +25,7 @@ export default function User()
 	const userGet = useQuery({
 		queryKey: ["users", id],
 		queryFn: () => api.get("/users/" + id),
-		retry: (count, error) => !error.message.includes("404") && count < 3
+		retry: stopOnHttp
 	});
 
 	const userDel = useMutation({
@@ -35,7 +37,7 @@ export default function User()
 		queryKey: ["users", id, "friends"],
 		queryFn: () => api.get("/users/" + id + "/relationships"),
 		enabled: userGet.isSuccess,
-		retry: (count, error) => !error.message.includes("404") && count < 3
+		retry: stopOnHttp
 	});
 
 	const friendshipAccept = useMutation({

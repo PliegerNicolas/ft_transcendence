@@ -23,6 +23,9 @@ import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
 
+import closeIcon from "./assets/close.svg";
+import check from "./assets/check.svg";
+
 function Auth({setLogInfo}: {setLogInfo: Function})
 {
 	const params = (new URL(location.href)).searchParams;
@@ -35,21 +38,25 @@ function Auth({setLogInfo}: {setLogInfo: Function})
 
 	const guard = useRef(false);
 
-	const postAuth = useMutation({
+	const [status, setStatus] = useState("pending");
 
+	const postAuth = useMutation({
 		mutationFn: ((code: string) =>
 			api.post("/auth", {code, redirect_uri: `http://${location.host}/auth`})) as
 			MutationFunction<{access_token: string}>,
 
 		onSuccess: (data: {access_token: string}) => {
-				localStorage.setItem(
-					"my_info", JSON.stringify({logged: true, token: data?.access_token}));
-				setLogInfo({logged: true, token: data.access_token});
-			},
+			setStatus("success");
+			localStorage.setItem(
+				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
+			setLogInfo({logged: true, token: data.access_token});
+			setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
+		},
 
-		onError: () => localStorage.removeItem("my_info"),
-
-		onSettled: () => navigate(redirectPath ? redirectPath : "/")
+		onError: () => {
+			setStatus("error");
+			localStorage.removeItem("my_info");
+		},
 	});
 
 	useEffect(() => {
@@ -60,10 +67,27 @@ function Auth({setLogInfo}: {setLogInfo: Function})
 	}, []);
 
 	return (
-		<div className="MainContent">
+		<div className="MainContent Auth">
+		{
+			status === "success" &&
+			<h3 className="Auth__Done">
+				<img src={check}/> Done!
+			</h3>
+			|| status === "pending" &&
 			<h3>
 				Please wait...
 			</h3>
+			|| status === "error" &&
+			<div className="Auth__Fail">
+				<h3 className="Auth__Done">
+					<img src={closeIcon}/>
+					Something went wrong:<br />{ postAuth.error?.message }
+				</h3>
+				<button onClick={() => navigate(redirectPath ? redirectPath : "/")}>
+					Go back
+				</button>
+			</div>
+		}
 		</div>
 	);
 }

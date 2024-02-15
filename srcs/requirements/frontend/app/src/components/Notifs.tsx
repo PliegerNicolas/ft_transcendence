@@ -43,12 +43,12 @@ function Notif(
 )
 {
 	const [fade, setFade] = useState(false);
-	const delta = 10000 + (notif.date - Date.now());
+	const delta = 6000 + (notif.date - Date.now());
 	const date = new Date(notif.date);
 
 	useEffect(() => {
 		const fadeTO = setTimeout(() => setFade(true), delta);
-		const rmTO = setTimeout(rmSelf, delta + 1000);
+		const rmTO = setTimeout(rmSelf, delta + 2000);
 
 		return (() => {
 			clearTimeout(fadeTO);

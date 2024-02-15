@@ -24,9 +24,7 @@ export default function NewChan()
 		status: "public",
 		password: "",
 		passwordRepeat: "",
-		allowed: [
-			{username: "mlaneyri", id: 1},
-		],
+		allowed: [],
 		banned: [],
 		admins: [
 			{username: "mlaneyri", id: 1},
@@ -39,6 +37,8 @@ export default function NewChan()
 	const { api, addNotif } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
+
+	const edit = false;
 
 	const postChan = useMutation({
 		mutationFn:
@@ -74,7 +74,7 @@ export default function NewChan()
 
 	return (
 		<form className="NewChan MainContent" onSubmit={handleSubmit}>
-			<ChatHeader chan={{...newChan, id: "", size: 1}} />
+			<ChatHeader chan={{...newChan, id: "", membersCount: 1}} />
 			<section className="NewChan__NameSection">
 				<label className="NewChan__NameLabel" htmlFor="channelName">
 					Name
@@ -137,15 +137,18 @@ export default function NewChan()
 						}
 					</div>
 				</section>
-				<section className="NewChan__PublicModeSection">
-					<UserList
-						title="Banned users"
-						list={newChan.banned}
-						update={(value: {username: string, id: number}) =>
-							setNewChan(updateField("banned", value))}
-						owner={null}
-					/>
-				</section>
+				{
+					edit &&
+					<section className="NewChan__PublicModeSection banned">
+						<UserList
+							title="Banned users"
+							list={newChan.banned}
+							update={(value: {username: string, id: number}) =>
+								setNewChan(updateField("banned", value))}
+							owner={null}
+						/>
+					</section>
+				}
 				</div>
 			}
 			{
@@ -160,15 +163,18 @@ export default function NewChan()
 					/>
 				</section>
 			}
-			<section>
-				<UserList
-					title="Admins"
-					list={newChan.admins}
-					update={(value: {username: string, id: number}) =>
-						setNewChan(updateField("admins", value))}
-					owner={newChan.admins[0]}
-				/>
-			</section>
+			{
+				edit &&
+				<section>
+					<UserList
+						title="Admins"
+						list={newChan.admins}
+						update={(value: {username: string, id: number}) =>
+							setNewChan(updateField("admins", value))}
+						owner={newChan.admins[0]}
+					/>
+				</section>
+			}
 			<button
 				style={{marginLeft: "15px"}}
 				onClick={(e) => {handleSubmit(e)}}
@@ -210,7 +216,7 @@ function UserList(
 		setNewAdmin("");
 		setTimeout(() =>
 			anchorRef.current?.scrollIntoView({block: "end", inline: "nearest"}),
-			100
+			1
 		);
 	}
 

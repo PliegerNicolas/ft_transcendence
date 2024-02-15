@@ -232,7 +232,7 @@
 }
 
 .fadeout {
-	animation: fadeout 1s ease-in-out forwards;
+	animation: fadeout 2s ease-in-out forwards;
 }
 
 @keyframes fadeout
@@ -256,4 +256,46 @@
 .RequireAuth > span {
 	font-weight: bold;
 	font-size: 1.15rem;
+}
+
+/*
+** Auth ========================================================================
+*/
+
+.Auth {
+	display: flex;
+	justify-content: center;
+	align-items: start;
+}
+
+.Auth__Done {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.Auth__Done img {
+	animation: fadein .5s ease-in-out forwards;
+	filter:
+		brightness(0) saturate(100%) invert(65%) sepia(38%) saturate(1474%)
+		hue-rotate(106deg) brightness(94%) contrast(101%);
+}
+
+.Auth__Fail {
+	display: flex;
+	align-items: center;
+	justify-content: start;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.Auth__Fail>h3 {
+	margin-bottom: 0;
+}
+
+.Auth__Fail img {
+	animation: fadein .5s ease-in-out forwards;
+	filter:
+		brightness(0) saturate(100%) invert(36%) sepia(75%) saturate(4156%)
+		hue-rotate(329deg) brightness(89%) contrast(94%);
 }

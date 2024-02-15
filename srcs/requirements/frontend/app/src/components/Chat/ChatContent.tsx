@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate } from "../../utils/utils.ts";
+import { useInvalidate, stopOnHttp } from "../../utils/utils.ts";
 import { ChanType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts";
 
@@ -25,11 +25,13 @@ export default function ChatContent() {
 	const getChan = useQuery({
 		queryKey: ["allChans"],
 		queryFn: () => api.get("/channels"),
+		retry: stopOnHttp
 	});
 
 	const getMsgs = useQuery({
 		queryKey: ["channels", id, "messages"],
 		queryFn: () => api.get("/channels/" + id + "/messages"),
+		retry: stopOnHttp
 	});
 
 	const postMsg = useMutation({
@@ -65,19 +67,40 @@ export default function ChatContent() {
 		setInputValue("");
 	}
 
-	console.log(getMsgs.status);
-	console.log(getMsgs.data);
-
-	return (
-		getChan.isPending &&
+	if (getChan.isPending) return (
 		<div className="Chat__Content spinner">
 			<Spinner />
 		</div>
-		|| getChan.isError &&
-		<div className="error-msg" style={{ margin: "30px" }}>
+	);
+
+	if (getChan.isError) return (
+		<div className="Chat__Content error">
 			Failed to load: {getChan.error.message}
 		</div>
-		|| getChan.isSuccess && getMsgs.isSuccess &&
+	);
+
+	if (getMsgs.isError) return (
+		<div className="Chat__Content error">
+			Failed to load this channel: {getMsgs.error.message}
+		</div>
+	);
+
+	if (!chan) return (
+		<div className="Chat__Content error">
+			This chan doesn't exist, or you may not have access to it.
+		</div>
+	);
+
+	if (getMsgs.isPending) {
+		return (
+			<div className="Chat__Content">
+				<ChatHeader chan={chan} />
+				<Spinner />
+			</div>
+		);
+	}
+
+	return (
 		<div className="Chat__Content">
 			<ChatHeader chan={chan} />
 			<div className="Chat__Convo">
@@ -90,14 +113,14 @@ export default function ChatContent() {
 					<hr />
 				</div>
 				{
-					getMsgs.data.map((item: any, index: any) => {
-						console.log(item)
+					getMsgs.data.map((item: any, index: number) => {
+						console.log(JSON.stringify(item))
 						return <Msg
 							key={index}
 							data={item}
 							prev={index ? getMsgs.data[index - 1] : null}
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
-							size={42}
+							size={chan.membersCount}
 						/>
 					})
 				}
