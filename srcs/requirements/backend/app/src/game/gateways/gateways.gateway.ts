@@ -5,9 +5,9 @@ import { gameState } from '../types/inputPayloads'
 import { createGameState, startGameInterval } from '../server/game.server'
 import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../server/game.constants'
 
-let state: gameState = null;
-let player1ID: string;
-let player2ID: string;
+let state: gameState[] = [];
+let player1ID: string[] = [];
+let player2ID: string[] = [];
 
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway implements OnModuleInit {
@@ -17,7 +17,7 @@ export class GameGateway implements OnModuleInit {
 
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
-			console.log('new connection : ' + socket.id)
+			console.log('new game socket connection : ' + socket.id)
 			socket.on('disconnect', () => {
 				this.server.emit('userLeftServer', socket.id);
 			});
@@ -25,10 +25,11 @@ export class GameGateway implements OnModuleInit {
 	}
   
 	@SubscribeMessage('createLobby')
-	handleLobbyCreate(@MessageBody() lobby_name: string, @ConnectedSocket() client: Socket) {
-		client.join(lobby_name);
-		this.server.to(lobby_name).emit('createdLobby', lobby_name);
-		player1ID = client.id;
+	handleLobbyCreate(@MessageBody() lobby: string, @ConnectedSocket() client: Socket) {
+		console.log('created lobby with id : ' + lobby)
+		client.join(lobby);
+		this.server.to(lobby).emit('createdLobby', lobby);
+		player1ID[lobby] = client.id;
 	}
 
 	@SubscribeMessage('getLobbyList')
@@ -37,93 +38,105 @@ export class GameGateway implements OnModuleInit {
 	}
   
 	@SubscribeMessage('joinLobby')
-	handleLobbyJoin(@MessageBody() lobby_name: string, @ConnectedSocket() client: Socket) {
+	handleLobbyJoin(@MessageBody() lobby: string, @ConnectedSocket() client: Socket) {
 		//if (player1ID && player2ID) {
 		//	client.emit('lobbyFull', lobby_name);
 		//}
 		//else {
-			client.join(lobby_name);
-			client.emit('joinedLobby', lobby_name);
-			this.server.to(lobby_name).emit('userJoinedLobby', client.id);
-			player2ID = client.id;
+			client.join(lobby);
+			client.emit('joinedLobby', lobby, player1ID[lobby]);
+			this.server.to(lobby).emit('userJoinedLobby', client.id);
+			player2ID[lobby] = client.id;
 		//}
 	}
 
 	@SubscribeMessage('leftLobby')
-	handleLobbyLeft(@MessageBody() lobby_name: string, @ConnectedSocket() client: Socket) {
-		client.leave(lobby_name);
-		this.server.to(lobby_name).emit('userLeftLobby', client.id);
-		if (player1ID === client.id) {
-			player1ID = null;
+	handleLobbyLeft(@MessageBody() lobby: string, @ConnectedSocket() client: Socket) {
+		client.leave(lobby);
+		this.server.to(lobby).emit('userLeftLobby', client.id);
+		if (player1ID[lobby] === client.id) {
+			const index = player1ID.indexOf(lobby, 0);
+			if (index > -1) {
+   				player1ID.splice(index, 1);
+			}
 		}
-		else if (player2ID === client.id) {
-			player2ID = null;
+		else if (player2ID[lobby] === client.id) {
+			const index = player2ID.indexOf(lobby, 0);
+			if (index > -1) {
+   				player2ID.splice(index, 1);
+			}
 		}
 	}
 
 	@SubscribeMessage('playerDisconnect')
-	handlePlayerDisconnect(@MessageBody() userId: string, @ConnectedSocket() client: Socket) {
-		if (player1ID === userId) {
-			if (state) {
-				state.score.player2 = 5;
+	handlePlayerDisconnect(@MessageBody() data: {userId: string, lobby: string}, @ConnectedSocket() client: Socket) {
+		if (player1ID[data.lobby] === data.userId) {
+			if (state[data.lobby]) {
+				state[data.lobby].score.player2 = 5;
 			}
-			player1ID = null;
+			const index = player1ID.indexOf(data.lobby, 0);
+			if (index > -1) {
+   				player1ID.splice(index, 1);
+			}
 		}
-		else if (player2ID === userId) {
-			if (state) {
-				state.score.player1 = 5;
+		else if (player2ID[data.lobby] === data.userId) {
+			if (state[data.lobby]) {
+				state[data.lobby].score.player1 = 5;
 			}
-			player2ID = null;
+			const index = player1ID.indexOf(data.lobby, 0);
+			if (index > -1) {
+   				player1ID.splice(index, 1);
+			}
 		}
 	}
 
 	@SubscribeMessage('initGame')
 	handleInitGame(@MessageBody() lobby: string, @ConnectedSocket() client: Socket) {
-		if (player1ID && player2ID) {
+		if (player1ID[lobby] && player2ID[lobby]) {
 			this.server.to(lobby).emit('startedGame');
-			state = createGameState();
-			state.player1ID = player1ID;
-			state.player2ID = player2ID;
-			startGameInterval(lobby, state, this.server);
+			state[lobby] = createGameState();
+			state[lobby].player1ID = player1ID[lobby];
+			state[lobby].player2ID = player2ID[lobby];
+			setTimeout(() => {startGameInterval(lobby, state[lobby], this.server);}, 3000);
 		}
 	}
 
 	@SubscribeMessage('keyDown')
-	handleKeyDown(@MessageBody() key: string, @ConnectedSocket() client: Socket) {
-		if (key === 'w') {
-			if (state.player1ID === client.id && state.player1.y - PADDLE_SPEED > 0) {
-				state.player1.speed = -Math.abs(PADDLE_SPEED);
+	handleKeyDown(@MessageBody() data: {key: string, lobby: string}, @ConnectedSocket() client: Socket) {
+		if (data.key === 'w') {
+			if (state[data.lobby].player1ID === client.id && state[data.lobby].player1.y - PADDLE_SPEED > 0) {
+				state[data.lobby].player1.speed = -Math.abs(PADDLE_SPEED);
 			}
-			else if (state.player2ID === client.id && state.player2.y - PADDLE_SPEED > 0) {
-				state.player2.speed = -Math.abs(PADDLE_SPEED);
+			else if (state[data.lobby].player2ID === client.id && state[data.lobby].player2.y - PADDLE_SPEED > 0) {
+				state[data.lobby].player2.speed = -Math.abs(PADDLE_SPEED);
 			}
 		}
-		else if (key === 's') {
-			if (state.player1ID === client.id && state.player1.y + PADDLE_SPEED < WINDOW_HEIGHT) {
-				state.player1.speed = Math.abs(PADDLE_SPEED);
+		else if (data.key === 's') {
+			if (state[data.lobby].player1ID === client.id && state[data.lobby].player1.y + PADDLE_SPEED < WINDOW_HEIGHT) {
+				state[data.lobby].player1.speed = Math.abs(PADDLE_SPEED);
 			}
-			else if (state.player2ID === client.id && state.player2.y + PADDLE_SPEED < WINDOW_HEIGHT) {
-				state.player2.speed = Math.abs(PADDLE_SPEED);
+			else if (state[data.lobby].player2ID === client.id && state[data.lobby].player2.y + PADDLE_SPEED < WINDOW_HEIGHT) {
+				state[data.lobby].player2.speed = Math.abs(PADDLE_SPEED);
 			}
 		}
 	}
 
 	@SubscribeMessage('keyUp')
-	handleKeyUp(@MessageBody() key: string, @ConnectedSocket() client: Socket) {
-		if (key === 'w') {
-			if (state.player1ID === client.id) {
-				state.player1.speed = 0;
+	handleKeyUp(@MessageBody() data: {key: string, lobby: string}, @ConnectedSocket() client: Socket) {
+		if (data.key === 'w') {
+			if (state[data.lobby].player1ID === client.id) {
+				state[data.lobby].player1.speed = 0;
 			}
-			else if (state.player2ID === client.id) {
-				state.player2.speed = 0;
+			else if (state[data.lobby].player2ID === client.id) {
+				state[data.lobby].player2.speed = 0;
 			}
 		}
-		else if (key === 's') {
-			if (state.player1ID === client.id) {
-					state.player1.speed = 0;
+		else if (data.key === 's') {
+			if (state[data.lobby].player1ID === client.id) {
+					state[data.lobby].player1.speed = 0;
 			}
-			else if (state.player2ID === client.id) {
-				state.player2.speed = 0;
+			else if (state[data.lobby].player2ID === client.id) {
+				state[data.lobby].player2.speed = 0;
 			}
 		}
 	}

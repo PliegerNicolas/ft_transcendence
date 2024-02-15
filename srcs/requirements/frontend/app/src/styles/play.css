@@ -1,16 +1,60 @@
 .Canvas {
 	border: 10px solid var(--bg-color-1);
-	width: 900px;
-	height: 600px;
+	width: 100%;
+	object-fit: contain;
 	box-sizing: border-box;
 	border-image-slice: 1;
 	border-color: var(--border-color-1);
+	box-shadow: 0 0 12px #000a;
 }
 
-Game {
-	width:100%auto;
-	display:flex;
+.Gamemode-Selectors {
+	width: 60vw;
+  	height: 70vh;
+	display: flex;
 	align-items: center;
-	outline: none;
-	flex-direction: column;
+	justify-content: center;
+}
+
+.Gamemode-button {
+	width: 50vw;
+  	height: 30vh;
+	font-size: 8vh;
+}
+
+.Create-lobby-button {
+	width: 10vw;
+	height: 5vh;
+  	font-size: 2.5vh;
+
+	position: fixed;
+	top: 66px;
+	left: 210px;
+  
+	background-color: #6f313c;
+	border-color: #994353;
+}
+
+.Create-lobby-button:hover {
+	background-color: #994353;
+}
+
+.Lobby-list {
+	position: fixed;
+	top: 111px;
+	left: 215px;
+}
+
+.Start-button {
+	width: 10vw;
+	height: 5vh;
+  	font-size: 2.5vh;
+	justify-content:flex-start;
+  
+	background-color: #316f31;
+	border-color: #47a347;
+}
+
+.Start-button:hover {
+	background-color: #47a347;
 }

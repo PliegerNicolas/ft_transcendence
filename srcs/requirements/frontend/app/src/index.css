@@ -17,8 +17,11 @@
 	--link-visited: #aaf;
 
 	--error: #f9a;
+	--error-faint: #e7a;
 	--error-bg: #d35;
 	--error-bg-hover: #712;
+
+	--yes: #0a7;
 
 	--border-color-1: #6177c7;
 	--border-color-2: #475a9e;
