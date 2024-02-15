@@ -17,7 +17,7 @@
         @Column()
         email: string;
 
-        @Column({ unique: true })
+        @Column({ unique: true, length: 25 })
         username: string;
 
         @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

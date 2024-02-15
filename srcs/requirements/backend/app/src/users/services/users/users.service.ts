@@ -20,14 +20,14 @@ export class UsersService {
         return (this.userRepository.find());
     }
 
-    async getUser(userId: bigint): Promise<User> {
+    async getUser(username: string): Promise<User> {
         // Public ?
         const user = await this.userRepository.findOne({
-            where: { id: userId },
+            where: { username: username },
             relations: ['profile']
         });
 
-        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
 
         return (user);
     }
@@ -44,16 +44,16 @@ export class UsersService {
         return (await this.userRepository.save(newUser));
     }
 
-    async replaceUser(userId: bigint, userDetails: ReplaceUserParams): Promise<User> {
+    async replaceUser(username: string, userDetails: ReplaceUserParams): Promise<User> {
         // Only if you're the target user.
         await this.verifyUserUnicity(userDetails.username, userDetails.oauthId);
 
         const user = await this.userRepository.findOne({
-            where: { id: userId },
+            where: { username: username },
             relations: ['profile'],
         });
 
-        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
 
         return (await this.userRepository.save({
             ...user,
@@ -65,16 +65,16 @@ export class UsersService {
         }));
     }
 
-    async updateUser(userId: bigint, userDetails: UpdateUserParams): Promise<User> {
+    async updateUser(username: string, userDetails: UpdateUserParams): Promise<User> {
         // Only if you're the target user.
         await this.verifyUserUnicity(userDetails.username, userDetails.oauthId);
 
         const user = await this.userRepository.findOne({
-            where: { id: userId },
+            where: { username: username },
             relations: ['profile'],
         });
 
-        if (!user) throw new NotFoundException(`User with ID ${userId} not found`);
+        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
 
         return (await this.userRepository.save({
             ...user,
@@ -86,16 +86,16 @@ export class UsersService {
         }));
     }
 
-    async deleteUser(userId: bigint): Promise<string> {
+    async deleteUser(username: string): Promise<string> {
         // Only if you're the target user.
         const user = await this.userRepository.findOne({
-            where: { id: userId },
+            where: { username: username },
         });
 
-        if (!user) throw new NotFoundException(`User with ID ${userId}`);
+        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
 
-        await this.userRepository.delete(userId.toString());
-        return (`User with ID ${userId} successfully deleted`);
+        await this.userRepository.remove(user);
+        return (`User with Username '${username}' successfully deleted`);
     }
 
     /* Helper Functions */
