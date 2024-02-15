@@ -19,16 +19,17 @@ const LocalGame = () => {
 	const [score, setScore] = useState({ player1: 0, player2: 0 });
 	const [gameOver, setGameOver] = useState(false);
 
-	const initialPlayer1State = { x: 20, y: 200, speed: 0 };
+	const initialPlayer1State = { x: 20, y: (WINDOW_HEIGHT / 2) - PADDLE_HEIGHT, speed: 0 };
 	const [player1, setPlayer1] = useState(initialPlayer1State);
-	const initialPlayer2State = { x: 860, y: 200, speed: 0 };
+	const initialPlayer2State = { x: WINDOW_WIDTH - PADDLE_WIDTH - 20, y: (WINDOW_HEIGHT / 2) - PADDLE_HEIGHT, speed: 0 };
 	const [player2, setPlayer2] = useState(initialPlayer2State);
 
 	const initialBallState = {
 		x: (WINDOW_WIDTH - BALL_SIZE) / 2 + Math.random() * 50 - 50 / 2,
-  		y: (WINDOW_HEIGHT - BALL_SIZE) / 2 + Math.random() * 50 - 50 / 2,
-		speedX: Math.random() > 0.5 ? 3 : -3,
-		speedY: Math.random() > 0.5 ? 3 : -3 };
+		y: (WINDOW_HEIGHT - BALL_SIZE) / 2 + Math.random() * 50 - 50 / 2,
+		speedX: Math.random() > 0.5 ? 5 : -5,
+		speedY: Math.random() > 0.5 ? 2 : -2,
+		maxSpeedY: 5}
 	const [ball, setBall] = useState(initialBallState);
   
 	useEffect(() => {
@@ -37,52 +38,74 @@ const LocalGame = () => {
 		gameContext!.font = "40px Orbitron";
 	
 		if (gameContext) {
-			const drawBoardDetails = () => {
-				for (var i = 0; i < WINDOW_HEIGHT; i += 30) {
-					gameContext!.fillStyle = "#fff";
-					gameContext!.fillRect((WINDOW_WIDTH / 2) - 3, i + 10, 6, 15);
-				}
-			
-				gameContext!.fillText(score.player1.toString(), (WINDOW_WIDTH / 2) - 50, 40);
-				gameContext!.fillText(score.player2.toString(), (WINDOW_WIDTH / 2) + 30, 40);
-			}
-
-			const drawGameOver = () => {
-				gameContext!.font = "80px Orbitron";
-				gameContext!.fillStyle = "#fff";
-				if (score.player1 >= MAX_SCORE) {
-					gameContext!.fillText("Player 1 won", (WINDOW_WIDTH / 2) - 200, (WINDOW_HEIGHT / 2));
-				}
-				else if (score.player2 >= MAX_SCORE) {
-					gameContext!.fillText("Player 2 won", (WINDOW_WIDTH / 2) - 200, (WINDOW_HEIGHT / 2));
-				}
-			}
-
-			const drawPause = () => {
-				gameContext!.font = "60px Orbitron";
-				gameContext!.fillStyle = "#fff";
-				gameContext!.fillText("Game Paused", (WINDOW_WIDTH / 2) - 150, (WINDOW_HEIGHT / 2));
-			}
+			const drawGame = () => {
+				gameContext!.textAlign = "center";
 	
-			const draw = () => {
-				gameContext!.fillStyle = "#000";
-				gameContext!.fillRect(0, 0, gameCanvas!.width, gameCanvas!.height);
-				  
+				const drawBackground = () => {
+					gameContext!.fillStyle = "#000";
+					gameContext!.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+				}
+	
+				const drawLines = () => {
+					for (var i = 0; i < WINDOW_HEIGHT; i += 30) {
+						gameContext!.fillStyle = "#fff";
+						gameContext!.fillRect((WINDOW_WIDTH / 2) - 6, i + 10, 6, 15);
+					}
+				}
+	
+				const drawPlayersName = () => {
+					gameContext!.font = "30px Orbitron";
+					gameContext!.fillText("Player 1", (WINDOW_WIDTH / 4), 40);
+					gameContext!.fillText("Player 2", (WINDOW_WIDTH / 1.333), 40);
+				}
+	
+				const drawScores = () => {
+					gameContext!.font = "60px Orbitron";
+					gameContext!.fillText(score.player1.toString(), (WINDOW_WIDTH / 2) - 50, 60);
+					gameContext!.fillText(score.player2.toString(), (WINDOW_WIDTH / 2) + 50, 60);
+				}
+	
+				const drawBoardDetails = () => {
+					drawBackground();
+					drawLines();
+					drawPlayersName();
+					drawScores();
+				}
+		
+				const drawGameOver = () => {
+					drawBackground();
+					gameContext!.font = "80px Orbitron";
+					gameContext!.fillStyle = "#fff";
+					if ((score.player1 >= MAX_SCORE)) {
+						gameContext!.fillText("Player 1 won", (WINDOW_WIDTH / 2), (WINDOW_HEIGHT / 2));
+					}
+					else if ((score.player2 >= MAX_SCORE)) {
+						gameContext!.fillText("Player 2 won", (WINDOW_WIDTH / 2), (WINDOW_HEIGHT / 2));
+					}
+				}
+		
+				const drawPause = () => {
+					gameContext!.font = "60px Orbitron";
+					gameContext!.fillStyle = "#fff";
+					gameContext!.fillText("Game Paused", (WINDOW_WIDTH / 2), (WINDOW_HEIGHT / 2));
+				}
+	
+				const drawGameState = () => {
+					gameContext!.fillStyle = "#fff";
+					gameContext!.fillRect(player1.x, player1.y, PADDLE_WIDTH, PADDLE_HEIGHT);
+					gameContext!.fillRect(player2.x, player2.y, PADDLE_WIDTH, PADDLE_HEIGHT);
+					gameContext!.fillRect(ball.x, ball.y, BALL_SIZE, BALL_SIZE);	
+				}
+		
 				drawBoardDetails();
+				drawGameState();
 				if (gameOver) {
 					drawGameOver();
 				}
 				else if (!gameState) {
 					drawPause();
 				}
-				gameContext!.fillStyle = "#fff";
-				gameContext!.fillRect(player1.x, player1.y, PADDLE_WIDTH, PADDLE_HEIGHT);
-				gameContext!.fillRect(player2.x, player2.y, PADDLE_WIDTH, PADDLE_HEIGHT);
-				gameContext!.fillRect(ball.x, ball.y, BALL_SIZE, BALL_SIZE);	
 			}
-	
-			gameContext!.fillStyle = 'black';
-			gameContext!.fillRect(0, 0, gameCanvas!.width, gameCanvas!.height);
 			
 			const gameLoop = () => {
 				if (score.player1 >= MAX_SCORE || score.player2 >= MAX_SCORE) {
@@ -91,7 +114,7 @@ const LocalGame = () => {
 				if (gameState && !gameOver) {
 				  updateGame();  
 				}
-				draw();
+				drawGame();
 			}
 			requestAnimationFrame(gameLoop);
 	
@@ -239,8 +262,8 @@ const LocalGame = () => {
 		<div>
 	  		<canvas
 				ref={canvasRef}
-				width={WINDOW_WIDTH} // Set your canvas width
-				height={WINDOW_HEIGHT} // Set your canvas height
+				width={WINDOW_WIDTH}
+				height={WINDOW_HEIGHT}
 				className="Canvas"></canvas>
 	  		<div>
 				<div className="controls">
