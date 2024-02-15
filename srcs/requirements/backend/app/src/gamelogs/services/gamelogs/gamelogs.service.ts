@@ -57,6 +57,7 @@ export class GamelogsService {
 
     async createGamelog(gamelogDetails: CreateGamelogParams): Promise<Gamelog> {
         // Only the server should be autorized to access this.
+        // How to verify this ? Dunno yet.
 
         const gamelogToUsers = await this.createGamelogToUsers(gamelogDetails.userResults, null);
         delete gamelogDetails.userResults;
@@ -85,6 +86,7 @@ export class GamelogsService {
 
     async replaceGamelog(gamelogId: bigint, gamelogDetails: ReplaceGamelogParams): Promise<Gamelog> {
         // Only the server should be autorized to access this.
+        // How to verify this ? Dunno yet.
 
         const gamelog = await this.gamelogRepository.findOne({
             where: { id: gamelogId },
@@ -105,6 +107,7 @@ export class GamelogsService {
 
     async updateGamelog(gamelogId: bigint, gamelogDetails: UpdateGamelogParams): Promise<Gamelog> {
         // Only the server should be autorized to access this.
+        // How to verify this ? Dunno yet.
 
         const gamelog = await this.gamelogRepository.findOne({
             where: { id: gamelogId },
@@ -125,6 +128,7 @@ export class GamelogsService {
 
     async deleteGamelog(gamelogId: bigint): Promise<string> {
         // verify user permissions. You shouldn't be able to delete a gamelog. Maybe hide your name / soft delete ?
+        // How to verify this ? Dunno yet.
 
         const gamelog = await this.gamelogRepository.findOne({
             where: { id: gamelogId },

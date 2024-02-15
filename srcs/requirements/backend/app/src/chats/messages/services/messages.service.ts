@@ -18,7 +18,7 @@ export class MessagesService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    async getChannelMessages(userId: bigint, channelId: bigint): Promise<Message[]> {
+    async getChannelMessages(userId: bigint = null, channelId: bigint): Promise<Message[]> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
             relations: ['messages.channelMember.user', 'members.user'],
@@ -37,7 +37,7 @@ export class MessagesService {
         return (channel.messages);
     }
 
-    async getChannelMessage(userId: bigint, channelId: bigint, messageId: bigint): Promise<Message> {
+    async getChannelMessage(userId: bigint = null, channelId: bigint, messageId: bigint): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
             relations: ['messages.channelMember.user', 'members.user'],
@@ -56,7 +56,7 @@ export class MessagesService {
         return (message);
     }
 
-    async createChannelMessage(userId: bigint, channelId: bigint, messageDetails: CreateMessageParams): Promise<Message> {
+    async createChannelMessage(userId: bigint = null, channelId: bigint, messageDetails: CreateMessageParams): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
             relations: ['members.user', 'messages'],
@@ -78,7 +78,7 @@ export class MessagesService {
         return (await this.messageRepository.save(message));
     }
 
-    async replaceChannelMessage(userId: bigint, channelId: bigint, messageId: bigint, messageDetails: ReplaceMessageParams): Promise<Message> {
+    async replaceChannelMessage(userId: bigint = null, channelId: bigint, messageId: bigint, messageDetails: ReplaceMessageParams): Promise<Message> {
         const message = await this.messageRepository.findOne({
             where: {
                 channel: { id: channelId },
@@ -98,7 +98,7 @@ export class MessagesService {
         }));
     }
 
-    async updateChannelMessage(userId: bigint, channelId: bigint, messageId: bigint, messageDetails: UpdateMessageParams): Promise<Message> {
+    async updateChannelMessage(userId: bigint = null, channelId: bigint, messageId: bigint, messageDetails: UpdateMessageParams): Promise<Message> {
         const message = await this.messageRepository.findOne({
             where: {
                 channel: { id: channelId },
@@ -118,7 +118,7 @@ export class MessagesService {
         }));
     }
 
-    async deleteChannelMessage(userId: bigint, channelId: bigint, messageId: bigint): Promise<string> {
+    async deleteChannelMessage(userId: bigint = null, channelId: bigint, messageId: bigint): Promise<string> {
         const message = await this.messageRepository.findOne({
             where: {
                 channel: { id: channelId },
