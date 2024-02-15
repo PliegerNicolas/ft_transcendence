@@ -34,7 +34,7 @@ export class ChannelsService {
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (!channel.members.some((member) => member.user.id === userId)) {
+        else if (!channel.members.some((member) => member.user.id == userId)) {
             throw new UnauthorizedException(`User with ID ${userId} isn't member of channel with ID ${channelId}`);
         }
 
