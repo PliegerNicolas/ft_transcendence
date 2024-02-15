@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
@@ -12,10 +13,29 @@ import "../../styles/chat.css";
 
 import ChatHeader from "./ChatHeader.tsx";
 import Msg from "./Msg.tsx";
+import ChanEdit from "./ChanEdit.tsx";
+
+// <ChatContentRouter /> =======================================================
+
+export default function ChatContentRouter()
+{
+	const params = useParams();
+	const id = params.id!;
+
+	return (
+		<Routes>
+			<Route path="/" element={<ChatContent />} />
+			<Route path="/edit" element={<ChanEdit id={+id}/>} />
+			<Route path="/*" element={
+				<div className="ChatContent error">No such channel!</div>
+			}/>
+		</Routes>
+	);
+}
 
 // <ChatContent /> =============================================================
 
-export default function ChatContent() {
+function ChatContent() {
 	const { api, addNotif } = useContext(MyContext);
 	const invalidate = useInvalidate();
 
@@ -68,41 +88,41 @@ export default function ChatContent() {
 	}
 
 	if (getChan.isPending) return (
-		<div className="Chat__Content spinner">
+		<div className="ChatContent spinner">
 			<Spinner />
 		</div>
 	);
 
 	if (getChan.isError) return (
-		<div className="Chat__Content error">
+		<div className="ChatContent error">
 			Failed to load: {getChan.error.message}
 		</div>
 	);
 
 	if (getMsgs.isError) return (
-		<div className="Chat__Content error">
+		<div className="ChatContent error">
 			Failed to load this channel: {getMsgs.error.message}
 		</div>
 	);
 
 	if (!chan) return (
-		<div className="Chat__Content error">
-			This chan doesn't exist, or you may not have access to it.
+		<div className="ChatContent error">
+			This channel doesn't exist, or you may not have access to it.
 		</div>
 	);
 
 	if (getMsgs.isPending) {
 		return (
-			<div className="Chat__Content">
-				<ChatHeader chan={chan} />
+			<div className="ChatContent">
+				<ChatHeader chan={chan} edit={false} />
 				<Spinner />
 			</div>
 		);
 	}
 
 	return (
-		<div className="Chat__Content">
-			<ChatHeader chan={chan} />
+		<div className="ChatContent">
+			<ChatHeader chan={chan} edit={false} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
 					{
@@ -113,16 +133,15 @@ export default function ChatContent() {
 					<hr />
 				</div>
 				{
-					getMsgs.data.map((item: any, index: number) => {
-						console.log(JSON.stringify(item))
-						return <Msg
+					getMsgs.data.map((item: any, index: number) =>
+						<Msg
 							key={index}
 							data={item}
 							prev={index ? getMsgs.data[index - 1] : null}
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
 							size={chan.membersCount}
 						/>
-					})
+					)
 				}
 				<div ref={anchorRef} />
 			</div>

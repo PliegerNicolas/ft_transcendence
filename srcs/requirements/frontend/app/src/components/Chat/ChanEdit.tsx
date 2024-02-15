@@ -15,11 +15,11 @@ import "../../styles/chat.css";
 
 import ChatHeader from "./ChatHeader.tsx";
 
-// <NewChan /> =================================================================
+// <ChanEdit /> ================================================================
 
-export default function NewChan()
+export default function ChanEdit({id}: {id: number})
 {
-	const [newChan, setNewChan] = useState({
+	const [chan, setChan] = useState({
 		name: "New Channel",
 		status: "public",
 		password: "",
@@ -37,35 +37,37 @@ export default function NewChan()
 	const { api, addNotif } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
-
-	const edit = false;
+/*
+	const getChan = useQuery({
+		queryKey[""]
+	});*/
 
 	const postChan = useMutation({
 		mutationFn:
-			(() => api.post("/channels", newChan)) as unknown as MutationFunction<ChanType>,
+			(() => api.post("/channels", chan)) as unknown as MutationFunction<ChanType>,
 		onError: error => addNotif({content: error.message}),
-		onSettled: () => {console.log(newChan); invalidate(["allChans"])},
+		onSettled: () => invalidate(["allChans"]),
 		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
 	});
 
 	function updateField(field: string, value: unknown) {
-		return ({ ...newChan, [field]: value });
+		return ({ ...chan, [field]: value });
 	}
 
 	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
 		if (e.target.name === "password" && e.target.value === "") {
-			setNewChan({
-				...newChan,
+			setChan({
+				...chan,
 				password: "",
 				passwordRepeat: "",
 			});
 		}
-		else setNewChan(updateField(e.target.name, e.target.value));
+		else setChan(updateField(e.target.name, e.target.value));
 	}
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		postChan.mutate(newChan);
+		postChan.mutate(chan);
 	}
 
 	function preventSubmit(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -73,78 +75,78 @@ export default function NewChan()
 	}
 
 	return (
-		<form className="NewChan MainContent" onSubmit={handleSubmit}>
-			<ChatHeader chan={{...newChan, id: "", membersCount: 1}} />
-			<section className="NewChan__NameSection">
-				<label className="NewChan__NameLabel" htmlFor="channelName">
+		<form className="ChanEdit MainContent" onSubmit={handleSubmit}>
+			<ChatHeader chan={{...chan, id: "", membersCount: 1}} edit={true} />
+			<section className="ChanEdit__NameSection">
+				<label className="ChanEdit__NameLabel" htmlFor="channelName">
 					Name
 				</label>
 				<input
 					type="text" id="channelName" name="name"
-					value={newChan.name} onChange={handleChange} onKeyDown={preventSubmit}
+					value={chan.name} onChange={handleChange} onKeyDown={preventSubmit}
 					placeholder="Cannot be empty!"
 				/>
 			</section>
 			<section>
-				<span className="NewChan__Title">Mode</span>
-				<span className="NewChan__ModeButtons">
-					<label htmlFor="modePublic" className={`${newChan.status === "public"}`}>
+				<span className="ChanEdit__Title">Mode</span>
+				<span className="ChanEdit__ModeButtons">
+					<label htmlFor="modePublic" className={`${chan.status === "public"}`}>
 						Public
-						<img src={newChan.status === "public" ? radioChecked : radioUnchecked}/>
+						<img src={chan.status === "public" ? radioChecked : radioUnchecked}/>
 					</label>
 					<input
 						type="radio" id="modePublic" name="status"
 						value="public" onChange={handleChange}
-						checked={newChan.status === "public"}
+						checked={chan.status === "public"}
 					/>
-					<label htmlFor="modePrivate" className={`${newChan.status === "private"}`}>
+					<label htmlFor="modePrivate" className={`${chan.status === "private"}`}>
 						Private
-						<img src={newChan.status === "private" ? radioChecked : radioUnchecked}/>
+						<img src={chan.status === "private" ? radioChecked : radioUnchecked}/>
 					</label>
 					<input
 						type="radio" id="modePrivate" name="status"
 						value="private" onChange={handleChange}
-						checked={newChan.status === "private"}
+						checked={chan.status === "private"}
 					/>
 				</span>
 			</section>
 			{
-				newChan.status === "public" &&
-				<div className="NewChan__PublicModeDiv">
-				<section className="NewChan__PublicModeSection">
-					<div className="NewChan__Title">Password</div>
-					<div className="NewChan__PasswdFields">
+				chan.status === "public" &&
+				<div className="ChanEdit__PublicModeDiv">
+				<section className="ChanEdit__PublicModeSection">
+					<div className="ChanEdit__Title">Password</div>
+					<div className="ChanEdit__PasswdFields">
 						<input
 							type="password" id="channelPassword" name="password"
-							value={newChan.password} onChange={handleChange}
+							value={chan.password} onChange={handleChange}
 							onKeyDown={preventSubmit}
 							placeholder="Leave blank for no password"
 						/>
 						{
-							!!newChan.password.length &&
+							!!chan.password.length &&
 							<input
 								type="password" id="channelPasswordRepeat" name="passwordRepeat"
-								value={newChan.passwordRepeat} onChange={handleChange}
+								value={chan.passwordRepeat} onChange={handleChange}
 								onKeyDown={preventSubmit}
 								placeholder="Repeat password"
 							/>
 						}
 						{
-							!!newChan.password.length
-								&& !!newChan.passwordRepeat.length
-								&& newChan.password != newChan.passwordRepeat
+							!!chan.password.length
+								&& !!chan.passwordRepeat.length
+								&& chan.password != chan.passwordRepeat
 								&& <span className="error-msg">Passwords do not match!</span>
 						}
 					</div>
 				</section>
 				{
-					edit &&
-					<section className="NewChan__PublicModeSection banned">
+					!!id &&
+					<section className="ChanEdit__PublicModeSection banned">
 						<UserList
 							title="Banned users"
-							list={newChan.banned}
+							list={chan.banned}
 							update={(value: {username: string, id: number}) =>
-								setNewChan(updateField("banned", value))}
+								setChan(updateField("banned", value))}
 							owner={null}
 						/>
 					</section>
@@ -152,26 +154,26 @@ export default function NewChan()
 				</div>
 			}
 			{
-				newChan.status === "private" &&
+				chan.status === "private" &&
 				<section>
 					<UserList
 						title="Allowed users"
-						list={newChan.allowed}
+						list={chan.allowed}
 						update={(value: {username: string, id: number}) =>
-							setNewChan(updateField("allowed", value))}
-						owner={newChan.allowed[0]}
+							setChan(updateField("allowed", value))}
+						owner={chan.allowed[0]}
 					/>
 				</section>
 			}
 			{
-				edit &&
+				!!id &&
 				<section>
 					<UserList
 						title="Admins"
-						list={newChan.admins}
+						list={chan.admins}
 						update={(value: {username: string, id: number}) =>
-							setNewChan(updateField("admins", value))}
-						owner={newChan.admins[0]}
+							setChan(updateField("admins", value))}
+						owner={chan.admins[0]}
 					/>
 				</section>
 			}
@@ -179,8 +181,8 @@ export default function NewChan()
 				style={{marginLeft: "15px"}}
 				onClick={(e) => {handleSubmit(e)}}
 				disabled={
-					newChan.status === "public"
-					&& newChan.password !== newChan.passwordRepeat
+					chan.status === "public"
+					&& chan.password !== chan.passwordRepeat
 				}
 			>
 				Submit
@@ -226,7 +228,7 @@ function UserList(
 
 	return (
 		<div>
-		<div className="NewChan__Title">
+		<div className="ChanEdit__Title">
 			{title}
 			<span className="notice-msg" style={{marginLeft: "6px"}}>
 				({listFilter.length + (owner ? 1 : 0)})
