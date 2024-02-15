@@ -36,7 +36,6 @@ export class ChannelsController {
     }
 
 	@UseGuards(AuthGuard('jwt'))
-	@UseGuards(RoleGuard)
     @Put('channels/:channelId')
     async replaceChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -75,6 +74,7 @@ export class ChannelsController {
     }
 
 	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(RoleGuard)
     @Delete('channels/:channelId')
     async deleteChannel(@Param('channelId', ParseIdPipe) channelId: bigint) {
         // For this moment userId is passed as 2. Need passport.
