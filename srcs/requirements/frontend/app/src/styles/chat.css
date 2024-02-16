@@ -165,10 +165,10 @@
 }
 
 /*
-** .Chat__Content ==============================================================
+** <ChatContent /> =============================================================
 */
 
-.Chat__Content {
+.ChatContent {
 	position: relative;
 	flex: 1;
 	padding-top: 54px;
@@ -179,60 +179,15 @@
 	overflow: hidden;
 }
 
-.Chat__Content.error {
+.ChatContent.error {
 	justify-content: start;
 	padding: 30px;
 	color: var(--error);
 	font-style: italic;
 }
 
-.Chat__Content.spinner {
+.ChatContent.spinner {
 	justify-content: center;
-}
-
-.Chat__Header {
-	font-size: 1.1rem;
-	font-weight: 600;
-	height: 54px;
-	display: flex;
-	align-items: center;
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	font-style: italic;
-	background: var(--bg-color-2);
-	border-bottom: 1px solid var(--bg-color-3);
-	box-shadow: 0 0 12px #000a;
-}
-
-.Chat__Collapse {
-	min-width: 48px;
-	width: 48px;
-	height: 54px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border-right: 1px solid var(--bg-color-4);
-	transition: .1s;
-}
-.Chat__Collapse:hover {
-	cursor: pointer;
-	background: var(--bg-color-3);
-}
-.Chat__Collapse:active {
-	background: var(--bg-color-4);
-}
-
-.Chat__Collapse>img {
-	height: 28px;
-}
-
-.Chat__Title {
-	padding-left: 18px;
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
 }
 
 .Chat__Convo {
@@ -280,7 +235,86 @@
 }
 
 /*
-** .Msg ========================================================================
+** <ChatHeader /> ==============================================================
+*/
+
+.ChatHeader {
+	font-size: 1.1rem;
+	font-weight: 600;
+	height: 54px;
+	display: flex;
+	align-items: center;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	font-style: italic;
+	background: var(--bg-color-2);
+	border-bottom: 1px solid var(--bg-color-3);
+	box-shadow: 0 0 12px #000a;
+}
+
+.ChatHeader__Collapse {
+	min-width: 48px;
+	width: 48px;
+	height: 54px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-right: 1px solid var(--bg-color-4);
+	transition: .1s;
+}
+.ChatHeader__Collapse:hover {
+	cursor: pointer;
+	background: var(--bg-color-3);
+}
+.ChatHeader__Collapse:active {
+	background: var(--bg-color-4);
+}
+
+.ChatHeader__Collapse>img {
+	height: 28px;
+}
+
+.ChatHeader__Main {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.ChatHeader__Title {
+	padding-left: 18px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.ChatHeader__Edit {
+	height: 30px;
+	width: 30px;
+	padding: 4px;
+	margin-right: 12px;
+	display: flex;
+	align-items: center;
+	border-radius: 7px;
+}
+.ChatHeader__Edit:hover {
+	cursor: pointer;
+	background-color: var(--bg-color-3);
+}
+.ChatHeader__Edit:active {
+	background-color: var(--bg-color-4);
+}
+
+.ChatHeader__Edit>img {
+	width: 100%;
+}
+
+/*
+** <Msg /> =====================================================================
 */
 
 .Msg {
@@ -356,10 +390,10 @@
 }
 
 /*
-** .NewChan ====================================================================
+** <ChanEdit /> ================================================================
 */
 
-.NewChan {
+.ChanEdit {
 	position: relative;
 	top: auto;
 	left: auto;
@@ -369,35 +403,35 @@
 	padding-top: calc(54px + 24px);
 }
 
-.NewChan__NameSection {
+.ChanEdit__NameSection {
 	display: flex;
 	align-items: center;
 }
 
-.NewChan__NameLabel {
+.ChanEdit__NameLabel {
 	font-size: 1rem;
 	font-weight: bold;
 	margin-right: 20px;
 }
 
-.NewChan__NameSection>input {
+.ChanEdit__NameSection>input {
 	width: 100%;
 }
 
-.NewChan__Title {
+.ChanEdit__Title {
 	font-size: 1rem;
 	font-weight: bold;
 	margin: 5px 0;
 }
 
-.NewChan__ModeButtons {
+.ChanEdit__ModeButtons {
 	margin-left: 20px;
 	display: inline-flex;
 	gap: 5px;
 	user-select: none;
 }
 
-.NewChan__ModeButtons>label {
+.ChanEdit__ModeButtons>label {
 	border-radius: 7px;
 	display: flex;
 	gap: 6px;
@@ -408,64 +442,64 @@
 	height: 36px;
 	transition: .1s;
 }
-.NewChan__ModeButtons>label:hover {
+.ChanEdit__ModeButtons>label:hover {
 	cursor: pointer;
 	background-color: var(--bg-color-3);
 }
-.NewChan__ModeButtons>label:active {
+.ChanEdit__ModeButtons>label:active {
 	background-color: var(--bg-color-4);
 }
 
-.NewChan__ModeButtons>label>img {
+.ChanEdit__ModeButtons>label>img {
 	height: 20px;
 }
 
-.NewChan__ModeButtons>label.true {
+.ChanEdit__ModeButtons>label.true {
 	background-color: var(--bg-color-4);
 }
 
-.NewChan__ModeButtons>input {
+.ChanEdit__ModeButtons>input {
 	display: none;
 }
 
-.NewChan__PublicModeDiv {
+.ChanEdit__PublicModeDiv {
 	display: flex;
 	flex-direction: column;
 	margin-bottom: 15px;
 	gap: 15px;
 }
 
-.NewChan__PublicModeSection {
+.ChanEdit__PublicModeSection {
 	flex: 1;
 	margin-top: 0;
 	margin-bottom: 0;
 }
-.NewChan__PublicModeSection.banned {
+.ChanEdit__PublicModeSection.banned {
 	border-color: var(--error-bg-hover);
 }
 
 @media (min-width: 1400px)
 {
-	.NewChan__PublicModeDiv { flex-direction: row; }
+	.ChanEdit__PublicModeDiv { flex-direction: row; }
 }
 
-.NewChan__PasswdFields {
+.ChanEdit__PasswdFields {
 	margin-top: 12px;
 	margin-left: 40px;
 	display: flex;
 	flex-direction: column;
 }
 
-.NewChan__PasswdFields>input {
+.ChanEdit__PasswdFields>input {
 	margin-bottom: 15px;
 }
 
-.NewChan__PasswdFields>.error-msg {
+.ChanEdit__PasswdFields>.error-msg {
 	font-size: .86rem;
 }
 
 /*
-** UserList ====================================================================
+** <UserList /> ================================================================
 */
 
 .UserList {
@@ -488,7 +522,7 @@
 
 @media (max-width: 900px)
 {
-	.NewChan__PasswdFields, .NewChan__UserList { margin-left: 20px; }
+	.ChanEdit__PasswdFields, .ChanEdit__UserList { margin-left: 20px; }
 }
 
 .UserList__Item {

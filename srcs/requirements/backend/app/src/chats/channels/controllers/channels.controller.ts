@@ -22,7 +22,7 @@ export class ChannelsController {
     async getChannel(@Param('channelId', ParseIdPipe) channelId: bigint,) {
         // Should pass userId (if user is connected and passport validated or null).
         // For this moment userId is passed as 2.
-        return (await this.channelService.getChannelMembers(BigInt(1), channelId));
+        return (await this.channelService.getChannel(BigInt(1), channelId));
     }
 
     @Get('channels/:channelId/members')
