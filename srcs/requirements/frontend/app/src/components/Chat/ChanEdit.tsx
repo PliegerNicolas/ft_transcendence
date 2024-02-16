@@ -25,7 +25,7 @@ export default function ChanEdit({id}: {id: number})
 		status: "public",
 		password: "",
 		passwordRepeat: "",
-		allowed: [],
+		allowed: [{username: "Your username", id: 1},],
 		banned: [],
 		admins: [
 			{username: "mlaneyri", id: 1},
@@ -60,9 +60,9 @@ export default function ChanEdit({id}: {id: number})
 		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
 	});
 
-	const putChan = useMutation({
+	const patchChan = useMutation({
 		mutationFn:
-			(() => api.put("/channels/" + id, chan)) as unknown as MutationFunction<ChanType>,
+			(() => api.patch("/channels/" + id, chan)) as unknown as MutationFunction<ChanType>,
 		onError: error => addNotif({content: error.message}),
 		onSettled: () => invalidate(["allChans"]),
 		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
@@ -85,10 +85,14 @@ export default function ChanEdit({id}: {id: number})
 
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		if (id)
-			putChan.mutate(chan);
-		else
+
+		if (!id) {
 			postChan.mutate(chan);
+			return ;
+		}
+
+		const patch = {name:chan.name, status: chan.status};
+		patchChan.mutate(patch);
 	}
 
 	function preventSubmit(e: React.KeyboardEvent<HTMLInputElement>) {
