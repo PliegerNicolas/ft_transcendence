@@ -14,10 +14,16 @@ export default function Msg(
 {
 	const date = fmtDate(data.createdAt);
 
+	const member = data.channelMember;
+
 	const connectPrev =
-		prev && prev.userId === data.userId && fmtDate(prev.createdAt) === date;
+		prev
+		&& prev.channelMember.id === member.id
+		&& fmtDate(prev.createdAt) === date;
 	const connectNext =
-		next && next.userId === data.userId && fmtDate(next.createdAt) === date;
+		next
+		&& next.channelMember.id === member.id
+		&& fmtDate(next.createdAt) === date;
 
 	function sameDate(a: Date, b: Date) {
 		if (a.getDate() !== b.getDate())
@@ -46,15 +52,17 @@ export default function Msg(
 		return ("" + String(n).padStart(2, "0"));
 	}
 
+	console.log(data);
+
 	return (
 		<div className={
 			`Msg
-			${data.userId === 1 && "me"}
+			${member.user.id == "1" && "me"}
 			${connectPrev && "connectPrev"}
 			${connectNext && "connectNext"}`
 		}>
 			<div className="Msg__PictureDiv">
-				<Link to={"/user/" + data.userId}>
+				<Link to={"/user/" + member.user.username}>
 					<img src={defaultPicture} />
 				</Link>
 			</div>
@@ -62,11 +70,11 @@ export default function Msg(
 			{
 				<div className="Msg__Info">
 					<Link
-						to={"/user/" + data.userId}
+						to={"/user/" + member.user.username}
 						className="Msg__Sender"
-						style={{color: `hsl(${(360 / size) * data.userId} 80% 80%)`}}
+						style={{color: `hsl(${(360 / size) * +member.id} 80% 80%)`}}
 					>
-						Machin (remplacer ceci)
+						{member.user.username}
 					</Link>
 					•
 					<span className="Msg__Date">

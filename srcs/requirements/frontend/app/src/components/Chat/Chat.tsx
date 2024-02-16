@@ -21,6 +21,11 @@ export default function ChatTest()
 			<ChatContext.Provider value={{showSidebar, setShowSidebar}}>
 				{ !!showSidebar && <ChatSidebar /> }
 				<Routes>
+					<Route path="/" element={
+						<div className="ChatContent nochan">
+							No open channel
+						</div>
+					}/>
 					<Route path="/:id/*" element={ <ChatContent/> } />
 					<Route path="/new" element={ <NewChan id={0} /> } />
 				</Routes>

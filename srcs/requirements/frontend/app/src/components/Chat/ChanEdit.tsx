@@ -35,6 +35,8 @@ export default function ChanEdit({id}: {id: number})
 		],
 	});
 
+	const [setPasswd, setSetPasswd] = useState(!id);
+
 	const { api, addNotif } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
@@ -83,6 +85,21 @@ export default function ChanEdit({id}: {id: number})
 		else setChan(updateField(e.target.name, e.target.value));
 	}
 
+	function patch<T>(a: T, b: T) {
+		const ret: Partial<T> = {};
+
+		for (const key in b) {
+			if (
+				a[key] !== b[key]
+				&& (a[key] !== undefined || (key === "password" && setPasswd))
+				&& key !== "passwordRepeat"
+			)
+				ret[key] = b[key];
+		}
+
+		return (ret);
+	}
+
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
 
@@ -91,8 +108,7 @@ export default function ChanEdit({id}: {id: number})
 			return ;
 		}
 
-		const patch = {name:chan.name, status: chan.status};
-		patchChan.mutate(patch);
+		patchChan.mutate(patch(getChan.data, chan));
 	}
 
 	function preventSubmit(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -151,7 +167,24 @@ export default function ChanEdit({id}: {id: number})
 				chan.status === "public" &&
 				<div className="ChanEdit__PublicModeDiv">
 				<section className="ChanEdit__PublicModeSection">
-					<div className="ChanEdit__Title">Password</div>
+				<div className="ChanEdit__Title">
+					Password
+					{
+						!!id &&
+						<span className="ChanEdit__SetPasswd">
+							<label htmlFor="setPasswd">
+								Change:
+								<div className={"checkBox " + setPasswd}></div>
+							</label>
+							<input
+								type="checkbox" id="setPasswd" checked={setPasswd}
+								onChange={() => setSetPasswd(prev => !prev)}
+							/>
+						</span>
+					}
+				</div>
+				{
+					setPasswd &&
 					<div className="ChanEdit__PasswdFields">
 						<input
 							type="password" id="channelPassword" name="password"
@@ -175,6 +208,7 @@ export default function ChanEdit({id}: {id: number})
 								&& <span className="error-msg">Passwords do not match!</span>
 						}
 					</div>
+				}
 				</section>
 				{
 					!!id &&
@@ -192,7 +226,7 @@ export default function ChanEdit({id}: {id: number})
 			}
 			{
 				chan.status === "private" &&
-				<section>
+				<section className="allowed">
 					<UserList
 						title="Allowed users"
 						list={chan.allowed}
