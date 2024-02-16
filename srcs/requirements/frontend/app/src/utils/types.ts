@@ -36,10 +36,15 @@ export interface MyInfoType {
 }
 
 export interface MsgType {
-	userId: number,
-	channelId: number,
+	id: string
+	channelId: string,
 	content: string,
-	createdAt: string
+	createdAt: string,
+	channelMember: {
+		id: string,
+		role: "admin" | "owner",
+		user: UserType,
+	}
 }
 
 export interface ChanType {

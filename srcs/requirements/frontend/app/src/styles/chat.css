@@ -177,6 +177,16 @@
 	flex-direction: column;
 	justify-content: end;
 	overflow: hidden;
+	box-shadow: inset 0 0 48px #0004;
+}
+
+.ChatContent.nochan {
+	justify-content: start;
+	align-items: center;
+	font-size: 1.6rem;
+	font-weight: bold;
+	font-style: italic;
+	color: var(--bg-color-5);
 }
 
 .ChatContent.error {
