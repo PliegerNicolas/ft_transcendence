@@ -19,6 +19,7 @@ import { ChannelMember } from './chats/channels/entities/ChannelMember.entity';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { BigIntSerializationInterceptor } from './common/interceptors/big-int-serialization/big-int-serialization.interceptor';
 import { GameModule } from './game/game.module';
+import { TwofactorauthService } from './twofactorauth/twofactorauth.service';
 
 @Module({
 	imports: [
@@ -49,6 +50,7 @@ import { GameModule } from './game/game.module';
 			provide: APP_INTERCEPTOR,
 			useClass: BigIntSerializationInterceptor,
 		},
+		TwofactorauthService,
 	],
 })
 export class AppModule {}
