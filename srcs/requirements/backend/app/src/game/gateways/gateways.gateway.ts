@@ -2,12 +2,13 @@ import { OnModuleInit } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io'
 import { gameState } from '../types/inputPayloads'
-import { createGameState, startGameInterval } from '../server/game.server'
+import { createGameState, matchmakingSystem, startGameInterval } from '../server/game.server'
 import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../server/game.constants'
 
 let state: gameState[] = [];
 let player1ID: string[] = [];
 let player2ID: string[] = [];
+let playersQueue: string[] = [];
 
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway implements OnModuleInit {
@@ -30,11 +31,6 @@ export class GameGateway implements OnModuleInit {
 		client.join(lobby);
 		this.server.to(lobby).emit('createdLobby', lobby);
 		player1ID[lobby] = client.id;
-	}
-
-	@SubscribeMessage('getLobbyList')
-	handleGetLobbyList(@ConnectedSocket() client: Socket) {
-		client.emit('lobbyList', this.server.sockets.adapter.rooms);
 	}
   
 	@SubscribeMessage('joinLobby')
@@ -90,14 +86,53 @@ export class GameGateway implements OnModuleInit {
 		}
 	}
 
-	@SubscribeMessage('initGame')
-	handleInitGame(@MessageBody() lobby: string, @ConnectedSocket() client: Socket) {
-		if (player1ID[lobby] && player2ID[lobby]) {
-			this.server.to(lobby).emit('startedGame');
-			state[lobby] = createGameState();
-			state[lobby].player1ID = player1ID[lobby];
-			state[lobby].player2ID = player2ID[lobby];
-			setTimeout(() => {startGameInterval(lobby, state[lobby], this.server);}, 3000);
+	@SubscribeMessage('joinQueue')
+	handleJoinQueue(@ConnectedSocket() client: Socket) {
+		var i = 0;
+		while (playersQueue[i]) {
+			i++;
+		}
+		playersQueue[i] = client.id;
+		matchmakingSystem(playersQueue, i, this.server);
+	}
+
+	@SubscribeMessage('ready')
+	handleReady(@MessageBody() data: {lobby: string, playerNumber: number}, @ConnectedSocket() client: Socket) {
+		if (!player1ID[data.lobby] && data.playerNumber === 1) {
+			console.log("player 1 ready");
+			player1ID[data.lobby] = client.id;
+			client.join(data.lobby);
+		}
+		else if (!player2ID[data.lobby]  && data.playerNumber === 2) {
+			console.log("player 2 ready");
+			player2ID[data.lobby] = client.id;
+			client.join(data.lobby);
+		}
+		if (player1ID[data.lobby] && player2ID[data.lobby]) {
+			this.server.to(data.lobby).emit('gameReady');
+			this.server.to(data.lobby).emit('startedGame');
+			state[data.lobby] = createGameState();
+			state[data.lobby].player1ID = player1ID[data.lobby];
+			state[data.lobby].player2ID = player2ID[data.lobby];
+			setTimeout(() => {startGameInterval(data.lobby, state[data.lobby], this.server);}, 3000);
+		}
+	}
+
+	@SubscribeMessage('notReady')
+	handleNotReady(@MessageBody() data: {lobby: string, playerNumber: number}, @ConnectedSocket() client: Socket) {
+		if (player1ID[data.lobby] && data.playerNumber === 1) {
+			const index = player1ID.indexOf(data.lobby, 0);
+			if (index > -1) {
+   				player1ID.splice(index, 1);
+			}
+			client.leave(data.lobby);
+		}
+		else if (player2ID[data.lobby]  && data.playerNumber === 2) {
+			const index = player2ID.indexOf(data.lobby, 0);
+			if (index > -1) {
+   				player2ID.splice(index, 1);
+			}
+			client.leave(data.lobby);
 		}
 	}
 
