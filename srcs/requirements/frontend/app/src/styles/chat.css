@@ -422,6 +422,7 @@
 	font-size: 1rem;
 	font-weight: bold;
 	margin: 5px 0;
+	display: inline-flex;
 }
 
 .ChanEdit__ModeButtons {
@@ -475,12 +476,48 @@
 	margin-bottom: 0;
 }
 .ChanEdit__PublicModeSection.banned {
-	border-color: var(--error-bg-hover);
+	border-color: var(--error-bg);
+}
+
+.ChanEdit .allowed {
+	border-color: var(--yes);
 }
 
 @media (min-width: 1400px)
 {
 	.ChanEdit__PublicModeDiv { flex-direction: row; }
+}
+
+.ChanEdit__SetPasswd {
+	margin-left: 10px;
+}
+
+.ChanEdit__SetPasswd>label {
+	font-size: .92rem;
+	font-style: italic;
+	color: var(--text-faint);
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+}
+
+.checkBox {
+	display: inline-block;
+	margin-left: 5px;
+	margin-right: 1px;
+	padding: 2px;
+	background-clip: content-box;
+	border: 2px solid var(--text-faint);
+	border-radius: 5px;
+	height: 10px;
+	width: 10px;
+}
+.checkBox.true {
+	background-color: var(--link-normal);
+}
+
+.ChanEdit__SetPasswd>input {
+	display: none;
 }
 
 .ChanEdit__PasswdFields {
