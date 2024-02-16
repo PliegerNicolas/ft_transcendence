@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsDefined, IsEmail, IsNotEmpty, IsOptional, ValidateNested } from "class-validator";
+import { IsDefined, IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
 import { ReplaceProfileDto } from "src/profiles/dtos/ReplaceProfile.dto";
 
 export class ReplaceUserDto {
@@ -11,6 +11,8 @@ export class ReplaceUserDto {
 
     @IsDefined()
     @IsNotEmpty()
+    @IsString()
+    @MaxLength(25)
     username: string;
 
     @IsDefined()
