@@ -58,6 +58,10 @@ const OnlineGame = () => {
 	const [inQueue, setInQueue] = useState(false);
 	const [gameReady, setGameReady] = useState(false);
 	const [playerReady, setPlayerReady] = useState(false);
+
+	const [backgroundColor, setBackgroundColor] = useState('#000');
+	const [paddlesColor, setPaddlesColor] = useState('#fff');
+	const [ballColor, setBallColor] = useState('#fff');
   
 	const destroySocketListeners = () => {
 		socket.off('createdLobby');
@@ -78,7 +82,7 @@ const OnlineGame = () => {
 		const drawGame = (new_gameState: InputPayloads) => {
 
 			const drawBackground = () => {
-				gameContext!.fillStyle = "#000";
+				gameContext!.fillStyle = backgroundColor;
 				gameContext!.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 			}
 
@@ -132,9 +136,10 @@ const OnlineGame = () => {
 			}
 
 			const drawGameState = () => {
-				gameContext!.fillStyle = "#fff";
+				gameContext!.fillStyle = paddlesColor;
 				gameContext!.fillRect(new_gameState.player1.x, new_gameState.player1.y, PADDLE_WIDTH, PADDLE_HEIGHT);
 				gameContext!.fillRect(new_gameState.player2.x, new_gameState.player2.y, PADDLE_WIDTH, PADDLE_HEIGHT);
+				gameContext!.fillStyle = ballColor;
 				gameContext!.fillRect(new_gameState.ball.x, new_gameState.ball.y, BALL_SIZE, BALL_SIZE);	
 			}
 	
@@ -168,7 +173,6 @@ const OnlineGame = () => {
 					gameContext!.fillText("1", WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 				}, 1000);
 			}, 1000);
-			console.log("timer end");
 		}
 
 		//Create socket listeners
@@ -182,6 +186,11 @@ const OnlineGame = () => {
 					socket.emit('opponentLeft', {userId, lobby});
 					setOppId('');
 				}
+			});
+			socket.on('leaveLobby', () => {
+				setPlayerReady(false);
+				setInQueue(false);
+				setLobby('');				
 			});
 			socket.on('gameFound', (player_number: number, lobby_id: string, opp_id: string) => {
 				console.log('lobby : ' + lobby_id + ' joined');
@@ -248,7 +257,6 @@ const OnlineGame = () => {
 	const joinQueueHandler = () => {
 		setInQueue(true);
 		socket.emit('joinQueue');
-		console.log('joined queue');
 	}
 
 	const leaveQueueHandler = () => {
@@ -283,6 +291,27 @@ const OnlineGame = () => {
 
 	return (
 		<div>
+			{gameReady === true ? <div>
+			</div> : <div>
+				<select onChange={(e) => setPaddlesColor(e.target.value)}>
+					<option value="#fff">default</option>
+    				<option value="#cc0000">red</option>
+    				<option value="#2eb82e">green</option>
+    				<option value="#008ae6">blue</option>
+   				</select>
+				<select onChange={(e) => setBackgroundColor(e.target.value)}>
+					<option value="#000">default</option>
+    				<option value="#cc0000">red</option>
+    				<option value="#2eb82e">green</option>
+    				<option value="#008ae6">blue</option>
+   				</select>
+				<select onChange={(e) => setBallColor(e.target.value)}>
+					<option value="#fff">default</option>
+    				<option value="#cc0000">red</option>
+    				<option value="#2eb82e">green</option>
+    				<option value="#008ae6">blue</option>
+   				</select>
+			</div>}
 			{lobby.length === 0 ? <div>
 				{inQueue === true ? <div>
 					<button className="Leave-queue-button" onClick={leaveQueueHandler}>Leave Queue</button>

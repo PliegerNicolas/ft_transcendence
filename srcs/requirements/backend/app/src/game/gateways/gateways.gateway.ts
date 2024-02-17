@@ -19,7 +19,6 @@ export class GameGateway implements OnModuleInit {
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
 			console.log('new game socket connection : ' + socket.id);
-			this.server.emit('userJoinedSocket', socket.id);
 			socket.on('disconnect', () => {
 				console.log(socket.id + ' left game socket');
 				this.server.emit('userLeftSocket', socket.id);
@@ -46,31 +45,34 @@ export class GameGateway implements OnModuleInit {
 			if (state[data.lobby]) {
 				state[data.lobby].score.player1 = 5;
 			}
-			const index = player1ID.indexOf(data.lobby, 0);
+			const index = player2ID.indexOf(data.lobby, 0);
 			if (index > -1) {
-   				player1ID.splice(index, 1);
+   				player2ID.splice(index, 1);
 			}
 		}
+		if (!state[data.lobby])
+			this.server.to(data.lobby).emit('leaveLobby');
+		client.leave(data.lobby);
 	}
 
 	@SubscribeMessage('joinQueue')
 	handleJoinQueue(@ConnectedSocket() client: Socket) {
 		var i = 0;
-		while (playersQueue[i] != client.id) {
+		while (playersQueue[i]) {
 			i++;
 		}
 		playersQueue[i] = client.id;
-		console.log(playersQueue);
 		matchmakingSystem(playersQueue, i, this.server);
 	}
 
 	@SubscribeMessage('leaveQueue')
 	handleLeaveQueue(@ConnectedSocket() client: Socket) {
 		var i = 0;
-		while (playersQueue[i]) {
+		while (playersQueue[i] != client.id) {
 			i++;
 		}
-		playersQueue.splice(i, 1);
+		if (playersQueue[i])
+			playersQueue.splice(i, 1);
 	}
 
 	@SubscribeMessage('ready')
