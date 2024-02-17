@@ -173,14 +173,13 @@ const OnlineGame = () => {
 
 		//Create socket listeners
 		if (socket) {
-			socket.on('userJoinedLobby', (newUserId: string) => {
+			socket.on('userJoinedSocket', (newUserId: string) => {
 				console.log('New user connected:', newUserId);
-				setOppId(newUserId);
 			});
-			socket.on('userLeftServer', (userId: string) => {
+			socket.on('userLeftSocket', (userId: string) => {
 				console.log('User disconnected:', userId);
 				if (userId === oppId) {
-					socket.emit('playerDisconnect', {userId, lobby});
+					socket.emit('opponentLeft', {userId, lobby});
 					setOppId('');
 				}
 			});
@@ -249,6 +248,12 @@ const OnlineGame = () => {
 	const joinQueueHandler = () => {
 		setInQueue(true);
 		socket.emit('joinQueue');
+		console.log('joined queue');
+	}
+
+	const leaveQueueHandler = () => {
+		setInQueue(false);
+		socket.emit('leaveQueue');
 	}
 
 	//database related functions
@@ -280,7 +285,7 @@ const OnlineGame = () => {
 		<div>
 			{lobby.length === 0 ? <div>
 				{inQueue === true ? <div>
-					<span>You are in queue</span>
+					<button className="Leave-queue-button" onClick={leaveQueueHandler}>Leave Queue</button>
 				</div> : <div>
 					<button className="Join-queue-button" onClick={joinQueueHandler}>Join Queue</button>
 				</div> }
