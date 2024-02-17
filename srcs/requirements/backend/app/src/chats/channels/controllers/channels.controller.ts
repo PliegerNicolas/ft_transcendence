@@ -15,7 +15,7 @@ export class ChannelsController {
     async getChannels() {
         // Should pass userId (if user is connected and passport validated or null)
         // For this moment userId is passed as 2.
-        return (await this.channelService.getChannels(BigInt(1)));
+        return (await this.channelService.getChannels(BigInt(2)));
     }
 
     @Get('channels/:channelId')
@@ -32,7 +32,7 @@ export class ChannelsController {
         return (await this.channelService.getChannelMembers(BigInt(2), channelId));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	//@UseGuards(AuthGuard('jwt'))
     @Post('channels')
     async createChannel(
         @Body(new ValidationPipe) createChannelDto: CreateChannelDto
@@ -41,7 +41,7 @@ export class ChannelsController {
         return (await this.channelService.createChannel(BigInt(1), createChannelDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	//@UseGuards(AuthGuard('jwt'))
     @Put('channels/:channelId')
     async replaceChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -51,7 +51,7 @@ export class ChannelsController {
         return (await this.channelService.replaceChannel(BigInt(1), channelId, replaceChannelDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	//@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId')
     async updateChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -61,7 +61,7 @@ export class ChannelsController {
         return (await this.channelService.updateChannel(BigInt(1), channelId, updateChannelDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	//@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId/join')
     async joinChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -70,7 +70,7 @@ export class ChannelsController {
         return (await this.channelService.joinChannel(BigInt(2), channelId));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	//@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId/leave')
     async leaveChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -79,7 +79,7 @@ export class ChannelsController {
         return (await this.channelService.leaveChannel(BigInt(2), channelId));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	//@UseGuards(AuthGuard('jwt'))
     @Delete('channels/:channelId')
     async deleteChannel(@Param('channelId', ParseIdPipe) channelId: bigint) {
         // For this moment userId is passed as 2. Need passport.
