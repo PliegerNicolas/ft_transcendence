@@ -52,3 +52,10 @@ export interface ChanType {
 	name: string,
 	membersCount: number,
 }
+
+export interface NotifType {
+	date: number,
+	content: string,
+	type: number,
+	id: number,
+}

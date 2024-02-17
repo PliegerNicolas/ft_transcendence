@@ -1,16 +1,11 @@
 import { useEffect, useState } from "react";
+import { NotifType } from "../utils/types";
 
 import closeIcon from "../assets/close.svg";
 
-/*
-** This component is one big chunk of spaghetti shit.
-**
-** Don't look too much into it, please.
-*/
-
 export default function Notifs(
 	{list, setList}:
-	{list: {type: number, content: string, date: number}[], setList: Function}
+	{list: NotifType[], setList: Function}
 )
 {
 	function rmNotif(date: number) {
@@ -22,7 +17,7 @@ export default function Notifs(
 		<div className="Notifs">
 		{
 			list.map((notif, index) =>
-				<div key={notif.date} style={{
+				<div key={notif.id} style={{
 					opacity: "" + (1 - .33 * ((list.length - 3) - index)),
 					display: (index < list.length - 5) ? "none" : "auto"
 				}}>
@@ -39,7 +34,7 @@ export default function Notifs(
 
 function Notif(
 	{notif, rmSelf}:
-	{notif: {type: number, content: string, date: number}, rmSelf: Function}
+	{notif: NotifType, rmSelf: Function}
 )
 {
 	const [fade, setFade] = useState(false);

@@ -16,6 +16,11 @@ import "../../styles/chat.css";
 import Spinner from "../Spinner.tsx";
 import ChatHeader from "./ChatHeader.tsx";
 
+interface UserListEntry {
+	username: string,
+	id: number,
+}
+
 // <ChanEdit /> ================================================================
 
 export default function ChanEdit({id}: {id: number})
@@ -25,13 +30,12 @@ export default function ChanEdit({id}: {id: number})
 		status: "public",
 		password: "",
 		passwordRepeat: "",
-		allowed: [{username: "Your username", id: 1},],
+		allowed: [
+			{username: "Your username", id: 1},
+		],
 		banned: [],
 		admins: [
-			{username: "mlaneyri", id: 1},
-			{username: "julboyer", id: 2},
-			{username: "nplieger", id: 3},
-			{username: "anbourge", id: 4},
+			{username: "Your username", id: 1},
 		],
 	});
 
@@ -71,7 +75,36 @@ export default function ChanEdit({id}: {id: number})
 	});
 
 	function updateField(field: string, value: unknown) {
-		return ({ ...chan, [field]: value });
+		setChan(prev => {
+			return {...prev, [field]: value };
+		});
+	}
+
+	function isInList(field: keyof typeof chan, value: UserListEntry) {
+		const list = chan[field];
+
+		if (!Array.isArray(list))
+			return false;
+		return (list.some(elem => elem.id == value.id));
+	}
+
+	function rmFromList(field: keyof typeof chan, value: UserListEntry) {
+		const list = chan[field];
+
+		if (!Array.isArray(list))
+			return ;
+		updateField(field, list.filter(elem => elem.id != value.id));
+	}
+
+	function addToList(field: keyof typeof chan, value: UserListEntry) {
+		if (isInList(field, value))
+			return ;
+
+		const list = chan[field];
+
+		if (!Array.isArray(list))
+			return ;
+		updateField(field, [...list, value]);
 	}
 
 	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -82,7 +115,7 @@ export default function ChanEdit({id}: {id: number})
 				passwordRepeat: "",
 			});
 		}
-		else setChan(updateField(e.target.name, e.target.value));
+		else updateField(e.target.name, e.target.value);
 	}
 
 	function patch<T>(a: T, b: T) {
@@ -216,8 +249,18 @@ export default function ChanEdit({id}: {id: number})
 						<UserList
 							title="Banned users"
 							list={chan.banned}
-							update={(value: {username: string, id: number}) =>
-								setChan(updateField("banned", value))}
+							add={(value: UserListEntry) => {
+								if (value.id == 1)
+									return addNotif({content: "You cannot ban yourself!"});
+								else if (isInList("admins", value))
+									return addNotif({content: "This user is an admin, please"
+									+ " unadmin them before banning them."});
+								rmFromList("allowed", value);
+								addToList("banned", value);
+							}}
+							rm={(value: UserListEntry) => {
+								rmFromList("banned", value)
+							}}
 							owner={null}
 						/>
 					</section>
@@ -230,8 +273,17 @@ export default function ChanEdit({id}: {id: number})
 					<UserList
 						title="Allowed users"
 						list={chan.allowed}
-						update={(value: {username: string, id: number}) =>
-							setChan(updateField("allowed", value))}
+						add={(value: UserListEntry) => {
+							addToList("allowed", value);
+							rmFromList("banned", value);
+						}}
+						rm={(value: UserListEntry) => {
+							if (isInList("admins", value))
+								return addNotif({content: "This user is an admin, please"
+									+ " unadmin them before taking them access."});
+							rmFromList("admins", value);
+							rmFromList("allowed", value);
+						}}
 						owner={chan.allowed[0]}
 					/>
 				</section>
@@ -242,8 +294,15 @@ export default function ChanEdit({id}: {id: number})
 					<UserList
 						title="Admins"
 						list={chan.admins}
-						update={(value: {username: string, id: number}) =>
-							setChan(updateField("admins", value))}
+						add={(value: UserListEntry) => {
+							if (chan.status == "public" && isInList("banned", value))
+								return addNotif({content: "This user is banned, please unban"
+									+ " them before making them admin."});
+							rmFromList("banned", value);
+							addToList("allowed", value);
+							addToList("admins", value);
+						}}
+						rm={(value: UserListEntry) => rmFromList("admins", value)}
 						owner={chan.admins[0]}
 					/>
 				</section>
@@ -263,8 +322,8 @@ export default function ChanEdit({id}: {id: number})
 }
 
 function UserList(
-	{title, list, update, owner}:
-	{title: string, list: {username: string, id: number}[], update: Function, owner: {username: string, id: number} | null}
+	{title, list, add, rm, owner}:
+	{title: string, list: UserListEntry[], add: Function, rm: Function, owner: UserListEntry | null}
 )
 {
 	const listFilter = owner ? list.filter(user => user.id != owner.id) : list;
@@ -272,7 +331,9 @@ function UserList(
 	const listHTML = listFilter.map(user =>
 		<div className="UserList__Item" key={user.id}>
 			<div>{user.username}</div>
-			<button type="button" onClick={() => rm(user.id)}>
+			<button type="button" onClick={() => {
+					rm(list.find(elem => elem.id == user.id))
+			}}>
 				<img src={closeIcon}/>
 			</button>
 		</div>);
@@ -281,20 +342,25 @@ function UserList(
 
 	const anchorRef = useRef<HTMLDivElement>(null);
 
-	function add() {
-		update([
-			...list,
-			{username: newAdmin, id: +Math.random().toString().slice(-10, -1)}
-		]);
-		setNewAdmin("");
-		setTimeout(() =>
-			anchorRef.current?.scrollIntoView({block: "end", inline: "nearest"}),
-			1
-		);
-	}
+	const { api, addNotif } = useContext(MyContext);
 
-	function rm(id: number) {
-		update(list.filter(user => user.id != id));
+	async function addUser() {
+		setNewAdmin("");
+		try {
+			const query = await api.get("/users/" + newAdmin);
+
+			if (list.some(elem => elem.id === query.id))
+				addNotif({content: "This user is already in the list: " + newAdmin});
+			else
+				add({username: newAdmin, id: query.id});
+			setTimeout(() =>
+				anchorRef.current?.scrollIntoView({block: "end", inline: "nearest"}),
+				1
+			);
+		}
+		catch (error) {
+			if (error instanceof Error) addNotif({content: error.message})
+		}
 	}
 
 	return (
@@ -335,14 +401,14 @@ function UserList(
 								return;
 							e.preventDefault();
 							if (newAdmin.length)
-								add();
+								addUser();
 						}}
 						placeholder="Add a user"
 					/>
 				</div>
 				<button
 					type="button" className="add"
-					onClick={add}
+					onClick={addUser}
 					disabled={!newAdmin.length}
 				>
 					<img src={addIcon}/>

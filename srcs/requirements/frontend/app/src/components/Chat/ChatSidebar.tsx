@@ -25,7 +25,7 @@ export default function ChatSidebar()
 
 	const getChans = useQuery({
 		queryKey: ["allChans"],
-		queryFn: () => context.api.get("/channels")
+		queryFn: () => context.api.get("/channels"),
 	});
 
 	return (
