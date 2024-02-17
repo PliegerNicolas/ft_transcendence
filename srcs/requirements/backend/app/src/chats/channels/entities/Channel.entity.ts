@@ -1,6 +1,6 @@
 import { IsEnum } from "class-validator";
 import { Message } from "src/chats/messages/entities/Message.entity";
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ChannelMember } from "./ChannelMember.entity";
 
 export enum ChannelStatus {
@@ -23,6 +23,12 @@ export class Channel {
     @IsEnum(ChannelStatus)
     @Column({ type: 'enum', enum: ChannelStatus, default: ChannelStatus.PRIVATE })
     status: ChannelStatus;
+
+    @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    createdAt: Date;
+
+    @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    updatedAt: Date;
 
     @OneToMany(() => ChannelMember, (member) => member.channel, { cascade: true })
     members?: ChannelMember[];
