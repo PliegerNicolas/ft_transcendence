@@ -34,7 +34,7 @@ export class ChannelsService {
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (!channel.members.some((member) => member.user.id == userId)) {
+        else if (!channel.members.some((member) => BigInt(member.user.id) === userId)) {
             throw new UnauthorizedException(`User with ID ${userId} isn't member of channel with ID ${channelId}`);
         }
 
@@ -50,7 +50,7 @@ export class ChannelsService {
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (!channel.members.some((member) => member.user.id == userId)) {
+        else if (!channel.members.some((member) => BigInt(member.user.id) === userId)) {
             throw new UnauthorizedException(`User with ID ${userId} isn't member of channel with ID ${channelId}`);
         }
 
@@ -83,7 +83,7 @@ export class ChannelsService {
         })
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (!channel.members.some((member) => member.user.id == userId)) {
+        else if (!channel.members.some((member) => BigInt(member.user.id) === userId)) {
             throw new UnauthorizedException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
 
@@ -102,7 +102,7 @@ export class ChannelsService {
         })
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (!channel.members.some((member) => member.user.id == userId)) {
+        else if (!channel.members.some((member) => BigInt(member.user.id) === userId)) {
             throw new UnauthorizedException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
 
@@ -127,7 +127,7 @@ export class ChannelsService {
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (channel.members.some((member) => member.user.id == userId)) {
+        else if (channel.members.some((member) => BigInt(member.user.id) === userId)) {
             throw new UnauthorizedException(`User with ID ${userId} is already member of channel with ID ${channelId}`);
         }
 
@@ -153,7 +153,7 @@ export class ChannelsService {
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (!channel.members.some((member) => member.user.id == userId)) {
+        else if (!channel.members.some((member) => BigInt(member.user.id) === userId)) {
             throw new UnauthorizedException(`User with ID ${userId} is not member of channel with ID ${channelId}`);
         }
 
@@ -172,7 +172,7 @@ export class ChannelsService {
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
-        const user = channel.members.find((member) => member.user.id == userId)
+        const user = channel.members.find((member) => BigInt(member.user.id) === userId)
 
         if (!user) throw new UnauthorizedException(`User with ID ${userId} isn't member of channel with ID ${channelId}`);
         else if (user.role !== ChannelRole.ADMIN) throw new UnauthorizedException(`User with ID ${userId} hasn't got enough permissions to delete Channel with ID ${channelId}`);
