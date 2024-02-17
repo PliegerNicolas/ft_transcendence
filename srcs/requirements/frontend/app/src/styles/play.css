@@ -8,27 +8,40 @@
 	box-shadow: 0 0 12px #000a;
 }
 
-.Create-lobby-button {
-	width: 10vw;
-	height: 5vh;
-  	font-size: 2.5vh;
+.Join-queue-button {
+	width: 30vw;
+	height: 20vh;
+  	font-size: 8vh;
 
-	position: fixed;
-	top: 66px;
-	left: 210px;
+	object-fit: contain;
+	box-shadow: 0 0 12px #000a;
+	margin-left: 20vw;
+  
+	background-color: #316f31;
+	border-color: #47a347;
+}
+
+.Join-queue-button:hover {
+	background-color: #47a347;
+}
+
+.Leave-queue-button {
+	width: 30vw;
+	height: 20vh;
+  	font-size: 8vh;
+
+	object-fit: contain;
+	box-shadow: 0 0 12px #000a;
+	display: flex;
+	align-items: center;
+	justify-content: center;
   
 	background-color: #6f313c;
 	border-color: #994353;
 }
 
-.Create-lobby-button:hover {
+.Leave-queue-button:hover {
 	background-color: #994353;
-}
-
-.Lobby-list {
-	position: fixed;
-	top: 111px;
-	left: 215px;
 }
 
 .Start-button {
@@ -37,10 +50,10 @@
   	font-size: 2.5vh;
 	justify-content:flex-start;
   
-	background-color: #316f31;
-	border-color: #47a347;
+	background-color: #6f313c;
+	border-color: #994353;
 }
 
 .Start-button:hover {
-	background-color: #47a347;
+	background-color: #994353;
 }
