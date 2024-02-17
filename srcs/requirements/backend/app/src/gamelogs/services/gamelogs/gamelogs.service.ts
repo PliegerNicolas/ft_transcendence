@@ -62,21 +62,7 @@ export class GamelogsService {
         const gamelogToUsers = await this.createGamelogToUsers(gamelogDetails.userResults, null);
         delete gamelogDetails.userResults;
 
-        // CA MARCHE PAS ICI MAIS JE VERRAI PLUS TARD
-        let gamelog = await this.gamelogRepository.findOne({
-            where: {
-                gamelogToUsers: {
-                    user: In(gamelogToUsers.map((gamelogToUser) => gamelogToUser.user)),
-                },
-            },
-            relations: ['gamelogToUsers'],
-        });
-
-        if (gamelogToUsers.length !== gamelog.gamelogToUsers.length) {
-            throw new BadRequestException('test');
-        }
-
-        gamelog = this.gamelogRepository.create({
+        const gamelog = this.gamelogRepository.create({
             ...gamelogDetails,
             gamelogToUsers,
         });
