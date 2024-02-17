@@ -13,11 +13,10 @@ import { ChanType } from "../../utils/types.ts";
 
 // <ChatSidebar /> =============================================================
 
-export default function ChatSidebar()
-{
+export default function ChatSidebar() {
 	const loc = useLocation();
 	const idArray = loc.pathname.match(/\/[^/]*$/);
-	const id = idArray?.length ? idArray[0].slice(1) : 0;
+	const id = idArray?.length ? idArray[0].slice(1) : "";
 
 	const { showSidebar } = useContext(ChatContext);
 
@@ -25,7 +24,7 @@ export default function ChatSidebar()
 
 	const getChans = useQuery({
 		queryKey: ["allChans"],
-		queryFn: () => context.api.get("/channels"),
+		queryFn: () => context.api.get("/channels").then(data => data.sort()),
 	});
 
 	return (
@@ -44,12 +43,12 @@ export default function ChatSidebar()
 			</h4>
 			{
 				getChans.isSuccess &&
-					<div className="Chat__Chanlist">
+				<div className="Chat__Chanlist">
 					{
-						getChans.data.map((chan : ChanType) =>
+						getChans.data.map((chan: ChanType) =>
 							<Link
-								to={chan.id}
-								className={`Chat__ChanListItem ${id === chan.id && "curr"}`}
+								to={"" + chan.id}
+								className={`Chat__ChanListItem ${id == chan.id && "curr"}`}
 								key={chan.id}
 							>
 								<div className="Chat__ChanListItemName">
@@ -60,13 +59,13 @@ export default function ChatSidebar()
 								</div>
 							</Link>)
 					}
-					</div>
+				</div>
 				|| getChans.isPending &&
-					<Spinner />
+				<Spinner />
 				|| getChans.isError &&
-					<div className="error-msg" style={{marginLeft: "25px"}}>
-						{getChans.error.message}
-					</div>
+				<div className="error-msg" style={{ marginLeft: "25px" }}>
+					{getChans.error.message}
+				</div>
 			}
 		</div>
 	);
