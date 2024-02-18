@@ -82,7 +82,12 @@ const OnlineGame = () => {
 		const drawGame = (new_gameState: InputPayloads) => {
 
 			const drawBackground = () => {
-				gameContext!.fillStyle = backgroundColor;
+				if (backgroundColor === paddlesColor || backgroundColor === ballColor) {
+					gameContext!.fillStyle = "#000";
+				}
+				else {
+					gameContext!.fillStyle = backgroundColor;
+				}
 				gameContext!.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 			}
 
@@ -264,6 +269,15 @@ const OnlineGame = () => {
 		socket.emit('leaveQueue');
 	}
 
+	const backToMenuHandler = () => {
+		setInQueue(false);
+		setPlayerReady(false);
+		setGameReady(false);
+		setGameOver(false);
+		socket.emit('leaveLobby', lobby);
+		setLobby('');
+	}
+
 	//database related functions
 
 	/*const context = useContext(MyContext);
@@ -292,31 +306,49 @@ const OnlineGame = () => {
 	return (
 		<div>
 			{gameReady === true ? <div>
-			</div> : <div>
-				<select onChange={(e) => setPaddlesColor(e.target.value)}>
-					<option value="#fff">default</option>
-    				<option value="#cc0000">red</option>
-    				<option value="#2eb82e">green</option>
-    				<option value="#008ae6">blue</option>
-   				</select>
-				<select onChange={(e) => setBackgroundColor(e.target.value)}>
-					<option value="#000">default</option>
-    				<option value="#cc0000">red</option>
-    				<option value="#2eb82e">green</option>
-    				<option value="#008ae6">blue</option>
-   				</select>
-				<select onChange={(e) => setBallColor(e.target.value)}>
-					<option value="#fff">default</option>
-    				<option value="#cc0000">red</option>
-    				<option value="#2eb82e">green</option>
-    				<option value="#008ae6">blue</option>
-   				</select>
-			</div>}
+			</div> : <section className="Play__SelectorSection">
+				<h3>Customize your game</h3>
+				<div className="Play__Selectors">
+					<div className="Play__PaddleSelector">
+						<span className="Play__CustomName">Paddle</span>
+						<select className="Play__PaddleSelect" onChange={(e) => setPaddlesColor(e.target.value)}>
+							<option value="#fff">default</option>
+    						<option value="#cc0000">red</option>
+    						<option value="#2eb82e">green</option>
+    						<option value="#008ae6">blue</option>
+   						</select>
+					</div>
+					<div className="Play__BackgroundSelector">
+						<span>Background</span>
+						<select onChange={(e) => setBackgroundColor(e.target.value)}>
+							<option value="#000">default</option>
+    						<option value="#cc0000">red</option>
+    						<option value="#2eb82e">green</option>
+    						<option value="#008ae6">blue</option>
+   						</select>
+					</div>
+					<div className="Play__BallSelector">
+						<span>Ball</span>
+						<select onChange={(e) => setBallColor(e.target.value)}>
+							<option value="#fff">default</option>
+    						<option value="#cc0000">red</option>
+    						<option value="#2eb82e">green</option>
+    						<option value="#008ae6">blue</option>
+   						</select>
+					</div>
+				</div>
+			</section>}
 			{lobby.length === 0 ? <div>
 				{inQueue === true ? <div>
-					<button className="Leave-queue-button" onClick={leaveQueueHandler}>Leave Queue</button>
+					<span className="Play__InQueueText">In Queue</span>
+					<div className="Play__Ellipsis">
+  						<div className="Play__Dot" style={{ '--dot-index': 1 } as React.CSSProperties}></div>
+  						<div className="Play__Dot" style={{ '--dot-index': 2 } as React.CSSProperties}></div>
+  						<div className="Play__Dot" style={{ '--dot-index': 3 } as React.CSSProperties}></div>
+					</div>
+					<button className="Play__LeaveQueueButton Play__ButtonAnimation" onClick={leaveQueueHandler}>Leave Queue</button>
 				</div> : <div>
-					<button className="Join-queue-button" onClick={joinQueueHandler}>Join Queue</button>
+					<button className="Play__JoinQueueButton Play__ButtonAnimation" onClick={joinQueueHandler}>Join Queue</button>
 				</div> }
 			</div> : <div>
 				{gameReady === true ? <div>
@@ -324,13 +356,19 @@ const OnlineGame = () => {
 						ref={canvasRef}
 						width={WINDOW_WIDTH}
 						height={WINDOW_HEIGHT}
-						className="Canvas">
+						className="Play__Canvas">
 					</canvas>
+					{gameOver === true ? <div>
+						<button className="Play__BackToMenu" onClick={backToMenuHandler}>Back to Menu</button>
+					</div> : <div></div>}
 				</div> : <div>
+					<div className="Play__ReadyCheckText">
+						<span>You have found an opponent !</span>
+					</div>
 					{playerReady === true ? <div>
-						<button className="Not-ready-button" onClick={notReadyCheckHandler}>Not Ready</button>
+						<button className="Play__NotReadyButton Play__ButtonAnimation" onClick={notReadyCheckHandler}>Not Ready</button>
 					</div> : <div>
-						<button className="Ready-button" onClick={readyCheckHandler}>Ready</button>
+						<button className="Play__ReadyButton Play__ButtonAnimation" onClick={readyCheckHandler}>Ready</button>
 					</div>}
 				</div> }
 			</div> }
