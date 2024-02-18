@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserResult } from 'src/gamelogs/dtos/UserResult.dto';
 import { Gamelog } from 'src/gamelogs/entities/Gamelog.entity';
@@ -62,21 +62,7 @@ export class GamelogsService {
         const gamelogToUsers = await this.createGamelogToUsers(gamelogDetails.userResults, null);
         delete gamelogDetails.userResults;
 
-        // CA MARCHE PAS ICI MAIS JE VERRAI PLUS TARD
-        let gamelog = await this.gamelogRepository.findOne({
-            where: {
-                gamelogToUsers: {
-                    user: In(gamelogToUsers.map((gamelogToUser) => gamelogToUser.user)),
-                },
-            },
-            relations: ['gamelogToUsers'],
-        });
-
-        if (gamelogToUsers.length !== gamelog.gamelogToUsers.length) {
-            throw new BadRequestException('test');
-        }
-
-        gamelog = this.gamelogRepository.create({
+        const gamelog = this.gamelogRepository.create({
             ...gamelogDetails,
             gamelogToUsers,
         });

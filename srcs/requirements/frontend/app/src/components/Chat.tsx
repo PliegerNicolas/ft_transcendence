@@ -1,4 +1,18 @@
-import { useEffect, useState, useRef } from "react";
+import Construction from "./Construction";
+
+function Chat()
+{
+	return (
+		<main className="MainContent">
+			<h2>Chat</h2>
+			<Construction />
+		</main>
+	);
+}
+
+export default Chat;
+
+/*import { useEffect, useState, useRef } from "react";
 import { io } from 'socket.io-client';
 import { format } from 'date-fns';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
@@ -90,13 +104,13 @@ function Chat() {
 		setChannels(prev => [...prev, user]);
 	}
 
-	/*const onPrivSubmit = () => {
+	const onPrivSubmit = () => {
 		socket.emit('newMessage', {
 			content: privmsg,
 			channel: channel
 		});
 		setPrivmsg('');
-	}*/
+	}
 
 	const onClickJoinChannel = () => {
 		socket.emit('joinChannel', 'general');
@@ -162,7 +176,7 @@ function Chat() {
 	);
 }
 
-export default Chat;
+export default Chat;*/
 
 /*<span>Send private message : </span>
 							<input

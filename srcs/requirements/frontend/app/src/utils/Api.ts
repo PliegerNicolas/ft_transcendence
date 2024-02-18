@@ -43,6 +43,15 @@ async get(endpoint: string) {
 		return (this.#return_switch(response));
 	};
 
+	async put(endpoint: string, body: any) {
+		const response = await fetch(this.base_url + endpoint, {
+			method: "PUT",
+			headers: this.headers,
+			body: JSON.stringify(body)
+		});
+		return (this.#return_switch(response));
+	};
+
 	async patch(endpoint: string, body: any) {
 		const response = await fetch(this.base_url + endpoint, {
 			method: "PATCH",
