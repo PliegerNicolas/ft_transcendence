@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Request, UseGuards, ValidationPipe } from '@nestjs/common';
 import { ChannelsService } from '../services/channels/channels.service';
 import { CreateChannelDto } from '../dtos/CreateChannel.dto';
 import { UpdateChannelDto } from '../dtos/UpdateChannel.dto';
@@ -6,6 +6,7 @@ import { ReplaceChannelDto } from '../dtos/ReplaceChannel.dto';
 import { ParseIdPipe } from 'src/common/pipes/parse-id/parse-id.pipe';
 import { AuthGuard } from '@nestjs/passport';
 import { RoleGuard } from 'src/role/role.guard';
+import { Role } from 'src/role/role.decorator';
 
 @Controller()
 export class ChannelsController {
@@ -33,58 +34,66 @@ export class ChannelsController {
         return (await this.channelService.getChannelMembers(BigInt(2), channelId));
     }
 
-	//@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'))
     @Post('channels')
     async createChannel(
-        @Body(new ValidationPipe) createChannelDto: CreateChannelDto
+        @Body(new ValidationPipe) createChannelDto: CreateChannelDto,
+		@Request() req: any,
     ) {
         // For this moment userId is passed as 1. Need passport to set a significant value.
-        return (await this.channelService.createChannel(BigInt(1), createChannelDto));
+        return (await this.channelService.createChannel(BigInt(req.id), createChannelDto));
     }
 
-	//@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'))
     @Put('channels/:channelId')
     async replaceChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
-        @Body(new ValidationPipe) replaceChannelDto: ReplaceChannelDto
+        @Body(new ValidationPipe) replaceChannelDto: ReplaceChannelDto,
+		@Request() req: any
     ) {
         // For this moment userId is passed as 1. Need passport.
-        return (await this.channelService.replaceChannel(BigInt(1), channelId, replaceChannelDto));
+        return (await this.channelService.replaceChannel(BigInt(req.id), channelId, replaceChannelDto));
     }
 
-	//@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId')
     async updateChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
-        @Body(new ValidationPipe) updateChannelDto: UpdateChannelDto
+        @Body(new ValidationPipe) updateChannelDto: UpdateChannelDto,
+		@Request() req: any,
     ) {
         // For this moment userId is passed as 1. Need passport.
-        return (await this.channelService.updateChannel(BigInt(1), channelId, updateChannelDto));
+        return (await this.channelService.updateChannel(BigInt(req.id), channelId, updateChannelDto));
     }
 
-	//@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId/join')
     async joinChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
+		@Request() req: any,
     ) {
         // For this moment userId is passed as 2. Need passport.
-        return (await this.channelService.joinChannel(BigInt(2), channelId));
+        return (await this.channelService.joinChannel(BigInt(req.id), channelId));
     }
 
-	//@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId/leave')
     async leaveChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
+		@Request() req: any,
     ) {
         // For this moment userId is passed as 2. Need passport.
-        return (await this.channelService.leaveChannel(BigInt(2), channelId));
+        return (await this.channelService.leaveChannel(BigInt(req.id), channelId));
     }
 
-	//@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(RoleGuard)
     @Delete('channels/:channelId')
-    async deleteChannel(@Param('channelId', ParseIdPipe) channelId: bigint) {
+    async deleteChannel(@Param('channelId', ParseIdPipe) channelId: bigint,
+						@Request() req: any,
+						) {
         // For this moment userId is passed as 2. Need passport.
-        return (await this.channelService.deleteChannel(BigInt(2), channelId));
+        return (await this.channelService.deleteChannel(BigInt(req.user.id), channelId));
     }
 
 }

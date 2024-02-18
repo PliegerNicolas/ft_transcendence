@@ -12,8 +12,8 @@ import { Repository } from 'typeorm';
 export class RoleGuard implements CanActivate {
 	constructor(private reflector: Reflector,
 				private jwtService : JwtService,
-				@InjectRepository(Channel)
-				private channelRepository : Repository<Channel>,
+				@InjectRepository(ChannelMember)
+				private channelMemberRepository : Repository<ChannelMember>,
 				@InjectRepository(User)
 				private userRepository : Repository<User>) {}
   async canActivate(
@@ -26,22 +26,28 @@ export class RoleGuard implements CanActivate {
 	// console.log(user.channelId)
 	// console.log(token.user_id)
 
-	const test = await this.channelRepository.findOne({
+	const test = await this.channelMemberRepository.findOne({
 	relations : {
-			members : true
+			channel : true,
+			user : true
 		},
-		where : {id : params.channelId,
-			members : {
-				user : {
-					id : token.user_id
-				}
+		where : {
+			channel : {
+				id: params.channelId
+			},
+			user : {
+				id : token.user_id
 			}
 		}
 
 	}).then(
 		(data) => data
 	)
-	console.log(test)
+	if (test == null)
+	{
+		return (false);
+	}
+	console.log(test.role)
 
 	return true;
   }
