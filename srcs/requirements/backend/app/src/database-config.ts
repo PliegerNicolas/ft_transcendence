@@ -28,7 +28,6 @@ const dbConfig: TypeOrmModuleOptions = {
 		Message,
 	],
 	synchronize: true,
-	parseInt8: true,
 	//logging: true, // TEMP
 };
 
