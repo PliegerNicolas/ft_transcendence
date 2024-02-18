@@ -89,11 +89,6 @@ export class ChannelsService {
             throw new UnauthorizedException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
 
-        console.log(channel);
-
-        // Les members ne sont pas updated corrected pour une raison X ou Y
-        //channelId the members est null en update ???
-
         return (await this.channelRepository.save({
             ...channel,
             ...channelDetails,
@@ -112,11 +107,6 @@ export class ChannelsService {
         else if (!channel.members.some((member) => BigInt(member.user.id) === userId)) {
             throw new UnauthorizedException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
-
-        console.log(channel);
-
-        // Les members ne sont pas updated corrected pour une raison X ou Y
-        //channelId the members est null en update ???
 
         return (await this.channelRepository.save({
             ...channel,
