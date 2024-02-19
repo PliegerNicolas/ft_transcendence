@@ -7,15 +7,14 @@ import { Channel } from 'src/chats/channels/entities/Channel.entity';
 import { ChannelMember } from 'src/chats/channels/entities/ChannelMember.entity';
 import { User } from 'src/users/entities/User.entity';
 import { Repository } from 'typeorm';
+import { Role } from './role.decorator';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
-	constructor(private reflector: Reflector,
-				private jwtService : JwtService,
+	constructor(private jwtService : JwtService,
 				@InjectRepository(ChannelMember)
 				private channelMemberRepository : Repository<ChannelMember>,
-				@InjectRepository(User)
-				private userRepository : Repository<User>) {}
+				private reflector : Reflector) {}
   async canActivate(
     context: ExecutionContext,
   ): Promise<boolean> {
@@ -23,6 +22,7 @@ export class RoleGuard implements CanActivate {
   	const request = context.switchToHttp().getRequest();
 	const token = this.jwtService.decode(request.headers.authorization);
 	const params = request.params;
+	const roles = this.reflector.get(Role, context.getHandler());
 	// console.log(user.channelId)
 	// console.log(token.user_id)
 
@@ -47,7 +47,12 @@ export class RoleGuard implements CanActivate {
 	{
 		return (false);
 	}
-	console.log(test.role)
+	// console.log(test.role)
+	// console.log(roles);
+	if (roles.find((element) => element == test.role) == undefined)
+	{
+		return false;
+	}
 
 	return true;
   }

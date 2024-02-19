@@ -38,10 +38,11 @@ export class ChannelsController {
     @Post('channels')
     async createChannel(
         @Body(new ValidationPipe) createChannelDto: CreateChannelDto,
-		@Request() req: any,
+		@Request() req: any
     ) {
         // For this moment userId is passed as 1. Need passport to set a significant value.
-        return (await this.channelService.createChannel(BigInt(req.id), createChannelDto));
+		console.log(req)
+        return (await this.channelService.createChannel(BigInt(req.user.id), createChannelDto));
     }
 
 	@UseGuards(AuthGuard('jwt'))
@@ -52,7 +53,7 @@ export class ChannelsController {
 		@Request() req: any
     ) {
         // For this moment userId is passed as 1. Need passport.
-        return (await this.channelService.replaceChannel(BigInt(req.id), channelId, replaceChannelDto));
+        return (await this.channelService.replaceChannel(BigInt(req.user.id), channelId, replaceChannelDto));
     }
 
 	@UseGuards(AuthGuard('jwt'))
@@ -60,37 +61,38 @@ export class ChannelsController {
     async updateChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
         @Body(new ValidationPipe) updateChannelDto: UpdateChannelDto,
-		@Request() req: any,
+		@Request() req: any
     ) {
         // For this moment userId is passed as 1. Need passport.
-        return (await this.channelService.updateChannel(BigInt(req.id), channelId, updateChannelDto));
+        return (await this.channelService.updateChannel(BigInt(req.user.id), channelId, updateChannelDto));
     }
 
 	@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId/join')
     async joinChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
-		@Request() req: any,
+		@Request() req: any
     ) {
         // For this moment userId is passed as 2. Need passport.
-        return (await this.channelService.joinChannel(BigInt(req.id), channelId));
+        return (await this.channelService.joinChannel(BigInt(req.user.id), channelId));
     }
 
 	@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId/leave')
     async leaveChannel(
         @Param('channelId', ParseIdPipe) channelId: bigint,
-		@Request() req: any,
+		@Request() req: any
     ) {
         // For this moment userId is passed as 2. Need passport.
-        return (await this.channelService.leaveChannel(BigInt(req.id), channelId));
+        return (await this.channelService.leaveChannel(BigInt(req.user.id), channelId));
     }
 
-	@UseGuards(AuthGuard('jwt'))
-	@UseGuards(RoleGuard)
+	@Role(['admin'])
+	@UseGuards(AuthGuard('jwt'), RoleGuard)
+	// @UseGuards(RoleGuard)
     @Delete('channels/:channelId')
     async deleteChannel(@Param('channelId', ParseIdPipe) channelId: bigint,
-						@Request() req: any,
+						@Request() req: any
 						) {
         // For this moment userId is passed as 2. Need passport.
         return (await this.channelService.deleteChannel(BigInt(req.user.id), channelId));
