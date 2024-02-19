@@ -6,11 +6,13 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 20:08:41 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/14 16:27:05 by lnr              ###   ########.fr        #
+#    Updated: 2024/02/19 11:40:45 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # Latest stable version of alpine linux at 8 january 2024.
 FROM alpine:3.19.0
+
+ARG PORT
 
 # Install NODE.JS and NPM.
 RUN apk update && \
@@ -30,11 +32,8 @@ RUN npm install
 COPY ./app/ .
 RUN npm run build
 
-# Set environment variable for port
-ENV PORT=3450
-
 # Expose port 3450.
-EXPOSE 3450
+EXPOSE $PORT
 
 # Run NPM.
 CMD ["npm", "run", "start:dev", "--",  "--preserveWatchOutput"]

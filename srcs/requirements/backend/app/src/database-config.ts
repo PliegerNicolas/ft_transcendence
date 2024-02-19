@@ -13,7 +13,7 @@ const { TypeOrmModuleOptions } = require('@nestjs/typeorm');
 const dbConfig: TypeOrmModuleOptions = {
 	type: 'postgres',
 	host: 'database',
-	port: 5432,
+	port: parseInt(process.env.DB_PORT),
 	username: process.env.POSTGRES_USER,
 	password: process.env.POSTGRES_PASSWORD,
 	database: process.env.POSTGRES_DB,
