@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:41:05 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/12 20:32:11 by nicolas          ###   ########.fr        #
+#    Updated: 2024/02/19 11:36:18 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # Latest version as of january 8 2024
@@ -34,13 +34,15 @@ services:
     build:
       context: ./requirements/backend
       dockerfile: Dockerfile
+      args:
+        PORT: ${BACKEND_PORT}
     restart: unless-stopped
     env_file:
       - .env
     networks:
       - transcendence
     ports:
-      - "3450:3450"
+      - "${BACKEND_PORT}:3450"
     depends_on:
       - database
 
@@ -49,13 +51,15 @@ services:
     build:
       context: ./requirements/frontend
       dockerfile: Dockerfile
+      args:
+        PORT: ${FRONTEND_PORT}
     restart: unless-stopped
     env_file:
       - .env
     networks:
       - transcendence
     ports:
-      - "8080:8080"
+      - "${FRONTEND_PORT}:8080"
 
   database:
     container_name: database
@@ -64,6 +68,7 @@ services:
       dockerfile: Dockerfile
       args:
         PGDATA: ${PGDATA}
+        PORT: ${DB_PORT}
     restart: unless-stopped
     env_file:
       - .env

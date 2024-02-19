@@ -11,6 +11,7 @@ import { AuthService } from './auth/auth.service';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { BigIntSerializationInterceptor } from './common/interceptors/big-int-serialization/big-int-serialization.interceptor';
 import { GameModule } from './game/game.module';
+import { PasswordHashingService } from './common/services/password-hashing/password-hashing.service';
 
 const dbConfig = require('./database-config');
 
@@ -33,6 +34,7 @@ const dbConfig = require('./database-config');
 			provide: APP_INTERCEPTOR,
 			useClass: BigIntSerializationInterceptor,
 		},
+		PasswordHashingService,
 	],
 })
 export class AppModule {}

@@ -2,6 +2,7 @@ import { IsEnum } from "class-validator";
 import { Message } from "src/chats/messages/entities/Message.entity";
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ChannelMember } from "./ChannelMember.entity";
+import { Exclude } from "class-transformer";
 
 export enum ChannelStatus {
     PUBLIC = 'public',
@@ -23,6 +24,10 @@ export class Channel {
     @IsEnum(ChannelStatus)
     @Column({ type: 'enum', enum: ChannelStatus, default: ChannelStatus.PRIVATE })
     status: ChannelStatus;
+
+    //@Exclude()
+    @Column({ nullable: true })
+    password: string;
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;

@@ -6,7 +6,7 @@
 #    By: julboyer <julboyer@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 23:43:12 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/11 17:46:10 by nicolas          ###   ########.fr        #
+#    Updated: 2024/02/19 11:40:32 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,6 +15,7 @@ FROM alpine:3.19.0
 ENV LANG=en_US.utf8
 ENV PG_RUN_DIR=/run/postgresql
 ARG PGDATA
+ARG PORT
 
 # POSTGRES_USER, POSTGRES_PASSWORD and POSTGRES_DB variables set in .env file
 
@@ -44,7 +45,7 @@ COPY /conf/pg_hba.conf $PGDATA/
 ENTRYPOINT ["sh", "/docker-entrypoint-initdb.d/init-db.sh"]
 
 # Expose the default postgres port.
-EXPOSE 5432
+EXPOSE $PORT
 
 # Run postgres as given user.
 CMD ["postgres", "-c", "listen_addresses=*"]
