@@ -674,6 +674,12 @@
 	background: var(--bg-color-2);
 }
 
+.DeletePopup__Notice {
+	margin-bottom: 20px;
+	font-size: .92rem;
+	font-style: italic;
+}
+
 .DeletePopup__Buttons {
 	display: flex;
 	justify-content: space-between;

@@ -348,6 +348,9 @@ function DeletePopup({cancel, del}: {cancel: Function, del: Function})
 		<div className="Popup">
 			<div className="DeletePopup">
 				<h3>Are you sure you want to delete this channel?</h3>
+				<div className="DeletePopup__Notice">
+					Warning: This is a permanent operation!
+				</div>
 				<div className="DeletePopup__Buttons">
 					<button onClick={() => cancel()}>
 						Cancel

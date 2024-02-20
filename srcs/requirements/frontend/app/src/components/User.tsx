@@ -56,7 +56,10 @@ export default function User()
 	});
 
 	const postFriendship = useMutation({
-		mutationFn: () => api.post("/users/" + id + "/relationships/", {})
+		mutationFn: (username: string) =>
+			api.post("/users/mlaneyri/relationships/", {username}),
+			// HARDCODED USERNAME BECAUSE /ME WILL PROBABLY NOT BE IMPLEMENTED
+			// UNTIL THE HEAT DEATH OF THE UNIVERSE
 	});
 
 	function invalidate(queryKey: Array<any>) {
@@ -139,7 +142,9 @@ export default function User()
 						/>
 					</> :
 					<div className="User__ActionsButtons">
-						<button>Add as friend</button>
+						<button onClick={() => postFriendship.mutate(user.username)}>
+							Request as friend
+						</button>
 						<button>Block</button>
 					</div>
 				}
