@@ -53,7 +53,7 @@ export class UsersController {
 
     @Get('me')
     // UseGuard => Verify if user connected and pass it's req.user
-    async getMyself(
+    async getMyUser(
         @Request() req: any,
     ) {
         const username = req.user.username;
@@ -62,7 +62,7 @@ export class UsersController {
 
     @Put('me')
     // UseGuard => Verify if user connected and pass it's req.user
-    async replaceMyself(
+    async replaceMyUser(
         @Body(new ValidationPipe) replaceUserDto: ReplaceUserDto,
         @Request() req: any,
     ) {
@@ -72,7 +72,7 @@ export class UsersController {
 
     @Patch('me')
     // UseGuard => Verify if user connected and pass it's req.user
-    async updateMyself(
+    async updateMyUser(
         @Body(new ValidationPipe) updateUserDto: UpdateUserDto,
         @Request() req: any,
     ) {
@@ -82,7 +82,7 @@ export class UsersController {
 
     @Delete('me')
     // UseGuard => Verify if user connected and pass it's req.user
-    async deleteMyself(
+    async deleteMyUser(
         @Request() req: any,
     ) {
         const username = req.user.username;
