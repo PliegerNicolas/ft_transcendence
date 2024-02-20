@@ -52,6 +52,13 @@ export default function ChanEdit({id}: {id: number})
 		enabled: !!id,
 	});
 
+	const delChan = useMutation({
+		mutationFn: () => api.delete("/channels/" + id),
+		onSettled: () => invalidate(["allChans"]),
+		onSuccess: () => navigate("/chattest"),
+		onError: error => addNotif({content: error.message}),
+	});
+
 	useEffect(() => {
 		if (!getChan.isSuccess)
 			return ;
@@ -307,16 +314,23 @@ export default function ChanEdit({id}: {id: number})
 					/>
 				</section>
 			}
-			<button
-				style={{marginLeft: "15px"}}
-				onClick={(e) => {handleSubmit(e)}}
-				disabled={
-					chan.status === "public"
-					&& chan.password !== chan.passwordRepeat
+			<div className="ChanEdit__FinalButtons" style={{marginLeft: "15px"}}>
+				{
+					id &&
+					<button onClick={() => delChan.mutate()}>
+						Delete
+					</button>
 				}
-			>
-				Submit
-			</button>
+				<button
+					onClick={(e) => {handleSubmit(e)}}
+					disabled={
+						chan.status === "public"
+						&& chan.password !== chan.passwordRepeat
+					}
+				>
+					Submit
+				</button>
+			</div>
 		</form>
 	);
 }
