@@ -37,7 +37,7 @@ export class ProfilesService {
         return (user.profile);
     }    
 
-    async createProfile(username: string, profileDetails: CreateProfileParams): Promise<Profile> {
+    async createProfile(username: string = null, profileDetails: CreateProfileParams): Promise<Profile> {
         const user = await this.userRepository.findOne({
             where: { username: username },
             relations: ['profile'],
@@ -54,7 +54,7 @@ export class ProfilesService {
         return (await this.profileRepository.save(profile));
     }
 
-    async replaceProfile(username: string, profileDetails: ReplaceProfileParams): Promise<Profile> {
+    async replaceProfile(username: string = null, profileDetails: ReplaceProfileParams): Promise<Profile> {
         const profile = await this.profileRepository.findOne({
             where: { user: { username: username } },
         });
@@ -67,7 +67,7 @@ export class ProfilesService {
         }));
     }
 
-    async updateProfile(username: string, profileDetails: ReplaceProfileParams): Promise<Profile> {
+    async updateProfile(username: string = null, profileDetails: ReplaceProfileParams): Promise<Profile> {
         const profile = await this.profileRepository.findOne({
             where: { user: { username: username } },
         });
@@ -80,7 +80,7 @@ export class ProfilesService {
         }));
     }
 
-    async clearProfile(username: string): Promise<Profile> {
+    async clearProfile(username: string = null): Promise<Profile> {
         const profile = await this.profileRepository.findOne({
             where: { user: { username: username } },
         });

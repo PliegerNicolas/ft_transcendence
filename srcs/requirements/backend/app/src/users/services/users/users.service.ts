@@ -71,7 +71,7 @@ export class UsersService {
         return (await this.userRepository.save(user));
     }
 
-    async replaceUser(username: string, userDetails: ReplaceUserParams): Promise<User> {
+    async replaceUser(username: string = null, userDetails: ReplaceUserParams): Promise<User> {
         let user = await this.userRepository.findOne({
             where: { username: userDetails.username },
             relations: ['profile'],
@@ -84,7 +84,7 @@ export class UsersService {
         }));
     }
 
-    async updateUser(username: string, userDetails: UpdateUserParams): Promise<User> {
+    async updateUser(username: string = null, userDetails: UpdateUserParams): Promise<User> {
         let user = await this.userRepository.findOne({
             where: { username: userDetails.username },
             relations: ['profile'],
@@ -97,7 +97,7 @@ export class UsersService {
         }));
     }
 
-    async deleteUser(username: string): Promise<string> {
+    async deleteUser(username: string = null): Promise<string> {
         let user = await this.userRepository.findOne({
             where: { username: username },
             relations: ['profile'],
