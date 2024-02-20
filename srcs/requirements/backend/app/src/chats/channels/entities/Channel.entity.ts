@@ -38,7 +38,7 @@ export class Channel {
     @OneToMany(() => ChannelMember, (member) => member.channel, { cascade: true })
     members?: ChannelMember[];
 
-    @OneToMany(() => Message, (messages) => messages.channel, { cascade: true }) // soft deletion ?
+    @OneToMany(() => Message, (messages) => messages.channel) // soft deletion ?
     messages?: Message[];
 
     /* Helper Functions */
