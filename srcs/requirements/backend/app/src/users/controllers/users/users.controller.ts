@@ -11,7 +11,9 @@ export class UsersController {
 
     constructor(private userService: UsersService) {}
 
+    /* */
     /* Public PATHS: anyone can access. */
+    /* */
 
     @Post('users')
     async createUser(
@@ -21,7 +23,9 @@ export class UsersController {
     }
 
     
+    /* */
     /* Public filtered PATHS: anyone can access but connected users would see additional data. */
+    /* */
 
     @Get('users')
     // UseGuard => Verify if user is connected but permit anyone to pass.
@@ -43,7 +47,9 @@ export class UsersController {
         else return (await this.userService.getUser(username));
     }
 
+    /* */
     /* Private PATHS: need to be connected and concerned to access. */
+    /* */
 
     @Get('me')
     // UseGuard => Verify if user connected and pass it's req.user
@@ -83,10 +89,12 @@ export class UsersController {
         return (await this.userService.deleteUser(username));
     }
 
+    /* */
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
+    /* */
 
     @Put('users/:username')
-    // UseGuard => Verify if user connected or if user as special permissions (ADMIN, MODERATOR, ...)
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceUser(
         @Param('username', ParseUsernamePipe) username: string,
         @Body(new ValidationPipe) replaceUserDto: ReplaceUserDto,
@@ -95,7 +103,7 @@ export class UsersController {
     }
 
     @Patch('users/:username')
-    // UseGuard => Verify if user connected or if user as special permissions (ADMIN, MODERATOR, ...)
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateUser(
         @Param('username', ParseUsernamePipe) username: string,
         @Body(new ValidationPipe) updateUserDto: UpdateUserDto,
@@ -104,13 +112,15 @@ export class UsersController {
     }
 
     @Delete('users/:username')
-    // UseGuard => Verify if user connected or if user as special permissions (ADMIN, MODERATOR, ...)
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async deleteUser(
         @Param('username', ParseUsernamePipe) username: string,
     ) {
         return (await this.userService.deleteUser(username));
     }
 
+    /* */
     /* Front-end PATHS: need to be sent via front-end and verified via a jwt key. */
+    /* */
 
 }

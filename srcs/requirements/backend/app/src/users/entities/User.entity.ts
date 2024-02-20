@@ -1,9 +1,15 @@
 import { Exclude } from "class-transformer";
+import { IsEnum } from "class-validator";
 import { ChannelMember } from "src/chats/channels/entities/ChannelMember.entity";
 import { GamelogToUser } from "src/gamelogs/entities/GamelogToUser.entity";
 import { Profile } from "src/profiles/entities/Profile.entity";
 import { Relationship } from "src/relationships/entities/Relationship.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
+
+export enum GlobalServerPrivileges {
+    OPERATOR = 'operator',
+    USER = 'user',
+}
 
 @Entity({ name: 'users' })
 @Unique(['email', 'username'])
@@ -21,6 +27,10 @@ export class User {
 
     @Column({ unique: true, length: 25 })
     username: string;
+
+    @IsEnum(GlobalServerPrivileges)
+    @Column({ type: 'enum', enum: GlobalServerPrivileges, default: GlobalServerPrivileges.USER })
+    globalServerPrivileges: GlobalServerPrivileges;
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
