@@ -16,108 +16,97 @@ export class UsersService {
     ) {}
 
     async getUsers(): Promise<User[]> {
-        // Public ?
-        return (this.userRepository.find());
+        return (await this.userRepository.find());
     }
 
-    async getUser(username: string): Promise<User> {
-        // Public ?
+    async getMyUsers(username: string = null): Promise<User[]> {
+        return (await this.userRepository.find({
+            relations: ['relationships']
+        }));
+    }
+
+    async getUser(username: string = null): Promise<User> {
         const user = await this.userRepository.findOne({
             where: { username: username },
-            relations: ['profile']
+            relations: ['profile'],
         });
 
-        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
+        if (!user) throw new NotFoundException(`User '${username}' not found`);
+
+        return (user);
+    }
+
+    async getMyUser(username: string = null): Promise<User> {
+        const user = await this.userRepository.findOne({
+            where: { username: username },
+            relations: ['profile'],
+        });
+
+        if (!user) throw new NotFoundException(`User '${username}' not found`);
 
         return (user);
     }
 
     async createUser(userDetails: CreateUserParams): Promise<User> {
-        // Public
-        await this.verifyUserUnicity(userDetails.username, userDetails.oauthId);
+        const { username, oauthId }: { username: string, oauthId: bigint } = userDetails;
 
-        const newUser = this.userRepository.create({
-            ...userDetails,
-            profile: userDetails.profile ? userDetails.profile : this.profileRepository.create(),
+        let user = await this.userRepository.findOne({
+            where: [
+                { username: username },
+                { oauthId: oauthId },
+            ],
         });
 
-        return (await this.userRepository.save(newUser));
+        if (user) {
+            const errorDetails = [];
+            if (user.username === username) errorDetails.push(`Username '${userDetails.username}'`);
+            if (BigInt(user.oauthId) === BigInt(oauthId)) errorDetails.push(`OauthId '${userDetails.oauthId}'`);
+            throw new BadRequestException(`User with ${errorDetails.join(' and ')} already exists`);
+        }
+
+        user = this.userRepository.create({
+            ...userDetails,
+        });
+
+        return (await this.userRepository.save(user));
     }
 
     async replaceUser(username: string, userDetails: ReplaceUserParams): Promise<User> {
-        // Only if you're the target user.
-        await this.verifyUserUnicity(userDetails.username, userDetails.oauthId);
-
-        const user = await this.userRepository.findOne({
-            where: { username: username },
+        let user = await this.userRepository.findOne({
+            where: { username: userDetails.username },
             relations: ['profile'],
         });
 
-        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
+        if (!user) throw new NotFoundException(`User '${username}' not found`);
 
         return (await this.userRepository.save({
-            ...user,
             ...userDetails,
-            profile: {
-                ...user.profile,
-                ...userDetails.profile,
-            }
         }));
     }
 
     async updateUser(username: string, userDetails: UpdateUserParams): Promise<User> {
-        // Only if you're the target user.
-        await this.verifyUserUnicity(userDetails.username, userDetails.oauthId);
-
-        const user = await this.userRepository.findOne({
-            where: { username: username },
+        let user = await this.userRepository.findOne({
+            where: { username: userDetails.username },
             relations: ['profile'],
         });
 
-        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
+        if (!user) throw new NotFoundException(`User '${username}' not found`);
 
         return (await this.userRepository.save({
-            ...user,
             ...userDetails,
-            profile: {
-                ...user.profile,
-                ...userDetails.profile,
-            }
         }));
     }
 
     async deleteUser(username: string): Promise<string> {
-        // Only if you're the target user.
-        const user = await this.userRepository.findOne({
+        let user = await this.userRepository.findOne({
             where: { username: username },
+            relations: ['profile'],
         });
 
-        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
+        if (!user) throw new NotFoundException(`User '${username}' not found`);
 
         await this.userRepository.remove(user);
-        return (`User with Username '${username}' successfully deleted`);
-    }
-
-    /* Helper Functions */
-
-    private async verifyUserUnicity(username: string, oauthId: bigint) {
-        const existingUser = await this.userRepository.findOne({
-            where: [
-                { username },
-                { oauthId },
-            ],
-        })
-
-        if (existingUser) {
-            let errorMessage = `User with `;
-            if (existingUser.username === username) {
-                errorMessage += `Username (${username}) `;
-            }
-            if (existingUser.oauthId == oauthId) {
-                errorMessage += `${existingUser.username === username ? 'and ' : ''}OauthId (${oauthId}) `;
-            }
-            throw new BadRequestException(errorMessage + `already exists.`);
-        }
+        return (`User '${username}' successfully deleted`);
     }
 
 }

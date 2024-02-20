@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Request, UseGuards, ValidationPipe } from '@nestjs/common';
 import { CreateUserDto } from '../../dtos/CreateUser.dto';
 import { UsersService } from 'src/users/services/users/users.service';
 import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
@@ -6,50 +6,111 @@ import { ReplaceUserDto } from 'src/users/dtos/ReplaceUser.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
 
-@Controller('users')
+@Controller()
 export class UsersController {
 
     constructor(private userService: UsersService) {}
 
-	// @UseGuards(AuthGuard('jwt'))
-    @Get()
-    async getUsers() {
-        return (await this.userService.getUsers());
-    }
+    /* Public PATHS: anyone can access. */
 
-    //@UseGuards(AuthGuard('jwt'))
-    @Get(':username')
-    async getUser(@Param('username', ParseUsernamePipe) username: string) {
-        return (await this.userService.getUser(username));
-    }
-
-	//@UseGuards(AuthGuard('jwt'))
-    @Post()
-    async createUser(@Body(new ValidationPipe) createUserDto: CreateUserDto) {
+    @Post('users')
+    async createUser(
+        @Body(new ValidationPipe) createUserDto: CreateUserDto
+    ) {
         return (await this.userService.createUser(createUserDto));
     }
 
-    //@UseGuards(AuthGuard('jwt'))
-    @Put(':username')
-    async replaceUserById(
+    
+    /* Public filtered PATHS: anyone can access but connected users would see additional data. */
+
+    @Get('users')
+    // UseGuard => Verify if user is connected but permit anyone to pass.
+    async getUsers(
+        @Request() req: any,
+    ) {
+        const username = req.user.username;
+        if (username) return (await this.userService.getMyUsers(username));
+        else return (await this.userService.getUsers());
+    }
+
+    @Get('users/:username')
+    // UseGuard => Verify if user is connected but permit anyone to pass.
+    async getUser(
+        @Param('username', ParseUsernamePipe) username: string,
+        @Request() req: any,
+    ) {
+        if (req.user.username) return (await this.userService.getMyUser(username));
+        else return (await this.userService.getUser(username));
+    }
+
+    /* Private PATHS: need to be connected and concerned to access. */
+
+    @Get('me')
+    // UseGuard => Verify if user connected and pass it's req.user
+    async getMyself(
+        @Request() req: any,
+    ) {
+        const username = req.user.username;
+        return (await this.userService.getUser(username));
+    }
+
+    @Put('me')
+    // UseGuard => Verify if user connected and pass it's req.user
+    async replaceMyself(
+        @Body(new ValidationPipe) replaceUserDto: ReplaceUserDto,
+        @Request() req: any,
+    ) {
+        const username = req.user.username;
+        return (await this.userService.replaceUser(username, replaceUserDto));
+    }
+
+    @Patch('me')
+    // UseGuard => Verify if user connected and pass it's req.user
+    async updateMyself(
+        @Body(new ValidationPipe) updateUserDto: UpdateUserDto,
+        @Request() req: any,
+    ) {
+        const username = req.user.username;
+        return (await this.userService.updateUser(username, updateUserDto));
+    }
+
+    @Delete('me')
+    // UseGuard => Verify if user connected and pass it's req.user
+    async deleteMyself(
+        @Request() req: any,
+    ) {
+        const username = req.user.username;
+        return (await this.userService.deleteUser(username));
+    }
+
+    /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
+
+    @Put('users/:username')
+    // UseGuard => Verify if user connected or if user as special permissions (ADMIN, MODERATOR, ...)
+    async replaceUser(
         @Param('username', ParseUsernamePipe) username: string,
         @Body(new ValidationPipe) replaceUserDto: ReplaceUserDto,
     ) {
-        return (await this.userService.updateUser(username, replaceUserDto));
+        return (await this.userService.replaceUser(username, replaceUserDto));
     }
 
-    //@UseGuards(AuthGuard('jwt'))
-    @Patch(':username')
-    async updateUserById(
+    @Patch('users/:username')
+    // UseGuard => Verify if user connected or if user as special permissions (ADMIN, MODERATOR, ...)
+    async updateUser(
         @Param('username', ParseUsernamePipe) username: string,
         @Body(new ValidationPipe) updateUserDto: UpdateUserDto,
     ) {
         return (await this.userService.updateUser(username, updateUserDto));
     }
 
-    @Delete(':username')
-    async deleteUserById(@Param('username', ParseUsernamePipe) username: string) {
+    @Delete('users/:username')
+    // UseGuard => Verify if user connected or if user as special permissions (ADMIN, MODERATOR, ...)
+    async deleteUser(
+        @Param('username', ParseUsernamePipe) username: string,
+    ) {
         return (await this.userService.deleteUser(username));
     }
+
+    /* Front-end PATHS: need to be sent via front-end and verified via a jwt key. */
 
 }
