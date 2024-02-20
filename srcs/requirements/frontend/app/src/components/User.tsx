@@ -20,62 +20,80 @@ export default function User()
 	const params = useParams();
 	const id = params.id!;
 	const queryClient = useQueryClient();
-	const {api} = useContext(MyContext);
+	const { api } = useContext(MyContext);
 
-	const userGet = useQuery({
+	const getUser = useQuery({
 		queryKey: ["users", id],
 		queryFn: () => api.get("/users/" + id),
 		retry: stopOnHttp
 	});
 
-	const userDel = useMutation({
+	const delUser = useMutation({
 		mutationFn: () => api.delete("/users/" + id),
 		onSettled: () => invalidate(["users", id])
 	});
 
-	const friendshipsGet = useQuery({
+	const getFriendships = useQuery({
 		queryKey: ["users", id, "friends"],
 		queryFn: () => api.get("/users/" + id + "/relationships"),
-		enabled: userGet.isSuccess,
+		enabled: getUser.isSuccess,
 		retry: stopOnHttp
 	});
 
-	const friendshipAccept = useMutation({
-		mutationFn: (friendId: string) =>
+	const patchFriendship = useMutation({
+		mutationFn: ({friendId, status}: {friendId: string, status: string}) =>
 			api.patch(
 				"/users/" + id + "/relationships/" + friendId,
-				{status: "accepted"}
+				{status: status}
 			),
-		onSettled: () => invalidate(["users", id, "friends"])
+		onSettled: () => invalidate(["users", id, "friends"]),
+	});
+
+	const delFriendship = useMutation({
+		mutationFn: (friendId: string) =>
+			api.delete("/users/" + id + "/relationships/" + friendId),
+		onSettled: () => invalidate(["users", id, "friends"]),
+	});
+
+	const postFriendship = useMutation({
+		mutationFn: () => api.post("/users/" + id + "/relationships/", {})
 	});
 
 	function invalidate(queryKey: Array<any>) {
 		queryClient.invalidateQueries({queryKey});
 	}
 
-	if (!userGet.isSuccess) return (
+	if (!getUser.isSuccess) return (
 		<main className="MainContent">
 		{
-			userGet.isPending ?
+			getUser.isPending ?
 			<div className="p-style">
 				<Spinner />
 			</div> :
 			<div className="p-style error-msg">
-				Failed to load user #{id}: {userGet.error.message}
+				Failed to load user #{id}: {getUser.error.message}
 			</div>
 		}
 		</main>
 	);
 
-	const user = userGet.data;
+	const user = getUser.data;
 	
 	function friendshipAction(action: string, ship: FriendshipType) {
+		const other = ship.user1.username == id ? ship.user2.username : ship.user1.username;
+
 		switch (action) {
 			case "approve":
-				friendshipAccept.mutate(
-					ship.user1.id == id ? ship.user2.id : ship.user1.id
-				);
-			break ;
+				patchFriendship.mutate({
+					friendId: other,
+					status: "accepted"
+				});
+				break ;
+			case "delete":
+			case "cancel":
+			case "reject":
+				delFriendship.mutate(other);
+				break ;
 		}
 	}
 
@@ -91,7 +109,9 @@ export default function User()
 				</h2>
 				<div className="User__Infos">
 					<div className="User__PictureContainer">
-						<img className="User__Picture" src={defaultPicture}/>
+						<label htmlFor={user.id == 1 ? "userPicture" : "machin"}>
+							<img className="User__Picture" src={defaultPicture}/>
+						</label>
 						<img className="User__PictureBg" src={defaultPicture}/>
 					</div>
 					<div className="genericList User__InfoItems">
@@ -102,13 +122,31 @@ export default function User()
 						<div><div>Last Name</div> <div>{user.profile?.lastName}</div></div>
 					</div>
 				</div>
+				<input
+					type="file" id="userPicture" name="userPicture"
+					style={{display: "none"}}
+					onChange={e => {console.log(e.currentTarget.files![0]);}}
+				/>
 				<hr />
-				<h3>User friendships:</h3>
-				<Friendships id={id} query={friendshipsGet} action={friendshipAction}/>
+				{
+					user.id == 1 ?
+					<>
+						<h3>Your friendships:</h3>
+						<Friendships
+							id={id}
+							query={getFriendships}
+							action={friendshipAction}
+						/>
+					</> :
+					<div className="User__ActionsButtons">
+						<button>Add as friend</button>
+						<button>Block</button>
+					</div>
+				}
 			</section>
 			<button
 				style={{margin: "0 15px", color: "#f9c"}}
-				onClick={() => userDel.mutate()}
+				onClick={() => delUser.mutate()}
 			>
 				Delete user
 			</button>
@@ -138,7 +176,7 @@ function Friendships(props: {
 
 	if (!props.query.data.length) return (
 		<p className="notice-msg">
-			No friendship for this user...
+			You have no friendships <span className="r">😢</span> (yet)
 		</p>
 	);
 
@@ -150,25 +188,25 @@ function Friendships(props: {
 					(item: FriendshipType) =>
 					item.status1 === "accepted" && item.status2 === "accepted"
 				}
-				actions={[]}
+				actions={["delete"]}
 			/>
 			<FriendshipList
 				title="Pending friendships"
 				filter={
 					(item: FriendshipType) =>
-						(item.status1 === "pending" && item.user2.id === props.id)
-						|| (item.status2 === "pending" && item.user1.id === props.id)
+						(item.status1 === "pending" && item.user2.username == props.id)
+						|| (item.status2 === "pending" && item.user1.username == props.id)
 				}
-				actions={[]}
+				actions={["cancel"]}
 			/>
 			<FriendshipList
 				title="Friendships to approve"
 				filter={
 					(item: FriendshipType) =>
-						(item.status1 === "pending" && item.user1.id === props.id)
-						|| (item.status2 === "pending" && item.user2.id === props.id)
+						(item.status1 === "pending" && item.user1.username === props.id)
+						|| (item.status2 === "pending" && item.user2.username === props.id)
 				}
-				actions={["approve"]}
+				actions={["reject", "approve"]}
 			/>
 		</FriendshipContext.Provider>
 	);
@@ -189,7 +227,7 @@ function FriendshipList(props: {
 	const actionClass = props.actions.join(" ");
 
 	function friend(ship: FriendshipType) {
-		return (ship.user1.id == id ? ship.user2 : ship.user1);
+		return (ship.user1.username == id ? ship.user2 : ship.user1);
 	}
 
 	if (!filterList.length) return (
@@ -206,17 +244,16 @@ function FriendshipList(props: {
 						<div>
 							{"#" + friend(item).id}
 						</div>
-						<Link to={"/user/" + friend(item).id}>
+						<div>
+						<Link to={"/user/" + friend(item).username}>
 							{"@" + friend(item).username}
 						</Link>
-						<div>
-							{item.updated_at}
 						</div>
 						{
 							props.actions.map((actionItem, index) =>
 								<div
 									key={index}
-									className={"clickable " + actionClass}
+									className={"clickable " + actionItem}
 									onClick={() => action(actionItem, item)}
 								>
 									{actionItem}

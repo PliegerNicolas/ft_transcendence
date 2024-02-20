@@ -2,7 +2,7 @@ import { useState, useContext, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MutationFunction, useMutation, useQuery } from "@tanstack/react-query";
 
-import { useInvalidate, stopOnHttp } from "../../utils/utils.ts";
+import { useInvalidate, stopOnHttp, httpStatus } from "../../utils/utils.ts";
 import { ChanType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -40,6 +40,7 @@ export default function ChanEdit({id}: {id: number})
 	});
 
 	const [setPasswd, setSetPasswd] = useState(!id);
+	const [popup, setPopup] = useState(false);
 
 	const { api, addNotif } = useContext(MyContext);
 	const invalidate = useInvalidate();
@@ -62,12 +63,14 @@ export default function ChanEdit({id}: {id: number})
 	useEffect(() => {
 		if (!getChan.isSuccess)
 			return ;
-		setChan(prev => {return {...prev, ...getChan.data}});
+		setChan(prev => {return {...prev, ...getChan.data, password: ""}});
 	}, [getChan.isSuccess]);
 
 	const postChan = useMutation({
 		mutationFn:
-			(() => api.post("/channels", chan)) as unknown as MutationFunction<ChanType>,
+			((data: ChanType) => {
+				console.log(data);
+				return api.post("/channels", data)}) as unknown as MutationFunction<ChanType>,
 		onError: error => addNotif({content: error.message}),
 		onSettled: () => invalidate(["allChans"]),
 		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
@@ -75,7 +78,9 @@ export default function ChanEdit({id}: {id: number})
 
 	const patchChan = useMutation({
 		mutationFn:
-			(() => api.patch("/channels/" + id, chan)) as unknown as MutationFunction<ChanType>,
+			((data: ChanType) => {
+				console.log(data);
+				return api.patch("/channels/" + id, data)}) as unknown as MutationFunction<ChanType>,
 		onError: error => addNotif({content: error.message}),
 		onSettled: () => invalidate(["allChans"]),
 		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
@@ -131,7 +136,7 @@ export default function ChanEdit({id}: {id: number})
 		for (const key in b) {
 			if (
 				a[key] !== b[key]
-				&& (a[key] !== undefined || (key === "password" && setPasswd))
+				&& (key !== "password" || setPasswd)
 				&& key !== "passwordRepeat"
 			)
 				ret[key] = b[key];
@@ -151,10 +156,6 @@ export default function ChanEdit({id}: {id: number})
 		patchChan.mutate(patch(getChan.data, chan));
 	}
 
-	function preventSubmit(e: React.KeyboardEvent<HTMLInputElement>) {
-		if (e.key === 'Enter') e.preventDefault();
-	}
-
 	if (id && getChan.isPending) return (
 		<div className="ChatContent spinner">
 			<Spinner />
@@ -168,15 +169,16 @@ export default function ChanEdit({id}: {id: number})
 	);
 
 	return (
-		<form className="ChanEdit MainContent" onSubmit={handleSubmit}>
+		<div className="ChanEdit ChatContent MainContent" onSubmit={handleSubmit}>
 			<ChatHeader chan={{...chan, id: "", membersCount: 1}} edit={true} />
+			<div className="ChanEdit__Scrollable">
 			<section className="ChanEdit__NameSection">
 				<label className="ChanEdit__NameLabel" htmlFor="channelName">
 					Name
 				</label>
 				<input
 					type="text" id="channelName" name="name"
-					value={chan.name} onChange={handleChange} onKeyDown={preventSubmit}
+					value={chan.name} onChange={handleChange}
 					placeholder="Cannot be empty!"
 				/>
 			</section>
@@ -229,7 +231,6 @@ export default function ChanEdit({id}: {id: number})
 						<input
 							type="password" id="channelPassword" name="password"
 							value={chan.password} onChange={handleChange}
-							onKeyDown={preventSubmit}
 							placeholder="Leave blank for no password"
 						/>
 						{
@@ -237,7 +238,6 @@ export default function ChanEdit({id}: {id: number})
 							<input
 								type="password" id="channelPasswordRepeat" name="passwordRepeat"
 								value={chan.passwordRepeat} onChange={handleChange}
-								onKeyDown={preventSubmit}
 								placeholder="Repeat password"
 							/>
 						}
@@ -316,8 +316,8 @@ export default function ChanEdit({id}: {id: number})
 			}
 			<div className="ChanEdit__FinalButtons" style={{marginLeft: "15px"}}>
 				{
-					id &&
-					<button onClick={() => delChan.mutate()}>
+					!!id &&
+					<button className="danger" onClick={() => setPopup(true)}>
 						Delete
 					</button>
 				}
@@ -331,7 +331,33 @@ export default function ChanEdit({id}: {id: number})
 					Submit
 				</button>
 			</div>
-		</form>
+			{
+				popup &&
+				<DeletePopup
+					cancel={() => {setPopup(false)}}
+					del={() => delChan.mutate()} />
+				}
+			</div>
+		</div>
+	);
+}
+
+function DeletePopup({cancel, del}: {cancel: Function, del: Function})
+{
+	return (
+		<div className="Popup">
+			<div className="DeletePopup">
+				<h3>Are you sure you want to delete this channel?</h3>
+				<div className="DeletePopup__Buttons">
+					<button onClick={() => cancel()}>
+						Cancel
+					</button>
+					<button onClick={() => del()} className="danger">
+						Delete
+					</button>
+				</div>
+			</div>
+		</div>
 	);
 }
 
@@ -373,7 +399,12 @@ function UserList(
 			);
 		}
 		catch (error) {
-			if (error instanceof Error) addNotif({content: error.message})
+			if (!(error instanceof Error))
+				return ;
+			if (httpStatus(error) == 404)
+				addNotif({content: "No such user: '" + newAdmin + "'"})
+			else
+				addNotif({content: error.message})
 		}
 	}
 
@@ -413,7 +444,6 @@ function UserList(
 						onKeyDown={e => {
 							if (e.key !== 'Enter')
 								return;
-							e.preventDefault();
 							if (newAdmin.length)
 								addUser();
 						}}
