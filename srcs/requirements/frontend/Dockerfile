@@ -6,12 +6,14 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:52:38 by nicolas           #+#    #+#              #
-#    Updated: 2024/01/11 13:54:37 by nicolas          ###   ########.fr        #
+#    Updated: 2024/02/19 11:40:39 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # Latest stable version of alpine linux at 8 january 2024.
 FROM alpine:3.19.0
+
+ARG PORT
 
 # Install NODE.JS and NPM.
 RUN apk update && \
@@ -31,11 +33,8 @@ RUN npm install
 COPY ./app/ .
 RUN npm run build
 
-# Set environment variable for port
-ENV PORT=8080
-
-# Expose port 8080.
-EXPOSE 8080
+# Expose port.
+EXPOSE $PORT
 
 # Run NPM.
 CMD ["sh", "-c", "npm run build && npm run preview -- --host"]

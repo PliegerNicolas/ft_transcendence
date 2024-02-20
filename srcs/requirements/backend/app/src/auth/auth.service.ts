@@ -89,7 +89,7 @@ export class AuthService
 						"image" : Object.values(info)[7].toString(),
 						"user" : {
 							//id : BigInt(1),
-							id : payload.user_id,
+							id : BigInt(payload.user_id),
 						}
 					}
 				])
@@ -103,6 +103,7 @@ export class AuthService
 			payload.oauth_id = Object.values(info)[0].toString()
 			console.log(JSON.stringify(payload))
 			const access_token = await this.jwtService.signAsync(payload)
+			console.log(access_token)
 		return {
 			access_token,
 		};

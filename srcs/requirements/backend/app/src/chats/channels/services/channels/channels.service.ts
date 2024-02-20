@@ -1,10 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel, ChannelStatus } from '../../entities/Channel.entity';
 import { Repository } from 'typeorm';
 import { CreateChannelParams, ReplaceChannelParams, UpdateChannelParams } from '../../types/channel.type';
 import { User } from 'src/users/entities/User.entity';
 import { ChannelMember, ChannelRole } from '../../entities/ChannelMember.entity';
+import { PasswordHashingService } from 'src/common/services/password-hashing/password-hashing.service';
 
 @Injectable()
 export class ChannelsService {
@@ -14,6 +15,8 @@ export class ChannelsService {
         private readonly channelRepository: Repository<Channel>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+
+        private readonly passwordHashingService: PasswordHashingService,
     ) {}
 
     async getChannels(userId: bigint = null): Promise<Channel[]> {
@@ -68,6 +71,10 @@ export class ChannelsService {
 
         if  (!user) throw new NotFoundException(`User with ID ${userId} not found`);
 
+        if (channelDetails.password) {
+            channelDetails.password = await this.passwordHashingService.hashPassword(channelDetails.password);
+        }
+
         const channel = this.channelRepository.create({
             ...channelDetails,
             members: [{ user, role: ChannelRole.ADMIN }],
@@ -89,11 +96,6 @@ export class ChannelsService {
             throw new UnauthorizedException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
 
-        console.log(channel);
-
-        // Les members ne sont pas updated corrected pour une raison X ou Y
-        //channelId the members est null en update ???
-
         return (await this.channelRepository.save({
             ...channel,
             ...channelDetails,
@@ -112,11 +114,6 @@ export class ChannelsService {
         else if (!channel.members.some((member) => BigInt(member.user.id) === userId)) {
             throw new UnauthorizedException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
         }
-
-        console.log(channel);
-
-        // Les members ne sont pas updated corrected pour une raison X ou Y
-        //channelId the members est null en update ???
 
         return (await this.channelRepository.save({
             ...channel,
