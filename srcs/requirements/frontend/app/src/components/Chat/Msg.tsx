@@ -52,8 +52,6 @@ export default function Msg(
 		return ("" + String(n).padStart(2, "0"));
 	}
 
-	console.log(data);
-
 	return (
 		<div className={
 			`Msg
