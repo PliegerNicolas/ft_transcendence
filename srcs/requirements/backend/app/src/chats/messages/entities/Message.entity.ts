@@ -21,10 +21,10 @@ export class Message {
     @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 
-    @ManyToOne(() => Channel, (channel) => channel.messages)
+    @ManyToOne(() => Channel, (channel) => channel.messages, { onDelete: 'CASCADE' })
     channel: Channel;
 
-    @ManyToOne(() => ChannelMember, (channelMember) => channelMember.messages)
+    @ManyToOne(() => ChannelMember, (channelMember) => channelMember.messages, { onDelete: 'CASCADE' })
     channelMember: ChannelMember;
 
 }
