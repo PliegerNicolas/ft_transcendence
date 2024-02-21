@@ -60,28 +60,38 @@ export class GamelogsController {
     /* Front-end PATHS: need to be sent via front-end and verified via a jwt key. */
     /* */
 
-    @Post()
+    @Post('gamelogs')
     // UseGuard => Only the front-end server can call this path
-    async createGamelog() {
-
+    async createGamelog(
+        @Body(new ValidationPipe) createGamelogDto: CreateGamelogDto,
+    ) {
+        return (await this.gamelogService.createGamelog(createGamelogDto));
     }
 
-    @Put()
+    @Put('gamelogs/:gamelogId')
     // UseGuard => Only the front-end server can call this path
-    async replaceGamelog() {
-
+    async replaceGamelog(
+        @Body(new ValidationPipe) replaceGamelogDto: ReplaceGamelogDto,
+        @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
+    ) {
+        return (await this.gamelogService.replaceGamelog(gamelogId, replaceGamelogDto));
     }
 
-    @Patch()
+    @Patch('gamelogs/:gamelogId')
     // UseGuard => Only the front-end server can call this path
-    async updateGamelog() {
-        
+    async updateGamelog(
+        @Body(new ValidationPipe) updateGamelogDto: UpdateGamelogDto,
+        @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
+    ) {
+        return (await this.gamelogService.updateGamelog(gamelogId, updateGamelogDto));
     }
 
-    @Delete()
+    @Delete('gamelogs/:gamelogId')
     // UseGuard => Only the front-end server can call this path
-    async deleteGamelog() {
-
+    async deleteGamelog(
+        @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
+    ) {
+        return (await this.gamelogService.deleteGamelog(gamelogId));
     }
 
     /*
