@@ -1,7 +1,6 @@
-import { IsDefined, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString, MinLength } from "class-validator";
 import { ChannelStatus } from "../entities/Channel.entity";
 import { Transform } from "class-transformer";
-import { IsStrongPassword } from "src/common/validators/is-strong-password.validator";
 
 export class ReplaceChannelDto {
 

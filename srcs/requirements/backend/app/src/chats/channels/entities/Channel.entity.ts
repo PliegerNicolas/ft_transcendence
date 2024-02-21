@@ -28,6 +28,9 @@ export class Channel {
     //@Exclude()
     @Column({ nullable: true })
     password: string;
+    
+    @Column()
+    isPasswordNeeded: boolean;
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
@@ -45,8 +48,17 @@ export class Channel {
 
     @BeforeInsert()
     @BeforeUpdate()
-    updateMembersCount(): void {
+    setupChannel(): void {
+        this.updateMembersCount();
+        this.updateIsPasswordNeeded();
+    }
+
+    private updateMembersCount(): void {
         this.membersCount = this.members.length;
+    }
+
+    private updateIsPasswordNeeded(): void {
+        this.isPasswordNeeded = !!this.password;
     }
 
 }

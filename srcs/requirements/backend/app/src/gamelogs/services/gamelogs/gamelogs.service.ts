@@ -5,7 +5,7 @@ import { Gamelog } from 'src/gamelogs/entities/Gamelog.entity';
 import { GameResult, GamelogToUser } from 'src/gamelogs/entities/GamelogToUser.entity';
 import { CreateGamelogParams, ReplaceGamelogParams, UpdateGamelogParams } from 'src/gamelogs/types/gamelogs.type';
 import { User } from 'src/users/entities/User.entity';
-import { In, Repository } from 'typeorm';
+import { Equal, In, Repository } from 'typeorm';
 
 @Injectable()
 export class GamelogsService {
@@ -21,6 +21,53 @@ export class GamelogsService {
         private readonly userRepository: Repository<User>,
     ) {}
 
+    async getAllGamelogs(): Promise<Gamelog[]> {
+        return (await this.gamelogRepository.find({
+            relations: ['gamelogToUsers.user'],
+        }));
+    }
+
+    async getGamelog(gamelogId: bigint = undefined): Promise<Gamelog> {
+        const gamelog = await this.gamelogRepository.findOne({
+            where: { id: gamelogId },
+            relations: ['gamelogToUsers.user'],
+        });
+
+        if (!gamelog) throw new NotFoundException(`Gamelog with ID ${gamelogId} not found`);
+
+        return (gamelog);
+    }
+
+    async getUserGamelogs(username: string = undefined): Promise<{ gamelogs: Gamelog[]; userResultsCount: Record<GameResult, number> }> {
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+            relations: ['userToGamelogs.gamelog.gamelogToUsers.user'],
+        });
+
+        if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
+
+        const gamelogs = user.userToGamelogs.map((userToGamelog) => userToGamelog.gamelog);
+        const userResultsCount = this.countUserResults(username, gamelogs);
+
+        return ({ gamelogs, userResultsCount });
+    }
+
+    /* Helper Functions */
+
+    private countUserResults(username: string, gamelogs: Gamelog[]): Record<GameResult, number> {
+        const userResultsCount: Record<GameResult, number> = {} as Record<GameResult, number>;
+        Object.values(GameResult).forEach((result) => { userResultsCount[result] = 0 });
+
+        gamelogs.forEach((gamelog) => {
+            gamelog.gamelogToUsers
+                .filter((gamelogToUser) => gamelogToUser.user.username === username)
+                .forEach((gamelogToUser) => { userResultsCount[gamelogToUser.result]++; });
+        });
+
+        return (userResultsCount);
+    }
+
+    /*
     async getGamelogs(): Promise<Gamelog[]> {
         // Public
 
@@ -128,6 +175,7 @@ export class GamelogsService {
 
     /* Helper Functions */
 
+    /*
     private async createGamelogToUsers(userResults: UserResult[], gamelog: Gamelog): Promise<GamelogToUser[]> {
         const usernames = userResults.map((userResult) => userResult.username);
 
@@ -161,5 +209,6 @@ export class GamelogsService {
 
         return (gamelogToUsers);
     }
+    */
 
 }

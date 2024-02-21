@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Profile } from 'src/profiles/entities/Profile.entity';
 import { User } from 'src/users/entities/User.entity';
 import { CreateUserParams, ReplaceUserParams, UpdateUserParams } from 'src/users/types/user.type';
 import { Equal, Repository } from 'typeorm';
@@ -11,8 +10,6 @@ export class UsersService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
-        @InjectRepository(Profile)
-        private readonly profileRepository: Repository<Profile>,
     ) {}
 
     async getUsers(): Promise<User[]> {

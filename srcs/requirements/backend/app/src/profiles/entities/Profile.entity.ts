@@ -14,7 +14,7 @@ export class Profile {
     lastName: string;
     
     @Column({nullable : true})
-	image: string;
+    image: string;
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
