@@ -86,6 +86,11 @@ export class UsersService {
         }));
     }
 
+	async setTwoFactorAuthSecret(userId: number, secret: string)
+	{
+		return this.userRepository.update(userId, {twoFactorAuthSecret: secret});
+	}
+
     async deleteUser(username: string): Promise<string> {
         // Only if you're the target user.
         const user = await this.userRepository.findOne({

@@ -17,7 +17,7 @@ export class AuthService
 		const users = await this.dataSource
 		.getRepository(User)
 		.createQueryBuilder()
-		.select("user.id")
+		.select("user")
 		.from(User, "user")
 		.where("user.oauthId = :id", { id: BigInt(oauthId) })
 		.getOne()

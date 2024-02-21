@@ -12,7 +12,9 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { BigIntSerializationInterceptor } from './common/interceptors/big-int-serialization/big-int-serialization.interceptor';
 import { GameModule } from './game/game.module';
 import { PasswordHashingService } from './common/services/password-hashing/password-hashing.service';
-import { TwofactorauthService } from './twofactorauth/twofactorauth.service';
+import { TwoFactorAuthService } from './twofactorauth/twofactorauth.service';
+import { UsersService } from './users/services/users/users.service';
+import { TwofactorauthModule } from './twofactorauth/twofactorauth.module';
 
 const dbConfig = require('./database-config');
 
@@ -26,7 +28,8 @@ const dbConfig = require('./database-config');
 		GamelogsModule,
 		AuthModule,
 		ChatsModule,
-		GameModule
+		GameModule,
+		TwofactorauthModule
 	],
 	controllers: [],
 	providers: [
@@ -35,8 +38,7 @@ const dbConfig = require('./database-config');
 			provide: APP_INTERCEPTOR,
 			useClass: BigIntSerializationInterceptor,
 		},
-		PasswordHashingService,
-		TwofactorauthService,
+		PasswordHashingService
 	],
 })
 export class AppModule {}
