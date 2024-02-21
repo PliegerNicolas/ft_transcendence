@@ -12,7 +12,6 @@ import Navbar from "./components/Navbar.tsx";
 import Home from "./components/Home.tsx";
 import Play from "./components/Game/Play.tsx";
 import Stats from "./components/Stats.tsx";
-import Chat from "./components/Chat.tsx";
 import ChatTest from "./components/Chat/Chat.tsx";
 import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
@@ -132,9 +131,6 @@ function App()
 					<Route path="/"	element={<Home />} />
 					<Route path="/play" element={<Play />} />
 					<Route path="/stats" element={<Stats />} />
-					<Route path="/chat" element={
-						<RequireAuth elem={<Chat />} />
-					}/>
 					<Route path="/chattest/*" element={
 						<RequireAuth elem={<ChatTest />} />
 					}/>
