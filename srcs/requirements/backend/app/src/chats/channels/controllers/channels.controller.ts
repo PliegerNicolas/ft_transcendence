@@ -17,21 +17,25 @@ export class ChannelsController {
     async getChannels() {
         // Should pass userId (if user is connected and passport validated or null)
         // For this moment userId is passed as 2.
-        return (await this.channelService.getChannels(BigInt(2)));
+        return (await this.channelService.getChannels(BigInt(1)));
     }
 
     @Get('channels/:channelId')
-    async getChannel(@Param('channelId', ParseIdPipe) channelId: bigint,) {
+    async getChannel(
+        @Param('channelId', ParseIdPipe) channelId: bigint
+    ) {
         // Should pass userId (if user is connected and passport validated or null).
         // For this moment userId is passed as 2.
         return (await this.channelService.getChannel(BigInt(1), channelId));
     }
 
     @Get('channels/:channelId/members')
-    async getChannelMembers(@Param('channelId', ParseIdPipe) channelId: bigint,) {
+    async getChannelMembers(
+        @Param('channelId', ParseIdPipe) channelId: bigint
+    ) {
         // Should pass userId (if user is connected and passport validated or null).
         // For this moment userId is passed as 2.
-        return (await this.channelService.getChannelMembers(BigInt(2), channelId));
+        return (await this.channelService.getChannelMembers(BigInt(1), channelId));
     }
 
 	@UseGuards(AuthGuard('jwt'))
@@ -41,8 +45,8 @@ export class ChannelsController {
 		@Request() req: any
     ) {
         // For this moment userId is passed as 1. Need passport to set a significant value.
-		console.log(req)
-        return (await this.channelService.createChannel(BigInt(req.user.id), createChannelDto));
+        const userId = req.user ? BigInt(req.user.id) : null;
+        return (await this.channelService.createChannel(userId, createChannelDto));
     }
 
 	@UseGuards(AuthGuard('jwt'))
@@ -53,7 +57,8 @@ export class ChannelsController {
 		@Request() req: any
     ) {
         // For this moment userId is passed as 1. Need passport.
-        return (await this.channelService.replaceChannel(BigInt(req.user.id), channelId, replaceChannelDto));
+        const userId = req.user ? BigInt(req.user.id) : null;
+        return (await this.channelService.replaceChannel(userId, channelId, replaceChannelDto));
     }
 
 	@UseGuards(AuthGuard('jwt'))
@@ -64,7 +69,8 @@ export class ChannelsController {
 		@Request() req: any
     ) {
         // For this moment userId is passed as 1. Need passport.
-        return (await this.channelService.updateChannel(BigInt(req.user.id), channelId, updateChannelDto));
+        const userId = req.user ? BigInt(req.user.id) : null;
+        return (await this.channelService.updateChannel(userId, channelId, updateChannelDto));
     }
 
 	@UseGuards(AuthGuard('jwt'))
@@ -74,7 +80,8 @@ export class ChannelsController {
 		@Request() req: any
     ) {
         // For this moment userId is passed as 2. Need passport.
-        return (await this.channelService.joinChannel(BigInt(req.user.id), channelId));
+        const userId = req.user ? BigInt(req.user.id) : null;
+        return (await this.channelService.joinChannel(userId, channelId));
     }
 
 	@UseGuards(AuthGuard('jwt'))
@@ -84,18 +91,20 @@ export class ChannelsController {
 		@Request() req: any
     ) {
         // For this moment userId is passed as 2. Need passport.
-        return (await this.channelService.leaveChannel(BigInt(req.user.id), channelId));
+        const userId = req.user ? BigInt(req.user.id) : null;
+        return (await this.channelService.leaveChannel(userId, channelId));
     }
 
 	@Role(['admin'])
 	@UseGuards(AuthGuard('jwt'), RoleGuard)
-	// @UseGuards(RoleGuard)
     @Delete('channels/:channelId')
-    async deleteChannel(@Param('channelId', ParseIdPipe) channelId: bigint,
-						@Request() req: any
-						) {
+    async deleteChannel(
+        @Param('channelId', ParseIdPipe) channelId: bigint,
+		@Request() req: any
+	) {
         // For this moment userId is passed as 2. Need passport.
-        return (await this.channelService.deleteChannel(BigInt(req.user.id), channelId));
+        const userId = BigInt(req.user?.id);
+        return (await this.channelService.deleteChannel(userId, channelId));
     }
 
 }

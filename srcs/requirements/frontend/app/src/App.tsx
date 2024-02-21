@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-route
 import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
+import { NotifType } from "./utils/types.ts";
 
 import Header from "./components/Header.tsx";
 import Navbar from "./components/Navbar.tsx";
@@ -112,10 +113,15 @@ function App()
 		return { logged: false, token: ""};
 	});
 
-	const [notifs, setNotifs] = useState<{type: number, content: string, date: number}[]>([]);
+	const [notifs, setNotifs] = useState<NotifType[]>([]);
 
-	function addNotif(add: {type: number, content: string, date: number}) {
-		add.date = Date.now();
+	function addNotif(add: NotifType) {
+		add.date = Date.now() + Math.floor(20 * Math.random());
+		add.id =
+			(10000 * (add.date % (24 * 600000)))
+			+ Math.floor(10000 * Math.random());
+		while (notifs.some(notif => notif.date === add.date))
+			add.date++;
 		setNotifs(prev => [...prev, add]);
 	}
 

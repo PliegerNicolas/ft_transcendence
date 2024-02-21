@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString, MinLength } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 import { ChannelStatus } from "../entities/Channel.entity";
 import { Transform } from "class-transformer";
 import { IsStrongPassword } from "src/common/validators/is-strong-password.validator";
@@ -15,9 +15,8 @@ export class UpdateChannelDto {
 
     @IsOptional()
     @IsString()
-    @Transform(({ value }) => value.trim())
+    @Transform(({ value }) => value === '' ? null: (value ? value.trim() : null))
     @MinLength(8)
-    @IsStrongPassword()
     password?: string;
 
 }

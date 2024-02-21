@@ -52,3 +52,29 @@ export interface ChanType {
 	name: string,
 	membersCount: number,
 }
+
+export interface NotifType {
+	date: number,
+	content: string,
+	type: number,
+	id: number,
+}
+
+export enum GameResult {
+    VICTORY = 'victory',
+    DEFEAT = 'defeat',
+    TIE = 'tie',
+}
+
+export enum GameType {
+    PONG = "pong",
+    UNDEFINED = "undefined",
+}
+
+export interface GamelogPostType {
+	userResults: [
+        { username: string, result: GameResult },
+        { username: string, result: GameResult }
+	],
+    gameType: GameType
+}

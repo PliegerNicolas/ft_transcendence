@@ -15,9 +15,8 @@ export class CreateChannelDto {
 
     @IsOptional()
     @IsString()
-    @Transform(({ value }) => value.trim())
+    @Transform(({ value }) => value === '' ? null: (value ? value.trim() : null))
     @MinLength(8)
-    @IsStrongPassword()
     password: string;
 
 }

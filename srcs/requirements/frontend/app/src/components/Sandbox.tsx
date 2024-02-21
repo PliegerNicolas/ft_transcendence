@@ -20,8 +20,6 @@ export default function Sandbox()
 
 	const invalidate = useInvalidate();
 
-	console.log(context.token);
-
 	const getChans = useQuery({
 		queryKey: ["allChans"],
 		queryFn: () => context.api.get("/channels"),
