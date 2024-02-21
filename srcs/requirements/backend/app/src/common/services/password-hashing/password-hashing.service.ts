@@ -6,8 +6,8 @@ export class PasswordHashingService {
 
     private readonly saltRounds: number = process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS) : 10;
 
-    // Random crashing ???
-    async hashPassword(password: string): Promise<string> {
+    async hashPassword(password: string = undefined): Promise<string> {
+        if (!password) return (null);
         return (await bcrypt.hash(password, this.saltRounds));
     }
 

@@ -4,7 +4,7 @@ export type CreateChannelParams = {
 
     name: string;
     status: ChannelStatus;
-    password: string;
+    password?: string;
 
 };
 

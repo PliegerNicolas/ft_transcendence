@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsDefined, IsEnum, IsNotEmpty, IsString, MinLength, ValidateIf } from "class-validator";
 import { ChannelStatus } from "../entities/Channel.entity";
 import { Transform } from "class-transformer";
 
@@ -12,9 +12,10 @@ export class ReplaceChannelDto {
     @IsEnum(ChannelStatus, { message: 'Invalid channel status' })
     status: ChannelStatus;
 
-    @IsNotEmpty()
+    @IsDefined()
     @IsString()
     @Transform(({ value }) => value === '' ? null: (value ? value.trim() : null))
+    @ValidateIf((o) => o.password !== null)
     @MinLength(8)
     password: string;
 

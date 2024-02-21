@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel, ChannelStatus } from '../../entities/Channel.entity';
-import { Repository } from 'typeorm';
+import { Equal, Repository } from 'typeorm';
 import { CreateChannelParams, ReplaceChannelParams, UpdateChannelParams } from '../../types/channel.type';
 import { User } from 'src/users/entities/User.entity';
 import { ChannelMember, ChannelRole } from '../../entities/ChannelMember.entity';
@@ -19,6 +19,118 @@ export class ChannelsService {
         private readonly passwordHashingService: PasswordHashingService,
     ) {}
 
+    async getChannels(username: string = undefined, filterByStatus: ChannelStatus = undefined): Promise<Channel[]> {
+        return (await this.channelRepository.find({
+            where: [
+                { members: { user: { username: Equal(username) } } },
+                { status: filterByStatus ? Equal(filterByStatus) : Equal(ChannelStatus.PUBLIC) }, // not sure if this works
+            ],
+        }));
+    }
+
+    async getChannel(channelId: bigint, username: string = undefined): Promise<Channel> {
+        const channel = await this.channelRepository.findOne({
+            where: { id: channelId },
+            relations: ['members.user'],
+        });
+        
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+        else if (
+            channel.status !== ChannelStatus.PUBLIC // Also protect if password set or show members either way because PUBLIC ?
+            && !channel.members.some((member) => member.user.username === username)
+        ) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+
+        return (channel);
+    }
+
+    async getChannelMembers(channelId: bigint, username: string = undefined): Promise<ChannelMember[]> {
+        const channel = await this.channelRepository.findOne({
+            where: { id: channelId },
+            relations: ['members.user'],
+        });
+        
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+        else if (
+            channel.status !== ChannelStatus.PUBLIC // Also protect if password set or show members either way because PUBLIC ?
+            && !channel.members.some((member) => member.user.username === username)
+        ) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+
+        return (channel.members);
+    }
+
+    async createChannel(username: string = undefined, channelDetails: CreateChannelParams): Promise<Channel> {
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+        });
+
+        if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
+
+        channelDetails.password = await this.passwordHashingService.hashPassword(channelDetails.password);
+
+        const channel = this.channelRepository.create({
+            ...channelDetails,
+            members: [{ user, role: ChannelRole.ADMIN }],
+        });
+
+        return (await this.channelRepository.save(channel));
+    }
+
+    async replaceChannel(channelId: bigint, username: string = undefined, channelDetails: ReplaceChannelParams): Promise<Channel> {
+        const channel = await this.channelRepository.findOne({
+            where: { id: Equal(channelId) },
+            relations: ['members.user'],
+        });
+
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+
+        const member = channel.members.find((member) => member.user.username === username);
+
+        if (!member) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+        else if (![ChannelRole.ADMIN].includes(member.role)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' hasn't got enough permissions in Channel with ID ${channelId}`);
+
+        return (await this.channelRepository.save({
+            ...channel,
+            ...channelDetails,
+        }));
+    }
+
+    async updateChannel(channelId: bigint, username: string = undefined, channelDetails: UpdateChannelParams): Promise<Channel> {
+        const channel = await this.channelRepository.findOne({
+            where: { id: Equal(channelId) },
+            relations: ['members.user'],
+        });
+
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+
+        const member = channel.members.find((member) => member.user.username === username);
+
+        if (!member) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+        else if (![ChannelRole.ADMIN].includes(member.role)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' hasn't got enough permissions in Channel with ID ${channelId}`);
+
+        return (await this.channelRepository.save({
+            ...channel,
+            ...channelDetails,
+        }));
+    }
+
+    async deleteChannel(channelId: bigint, username: string = undefined): Promise<string> {
+        const channel = await this.channelRepository.findOne({
+            where: { id: Equal(channelId) },
+            relations: ['members.user'],
+        });
+
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+
+        const member = channel.members.find((member) => member.user.username === username);
+
+        if (!member) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+        else if (![ChannelRole.ADMIN].includes(member.role)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' hasn't got enough permissions in Channel with ID ${channelId}`);
+
+        await this.channelRepository.remove(channel);
+        return (`Channel with ID ${channelId} successfully deleted`);
+    }
+
+    /*
     async getChannels(userId: bigint = null): Promise<Channel[]> {
        return (await this.channelRepository.find({
             where: [
@@ -189,5 +301,6 @@ export class ChannelsService {
         await this.channelRepository.remove(channel);
         return (`Channel with ID ${channelId} successfully deleted`);
     }
+    */
 
 }

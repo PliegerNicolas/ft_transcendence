@@ -54,7 +54,7 @@ export class Channel {
     }
 
     private updateMembersCount(): void {
-        this.membersCount = this.members.length;
+        this.membersCount = this.members ? this.members.length : 0;
     }
 
     private updateIsPasswordNeeded(): void {
