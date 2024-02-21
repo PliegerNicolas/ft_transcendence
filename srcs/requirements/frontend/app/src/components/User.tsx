@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -21,6 +21,8 @@ export default function User()
 	const id = params.id!;
 	const queryClient = useQueryClient();
 	const { api } = useContext(MyContext);
+
+	const [popup, setPopup] = useState(false);
 
 	const getUser = useQuery({
 		queryKey: ["users", id],
@@ -56,27 +58,28 @@ export default function User()
 	});
 
 	const postFriendship = useMutation({
-		mutationFn: (username: string) =>
-			api.post("/users/mlaneyri/relationships/", {username}),
-			// HARDCODED USERNAME BECAUSE /ME WILL PROBABLY NOT BE IMPLEMENTED
-			// UNTIL THE HEAT DEATH OF THE UNIVERSE
+		mutationFn: ({me, other}: {me: string, other: string}) =>
+			api.post("/users/" + me + "/relationships/", {username: other}),
+		onSettled: () => invalidate(["users", id, "friends"]),
 	});
 
 	function invalidate(queryKey: Array<any>) {
 		queryClient.invalidateQueries({queryKey});
 	}
 
-	if (!getUser.isSuccess) return (
+	if (getUser.isPending) return (
 		<main className="MainContent">
-		{
-			getUser.isPending ?
 			<div className="p-style">
 				<Spinner />
-			</div> :
+			</div>
+		</main>
+	);
+
+	if (getUser.isError) return (
+		<main className="MainContent">
 			<div className="p-style error-msg">
 				Failed to load user #{id}: {getUser.error.message}
 			</div>
-		}
 		</main>
 	);
 
@@ -132,33 +135,72 @@ export default function User()
 				/>
 				<hr />
 				{
-					user.id == 1 ?
-					<>
-						<h3>Your friendships:</h3>
-						<Friendships
-							id={id}
-							query={getFriendships}
-							action={friendshipAction}
-						/>
-					</> :
+					user.id != 1 &&
 					<div className="User__ActionsButtons">
-						<button onClick={() => postFriendship.mutate(user.username)}>
+						<button onClick={() =>
+							postFriendship.mutate({me: "mlaneyri", other: user.username})
+						}>
 							Request as friend
 						</button>
 						<button>Block</button>
+						<hr />
+						<button onClick={() =>
+							postFriendship.mutate({me: user.username, other: "mlaneyri"})
+						}>
+							Make request me
+						</button>
 					</div>
 				}
+				<h3>Your friendships:</h3>
+				<Friendships
+					id={id}
+					query={getFriendships}
+					action={friendshipAction}
+				/>
 			</section>
 			<button
-				style={{margin: "0 15px", color: "#f9c"}}
-				onClick={() => delUser.mutate()}
+				style={{margin: "0 15px"}}
+				className="danger"
+				onClick={() => setPopup(true)}
 			>
-				Delete user
+				Delete account
 			</button>
+			{
+				popup &&
+				<DeletePopup
+					cancel={() => {setPopup(false)}}
+					del={() => delUser.mutate()} />
+			}
 		</main>
 	);
 }
 
+// <DeletePopup /> =============================================================
+
+function DeletePopup({cancel, del}: {cancel: Function, del: Function})
+{
+	return (
+		<div className="Popup__Bg">
+			<div className="Popup">
+				<h3>Are you sure you want to delete your account?</h3>
+				<div className="DeletePopup__Notice">
+					Of course, for now, you may delete any account, but later it will be
+					only yours.<br /><br />
+					** TODO ** remove this in due time.<br /><br />
+					Warning: This is a permanent operation!
+				</div>
+				<div className="DeletePopup__Buttons">
+					<button onClick={() => cancel()}>
+						Cancel
+					</button>
+					<button onClick={() => del()} className="danger">
+						Delete
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+}
 // <Friendships /> =============================================================
 
 function Friendships(props: {

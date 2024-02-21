@@ -90,34 +90,24 @@
 	grid-template-columns: .8fr 3fr 1fr;
 }
 
-.User__FriendItem.delete>.delete {
-	border: 1px solid #a46;
-	color: #fac;
-	background: #412;
-}
-
 .User__FriendItem.cancel {
 	grid-template-columns: .8fr 3fr 1fr;
-}
-
-.User__FriendItem.cancel>.cancel {
-	border: 1px solid #a46;
-	color: #fac;
-	background: #412;
 }
 
 .User__FriendItem.approve {
 	grid-template-columns: .8fr 2fr 1fr 1fr;
 }
 
-.User__FriendItem.reject.approve>.approve {
-	border: 1px solid #4a8;
-	color: #afd;
-	background: #133;
-}
-
+.User__FriendItem.delete>.delete,
+.User__FriendItem.cancel>.cancel,
 .User__FriendItem.reject.approve>.reject {
 	border: 1px solid #a46;
 	color: #fac;
 	background: #412;
+}
+
+.User__FriendItem.reject.approve>.approve {
+	border: 1px solid #4a8;
+	color: #afd;
+	background: #133;
 }

@@ -155,20 +155,22 @@ function UserListRender(
 	{query}: {query: UseQueryResult<any, Error>}
 )
 {
-	return (
+	if (query.isPending) return (
 		query.isPending &&
 		<div className="genericList">
 			<div><Spinner /></div>
-		</div> ||
+		</div>
+	);
 
-		query.isError &&
+	if (query.isError) return (
 		<div>
 			<span className="error-msg">
 				Failed to load user list: {query.error?.message}
 			</span><br />
-		</div> ||
+		</div>
+	);
 
-		query.isSuccess &&
+	return (
 		<div className="Sandbox__Scrollable">
 			<div className="genericList">
 			<div className="Sandbox__UserItem genericListHead">
