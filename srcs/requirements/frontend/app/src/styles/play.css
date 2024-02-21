@@ -203,3 +203,18 @@ select:focus {
 	object-fit: contain;
 	box-shadow: 0 0 12px #000a;
 }
+
+.Play__Instructions {
+	font-size: 2em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 3em;
+	opacity: 60%;
+
+	user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
