@@ -79,35 +79,43 @@
 	grid-template-columns: .8fr 2fr 2fr;
 }
 
-.User__FriendItem>.clickable {
+.User__FriendItem>div {
 	display: flex;
-	justify-content: center;
-	user-select: none;
-	transition: .15s;
+	align-items: center;
 }
 
-.User__FriendItem.delete {
+.User__FriendItem>div:last-child {
+	display: flex;
+	justify-content: end;
+}
+
+.User__FriendItem.unfriend,
+.User__FriendItem.cancel,
+.User__FriendItem.unblock {
 	grid-template-columns: .8fr 3fr 1fr;
 }
 
-.User__FriendItem.cancel {
-	grid-template-columns: .8fr 3fr 1fr;
+.User__FriendItem.accept {
+	grid-template-columns: .8fr 2fr 2fr;
 }
 
-.User__FriendItem.approve {
-	grid-template-columns: .8fr 2fr 1fr 1fr;
+.User__FriendItem .unfriend,
+.User__FriendItem .cancel,
+.User__FriendItem .reject {
+	border: 1px solid #e7a;
+	color: #e7a;
 }
 
-.User__FriendItem.delete>.delete,
-.User__FriendItem.cancel>.cancel,
-.User__FriendItem.reject.approve>.reject {
-	border: 1px solid #a46;
-	color: #fac;
-	background: #412;
+.User__FriendItem .accept {
+	border: 1px solid #6d9;
+	color: #6d9
 }
 
-.User__FriendItem.reject.approve>.approve {
-	border: 1px solid #4a8;
-	color: #afd;
-	background: #133;
+.User__FriendItem .unblock {
+	border: 1px solid #69d;
+	color: #69d;
+}
+
+.User__FriendItem button:hover {
+	color: var(--text-accent);
 }
