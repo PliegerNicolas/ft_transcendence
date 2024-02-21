@@ -30,7 +30,8 @@ function resetGameState(gameState: gameState) {
 	gameState.player2 = { x: WINDOW_WIDTH - PADDLE_WIDTH - 20, y: (WINDOW_HEIGHT / 2) - PADDLE_HEIGHT, speed: 0 };
 }
 
-export function startGameInterval(lobby: string, gameState: gameState, socket: Server) {
+export function startGameInterval(lobby: string, gameState: gameState, socket: Server, player1Name: string, player2Name: string) {
+	let gameOver = false;
 	const intervalId = setInterval(() => {
 		const winner = gameLoop(gameState);
 
@@ -42,14 +43,17 @@ export function startGameInterval(lobby: string, gameState: gameState, socket: S
 			gameState.score.player2 += 1;
 			resetGameState(gameState);
 		}
-		//console.log(gameState);
 		socket.to(lobby).emit('updateGame', gameState);
-		if (gameState.score.player1 === MAX_SCORE) {
-			socket.to(lobby).emit('gameOver', gameState);
+		if (gameOver === false && gameState.score.player1 === MAX_SCORE) {
+			gameOver = true;
+			console.log("winner is " + player1Name);
+			socket.to(lobby).emit('gameOver', gameState, player1Name, player2Name);
 			setTimeout(() => {clearInterval(intervalId)}, 50);
 		}
-		else if (gameState.score.player2 === MAX_SCORE) {
-			socket.to(lobby).emit('gameOver', gameState);
+		else if (gameOver === false && gameState.score.player2 === MAX_SCORE) {
+			gameOver = true;
+			console.log("winner is " + player2Name);
+			socket.to(lobby).emit('gameOver', gameState, player1Name, player2Name);
 			setTimeout(() => {clearInterval(intervalId)}, 50);
 		}
 	}, 1000 / FRAME_RATE);
