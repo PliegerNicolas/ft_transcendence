@@ -243,6 +243,11 @@ export default function ChanEdit({id}: {id: number})
 						}
 						{
 							!!chan.password.length
+								&& chan.password.length < 8
+								&& <span className="error-msg">Password length must be 8 or more!</span>
+						}
+						{
+							!!chan.password.length
 								&& !!chan.passwordRepeat.length
 								&& chan.password != chan.passwordRepeat
 								&& <span className="error-msg">Passwords do not match!</span>
@@ -325,7 +330,8 @@ export default function ChanEdit({id}: {id: number})
 					onClick={(e) => {handleSubmit(e)}}
 					disabled={
 						chan.status === "public"
-						&& chan.password !== chan.passwordRepeat
+						&& (chan.password !== chan.passwordRepeat
+							|| (!!chan.password.length && chan.password.length < 8))
 					}
 				>
 					Submit
@@ -336,7 +342,7 @@ export default function ChanEdit({id}: {id: number})
 				<DeletePopup
 					cancel={() => {setPopup(false)}}
 					del={() => delChan.mutate()} />
-				}
+			}
 			</div>
 		</div>
 	);
@@ -345,8 +351,8 @@ export default function ChanEdit({id}: {id: number})
 function DeletePopup({cancel, del}: {cancel: Function, del: Function})
 {
 	return (
-		<div className="Popup">
-			<div className="DeletePopup">
+		<div className="Popup__Bg">
+			<div className="Popup">
 				<h3>Are you sure you want to delete this channel?</h3>
 				<div className="DeletePopup__Notice">
 					Warning: This is a permanent operation!
