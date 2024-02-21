@@ -8,7 +8,7 @@ import { io } from 'socket.io-client';
 import "../../styles/chat.css";
 
 import ChatSidebar from "./ChatSidebar.tsx";
-import NewChan from "./NewChan.tsx";
+import NewChan from "./ChanEdit.tsx";
 import ChatContent from "./ChatContent.tsx";
 
 export const socket = io(`http://${location.hostname}:3450/chat`);
@@ -25,8 +25,13 @@ export default function ChatTest()
 			<ChatContext.Provider value={{showSidebar, setShowSidebar}}>
 				{ !!showSidebar && <ChatSidebar /> }
 				<Routes>
-					<Route path="/:id" element={ <ChatContent/> } />
-					<Route path="/new" element={ <NewChan /> } />
+					<Route path="/" element={
+						<div className="ChatContent nochan">
+							No open channel
+						</div>
+					}/>
+					<Route path="/:id/*" element={ <ChatContent/> } />
+					<Route path="/new" element={ <NewChan id={0} /> } />
 				</Routes>
 			</ChatContext.Provider>
 		</main>

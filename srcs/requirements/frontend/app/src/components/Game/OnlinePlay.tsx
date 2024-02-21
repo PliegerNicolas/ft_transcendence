@@ -1,6 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { io } from 'socket.io-client';
-import uuid from 'react-uuid'
+
+import { useInvalidate } from "../../utils/utils.ts";
+import { useMutation } from "@tanstack/react-query";
+import { MyContext } from "../../utils/contexts.ts";
+import { GameResult, GameType, GamelogPostType } from "../../utils/types.ts"
 
 import "../../styles/play.css";
 
@@ -45,38 +49,49 @@ type Score = {
 export const socket = io(`http://${location.hostname}:3450/game`);
 
 const OnlineGame = () => {
-	const [lobbyList, setLobbyList] = useState<Map<string, Set<string>>>();
 	const [lobby, setLobby] = useState<string>('');
 	const [playerNumber, setPlayerNumber] = useState(1);
 	const [oppId, setOppId] = useState('');
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
-	const [gameState, setGameState] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
+	const [sentLogs, setSentLogs] = useState(false);
 
-	const [value, setValue] = useState('');
+	const [inQueue, setInQueue] = useState(false);
+	const [gameReady, setGameReady] = useState(false);
+	const [playerReady, setPlayerReady] = useState(false);
+
+	const [backgroundColor, setBackgroundColor] = useState('#000');
+	const [paddlesColor, setPaddlesColor] = useState('#fff');
+	const [ballColor, setBallColor] = useState('#fff');
   
 	const destroySocketListeners = () => {
-		socket.off('createdLobby');
-		socket.off('userJoinedLobby');
-		socket.off('userLeftLobby');
-		socket.off('joinedLobby');
-		socket.off('pausedGame');
+		socket.off('userJoinedSocket');
+		socket.off('userLeftSocket');
+		socket.off('leaveLobby');
+		socket.off('gameFound');
+		socket.off('gameReady');
 		socket.off('startedGame');
 		socket.off('updateGame');
-		socket.off('updateScore');
 		socket.off('gameOver');
 	}
 
 	useEffect(() => {
+
+// Draw Functions ==============================================================================================================	
+
 		const gameCanvas = canvasRef.current;
 		const gameContext = gameCanvas?.getContext('2d');
 		
 		const drawGame = (new_gameState: InputPayloads) => {
-			gameContext!.textAlign = "center";
 
 			const drawBackground = () => {
-				gameContext!.fillStyle = "#000";
+				if (backgroundColor === paddlesColor || backgroundColor === ballColor) {
+					gameContext!.fillStyle = "#000";
+				}
+				else {
+					gameContext!.fillStyle = backgroundColor;
+				}
 				gameContext!.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 			}
 
@@ -89,6 +104,8 @@ const OnlineGame = () => {
 
 			const drawPlayersName = () => {
 				gameContext!.font = "30px Orbitron";
+				gameContext!.textAlign = "center";
+				gameContext!.fillStyle = "#fff";
 				if (playerNumber === 1) {
 					gameContext!.fillText("You", (WINDOW_WIDTH / 4), 40);
 					gameContext!.fillText(new_gameState.player2ID, (WINDOW_WIDTH / 1.333), 40);
@@ -101,6 +118,8 @@ const OnlineGame = () => {
 
 			const drawScores = () => {
 				gameContext!.font = "60px Orbitron";
+				gameContext!.textAlign = "center";
+				gameContext!.fillStyle = "#fff";
 				gameContext!.fillText(new_gameState.score.player1.toString(), (WINDOW_WIDTH / 2) - 50, 60);
 				gameContext!.fillText(new_gameState.score.player2.toString(), (WINDOW_WIDTH / 2) + 50, 60);
 			}
@@ -115,6 +134,7 @@ const OnlineGame = () => {
 			const drawGameOver = () => {
 				drawBackground();
 				gameContext!.font = "80px Orbitron";
+				gameContext!.textAlign = "center";
 				gameContext!.fillStyle = "#fff";
 				if ((new_gameState.score.player1 >= MAX_SCORE && playerNumber === 1) || (new_gameState.score.player2 >= MAX_SCORE && playerNumber === 2)) {
 					gameContext!.fillText("You won", (WINDOW_WIDTH / 2), (WINDOW_HEIGHT / 2));
@@ -123,17 +143,12 @@ const OnlineGame = () => {
 					gameContext!.fillText("You lost", (WINDOW_WIDTH / 2), (WINDOW_HEIGHT / 2));
 				}
 			}
-	
-			const drawPause = () => {
-				gameContext!.font = "60px Orbitron";
-				gameContext!.fillStyle = "#fff";
-				gameContext!.fillText("Game Paused", (WINDOW_WIDTH / 2), (WINDOW_HEIGHT / 2));
-			}
 
 			const drawGameState = () => {
-				gameContext!.fillStyle = "#fff";
+				gameContext!.fillStyle = paddlesColor;
 				gameContext!.fillRect(new_gameState.player1.x, new_gameState.player1.y, PADDLE_WIDTH, PADDLE_HEIGHT);
 				gameContext!.fillRect(new_gameState.player2.x, new_gameState.player2.y, PADDLE_WIDTH, PADDLE_HEIGHT);
+				gameContext!.fillStyle = ballColor;
 				gameContext!.fillRect(new_gameState.ball.x, new_gameState.ball.y, BALL_SIZE, BALL_SIZE);	
 			}
 	
@@ -142,80 +157,108 @@ const OnlineGame = () => {
 			if (gameOver) {
 				drawGameOver();
 			}
-			else if (!gameState) {
-				drawPause();
-			}
 		}
 
 		const drawTimer = () => {
-			gameContext!.textAlign = "center";
 			gameContext!.fillStyle = "#000";
 			gameContext!.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 			gameContext!.fillStyle = "#fff";
+			gameContext!.textAlign = "center";
 			gameContext!.font = "150px Orbitron";
 			gameContext!.fillText("3", WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 			setTimeout(() => {
 				gameContext!.fillStyle = "#000";
 				gameContext!.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 				gameContext!.fillStyle = "#fff";
+				gameContext!.textAlign = "center";
 				gameContext!.font = "150px Orbitron";
 				gameContext!.fillText("2", WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 				setTimeout(() => {
 					gameContext!.fillStyle = "#000";
 					gameContext!.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 					gameContext!.fillStyle = "#fff";
+					gameContext!.textAlign = "center";
 					gameContext!.font = "150px Orbitron";
 					gameContext!.fillText("1", WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 				}, 1000);
 			}, 1000);
 		}
 
-		//Create socket listeners
+// Socket Listeners ==============================================================================================================
+		
 		if (socket) {
-			socket.on('lobbyList', (lobby_list: Map<string, Set<string>>) => {
-				setLobbyList(lobby_list);
-				console.log(lobbyList);
-			});
-			socket.on('createdLobby', (lobby_id: string) => {
-				console.log(lobby_id + ' created');
-				setLobby(lobby_id);
-				setPlayerNumber(1);
-			});
-			socket.on('userJoinedLobby', (newUserId: string) => {
+			socket.on('userJoinedSocket', (newUserId: string) => {
 				console.log('New user connected:', newUserId);
-				setOppId(newUserId);
 			});
-			socket.on('userLeftServer', (userId: string) => {
+			socket.on('userLeftSocket', (userId: string) => {
 				console.log('User disconnected:', userId);
 				if (userId === oppId) {
-					socket.emit('playerDisconnect', {userId, lobby});
+					console.log('opponent left lobby');
+					socket.emit('opponentLeft', {userId, lobby});
 					setOppId('');
+					if (gameOver === true) {
+						setLobby('');
+						setGameReady(false);
+					}
 				}
 			});
-	
-			socket.on('joinedLobby', (lobby_id: string, opp_id: string) => {
-				console.log(lobby_id + ' joined');
+			socket.on('leaveLobby', () => {
+				setPlayerReady(false);
+				setInQueue(false);
+				setLobby('');				
+			});
+			socket.on('gameFound', (player_number: number, lobby_id: string, opp_id: string) => {
+				console.log('lobby : ' + lobby_id + ' joined');
 				setLobby(lobby_id);
 				setOppId(opp_id);
-				setPlayerNumber(2);
+				setPlayerNumber(player_number);
+				setInQueue(false);
 			});
-			socket.on('lobbyFull', (lobby_id: string) => {
-				console.log(lobby_id + ' is full');
-			});
+			socket.on('gameReady', () => {
+				setGameReady(true);
+			})
 			socket.on('startedGame', () => {
-				console.log('Start game');
 				drawTimer();
-				setGameState(true);
+				console.log('Start game');
 				setGameOver(false);
+				setSentLogs(false);
 			});
 			socket.on('updateGame', (new_gameState: InputPayloads) => {
 				if (gameContext && !gameOver)
 					requestAnimationFrame(() => drawGame(new_gameState));
 			});
-			socket.on('gameOver', (new_gameState: InputPayloads) => {
+			socket.on('gameOver', (new_gameState: InputPayloads, player1Name: string, player2Name: string) => {
+				console.log('game is over');
 				setGameOver(true);
-				requestAnimationFrame(() => drawGame(new_gameState));
+				if (gameContext)
+					requestAnimationFrame(() => drawGame(new_gameState));
+				if (sentLogs === false && playerNumber === 1 && new_gameState.score.player1 === MAX_SCORE) {
+					setSentLogs(true);
+					postGamelog.mutate({
+						userResults: [
+							{ username: player1Name, result: GameResult.VICTORY },
+							{ username: player2Name, result: GameResult.DEFEAT }
+						],
+						gameType: GameType.PONG
+					});
+					socket.emit('sentLogs', lobby);
+				}
+				else if (sentLogs === false && playerNumber === 2 && new_gameState.score.player2 === MAX_SCORE) {
+					setSentLogs(true);
+					postGamelog.mutate({
+						userResults: [
+							{ username: player1Name, result: GameResult.DEFEAT },
+							{ username: player2Name, result: GameResult.VICTORY }
+						],
+						gameType: GameType.PONG
+					});
+					socket.emit('sentLogs', lobby);
+				}
 				setOppId('');
+			});
+			socket.on('drawEndGame', (new_gameState: InputPayloads) => {
+				if (gameContext)
+					requestAnimationFrame(() => drawGame(new_gameState));
 			});
 		}
 		
@@ -230,8 +273,10 @@ const OnlineGame = () => {
 		};
 	}, [[]]);
 
+// Handlers ==============================================================================================================
+
 	const keyDownHandler = (event: KeyboardEvent) => {
-		if (event.key === 'w' || event.key === 's') {
+		if (event.key === 'w' || event.key === 's' || event.key === 'ArrowUp' || event.key === 'ArrowDown') {
 			const key = event.key;
 			socket.emit('keyDown', {key, lobby});
 			event.preventDefault();
@@ -239,54 +284,132 @@ const OnlineGame = () => {
 	}
 
 	const keyUpHandler = (event: KeyboardEvent) => {
-		if (event.key === 'w' || event.key === 's') {
+		if (event.key === 'w' || event.key === 's' || event.key === 'ArrowUp' || event.key === 'ArrowDown') {
 			const key = event.key;
 			socket.emit('keyUp', {key, lobby});
 			event.preventDefault();
 		}
 	}
 
-	const lobbyCreateHandler = () => {
-		socket.emit('createLobby', uuid());
-	}
-/*
-	const lobbyListHandler = () => {
-		socket.emit('getLobbyList');
-	}
-*/
-	const lobbyJoinHandler = (lobby: string) => {
-		socket.emit('joinLobby', lobby);
-		setValue('');
+	const readyCheckHandler = () => {
+		if (playerNumber === 1)
+			socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: 'Maëvo'});
+		else if (playerNumber === 2)
+			socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: 'Léa'});
+		setPlayerReady(true);
 	}
 
-	const initGameHandler = () => {
-		socket.emit('initGame', lobby);
+	const notReadyCheckHandler = () => {
+		socket.emit('notReady', {lobby, playerNumber});
+		setPlayerReady(false);
 	}
+
+	const joinQueueHandler = () => {
+		setInQueue(true);
+		socket.emit('joinQueue');
+	}
+
+	const leaveQueueHandler = () => {
+		setInQueue(false);
+		socket.emit('leaveQueue');
+	}
+
+	const backToMenuHandler = () => {
+		setInQueue(false);
+		setPlayerReady(false);
+		setGameReady(false);
+		setGameOver(false);
+		socket.emit('leaveLobby', lobby);
+		setLobby('');
+	}
+
+// Database related functions ==============================================================================================================
+
+	const context = useContext(MyContext);
+
+	const invalidate = useInvalidate();
+	
+	//sending the gamelogs to the database
+	const postGamelog = useMutation({
+		mutationFn: (gamelog: GamelogPostType) => context.api.post("/gamelogs", gamelog),
+		onSettled: () => invalidate(["gamelogs"]),
+		onError: error => context.addNotif({content: error.message}),
+	});
+
+// Return ==============================================================================================================
 
 	return (
 		<div>
-			{lobby.length === 0 ? <div>
-				<button className="Create-lobby-button" onClick={lobbyCreateHandler}>Create Lobby</button>
-				<div className="Lobby-list">
-					<span>Lobby name : </span>
-					<input
-						type="text"
-						value={value}
-						onChange={(e) => setValue(e.target.value)}
-						id="lobby-join-form"
-					/>
-					<button onClick={() => lobbyJoinHandler(value)}>Join Lobby</button>
+			{gameReady === true ? <div>
+			</div> : <section className="Play__SelectorSection">
+				<h3>Customize your game</h3>
+				<div className="Play__Selectors">
+					<div className="Play__PaddleSelector">
+						<span className="Play__CustomName">Paddle</span>
+						<select id="PaddleSelect"  onChange={(e) => setPaddlesColor(e.target.value)}>
+							<option value="#fff">default</option>
+    						<option value="#cc0000">red</option>
+    						<option value="#2eb82e">green</option>
+    						<option value="#008ae6">blue</option>
+   						</select>
+					</div>
+					<div className="Play__BackgroundSelector">
+						<span>Background</span>
+						<select id="BackgroundSelect" onChange={(e) => setBackgroundColor(e.target.value)}>
+							<option value="#000">default</option>
+    						<option value="#cc0000">red</option>
+    						<option value="#2eb82e">green</option>
+    						<option value="#008ae6">blue</option>
+   						</select>
+					</div>
+					<div className="Play__BallSelector">
+						<span>Ball</span>
+						<select id="BallSelect" onChange={(e) => setBallColor(e.target.value)}>
+							<option value="#fff">default</option>
+    						<option value="#cc0000">red</option>
+    						<option value="#2eb82e">green</option>
+    						<option value="#008ae6">blue</option>
+   						</select>
+					</div>
 				</div>
+			</section>}
+			{lobby.length === 0 ? <div>
+				{inQueue === true ? <div>
+					<span className="Play__InQueueText">In Queue</span>
+					<div className="Play__Ellipsis">
+  						<div className="Play__Dot" style={{ '--dot-index': 1 } as React.CSSProperties}></div>
+  						<div className="Play__Dot" style={{ '--dot-index': 2 } as React.CSSProperties}></div>
+  						<div className="Play__Dot" style={{ '--dot-index': 3 } as React.CSSProperties}></div>
+					</div>
+					<button className="Play__LeaveQueueButton Play__ButtonAnimation" onClick={leaveQueueHandler}>Leave Queue</button>
+				</div> : <div>
+					<button className="Play__JoinQueueButton Play__ButtonAnimation" onClick={joinQueueHandler}>Join Queue</button>
+				</div> }
 			</div> : <div>
-				<canvas
-					ref={canvasRef}
-					width={WINDOW_WIDTH}
-					height={WINDOW_HEIGHT}
-					className="Canvas"></canvas>
-					<button className="Start-button" onClick={initGameHandler}>Start game</button>
-					<p>{lobby}</p>
+				{gameReady === true ? <div>
+					<canvas
+						ref={canvasRef}
+						width={WINDOW_WIDTH}
+						height={WINDOW_HEIGHT}
+						className="Play__Canvas">
+					</canvas>
+					{gameOver === true ? <div>
+						<button className="Play__BackToMenu" onClick={backToMenuHandler}>Back to Menu</button>
+					</div> : <div></div>}
+				</div> : <div>
+					<div className="Play__ReadyCheckText">
+						<span>You have found an opponent !</span>
+					</div>
+					{playerReady === true ? <div>
+						<button className="Play__NotReadyButton Play__ButtonAnimation" onClick={notReadyCheckHandler}>Not Ready</button>
+					</div> : <div>
+						<button className="Play__ReadyButton Play__ButtonAnimation" onClick={readyCheckHandler}>Ready</button>
+					</div>}
+				</div> }
 			</div> }
-
+			{gameReady === true ? <div></div> : <div>
+				<span className="Play__Instructions">Use W/S or 🔼/🔽 to control your paddle</span>
+			</div>}
 		</div>
 	);
 };

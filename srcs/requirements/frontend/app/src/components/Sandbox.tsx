@@ -182,7 +182,7 @@ function UserListRender(
 				query.data?.map((user: UserType) =>
 					<Link
 						key={user.id}
-						to={"/user/" + user.id}
+						to={"/user/" + user.username}
 						className="Sandbox__UserItem clickable"
 					>
 						<div>{"#" + user.id}</div>

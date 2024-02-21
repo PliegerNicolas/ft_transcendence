@@ -1,7 +1,8 @@
 import { IsEnum } from "class-validator";
 import { Message } from "src/chats/messages/entities/Message.entity";
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ChannelMember } from "./ChannelMember.entity";
+import { Exclude } from "class-transformer";
 
 export enum ChannelStatus {
     PUBLIC = 'public',
@@ -24,10 +25,20 @@ export class Channel {
     @Column({ type: 'enum', enum: ChannelStatus, default: ChannelStatus.PRIVATE })
     status: ChannelStatus;
 
+    //@Exclude()
+    @Column({ nullable: true })
+    password: string;
+
+    @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    createdAt: Date;
+
+    @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    updatedAt: Date;
+
     @OneToMany(() => ChannelMember, (member) => member.channel, { cascade: true })
     members?: ChannelMember[];
 
-    @OneToMany(() => Message, (messages) => messages.channel, { cascade: true }) // soft deletion ?
+    @OneToMany(() => Message, (messages) => messages.channel) // soft deletion ?
     messages?: Message[];
 
     /* Helper Functions */

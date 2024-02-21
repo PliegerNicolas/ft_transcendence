@@ -8,9 +8,9 @@ export function useInvalidate()
 	return ((key: QueryKey) => queryClient.invalidateQueries({queryKey: key}))
 }
 
-export function httpStatus(s: string)
+export function httpStatus(e: Error)
 {
-	const statusString = s.substring(0, 4);
+	const statusString = e.message.substring(0, 4);
 	if (isNaN(+statusString) || isNaN(parseFloat(statusString)))
 		return (0);
 	return (+statusString);
@@ -18,5 +18,5 @@ export function httpStatus(s: string)
 
 export function stopOnHttp(count: number, error: Error)
 {
-	return (!httpStatus(error.message) && count < 3)
+	return (!httpStatus(error) && count < 3)
 }

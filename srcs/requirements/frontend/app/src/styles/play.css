@@ -1,46 +1,220 @@
-.Canvas {
-	border: 10px solid var(--bg-color-1);
+.Play__Canvas {
 	width: 100%;
 	object-fit: contain;
 	box-sizing: border-box;
-	border-image-slice: 1;
-	border-color: var(--border-color-1);
 	box-shadow: 0 0 12px #000a;
+	margin-top: 2em;
 }
 
-.Create-lobby-button {
-	width: 10vw;
-	height: 5vh;
-  	font-size: 2.5vh;
+.Play__JoinQueueButton {
+	display:flex;
+	justify-content: center;
+	align-items: center;
 
-	position: fixed;
-	top: 66px;
-	left: 210px;
-  
-	background-color: #6f313c;
-	border-color: #994353;
-}
+	width: 30vw;
+	height: 20vh;
+  	font-size: 8vh;
+	margin: 5px auto 15px;
 
-.Create-lobby-button:hover {
-	background-color: #994353;
-}
-
-.Lobby-list {
-	position: fixed;
-	top: 111px;
-	left: 215px;
-}
-
-.Start-button {
-	width: 10vw;
-	height: 5vh;
-  	font-size: 2.5vh;
-	justify-content:flex-start;
+	object-fit: contain;
+	box-shadow: 0 0 12px #000a;
   
 	background-color: #316f31;
 	border-color: #47a347;
 }
 
-.Start-button:hover {
+.Play__JoinQueueButton:hover {
 	background-color: #47a347;
+}
+
+.Play__LeaveQueueButton {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	width: 10vw;
+	height: 5vh;
+  	font-size: 2vh;
+
+	object-fit: contain;
+	box-shadow: 0 0 12px #000a;
+	margin: 30px auto 15px;
+  
+	background-color: #6f313c;
+	border-color: #994353;
+}
+
+.Play__LeaveQueueButton:hover {
+	background-color: #994353;
+}
+
+.Play__SelectorSection {
+	text-align: center;
+	margin: 5vh auto 10vh;
+  }
+  
+.Play__Selectors {
+	display: flex;
+	justify-content: space-around;
+	margin-top: 3vh;
+  }
+  
+.Play__PaddleSelector,
+.Play__BackgroundSelector,
+.Play__BallSelector {
+	width: 30%;
+}
+
+select {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 100%;
+	font-size: 1rem;
+	padding: 0.5em 1em;
+	margin-top: 0.3em;
+	margin-bottom: 0.2em;
+	cursor: pointer;
+	appearance: none;
+	/*  safari  */
+	-webkit-appearance: none;
+  	/* other styles for aesthetics */
+  	background-color: var(--bg-color-5);
+  	border: 1px solid var(--current-option-text);
+  	border-radius: 0.25rem;
+  	color: var(--text-normal);
+  	cursor: pointer;
+
+  	background-image:
+		linear-gradient(45deg, transparent 50%, var(--current-option-text) 50%),
+		linear-gradient(135deg, var(--current-option-text) 50%, transparent 50%);
+  	background-position:
+		calc(100% - 20px) calc(1em),
+		calc(100% - 15px) calc(1em);
+  	background-size:
+		5px 5px,
+		5px 5px;
+  	background-repeat: no-repeat;
+  }
+
+select:focus {
+	outline: 0;
+}
+
+.Play__ButtonAnimation {
+	transition: transform 0.2s ease-in-out;
+}
+  
+.Play__ButtonAnimation:hover {
+	transform: scale(1.02);
+}
+
+.Play__InQueueText {
+	font-size: 2em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 0.25em;
+}
+
+.Play__Ellipsis {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+  
+.Play__Dot {
+	width: 12px;
+	height: 12px;
+	background-color: #fff;
+	border-radius: 50%;
+	margin: 0 5px;
+	animation: blink 2.1s infinite;
+	animation-delay: calc(0.5s * var(--dot-index));
+}
+  
+@keyframes blink {
+	0%, 100% {
+	  opacity: 1;
+	}
+	50% {
+	  opacity: 0.5;
+	}
+}
+
+.Play__ReadyCheckText {
+	font-size: 2em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 0.2em;
+}
+
+.Play__ReadyButton {
+	display:flex;
+	justify-content: center;
+	align-items: center;
+	
+	width: 30vw;
+	height: 20vh;
+	font-size: 8vh;
+	margin: 5px auto 15px;
+	
+	object-fit: contain;
+	box-shadow: 0 0 12px #000a;
+	  
+	background-color: #316f31;
+	border-color: #47a347;
+}
+	
+.Play__ReadyButton:hover {
+	background-color: #47a347;
+}
+
+.Play__NotReadyButton {
+	display:flex;
+	justify-content: center;
+	align-items: center;
+	
+	width: 30vw;
+	height: 20vh;
+	font-size: 8vh;
+	margin: 5px auto 15px;
+	
+	object-fit: contain;
+	box-shadow: 0 0 12px #000a;
+	  
+	background-color: #6f313c;
+	border-color: #994353;
+}
+
+.Play__NotReadyButton:hover {
+	background-color: #994353;
+}
+
+.Play__BackToMenu {
+	display:flex;
+	justify-content: center;
+	align-items: center;
+
+	width: 8vw;
+	height: 4vh;
+	font-size: 1.5vh;
+	margin: 25px auto 25px;
+	object-fit: contain;
+	box-shadow: 0 0 12px #000a;
+}
+
+.Play__Instructions {
+	font-size: 2em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 3em;
+	opacity: 60%;
+
+	user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
 }

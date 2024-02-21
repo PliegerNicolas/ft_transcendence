@@ -36,14 +36,45 @@ export interface MyInfoType {
 }
 
 export interface MsgType {
-	userId: number,
-	channelId: number,
+	id: string
+	channelId: string,
 	content: string,
-	createdAt: string
+	createdAt: string,
+	channelMember: {
+		id: string,
+		role: "admin" | "owner",
+		user: UserType,
+	}
 }
 
 export interface ChanType {
 	id: string,
 	name: string,
 	membersCount: number,
+}
+
+export interface NotifType {
+	date: number,
+	content: string,
+	type: number,
+	id: number,
+}
+
+export enum GameResult {
+    VICTORY = 'victory',
+    DEFEAT = 'defeat',
+    TIE = 'tie',
+}
+
+export enum GameType {
+    PONG = "pong",
+    UNDEFINED = "undefined",
+}
+
+export interface GamelogPostType {
+	userResults: [
+        { username: string, result: GameResult },
+        { username: string, result: GameResult }
+	],
+    gameType: GameType
 }
