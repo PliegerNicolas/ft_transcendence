@@ -299,3 +299,38 @@
 		brightness(0) saturate(100%) invert(36%) sepia(75%) saturate(4156%)
 		hue-rotate(329deg) brightness(89%) contrast(94%);
 }
+
+/*
+** Popup =======================================================================
+*/
+
+.Popup__Bg {
+	position: absolute;
+	background: #000a;
+	top: 0; bottom: 0; left: 0; right: 0;
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.Popup {
+	border: 1px solid var(--bg-color-5);
+	border-radius: 7px;
+	padding: 12px;
+	padding-top: 0;
+	margin: 48px;
+	background: var(--bg-color-2);
+	max-width: 500px;
+}
+
+.DeletePopup__Notice {
+	margin-bottom: 20px;
+	font-size: .92rem;
+	font-style: italic;
+}
+
+.DeletePopup__Buttons {
+	display: flex;
+	justify-content: space-between;
+}

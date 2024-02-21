@@ -215,13 +215,13 @@ const OnlineGame = () => {
 				setInQueue(false);
 			});
 			socket.on('gameReady', () => {
-				setSentLogs(false);
 				setGameReady(true);
 			})
 			socket.on('startedGame', () => {
 				drawTimer();
 				console.log('Start game');
 				setGameOver(false);
+				setSentLogs(false);
 			});
 			socket.on('updateGame', (new_gameState: InputPayloads) => {
 				if (gameContext && !gameOver)
