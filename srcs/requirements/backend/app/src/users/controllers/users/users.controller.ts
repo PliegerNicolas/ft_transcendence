@@ -32,7 +32,7 @@ export class UsersController {
     async getUsers(
         @Request() req: any,
     ) {
-        const username = req.user.username;
+        const username = req.user ? req.user.username : undefined;
         if (username) return (await this.userService.getMyUsers(username));
         else return (await this.userService.getUsers());
     }
@@ -43,7 +43,7 @@ export class UsersController {
         @Param('username', ParseUsernamePipe) username: string,
         @Request() req: any,
     ) {
-        if (req.user.username) return (await this.userService.getMyUser(username));
+        if (req.user?.username) return (await this.userService.getMyUser(username));
         else return (await this.userService.getUser(username));
     }
 
@@ -56,8 +56,8 @@ export class UsersController {
     async getMyUser(
         @Request() req: any,
     ) {
-        const username = req.user.username;
-        return (await this.userService.getUser(username));
+        const username = req.user ? req.user.username : undefined;
+        return (await this.userService.getMyUser(username));
     }
 
     @Put('me')
@@ -66,7 +66,7 @@ export class UsersController {
         @Body(new ValidationPipe) replaceUserDto: ReplaceUserDto,
         @Request() req: any,
     ) {
-        const username = req.user.username;
+        const username = req.user ? req.user.username : undefined;
         return (await this.userService.replaceUser(username, replaceUserDto));
     }
 
@@ -76,7 +76,7 @@ export class UsersController {
         @Body(new ValidationPipe) updateUserDto: UpdateUserDto,
         @Request() req: any,
     ) {
-        const username = req.user.username;
+        const username = req.user ? req.user.username : undefined;
         return (await this.userService.updateUser(username, updateUserDto));
     }
 
@@ -85,7 +85,7 @@ export class UsersController {
     async deleteMyUser(
         @Request() req: any,
     ) {
-        const username = req.user.username;
+        const username = req.user ? req.user.username : undefined;
         return (await this.userService.deleteUser(username));
     }
 

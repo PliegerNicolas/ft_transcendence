@@ -29,7 +29,7 @@ export class ProfilesController {
         @Body(new ValidationPipe) replaceProfileDto: ReplaceProfileDto,
         @Request() req: any,
     ) {
-        const username = req.user.username;
+        const username = req.user ? req.user.username : undefined;
         return (await this.profileService.replaceProfile(username, replaceProfileDto));
     }
 
@@ -39,7 +39,7 @@ export class ProfilesController {
         @Body(new ValidationPipe) updateProfileDto: UpdateProfileDto,
         @Request() req: any,
     ) {
-        const username = req.user.username;
+        const username = req.user ? req.user.username : undefined;
         return (await this.profileService.updateProfile(username, updateProfileDto));
     }
 
@@ -48,7 +48,7 @@ export class ProfilesController {
     async clearMyprofile(
         @Request() req: any,
     ) {
-        const username = req.user.username;
+        const username = req.user ? req.user.username : undefined;
         return (await this.profileService.clearProfile(username));
     }
 

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Relationship } from 'src/relationships/entities/Relationship.entity';
 import { CreateRelationshipParams, ReplaceRelationshipParams, UpdateRelationshipParams } from 'src/relationships/types/relationship.type';
 import { User } from 'src/users/entities/User.entity';
-import { Repository } from 'typeorm';
+import { Equal, Relation, Repository } from 'typeorm';
 
 @Injectable()
 export class RelationshipsService {
@@ -15,21 +15,21 @@ export class RelationshipsService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    async getUserRelationships(username: string): Promise<Relationship[]> {
+    async getRelationships(username: string = undefined): Promise<Relationship[]> {
         const user = await this.userRepository.findOne({
             where: { username: username },
             relations: [
                 'relationships1.user1', 'relationships1.user2',
-                'relationships2.user1', 'relationships2.user2',
+                'relationships2.user1', 'relationships2.user2'
             ],
         });
 
-        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
+        if (!user) throw new NotFoundException(`User '${username} not found`);
 
         return (user.getRelationships());
     }
 
-    async getUserRelationship(username: string, targetUsername: string): Promise<Relationship> {
+    async getRelationship(username: string = undefined, targetUsername: string = undefined): Promise<Relationship> {
         const relationship = await this.relationshipRepository.findOne({
             where: [
                 { user1: { username: username }, user2: { username: targetUsername } },
@@ -38,37 +38,37 @@ export class RelationshipsService {
             relations: ['user1', 'user2'],
         });
 
-        if (!relationship) throw new NotFoundException(`Relationship between given users (${[username, targetUsername]}) not found`);
+        if (!relationship) throw new NotFoundException(`Relationship between User '${username ? username : '{undefined}' }' and '${targetUsername ? targetUsername : '{undefined}' }' not found`);
 
         return (relationship);
     }
 
-    async createUserRelationship(username: string, relationshipDetails: CreateRelationshipParams): Promise<Relationship> {
+    async createRelationship(username: string = undefined, relationshipDetails: CreateRelationshipParams): Promise <Relationship> {
+        const targetUsername = relationshipDetails.username;
+
         let relationship = await this.relationshipRepository.findOne({
             where: [
-                { user1: { username: username }, user2: { username: relationshipDetails.username } },
-                { user1: { username: relationshipDetails.username }, user2: { username: username } },
+                { user1: { username: Equal(username) }, user2: { username: Equal(targetUsername) } },
+                { user1: { username: Equal(targetUsername) }, user2: { username: Equal(username) } },
             ],
+            relations: ['user1', 'user2'],
         });
 
-        if (relationship) throw new ConflictException(`Relationship between ${[username, relationshipDetails.username]} already exists`);
+        if (relationship) throw new NotFoundException(`Relationship between User '${username ? username : '{undefined}' }' and '${targetUsername ? targetUsername : '{undefined}' }' already exists`);
 
         const [user1, user2] = await Promise.all([
-            this.userRepository.findOne({ where: { username: username } }),
-            this.userRepository.findOne({ where: { username: relationshipDetails.username } }),
+            this.userRepository.findOne({ where: { username: Equal(username) } }),
+            this.userRepository.findOne({ where: { username: Equal(targetUsername) } }),
         ]);
 
-        if (!user1 || !user2) {
-            const missingUsers = [];
-            if (!user1) missingUsers.push(username);
-            if (!user2) missingUsers.push(relationshipDetails.username);
-            if (missingUsers.length > 1) throw new NotFoundException(`Users with Usernames '${missingUsers}' not found`);
-            else throw new NotFoundException(`User with Username '${missingUsers}' not found`);
-        }
+        const missingUsers = [user1, user2]
+            .map((user, i) => user ? undefined : [username, targetUsername][i] ?? '{undefined}')
+            .filter((user) => user !== undefined);
+        if (missingUsers.length > 0) throw new NotFoundException(`User${missingUsers.length > 1 ? 's' : ''} '${missingUsers.join("' and '")}' not found`);
 
         relationship = this.relationshipRepository.create({
-            user1,
-            user2
+            user1: user1,
+            user2: user2,
         });
 
         relationship.setStatusOnCreation(relationshipDetails.status);
@@ -76,61 +76,57 @@ export class RelationshipsService {
         return (await this.relationshipRepository.save(relationship));
     }
 
-    async replaceUserRelationship(
-        username: string,
-        targetUsername: string,
-        relationshipDetails: ReplaceRelationshipParams
-    ): Promise<Relationship> {
+    async replaceRelationship(username: string = undefined, targetUsername: string = undefined, relationshipDetails: ReplaceRelationshipParams): Promise <Relationship> {
         const relationship = await this.relationshipRepository.findOne({
             where: [
-                { user1: { username: username }, user2: { username: targetUsername } },
-                { user1: { username: targetUsername }, user2: { username: username } },
+                { user1: { username: Equal(username) }, user2: { username: Equal(targetUsername) } },
+                { user1: { username: Equal(targetUsername) }, user2: { username: Equal(username) } },
             ],
             relations: ['user1', 'user2'],
         });
 
-        if (!relationship) throw new NotFoundException(`Relationship between Users with Usernammes (${[username, targetUsername]}) not found`);
+        if (!relationship) throw new NotFoundException(`Relationship between User '${username ? username : '{undefined}' }' and '${targetUsername ? targetUsername : '{undefined}' }' not found`);
 
         relationship.setStatusByUsername(username, relationshipDetails.status);
 
-        return (await this.relationshipRepository.save(relationship));
+        return (await this.relationshipRepository.save({
+            ...relationship,
+        }));
     }
 
-    async updateUserRelationship(
-        username: string,
-        targetUsername: string,
-        relationshipDetails: UpdateRelationshipParams
-    ): Promise<Relationship> {
+    async updateRelationship(username: string = undefined, targetUsername: string = undefined, relationshipDetails: UpdateRelationshipParams): Promise <Relationship> {
         const relationship = await this.relationshipRepository.findOne({
             where: [
-                { user1: { username: username }, user2: { username: targetUsername } },
-                { user1: { username: targetUsername }, user2: { username: username } },
+                { user1: { username: Equal(username) }, user2: { username: Equal(targetUsername) } },
+                { user1: { username: Equal(targetUsername) }, user2: { username: Equal(username) } },
             ],
             relations: ['user1', 'user2'],
         });
 
-        if (!relationship) throw new NotFoundException(`Relationship between Users with Usernammes (${[username, targetUsername]}) not found`);
+        if (!relationship) throw new NotFoundException(`Relationship between User '${username ? username : '{undefined}' }' and '${targetUsername ? targetUsername : '{undefined}' }' not found`);
 
         relationship.setStatusByUsername(username, relationshipDetails.status);
 
-        return (await this.relationshipRepository.save(relationship));
+        return (await this.relationshipRepository.save({
+            ...relationship,
+        }));
     }
 
-    async deleteRelationship(username: string, targetUsername: string): Promise<string> {
+    async deleteRelationship(username: string = undefined, targetUsername: string = undefined): Promise<string> {
         const relationship = await this.relationshipRepository.findOne({
             where: [
-                { user1: { username: username }, user2: { username: targetUsername } },
-                { user1: { username: targetUsername }, user2: { username: username } },
+                { user1: { username: Equal(username) }, user2: { username: Equal(targetUsername) } },
+                { user1: { username: Equal(targetUsername) }, user2: { username: Equal(username) } },
             ],
             relations: ['user1', 'user2'],
         });
 
-        if (!relationship) throw new NotFoundException(`Relationship between Users with Usernammes (${[username, targetUsername]}) not found`);
+        if (!relationship) throw new NotFoundException(`Relationship between User '${username ? username : '{undefined}' }' and '${targetUsername ? targetUsername : '{undefined}' }' not found`);
 
         relationship.isDeletionPermitted(username);
 
         await this.relationshipRepository.remove(relationship);
-        return (`Relationship between Users with Usernames ${[username, targetUsername]} successfully deleted`);
+        return (`Relationship between User '${username ? username : '{undefined}' }' and '${targetUsername ? targetUsername : '{undefined}' }' successfully deleted`);
 
     }
 
