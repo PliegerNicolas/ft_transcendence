@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-route
 import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
-import { NotifType } from "./utils/types.ts";
 
 import Header from "./components/Header.tsx";
 import Navbar from "./components/Navbar.tsx";
@@ -13,7 +12,6 @@ import Navbar from "./components/Navbar.tsx";
 import Home from "./components/Home.tsx";
 import Play from "./components/Game/Play.tsx";
 import Stats from "./components/Stats.tsx";
-import Chat from "./components/Chat.tsx";
 import ChatTest from "./components/Chat/Chat.tsx";
 import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
@@ -113,15 +111,10 @@ function App()
 		return { logged: false, token: ""};
 	});
 
-	const [notifs, setNotifs] = useState<NotifType[]>([]);
+	const [notifs, setNotifs] = useState<{type: number, content: string, date: number}[]>([]);
 
-	function addNotif(add: NotifType) {
-		add.date = Date.now() + Math.floor(20 * Math.random());
-		add.id =
-			(10000 * (add.date % (24 * 600000)))
-			+ Math.floor(10000 * Math.random());
-		while (notifs.some(notif => notif.date === add.date))
-			add.date++;
+	function addNotif(add: {type: number, content: string, date: number}) {
+		add.date = Date.now();
 		setNotifs(prev => [...prev, add]);
 	}
 
@@ -138,9 +131,6 @@ function App()
 					<Route path="/"	element={<Home />} />
 					<Route path="/play" element={<Play />} />
 					<Route path="/stats" element={<Stats />} />
-					<Route path="/chat" element={
-						<RequireAuth elem={<Chat />} />
-					}/>
 					<Route path="/chattest/*" element={
 						<RequireAuth elem={<ChatTest />} />
 					}/>

@@ -22,8 +22,7 @@ function Navbar()
 		{ name: "Home", path: "/", img: homeIcon },
 		{ name: "Play",	path: "/play", img: playIcon },
 		{ name: "Stats", path: "/stats", img: statsIcon },
-		{ name: "Chat", path: "/chat", img: chatIcon },
-		{ name: "Chat Test", path: "/chattest", img: chatIcon },
+		{ name: "Chat", path: "/chattest", img: chatIcon },
 		{ name: "Settings", path: "/settings", img: settingsIcon },
 		{ name: "About", path: "/about", img: aboutIcon },
 		{ name: "Sandbox", path: "/sandbox", img: sandboxIcon }
