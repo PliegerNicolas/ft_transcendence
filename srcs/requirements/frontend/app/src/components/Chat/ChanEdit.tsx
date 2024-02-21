@@ -56,7 +56,7 @@ export default function ChanEdit({id}: {id: number})
 	const delChan = useMutation({
 		mutationFn: () => api.delete("/channels/" + id),
 		onSettled: () => invalidate(["allChans"]),
-		onSuccess: () => navigate("/chattest"),
+		onSuccess: () => navigate("/chat"),
 		onError: error => addNotif({content: error.message}),
 	});
 
@@ -73,7 +73,7 @@ export default function ChanEdit({id}: {id: number})
 				return api.post("/channels", data)}) as unknown as MutationFunction<ChanType>,
 		onError: error => addNotif({content: error.message}),
 		onSettled: () => invalidate(["allChans"]),
-		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
+		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
 	});
 
 	const patchChan = useMutation({
@@ -83,7 +83,7 @@ export default function ChanEdit({id}: {id: number})
 				return api.patch("/channels/" + id, data)}) as unknown as MutationFunction<ChanType>,
 		onError: error => addNotif({content: error.message}),
 		onSettled: () => invalidate(["allChans"]),
-		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
+		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
 	});
 
 	function updateField(field: string, value: unknown) {

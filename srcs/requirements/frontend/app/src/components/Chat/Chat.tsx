@@ -11,7 +11,7 @@ import ChatContent from "./ChatContent.tsx";
 
 // <Chat /> ====================================================================
 
-export default function ChatTest()
+export default function Chat()
 {
 	const [showSidebar, setShowSidebar] =
 		useState(+(document.body.clientWidth > 900));

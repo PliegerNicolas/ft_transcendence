@@ -107,7 +107,7 @@ export default function Sandbox()
 							<div key={chan.id} className="Sandbox__ContextItem">
 								<div>#{chan.id}</div>
 								<div>
-									<Link to={"/chattest/" + chan.id}>
+									<Link to={"/chat/" + chan.id}>
 										<span>{chan.name}</span>
 									</Link>
 								</div>
