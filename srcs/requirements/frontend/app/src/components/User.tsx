@@ -13,6 +13,9 @@ import { stopOnHttp } from "../utils/utils.ts";
 import "../styles/user.css";
 
 import defaultPicture from "../assets/default_profile.png";
+//import addFriend from "../assets/add-friend.svg";
+//import rmFriend from "../assets/rm-friend.svg";
+//import blockUser from "../assets/user-block.svg";
 
 // <User /> ====================================================================
 
@@ -44,9 +47,9 @@ export default function User()
 	});
 
 	const patchFriendship = useMutation({
-		mutationFn: ({friendId, status}: {friendId: string, status: string}) =>
+		mutationFn: ({me, them, status}: {me: string, them: string, status: string}) =>
 			api.patch(
-				"/users/" + id + "/relationships/" + friendId,
+				"/users/" + me + "/relationships/" + them,
 				{status: status}
 			),
 		onSettled: () => invalidate(["users", id, "friends"]),
@@ -69,30 +72,6 @@ export default function User()
 
 	function invalidate(queryKey: Array<any>) {
 		queryClient.invalidateQueries({queryKey});
-	}
-
-	function friend() {
-		postFriendship.mutate({me: "mlaneyri", other: user.username, status: "accepted"});
-	}
-
-	function friendMe() {
-		postFriendship.mutate({other: "mlaneyri", me: user.username, status: "accepted"});
-	}
-
-	function block() {
-		postFriendship.mutate({me: "mlaneyri", other: user.username, status: "blocked"});
-	}
-
-	function blockMe() {
-		postFriendship.mutate({other: "mlaneyri", me: user.username, status: "blocked"});
-	}
-
-	function delShip() {
-		delFriendship.mutate(user.username);
-	}
-
-	function acceptShip() {
-		patchFriendship.mutate({friendId: user.username, status: "accepted"});
 	}
 
 	if (getUser.isPending) return (
@@ -119,7 +98,8 @@ export default function User()
 		switch (action) {
 			case "accept":
 				patchFriendship.mutate({
-					friendId: other,
+					me: id,
+					them: other,
 					status: "accepted"
 				});
 				break ;
@@ -132,8 +112,6 @@ export default function User()
 		}
 	}
 	
-	console.log(getFriendships.data);
-
 	function getStatus()
 	{
 		if (!getFriendships.isSuccess)
@@ -150,21 +128,21 @@ export default function User()
 		const myStatus = match.user1.id == "1" ? match.status1 : match.status2;
 		const theirStatus = match.user1.id == "1" ? match.status2 : match.status1;
 
-		if (theirStatus == "blocked")
-			return ("imblocked");
 		if (myStatus == "blocked")
 			return ("blocked");
 		if (myStatus == "pending")
 			return ("approve");
 		if (theirStatus == "pending")
 			return ("pending");
+		if (theirStatus == "blocked")
+			return ("imblocked");
 		return ("");
 	}
 
-	console.log(getStatus());
+	console.log(getFriendships.data);
 
 	return (
-		<main className="MainContent">
+		<main className="MainContent User">
 			<section>
 				<h2>
 					{
@@ -196,21 +174,28 @@ export default function User()
 				<hr />
 				{
 					user.id != 1 && getFriendships.isSuccess &&
+					<OnOtherActions
+						status={getStatus()}
+						post={postFriendship.mutate}
+						patch={patchFriendship.mutate}
+						del={delFriendship.mutate}
+						name={user.username}
+					/>
+				}
+				{
+					user.id != 1 && getFriendships.isSuccess &&
 					<div className="User__ActionsButtons">
-						{
-							getStatus() == "" &&
-								<button onClick={friend}> Friend request </button>
-							|| getStatus() == "accepted" &&
-								<button onClick={delShip}> Unfriend </button>
-							|| getStatus() == "approve" &&
-								<button onClick={acceptShip}> Accept as friend </button>
-							|| getStatus() == "imblocked" &&
-								<button> Friend request </button>
-						}
-						<button onClick={block}> Block </button>
 						<hr />
-						<button onClick={friendMe}> Make friend request me </button>
-						<button onClick={blockMe}> Make block me </button>
+						<button onClick={() =>
+							postFriendship.mutate({other: "mlaneyri", me: user.username, status: "accepted"})
+						}>
+							Make friend request me
+						</button>
+						<button onClick={() =>
+							postFriendship.mutate({other: "mlaneyri", me: user.username, status: "blocked"})
+						}>
+							Make block me 
+						</button>
 					</div>
 				}
 				<h3>Relationships:</h3>
@@ -246,6 +231,100 @@ export default function User()
 	);
 }
 
+// <OnOtherActions /> ==========================================================
+
+function OnOtherActions(
+	{status, post, patch, del, name}:
+	{status: string, post: Function, patch: Function, del: Function, name: string}
+)
+{
+	function friend() {
+		post({me: "mlaneyri", other: name, status: "accepted"});
+	}
+
+	function block() {
+		post({me: "mlaneyri", other: name, status: "blocked"});
+	}
+
+	function acceptShip() {
+		patch({me: "mlaneyri", them: name, status: "accepted"});
+	}
+
+	console.log(status);
+
+	switch (status) {
+		case "accepted": return (
+			<div className="User__ActionsButtons">
+				<div className="User__Status">
+					You are friend with {name}.
+				</div>
+				<button onClick={() => del(name)} className="reject">
+					Unfriend
+				</button>
+			</div>
+		);
+		case "approve": return (
+			<div className="User__ActionsButtons">
+				<div className="User__Status">
+					{name} sent you a friend request.
+				</div>
+				<button onClick={acceptShip} className="accept">
+					Accept as friend
+				</button>
+			</div>
+		);
+		case "pending": return (
+			<div className="User__ActionsButtons">
+				<div className="User__Status">
+					Your friend request to {name} is pending.
+				</div>
+				<button onClick={() => del(name)} className="reject">
+					Cancel
+				</button>
+			</div>
+		);
+		case "blocked": return (
+			<div className="User__ActionsButtons">
+				<div className="User__Status">
+					You are blocking {name}.
+				</div>
+				<button
+					className="unblock"
+					onClick={() => patch({me: "mlaneyri", them: name, status: "undefined"})}
+				>
+					Unblock
+				</button>
+			</div>
+		);
+		case "imblocked": return (
+			<div className="User__ActionsButtons">
+				<button
+					className="accept"
+				>
+					Friend request
+				</button>
+				<button
+					className="reject"
+					onClick={() => patch({me: "mlaneyri", them: name, status: "blocked"})}
+				>
+					Block
+				</button>
+			</div>
+		);
+	}
+
+	return (
+		<div className="User__ActionsButtons">
+			<button onClick={friend} className="accept">
+				Friend request
+			</button>
+			<button onClick={block} className="reject">
+				Block
+			</button>
+		</div>
+	);
+}
+
 // <Friendships /> =============================================================
 
 function Friendships(props: {
@@ -268,7 +347,8 @@ function Friendships(props: {
 
 	if (!props.query.data.find((elem: FriendshipType) =>
 		((elem.status1 != "blocked" || elem.user2.username != props.id)
-		&& (elem.status2 != "blocked" || elem.user1.username != props.id)))
+		&& (elem.status2 != "blocked" || elem.user1.username != props.id))
+		|| (elem.status1 == "blocked" && elem.status2 == "blocked"))
 	) return (
 		<p className="notice-msg">
 			You have no relations <span className="r">😢</span> (yet)
@@ -329,6 +409,7 @@ function FriendshipList(props: {
 	const filterList = friendships.filter((item: FriendshipType) =>
 		props.filter(item)
 	);
+
 	const actionClass = props.actions.join(" ");
 
 	function friend(ship: FriendshipType) {

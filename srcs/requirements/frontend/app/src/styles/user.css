@@ -99,23 +99,35 @@
 	grid-template-columns: .8fr 2fr 2fr;
 }
 
-.User__FriendItem .unfriend,
-.User__FriendItem .cancel,
-.User__FriendItem .reject {
+.User button.unfriend,
+.User button.cancel,
+.User button.reject {
 	border: 1px solid #e7a;
 	color: #e7a;
 }
 
-.User__FriendItem .accept {
+.User button.accept {
 	border: 1px solid #6d9;
 	color: #6d9
 }
 
-.User__FriendItem .unblock {
+.User button.unblock {
 	border: 1px solid #69d;
 	color: #69d;
 }
 
 .User__FriendItem button:hover {
 	color: var(--text-accent);
+}
+
+.User__ActionsButtons {
+	text-align: center;
+}
+
+.User__Status {
+	font-style: italic;
+	color: var(--text-faint);
+	font-size: .92rem;
+	display: block;
+	margin-bottom: 6px;
 }

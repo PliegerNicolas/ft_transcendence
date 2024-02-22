@@ -138,16 +138,20 @@ function App()
 					<Route path="/"	element={<Home />} />
 					<Route path="/play" element={<Play />} />
 					<Route path="/stats" element={<Stats />} />
+					<Route path="/about" element={<About />} />
+					<Route path="/auth" element={<Auth setLogInfo={setLogInfo} />} />
 					<Route path="/chat/*" element={
 						<RequireAuth elem={<Chat />} />
 					}/>
-					<Route path="/settings" element={<Settings />} />
-					<Route path="/about" element={<About />} />
+					<Route path="/settings" element={
+						<RequireAuth elem={<Settings />} />
+					}/>
 					<Route path="/sandbox" element={
 						<RequireAuth elem={<Sandbox />} />
 					}/>
-					<Route path="/user/:id" element={<User />} />
-					<Route path="/auth" element={<Auth setLogInfo={setLogInfo} />} />
+					<Route path="/user/:id" element={
+						<RequireAuth elem={<User />} />
+					} />
 					<Route path="*" element={<NotFound />} />
 				</Routes>
 				<Notifs list={notifs} setList={setNotifs} />
