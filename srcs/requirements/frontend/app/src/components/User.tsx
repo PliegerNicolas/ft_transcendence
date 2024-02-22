@@ -6,6 +6,7 @@ import { FriendshipContext, MyContext } from "../utils/contexts.ts";
 import { FriendshipType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
+import ConfirmPopup from "./ConfirmPopup.tsx";
 
 import { stopOnHttp } from "../utils/utils.ts";
 
@@ -228,40 +229,23 @@ export default function User()
 			</button>
 			{
 				popup &&
-				<DeletePopup
-					cancel={() => {setPopup(false)}}
-					del={() => delUser.mutate()} />
+				<ConfirmPopup
+					title="Are you sure you want to delete your account?"
+					text={
+						<> Of course, for now, you may delete any account, but later it will
+						be only yours.<br /><br />
+						** TODO ** remove this in due time.<br /><br />
+						Warning: This is a permanent operation! </>
+					}
+					action="Delete"
+					cancelFt={() => setPopup(false)}
+					actionFt={delUser.mutate}
+				/>
 			}
 		</main>
 	);
 }
 
-// <DeletePopup /> =============================================================
-
-function DeletePopup({cancel, del}: {cancel: Function, del: Function})
-{
-	return (
-		<div className="Popup__Bg">
-			<div className="Popup">
-				<h3>Are you sure you want to delete your account?</h3>
-				<div className="DeletePopup__Notice">
-					Of course, for now, you may delete any account, but later it will be
-					only yours.<br /><br />
-					** TODO ** remove this in due time.<br /><br />
-					Warning: This is a permanent operation!
-				</div>
-				<div className="DeletePopup__Buttons">
-					<button onClick={() => cancel()}>
-						Cancel
-					</button>
-					<button onClick={() => del()} className="danger">
-						Delete
-					</button>
-				</div>
-			</div>
-		</div>
-	);
-}
 // <Friendships /> =============================================================
 
 function Friendships(props: {
