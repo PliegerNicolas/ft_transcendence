@@ -1,7 +1,7 @@
 import { IsEnum } from "class-validator";
 import { Message } from "src/chats/messages/entities/Message.entity";
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { ChannelMember } from "./ChannelMember.entity";
+import { ChannelMember, ChannelRole } from "./ChannelMember.entity";
 import { Exclude } from "class-transformer";
 
 export enum ChannelStatus {
@@ -50,15 +50,30 @@ export class Channel {
     @BeforeUpdate()
     setupChannel(): void {
         this.updateMembersCount();
+        this.ensureAdminExists();
         this.updateIsPasswordNeeded();
+        this.enforceStatusIfPasswordGiven();
     }
 
     private updateMembersCount(): void {
         this.membersCount = this.members ? this.members.length : 0;
     }
 
+    private ensureAdminExists(): void {
+        console.log("test");
+        console.log(this.members);
+        if (this.members.length === 0 || this.members.some((member) => member.role === ChannelRole.ADMIN)) return ;
+        let nextAdmin = this.members.find((member) => member.role === ChannelRole.MODERATOR);
+        if (!nextAdmin) nextAdmin = this.members[0];
+        nextAdmin.role = ChannelRole.ADMIN;
+    }
+
     private updateIsPasswordNeeded(): void {
         this.isPasswordNeeded = !!this.password;
+    }
+
+    private enforceStatusIfPasswordGiven(): void {
+        if (this.password) this.status = ChannelStatus.PRIVATE;
     }
 
 }

@@ -61,10 +61,11 @@ export class ProfilesService {
 
         if (!profile) throw new NotFoundException(`Profile of User '${username ? username : '{undefined}'}' not found`);
 
-        return (await this.profileRepository.save({
-            ...profile,
+        this.profileRepository.merge(profile, {
             ...profileDetails,
-        }));
+        });
+
+        return (await this.profileRepository.save(profile));
     }
 
     async updateProfile(username: string = undefined, profileDetails: ReplaceProfileParams): Promise<Profile> {
@@ -74,10 +75,11 @@ export class ProfilesService {
 
         if (!profile) throw new NotFoundException(`Profile of User '${username ? username : '{undefined}' }' not found`);
 
-        return (await this.profileRepository.save({
-            ...profile,
+        this.profileRepository.merge(profile, {
             ...profileDetails,
-        }));
+        });
+
+        return (await this.profileRepository.save(profile));
     }
 
     async clearProfile(username: string = undefined): Promise<Profile> {

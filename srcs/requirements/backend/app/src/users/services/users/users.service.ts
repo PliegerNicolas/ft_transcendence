@@ -88,9 +88,11 @@ export class UsersService {
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
 
-        return (await this.userRepository.save({
+        this.userRepository.merge(user, {
             ...userDetails,
-        }));
+        });
+
+        return (await this.userRepository.save(user));
     }
 
     async updateUser(username: string = undefined, userDetails: UpdateUserParams): Promise<User> {
@@ -115,9 +117,11 @@ export class UsersService {
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
 
-        return (await this.userRepository.save({
+        this.userRepository.merge(user, {
             ...userDetails,
-        }));
+        });
+
+        return (await this.userRepository.save(user));
     }
 
     async deleteUser(username: string = undefined): Promise<string> {

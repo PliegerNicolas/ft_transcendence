@@ -23,3 +23,13 @@ export type UpdateChannelParams = {
     password?: string;
 
 };
+
+export type JoinChannelParams = {
+
+    password?: string;
+
+};
+
+export type LeaveChannelParams = {
+
+};

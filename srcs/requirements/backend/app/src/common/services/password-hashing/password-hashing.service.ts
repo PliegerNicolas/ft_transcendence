@@ -8,11 +8,15 @@ export class PasswordHashingService {
 
     async hashPassword(password: string = undefined): Promise<string> {
         if (!password) return (null);
-        return (await bcrypt.hash(password, this.saltRounds));
+        const trimmedPassword = password.trim();
+        return (await bcrypt.hash(trimmedPassword, this.saltRounds));
     }
 
+    // Not working ?
     async comparePasswords(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
-        return (await bcrypt.compare(plainTextPassword, hashedPassword));
+        const trimmedPlainTextPassword = plainTextPassword.trim();
+        const a = await bcrypt.compare(trimmedPlainTextPassword, hashedPassword);
+        return (a);
     }
 
 }

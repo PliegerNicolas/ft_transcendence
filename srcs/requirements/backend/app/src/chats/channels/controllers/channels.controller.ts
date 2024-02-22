@@ -6,9 +6,10 @@ import { ReplaceChannelDto } from '../dtos/ReplaceChannel.dto';
 import { ParseIdPipe } from 'src/common/pipes/parse-id/parse-id.pipe';
 import { AuthGuard } from '@nestjs/passport';
 import { RoleGuard } from 'src/role/role.guard';
-import { Role } from 'src/role/role.decorator';
 import { ChannelStatus } from '../entities/Channel.entity';
 import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
+import { JoinChannelDto } from '../dtos/JoinChannel.dto';
+import { LeaveChannelDto } from '../dtos/LeaveChannel.dto';
 
 @Controller()
 export class ChannelsController {
@@ -102,9 +103,42 @@ export class ChannelsController {
         return (await this.channelService.deleteChannel(channelId, username));
     }
 
+    @Patch('channels/:channelId/join')
+    // UseGuard => Verify if user connected and pass it's req.user
+    // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...)
+    async joinMyChannel(
+        @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Body(new ValidationPipe) joinChannelDto: JoinChannelDto,
+        @Request() req: any,
+    ) {
+        const username = req.user ? req.user.username : undefined;
+        return (await this.channelService.joinChannel(channelId, username, joinChannelDto));
+    }
+
+    @Patch('channels/:channelId/leave')
+    // UseGuard => Verify if user connected and pass it's req.user
+    // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...)
+    async leaveMyChannel(
+        @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Body(new ValidationPipe) leaveChannelDto: LeaveChannelDto,
+        @Request() req: any,
+    ) {
+        const username = req.user ? req.user.username : undefined;
+        return (await this.channelService.leaveChannel(channelId, username, leaveChannelDto));
+    }
+
     /* */
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
+
+    @Get('users/:username/channels')
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
+    async getUserChannels(
+        @Param('username', ParseUsernamePipe) username: string,
+        @Query('filterByStatus') filterByStatus?: ChannelStatus,
+    ) {
+        return (await this.channelService.getChannels(username, filterByStatus));
+    }
 
     @Post('users/:username/channels')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
@@ -116,7 +150,7 @@ export class ChannelsController {
     }
 
     @Put('users/:username/channels/:channelId')
-    // UseGuard => Verify if user connected and pass it's req.user
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...)
     async replaceChannel(
         @Param('username', ParseUsernamePipe) username: string,
@@ -127,7 +161,7 @@ export class ChannelsController {
     }
 
     @Patch('users/:username/channels/:channelId')
-    // UseGuard => Verify if user connected and pass it's req.user
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...)
     async updateChannel(
         @Param('username', ParseUsernamePipe) username: string,
@@ -138,13 +172,35 @@ export class ChannelsController {
     }
 
     @Delete('users/:username/channels/:channelId')
-    // UseGuard => Verify if user connected and pass it's req.user
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...)
     async deleteChannel(
         @Param('username', ParseUsernamePipe) username: string,
         @Param('channelId', ParseIdPipe) channelId: bigint,
     ) {
         return (await this.channelService.deleteChannel(channelId, username));
+    }
+
+    @Patch('users/:username/channels/:channelId/join')
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
+    // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...)
+    async joinChannel(
+        @Param('username', ParseUsernamePipe) username: string,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Body(new ValidationPipe) joinChannelDto: JoinChannelDto,
+    ) {
+        return (await this.channelService.joinChannel(channelId, username, joinChannelDto));
+    }
+
+    @Patch('users/:username/channels/:channelId/leave')
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
+    // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...)
+    async leaveChannel(
+        @Param('username', ParseUsernamePipe) username: string,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Body(new ValidationPipe) leaveChannelDto: LeaveChannelDto,
+    ) {
+        return (await this.channelService.leaveChannel(channelId, username, leaveChannelDto));
     }
 
     /* */

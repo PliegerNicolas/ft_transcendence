@@ -21,13 +21,14 @@ export class User {
     @Column({ type: 'bigint', unique: true })
     oauthId: bigint;
 
-    @Exclude()
+    @Exclude() // Exclude ?
     @Column()
     email: string;
 
     @Column({ unique: true, length: 25 })
     username: string;
 
+    @Exclude() // Exclude ?
     @IsEnum(GlobalServerPrivileges)
     @Column({ type: 'enum', enum: GlobalServerPrivileges, default: GlobalServerPrivileges.USER })
     globalServerPrivileges: GlobalServerPrivileges;

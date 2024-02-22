@@ -89,9 +89,7 @@ export class RelationshipsService {
 
         relationship.setStatusByUsername(username, relationshipDetails.status);
 
-        return (await this.relationshipRepository.save({
-            ...relationship,
-        }));
+        return (await this.relationshipRepository.save(relationship));
     }
 
     async updateRelationship(username: string = undefined, targetUsername: string = undefined, relationshipDetails: UpdateRelationshipParams): Promise <Relationship> {
@@ -107,9 +105,7 @@ export class RelationshipsService {
 
         relationship.setStatusByUsername(username, relationshipDetails.status);
 
-        return (await this.relationshipRepository.save({
-            ...relationship,
-        }));
+        return (await this.relationshipRepository.save(relationship));
     }
 
     async deleteRelationship(username: string = undefined, targetUsername: string = undefined): Promise<string> {

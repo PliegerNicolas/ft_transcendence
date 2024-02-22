@@ -57,7 +57,7 @@ export class GamelogsService {
         const gamelog = this.gamelogRepository.create({
             ...gamelogDetails,
             gamelogToUsers: gamelogToUsers,
-        })
+        });
 
         return (await this.gamelogRepository.save(gamelog));
     }
@@ -73,11 +73,12 @@ export class GamelogsService {
         const gamelogToUsers = await this.createOrUpdateGamelogToUsers(gamelogDetails.userResults, gamelog)
             .finally(() => delete gamelogDetails.userResults);
 
-        return (await this.gamelogRepository.save({
-            ...gamelog,
+        this.gamelogRepository.merge(gamelog, {
             ...gamelogDetails,
-            gamelogToUsers: gamelogToUsers,
-        }));
+            gamelogToUsers: gamelogToUsers
+        });
+
+        return (await this.gamelogRepository.save(gamelog));
     }
 
     async updateGamelog(gamelogId: bigint = undefined, gamelogDetails: UpdateGamelogParams): Promise<Gamelog> {
@@ -91,11 +92,12 @@ export class GamelogsService {
         const gamelogToUsers = await this.createOrUpdateGamelogToUsers(gamelogDetails.userResults, gamelog)
             .finally(() => delete gamelogDetails.userResults);
 
-        return (await this.gamelogRepository.save({
-            ...gamelog,
-            ...gamelogDetails,
-            gamelogToUsers: gamelogToUsers,
-        }));
+            this.gamelogRepository.merge(gamelog, {
+                ...gamelogDetails,
+                gamelogToUsers: gamelogToUsers
+            });
+
+            return (await this.gamelogRepository.save(gamelog));
     }
 
     async deleteGamelog(gamelogId: bigint = undefined): Promise<string> {
