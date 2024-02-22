@@ -6,6 +6,8 @@ import { useInvalidate, stopOnHttp, httpStatus } from "../../utils/utils.ts";
 import { ChanType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
+import { socket } from "../../App.tsx"
+
 import closeIcon from "../../assets/close.svg";
 import radioChecked from "../../assets/radio-checked.svg";
 import radioUnchecked from "../../assets/radio-unchecked.svg";
@@ -150,6 +152,7 @@ export default function ChanEdit({id}: {id: number})
 
 		if (!id) {
 			postChan.mutate(chan);
+			socket.emit('joinChannel', chan.name);
 			return ;
 		}
 

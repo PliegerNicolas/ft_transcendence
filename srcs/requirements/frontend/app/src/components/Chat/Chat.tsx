@@ -3,15 +3,11 @@ import { Routes, Route } from "react-router-dom";
 
 import { ChatContext } from "../../utils/contexts.ts";
 
-import { io } from 'socket.io-client';
-
 import "../../styles/chat.css";
 
 import ChatSidebar from "./ChatSidebar.tsx";
 import NewChan from "./ChanEdit.tsx";
 import ChatContent from "./ChatContent.tsx";
-
-export const socket = io(`http://${location.hostname}:3450/chat`);
 
 // <Chat /> ====================================================================
 

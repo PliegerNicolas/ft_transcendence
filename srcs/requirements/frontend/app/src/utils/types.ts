@@ -78,3 +78,8 @@ export interface GamelogPostType {
 	],
     gameType: GameType
 }
+
+export interface MessagePayloads {
+	content: string,
+	channel: string,
+}

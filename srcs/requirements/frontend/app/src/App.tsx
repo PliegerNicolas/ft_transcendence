@@ -7,6 +7,8 @@ import { useMutation, MutationFunction } from "@tanstack/react-query";
 import { MyContext } from "./utils/contexts.ts";
 import { NotifType } from "./utils/types.ts";
 
+import { io } from 'socket.io-client';
+
 import Header from "./components/Header.tsx";
 import Navbar from "./components/Navbar.tsx";
 
@@ -25,6 +27,8 @@ import Api from "./utils/Api";
 
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
+
+export const socket = io(`http://${location.hostname}:3450/chat`);
 
 function Auth({setLogInfo}: {setLogInfo: Function})
 {

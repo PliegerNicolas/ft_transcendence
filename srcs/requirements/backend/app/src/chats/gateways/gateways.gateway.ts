@@ -11,9 +11,9 @@ export class ChatGateway implements OnModuleInit {
 
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
-			this.server.emit('newUser', socket.id);
+			this.server.to(socket.id).emit('rejoinChannels');
 			console.log('new chat socket connection : ' + socket.id)
-	
+
 			socket.on('disconnect', () => {
 				this.server.emit('userDisconnected', socket.id);
 			});
@@ -22,24 +22,13 @@ export class ChatGateway implements OnModuleInit {
 
 	@SubscribeMessage('newMessage')
 	handleNewMessage(@MessageBody() message: MessagePayloads, @ConnectedSocket() client: Socket) {
-		client.to(message.channel).emit('onMessage', {
-			content: message.content,
-			sender_id: client.id,
-			channel_id: message.channel,
-			date: Date()
-		});
-	}
-  
-	@SubscribeMessage('createChannel')
-	handleChannelCreate(@MessageBody() channel_name: string, @ConnectedSocket() client: Socket) {
-		client.join(channel_name);
-		this.server.to(channel_name).emit('createdChannel', channel_name);
+		client.to(message.channel).emit('onMessage', message.content);
+		console.log('NEW MESSAGE HANDLED : ' + message.content);
 	}
   
 	@SubscribeMessage('joinChannel')
-	handleChannelJoin(@MessageBody() channel_name: string, @ConnectedSocket() client: Socket) {
-		client.join(channel_name);
-		client.emit('joinedChannel', channel_name);
-		this.server.to(channel_name).emit('userJoinedChannel', client.id);
+	handleChannelJoin(@MessageBody() channel: string, @ConnectedSocket() client: Socket) {
+		client.join(channel);
+		console.log('JOINED CHANNEL : ' + channel);
 	}
 }

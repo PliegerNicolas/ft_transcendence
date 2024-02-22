@@ -8,6 +8,8 @@ import Spinner from "../Spinner.tsx";
 import { useInvalidate, stopOnHttp } from "../../utils/utils.ts";
 import { MyContext } from "../../utils/contexts";
 
+import { socket } from "../../App.tsx"
+
 import "../../styles/chat.css";
 
 import ChatHeader from "./ChatHeader.tsx";
@@ -60,6 +62,25 @@ function ChatContent() {
 		onError: error => addNotif({ content: error.message }),
 	});
 
+	useEffect(() => {
+		socket.on('rejoinChannels', () => {
+			if (getChan.isSuccess) {
+				console.log('rejoinChannels caught', getChan.data.name);
+				socket.emit('joinChannel', getChan.data.name);
+			}
+		});
+		socket.on('onMessage', (content: string) => {
+			console.log('onMessage caught');
+			invalidate(["channels", id, "messages"]);
+			addNotif({ content: content });
+			console.log(content);
+		});
+		return () => {
+			socket.off('onMessage');
+			socket.off('rejoinsChannels');
+		};
+	}, []);
+
 	/*
 	** These lines are desirable to auto-scroll at bottom of chat.
 	*/
@@ -78,6 +99,7 @@ function ChatContent() {
 			return;
 
 		postMsg.mutate(inputValue);
+		socket.emit('newMessage', { content: inputValue, channel: getChan.data.name });
 		setInputValue("");
 	}
 
