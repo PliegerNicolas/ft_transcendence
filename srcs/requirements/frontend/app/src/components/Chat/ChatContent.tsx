@@ -35,7 +35,7 @@ export default function ChatContentRouter()
 // <ChatContent /> =============================================================
 
 function ChatContent() {
-	const { api, addNotif } = useContext(MyContext);
+	const { api, addNotif, setLastChan } = useContext(MyContext);
 	const invalidate = useInvalidate();
 
 	const params = useParams();
@@ -59,6 +59,8 @@ function ChatContent() {
 		onSettled: () => invalidate(["channels", id, "messages"]),
 		onError: error => addNotif({ content: error.message }),
 	});
+
+	setLastChan(id);
 
 	/*
 	** These lines are desirable to auto-scroll at bottom of chat.

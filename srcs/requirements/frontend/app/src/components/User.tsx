@@ -203,7 +203,7 @@ export default function User()
 								<button onClick={delShip}> Unfriend </button>
 							|| getStatus() == "approve" &&
 								<button onClick={acceptShip}> Accept as friend </button>
-							|| getStatus() == "blocked" &&
+							|| getStatus() == "imblocked" &&
 								<button> Friend request </button>
 						}
 						<button onClick={block}> Block </button>
@@ -282,7 +282,10 @@ function Friendships(props: {
 		</p>
 	);
 
-	if (!props.query.data.length) return (
+	if (!props.query.data.find((elem: FriendshipType) =>
+		((elem.status1 != "blocked" || elem.user2.username != props.id)
+		&& (elem.status2 != "blocked" || elem.user1.username != props.id)))
+	) return (
 		<p className="notice-msg">
 			You have no relations <span className="r">😢</span> (yet)
 		</p>

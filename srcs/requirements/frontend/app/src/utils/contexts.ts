@@ -13,7 +13,9 @@ export const MyContext = createContext({
 	logged: false,
 	token: "",
 	api: new Api(`http://${location.hostname}:3450`),
-	addNotif: (() => {}) as Function
+	addNotif: (() => {}) as Function,
+	lastChan: "",
+	setLastChan: (() => {}) as Function,
 });
 
 export const ChatContext = createContext({

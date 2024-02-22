@@ -22,6 +22,7 @@ import Notifs from "./components/Notifs.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
+import { randomString } from "./utils/utils.ts";
 
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
@@ -115,20 +116,20 @@ function App()
 	const [notifs, setNotifs] = useState<NotifType[]>([]);
 
 	function addNotif(add: NotifType) {
-		add.date = Date.now() + Math.floor(20 * Math.random());
-		add.id =
-			(10000 * (add.date % (24 * 600000)))
-			+ Math.floor(10000 * Math.random());
-		while (notifs.some(notif => notif.date === add.date))
-			add.date++;
+		add.date = Date.now();
+		add.id = "" + add.date + randomString(8);
 		setNotifs(prev => [...prev, add]);
 	}
+
+	const [lastChan, setLastChan] = useState("");
 
 	return (
 		<MyContext.Provider value={{
 			...logInfo,
 			addNotif,
-			api: new Api(`http://${location.hostname}:3450`, logInfo.token)
+			api: new Api(`http://${location.hostname}:3450`, logInfo.token),
+			lastChan,
+			setLastChan,
 		}}>
 			<Router>
 				<Header/>
