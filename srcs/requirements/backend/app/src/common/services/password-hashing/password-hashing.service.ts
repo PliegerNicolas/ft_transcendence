@@ -15,8 +15,7 @@ export class PasswordHashingService {
     // Not working ?
     async comparePasswords(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
         const trimmedPlainTextPassword = plainTextPassword.trim();
-        const a = await bcrypt.compare(trimmedPlainTextPassword, hashedPassword);
-        return (a);
+        return (await bcrypt.compareSync(trimmedPlainTextPassword, hashedPassword));
     }
 
 }

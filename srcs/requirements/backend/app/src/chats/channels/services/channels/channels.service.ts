@@ -35,10 +35,7 @@ export class ChannelsService {
         });
         
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (
-            channel.status !== ChannelStatus.PUBLIC // Also protect if password set or show members either way because PUBLIC ?
-            && !channel.members.some((member) => member.user.username === username)
-        ) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+        else if (channel.status !== ChannelStatus.PUBLIC && !channel.isMember(username)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
 
         return (channel);
     }
@@ -50,10 +47,7 @@ export class ChannelsService {
         });
         
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (
-            channel.status !== ChannelStatus.PUBLIC // Also protect if password set or show members either way because PUBLIC ?
-            && !channel.members.some((member) => member.user.username === username)
-        ) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+        else if (channel.status !== ChannelStatus.PUBLIC && !channel.isMember(username)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
 
         return (channel.members);
     }
@@ -83,10 +77,8 @@ export class ChannelsService {
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
-        const member = channel.members.find((member) => member.user.username === username);
-
-        if (!member) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
-        else if (![ChannelRole.ADMIN].includes(member.role)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' hasn't got enough permissions in Channel with ID ${channelId}`);
+        if (!channel.isMember(username)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+        else if (!channel.hasPermission(username, ChannelRole.MODERATOR)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' hasn't got enough permissions in Channel with ID ${channelId}`);
 
         if (channelDetails.password) channelDetails.password = await this.passwordHashingService.hashPassword(channelDetails.password);
 
@@ -107,8 +99,8 @@ export class ChannelsService {
 
         const member = channel.members.find((member) => member.user.username === username);
 
-        if (!member) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
-        else if (![ChannelRole.ADMIN].includes(member.role)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' hasn't got enough permissions in Channel with ID ${channelId}`);
+        if (!channel.isMember(username)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+        else if (!channel.hasPermission(username, ChannelRole.MODERATOR)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' hasn't got enough permissions in Channel with ID ${channelId}`);
 
         if (channelDetails.password) channelDetails.password = await this.passwordHashingService.hashPassword(channelDetails.password);
 
@@ -127,10 +119,8 @@ export class ChannelsService {
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
-        const member = channel.members.find((member) => member.user.username === username);
-
-        if (!member) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
-        else if (![ChannelRole.ADMIN].includes(member.role)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' hasn't got enough permissions in Channel with ID ${channelId}`);
+        if (!channel.isMember(username)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+        else if (!channel.hasPermission(username, ChannelRole.ADMIN)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' hasn't got enough permissions in Channel with ID ${channelId}`);
 
         await this.channelRepository.remove(channel);
         return (`Channel with ID ${channelId} successfully deleted`);
@@ -144,9 +134,7 @@ export class ChannelsService {
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
-        const member = channel.members.find((member) => member.user.username === username);
-
-        if (member) throw new BadRequestException(`User '${username ? username : '{undefined}'}' is already member of Channel with ID ${channelId}`);
+        if (channel.isMember(username)) throw new BadRequestException(`User '${username ? username : '{undefined}'}' is already member of Channel with ID ${channelId}`);
         else if (channel.isPasswordNeeded && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)) {
             throw new UnauthorizedException(`Channel with ID ${channelId} expects a valid password`);
         }

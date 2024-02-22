@@ -52,7 +52,6 @@ export class Channel {
         this.updateMembersCount();
         this.ensureAdminExists();
         this.updateIsPasswordNeeded();
-        this.enforceStatusIfPasswordGiven();
     }
 
     private updateMembersCount(): void {
@@ -72,8 +71,15 @@ export class Channel {
         this.isPasswordNeeded = !!this.password;
     }
 
-    private enforceStatusIfPasswordGiven(): void {
-        if (this.password) this.status = ChannelStatus.PRIVATE;
+    public isMember(username: string): boolean {
+        return (this.members.some((member) => member.user.username === username));
+    }
+
+    public hasPermission(username: string, role: ChannelRole): boolean {
+        const member = this.members.find((member) => member.user.username === username);
+        console.log(member);
+        console.log(member.role <= role);
+        return (member.role <= role);
     }
 
 }
