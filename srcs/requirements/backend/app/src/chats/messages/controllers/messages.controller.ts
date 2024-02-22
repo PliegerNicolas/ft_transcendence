@@ -11,6 +11,7 @@ export class MessagesController {
 
     constructor(private messageService: MessagesService) {}
 
+    /*
     @Get('channels/:channelId/messages')
     async getChannelMessages(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -75,5 +76,6 @@ export class MessagesController {
         // For this moment userId is passed as 1.
         return (await this.messageService.deleteChannelMessage(BigInt(1), channelId, messageId));
     }
+    */
 
 }

@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
-import { ChannelStatus } from "../entities/Channel.entity";
 import { Transform } from "class-transformer";
+import { ChannelMode, ChannelVisibility } from "../entities/Channel.entity";
 
 export class CreateChannelDto {
 
@@ -9,8 +9,12 @@ export class CreateChannelDto {
     name: string;
 
     @IsNotEmpty()
-    @IsEnum(ChannelStatus, { message: 'Invalid channel status' })
-    status: ChannelStatus;
+    @IsEnum(ChannelVisibility, { message: 'Invalid channel visibility' })
+    visibility: ChannelVisibility;
+
+    @IsNotEmpty()
+    @IsEnum(ChannelMode, { message: 'Invalid channel mode' })
+    mode: ChannelMode;
 
     @IsOptional()
     @IsString()

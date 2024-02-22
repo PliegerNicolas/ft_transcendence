@@ -1,6 +1,6 @@
 import { IsDefined, IsEnum, IsNotEmpty, IsString, MinLength, ValidateIf } from "class-validator";
-import { ChannelStatus } from "../entities/Channel.entity";
 import { Transform } from "class-transformer";
+import { ChannelMode, ChannelVisibility } from "../entities/Channel.entity";
 
 export class ReplaceChannelDto {
 
@@ -9,8 +9,12 @@ export class ReplaceChannelDto {
     name: string;
 
     @IsNotEmpty()
-    @IsEnum(ChannelStatus, { message: 'Invalid channel status' })
-    status: ChannelStatus;
+    @IsEnum(ChannelVisibility, { message: 'Invalid channel visibility' })
+    visibility: ChannelVisibility;
+
+    @IsNotEmpty()
+    @IsEnum(ChannelMode, { message: 'Invalid channel mode' })
+    mode: ChannelMode;
 
     @IsDefined()
     @IsString()

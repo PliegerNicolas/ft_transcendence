@@ -1,15 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Request, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Param, Query, Request, ValidationPipe } from '@nestjs/common';
 import { ChannelsService } from '../services/channels/channels.service';
-import { CreateChannelDto } from '../dtos/CreateChannel.dto';
-import { UpdateChannelDto } from '../dtos/UpdateChannel.dto';
-import { ReplaceChannelDto } from '../dtos/ReplaceChannel.dto';
 import { ParseIdPipe } from 'src/common/pipes/parse-id/parse-id.pipe';
-import { AuthGuard } from '@nestjs/passport';
-import { RoleGuard } from 'src/role/role.guard';
-import { ChannelStatus } from '../entities/Channel.entity';
-import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
-import { JoinChannelDto } from '../dtos/JoinChannel.dto';
-import { LeaveChannelDto } from '../dtos/LeaveChannel.dto';
+import { GetChannelsQueryDto } from '../dtos/GetChannelsQuery.dto';
 
 @Controller()
 export class ChannelsController {
@@ -27,13 +19,14 @@ export class ChannelsController {
     @Get('channels')
     // UseGuard => Verify if user is connected but permit anyone to pass.
     async getChannels(
+        @Query(new ValidationPipe({ transform: true, whitelist: true })) queryDto: GetChannelsQueryDto,
         @Request() req: any,
-        @Query('filterByStatus') filterByStatus?: ChannelStatus,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return (await this.channelService.getChannels(username, filterByStatus));
+        return (await this.channelService.getChannels(username, queryDto));
     }
 
+    /*
     @Get('channels/:channelId')
     // UseGuard => Verify if user is connected but permit anyone to pass.
     async getChannel(
@@ -43,8 +36,9 @@ export class ChannelsController {
         const username = req.user ? req.user.username : undefined;
         return (await this.channelService.getChannel(channelId, username));
     }
+    */
 
-    @Get('channels/:channelId/members')
+    /*@Get('channels/:channelId/members')
     // UseGuard => Verify if user is connected but permit anyone to pass.
     async getChannelMembers(
         @Param('channelId', ParseIdPipe) channelId: bigint,
@@ -52,13 +46,13 @@ export class ChannelsController {
     ) {
         const username = req.user ? req.user.username : undefined;
         return (await this.channelService.getChannel(channelId, username));
-    }
+    }*/
 
     /* */
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
-    @Post('channels')
+    /*@Post('channels')
     // UseGuard => Verify if user connected and pass it's req.user
     async createMyChannel(
         @Body(new ValidationPipe) createChannelDto: CreateChannelDto,
@@ -125,19 +119,19 @@ export class ChannelsController {
     ) {
         const username = req.user ? req.user.username : undefined;
         return (await this.channelService.leaveChannel(channelId, username, leaveChannelDto));
-    }
+    }*/
 
     /* */
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
 
-    @Get('users/:username/channels')
+    /*@Get('users/:username/channels')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getUserChannels(
         @Param('username', ParseUsernamePipe) username: string,
-        @Query('filterByStatus') filterByStatus?: ChannelStatus,
+        @Query('visibility') filterByVisibility?: ChannelVisibility,
     ) {
-        return (await this.channelService.getChannels(username, filterByStatus));
+        return (await this.channelService.getChannels(username, filterByVisibility));
     }
 
     @Post('users/:username/channels')
@@ -201,10 +195,6 @@ export class ChannelsController {
         @Body(new ValidationPipe) leaveChannelDto: LeaveChannelDto,
     ) {
         return (await this.channelService.leaveChannel(channelId, username, leaveChannelDto));
-    }
-
-    /* */
-    /* Front-end PATHS: need to be sent via front-end and verified via a jwt key. */
-    /* */
+    }*/
 
 }

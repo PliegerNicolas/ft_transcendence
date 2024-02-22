@@ -82,8 +82,4 @@ export class ProfilesController {
         return (await this.profileService.clearProfile(username));
     }
 
-    /* */
-    /* Front-end PATHS: need to be sent via front-end and verified via a jwt key. */
-    /* */
-
 }

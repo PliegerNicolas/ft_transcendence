@@ -119,8 +119,4 @@ export class UsersController {
         return (await this.userService.deleteUser(username));
     }
 
-    /* */
-    /* Front-end PATHS: need to be sent via front-end and verified via a jwt key. */
-    /* */
-
 }

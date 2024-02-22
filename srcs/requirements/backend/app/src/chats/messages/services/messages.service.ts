@@ -2,7 +2,7 @@ import { UnauthorizedException, Injectable, NotFoundException } from '@nestjs/co
 import { Message } from '../entities/Message.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Channel, ChannelStatus } from 'src/chats/channels/entities/Channel.entity';
+import { Channel } from 'src/chats/channels/entities/Channel.entity';
 import { User } from 'src/users/entities/User.entity';
 import { CreateMessageParams, ReplaceMessageParams, UpdateMessageParams } from '../types/message.type';
 
@@ -18,6 +18,7 @@ export class MessagesService {
         private readonly userRepository: Repository<User>,
     ) {}
 
+    /*
     async getChannelMessages(userId: bigint = null, channelId: bigint): Promise<Message[]> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
@@ -135,9 +136,11 @@ export class MessagesService {
         await this.messageRepository.remove(message);
         return (`Message with ID ${messageId} in Channel with ID ${channelId} successfully deleted`);
     }
+    */
 
     /* Helper Functions */
 
+    /*
     public generateNextMessageId(channel: Channel): bigint {
         if (!channel.messages) return (BigInt(1));
 
@@ -148,5 +151,6 @@ export class MessagesService {
 
         return (highestMessageId + BigInt(1));
     }
+    */
 
 }

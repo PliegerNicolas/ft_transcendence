@@ -1,9 +1,18 @@
-import { ChannelStatus } from "../entities/Channel.entity";
+import { ChannelMode, ChannelVisibility } from "../entities/Channel.entity";
+
+export class GetChannelsQueryParam {
+
+    name?: string;
+    visibility?: ChannelVisibility;
+    mode?: ChannelMode;
+
+}
 
 export type CreateChannelParams = {
 
     name: string;
-    status: ChannelStatus;
+    visibility: ChannelVisibility;
+    mode: ChannelMode;
     password?: string;
 
 };
@@ -11,7 +20,8 @@ export type CreateChannelParams = {
 export type ReplaceChannelParams = {
 
     name: string;
-    status: ChannelStatus;
+    visibility: ChannelVisibility;
+    mode: ChannelMode;
     password: string;
     
 };
@@ -19,17 +29,8 @@ export type ReplaceChannelParams = {
 export type UpdateChannelParams = {
 
     name?: string;
-    status?: ChannelStatus;
+    visibility?: ChannelVisibility;
+    mode?: ChannelMode;
     password?: string;
-
-};
-
-export type JoinChannelParams = {
-
-    password?: string;
-
-};
-
-export type LeaveChannelParams = {
 
 };

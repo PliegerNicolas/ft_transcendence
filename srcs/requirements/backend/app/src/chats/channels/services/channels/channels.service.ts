@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Channel, ChannelStatus } from '../../entities/Channel.entity';
+import { Channel, ChannelMode, ChannelVisibility } from '../../entities/Channel.entity';
 import { Equal, Repository } from 'typeorm';
-import { CreateChannelParams, JoinChannelParams, LeaveChannelParams, ReplaceChannelParams, UpdateChannelParams } from '../../types/channel.type';
+import { CreateChannelParams, GetChannelsQueryParam, ReplaceChannelParams, UpdateChannelParams } from '../../types/channel.type';
 import { User } from 'src/users/entities/User.entity';
 import { ChannelMember, ChannelRole } from '../../entities/ChannelMember.entity';
 import { PasswordHashingService } from 'src/common/services/password-hashing/password-hashing.service';
@@ -19,13 +19,19 @@ export class ChannelsService {
         private readonly passwordHashingService: PasswordHashingService,
     ) {}
 
-    async getChannels(username: string = undefined, filterByStatus: ChannelStatus = undefined): Promise<Channel[]> {
-        return (await this.channelRepository.find({
+    async getChannels(username: string = undefined, queryParams: GetChannelsQueryParam): Promise<Channel[]> {
+        const channels = await this.channelRepository.find({
             where: [
                 { members: { user: { username: Equal(username) } } },
-                { status: filterByStatus ? Equal(filterByStatus) : Equal(ChannelStatus.PUBLIC) }, // not sure if this works
+                { visibility: Equal(ChannelVisibility.PUBLIC) },
             ],
-        }));
+        });
+
+        return (channels.filter(channel =>
+            Object.entries(queryParams).every(([key, value]) =>
+                value === undefined || channel[key] === value
+            )
+        ));
     }
 
     async getChannel(channelId: bigint, username: string = undefined): Promise<Channel> {
@@ -35,11 +41,13 @@ export class ChannelsService {
         });
         
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (channel.status !== ChannelStatus.PUBLIC && !channel.isMember(username)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+
+        // ???
 
         return (channel);
     }
 
+    /*
     async getChannelMembers(channelId: bigint, username: string = undefined): Promise<ChannelMember[]> {
         const channel = await this.channelRepository.findOne({
             where: { id: channelId },
@@ -47,7 +55,8 @@ export class ChannelsService {
         });
         
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (channel.status !== ChannelStatus.PUBLIC && !channel.isMember(username)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
+        // recheck
+        else if (channel.visibility !== ChannelVisibility.PUBLIC && !channel.isMember(username)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
 
         return (channel.members);
     }
@@ -133,7 +142,7 @@ export class ChannelsService {
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
         if (channel.isMember(username)) throw new BadRequestException(`User '${username ? username : '{undefined}'}' is already member of Channel with ID ${channelId}`);
-        else if (channel.isPasswordNeeded && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)) {
+        else if (channel.password && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)) {
             throw new UnauthorizedException(`Channel with ID ${channelId} expects a valid password`);
         }
 
@@ -180,5 +189,6 @@ export class ChannelsService {
         }
         return (await this.channelRepository.save(channel));
     }
+    */
 
 }

@@ -1,5 +1,5 @@
 import { IsEnum, IsOptional, IsString, MinLength } from "class-validator";
-import { ChannelStatus } from "../entities/Channel.entity";
+import { ChannelMode, ChannelVisibility } from "../entities/Channel.entity";
 import { Transform } from "class-transformer";
 
 export class UpdateChannelDto {
@@ -9,8 +9,12 @@ export class UpdateChannelDto {
     name?: string;
 
     @IsOptional()
-    @IsEnum(ChannelStatus, { message: 'Invalid channel status' })
-    status?: ChannelStatus;
+    @IsEnum(ChannelVisibility, { message: 'Invalid channel visibility' })
+    visibility?: ChannelVisibility;
+
+    @IsOptional()
+    @IsEnum(ChannelMode, { message: 'Invalid channel mode' })
+    mode?: ChannelMode;
 
     @IsOptional()
     @IsString()

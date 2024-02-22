@@ -1,7 +1,8 @@
+import { IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 import { Transform } from "class-transformer";
-import { IsOptional, IsString, MinLength } from "class-validator";
+import { ChannelMode, ChannelVisibility } from "../entities/Channel.entity";
 
-export class JoinChannelDto {
+export class GetChannelDto {
 
     @IsOptional()
     @IsString()

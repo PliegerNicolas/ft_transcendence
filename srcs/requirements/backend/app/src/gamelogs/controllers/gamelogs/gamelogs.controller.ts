@@ -56,12 +56,16 @@ export class GamelogsController {
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
 
-    /* */
-    /* Front-end PATHS: need to be sent via front-end and verified via a jwt key. */
-    /* */
+    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+    // In our cases here we have to enforce being ADMIN or MODERATOR to access to update gamelogs.
+    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
     @Post('gamelogs')
-    // UseGuard => Only the front-end server can call this path
+    // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async createGamelog(
         @Body(new ValidationPipe) createGamelogDto: CreateGamelogDto,
     ) {
@@ -69,7 +73,7 @@ export class GamelogsController {
     }
 
     @Put('gamelogs/:gamelogId')
-    // UseGuard => Only the front-end server can call this path
+    // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async replaceGamelog(
         @Body(new ValidationPipe) replaceGamelogDto: ReplaceGamelogDto,
         @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
@@ -78,7 +82,7 @@ export class GamelogsController {
     }
 
     @Patch('gamelogs/:gamelogId')
-    // UseGuard => Only the front-end server can call this path
+    // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async updateGamelog(
         @Body(new ValidationPipe) updateGamelogDto: UpdateGamelogDto,
         @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
@@ -87,59 +91,11 @@ export class GamelogsController {
     }
 
     @Delete('gamelogs/:gamelogId')
-    // UseGuard => Only the front-end server can call this path
+    // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async deleteGamelog(
         @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
     ) {
         return (await this.gamelogService.deleteGamelog(gamelogId));
     }
-
-    /*
-    @Get('gamelogs')
-    async getGamelogs() {
-        // public
-        return (await this.gamelogService.getGamelogs());
-    }
-
-    @Get('users/:username/gamelogs')
-    async getUserGamelogs(@Param('username', ParseUsernamePipe) username: string) {
-        // public ?
-        return (await this.gamelogService.getUserGamelogs(username));
-    }
-
-	//@UseGuards(AuthGuard('jwt'))
-    @Post('gamelogs')
-    async createGamelog(@Body(new ValidationPipe) createGamelogDto: CreateGamelogDto) {
-        // server permission only
-        return (await this.gamelogService.createGamelog(createGamelogDto));
-    }
-
-    //@UseGuards(AuthGuard('jwt'))
-    @Put('gamelogs/:gamelogId')
-    async replaceGamelog(
-        @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
-        @Body(new ValidationPipe) replaceGamelogDto: ReplaceGamelogDto
-    ) {
-        // server permission only
-        return (await this.gamelogService.replaceGamelog(gamelogId, replaceGamelogDto));
-    }
-
-    //@UseGuards(AuthGuard('jwt'))
-    @Patch('gamelogs/:gamelogId')
-    async updateGamelog(
-        @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
-        @Body(new ValidationPipe) updateGamelogDto: UpdateGamelogDto
-    ) {
-        // server permission only
-        return (await this.gamelogService.updateGamelog(gamelogId, updateGamelogDto));
-    }
-
-    //@UseGuards(AuthGuard('jwt'))
-    @Delete('gamelogs/:gamelogId')
-    async deleteGamelog(@Param('gamelogId', ParseIdPipe) gamelogId: bigint) {
-        // server permission only
-        return (await this.gamelogService.deleteGamelog(gamelogId));
-    }
-    */
 
 }
