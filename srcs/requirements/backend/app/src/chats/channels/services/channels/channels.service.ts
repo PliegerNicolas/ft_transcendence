@@ -97,8 +97,6 @@ export class ChannelsService {
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
-        const member = channel.members.find((member) => member.user.username === username);
-
         if (!channel.isMember(username)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' isn't member of Channel with ID ${channelId}`);
         else if (!channel.hasPermission(username, ChannelRole.MODERATOR)) throw new UnauthorizedException(`User '${username ? username : '{undefined}'}' hasn't got enough permissions in Channel with ID ${channelId}`);
 

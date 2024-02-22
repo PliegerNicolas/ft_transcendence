@@ -59,8 +59,6 @@ export class Channel {
     }
 
     private ensureAdminExists(): void {
-        console.log("test");
-        console.log(this.members);
         if (this.members.length === 0 || this.members.some((member) => member.role === ChannelRole.ADMIN)) return ;
         let nextAdmin = this.members.find((member) => member.role === ChannelRole.MODERATOR);
         if (!nextAdmin) nextAdmin = this.members[0];
@@ -77,8 +75,6 @@ export class Channel {
 
     public hasPermission(username: string, role: ChannelRole): boolean {
         const member = this.members.find((member) => member.user.username === username);
-        console.log(member);
-        console.log(member.role <= role);
         return (member.role <= role);
     }
 

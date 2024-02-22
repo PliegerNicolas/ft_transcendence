@@ -1,21 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs'
+import * as argon2 from 'argon2'
 
 @Injectable()
 export class PasswordHashingService {
 
-    private readonly saltRounds: number = process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS) : 10;
-
-    async hashPassword(password: string = undefined): Promise<string> {
-        if (!password) return (null);
-        const trimmedPassword = password.trim();
-        return (await bcrypt.hash(trimmedPassword, this.saltRounds));
+    async hashPassword(password: string): Promise<string> {
+        try {
+            if (!password) return null;
+            return await argon2.hash(password);
+        } catch (error) {
+            console.error('Error hashing password:', error);
+            throw error;
+        }
     }
 
     // Not working ?
     async comparePasswords(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
-        const trimmedPlainTextPassword = plainTextPassword.trim();
-        return (await bcrypt.compareSync(trimmedPlainTextPassword, hashedPassword));
+        return (argon2.verify(hashedPassword, plainTextPassword));
     }
 
 }
