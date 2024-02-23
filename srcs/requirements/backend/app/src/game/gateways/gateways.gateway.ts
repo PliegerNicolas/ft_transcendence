@@ -2,7 +2,7 @@ import { OnModuleInit } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io'
 import { gameState } from '../types/inputPayloads'
-import { createGameState, matchmakingSystem, startGameInterval } from '../server/game.server'
+import { GameServer } from '../server/game.server'
 import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../server/game.constants'
 
 let state: gameState[] = [];
@@ -14,6 +14,8 @@ let player2Username: string[] = [];
 
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway implements OnModuleInit {
+
+	constructor(private readonly gameServer: GameServer) {}
 
 	@WebSocketServer()
 	server: Server;
@@ -63,7 +65,7 @@ export class GameGateway implements OnModuleInit {
 			i++;
 		}
 		playersQueue[i] = client.id;
-		matchmakingSystem(playersQueue, i, this.server);
+		this.gameServer.matchmakingSystem(playersQueue, i, this.server);
 	}
 
 	@SubscribeMessage('leaveQueue')
@@ -91,10 +93,10 @@ export class GameGateway implements OnModuleInit {
 		if (player1ID[data.lobby] && player2ID[data.lobby]) {
 			this.server.to(data.lobby).emit('gameReady');
 			setTimeout(() => {this.server.to(data.lobby).emit('startedGame')}, 200);
-			state[data.lobby] = createGameState();
+			state[data.lobby] = this.gameServer.createGameState();
 			state[data.lobby].player1ID = player1ID[data.lobby];
 			state[data.lobby].player2ID = player2ID[data.lobby];
-			setTimeout(() => {startGameInterval(data.lobby, state[data.lobby], this.server, player1Username[data.lobby], player2Username[data.lobby])}, 3200);
+			setTimeout(() => {this.gameServer.startGameInterval(data.lobby, state[data.lobby], this.server, player1Username[data.lobby], player2Username[data.lobby])}, 3200);
 		}
 	}
 
