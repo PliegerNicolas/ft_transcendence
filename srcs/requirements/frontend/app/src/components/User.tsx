@@ -287,8 +287,6 @@ function OnOtherActions(
 		patch({me: "mlaneyri", them: name, status: "accepted"});
 	}
 
-	console.log(status);
-
 	switch (status) {
 		case "accepted": return (
 			<div className="User__ActionsButtons">

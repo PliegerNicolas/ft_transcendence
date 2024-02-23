@@ -162,8 +162,6 @@ function UserListRender(
 		</div>
 	);
 
-	console.log(query.data);
-
 	return (
 		<div className="Sandbox__Scrollable">
 			<div className="genericList">
