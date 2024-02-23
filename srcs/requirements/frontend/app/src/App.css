@@ -156,7 +156,7 @@
 	border-radius: 7px;
 }
 
-.genericList > *.clickable:hover, .genericList > * > *.clickable:hover {
+.genericList > *.clickable:hover {
 	border: 1px solid var(--text-faint);
 
 	filter: brightness(1.1) saturate(1.4);
@@ -165,7 +165,7 @@
 	text-shadow: 0 0 6px #fff4;
 }
 
-.genericList > *.clickable:active, .genericList > * > *.clickable:active {
+.genericList > *.clickable:active {
 	filter: none;
 }
 

@@ -13,7 +13,7 @@ import Navbar from "./components/Navbar.tsx";
 import Home from "./components/Home.tsx";
 import Play from "./components/Game/Play.tsx";
 import Stats from "./components/Stats.tsx";
-import ChatTest from "./components/Chat/Chat.tsx";
+import Chat from "./components/Chat/Chat.tsx";
 import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
@@ -22,6 +22,7 @@ import Notifs from "./components/Notifs.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
+import { randomString } from "./utils/utils.ts";
 
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
@@ -115,20 +116,20 @@ function App()
 	const [notifs, setNotifs] = useState<NotifType[]>([]);
 
 	function addNotif(add: NotifType) {
-		add.date = Date.now() + Math.floor(20 * Math.random());
-		add.id =
-			(10000 * (add.date % (24 * 600000)))
-			+ Math.floor(10000 * Math.random());
-		while (notifs.some(notif => notif.date === add.date))
-			add.date++;
+		add.date = Date.now();
+		add.id = "" + add.date + randomString(8);
 		setNotifs(prev => [...prev, add]);
 	}
+
+	const [lastChan, setLastChan] = useState("");
 
 	return (
 		<MyContext.Provider value={{
 			...logInfo,
 			addNotif,
-			api: new Api(`http://${location.hostname}:3450`, logInfo.token)
+			api: new Api(`http://${location.hostname}:3450`, logInfo.token),
+			lastChan,
+			setLastChan,
 		}}>
 			<Router>
 				<Header/>
@@ -137,16 +138,20 @@ function App()
 					<Route path="/"	element={<Home />} />
 					<Route path="/play" element={<Play />} />
 					<Route path="/stats" element={<Stats />} />
-					<Route path="/chattest/*" element={
-						<RequireAuth elem={<ChatTest />} />
-					}/>
-					<Route path="/settings" element={<Settings />} />
 					<Route path="/about" element={<About />} />
+					<Route path="/auth" element={<Auth setLogInfo={setLogInfo} />} />
+					<Route path="/chat/*" element={
+						<RequireAuth elem={<Chat />} />
+					}/>
+					<Route path="/settings" element={
+						<RequireAuth elem={<Settings />} />
+					}/>
 					<Route path="/sandbox" element={
 						<RequireAuth elem={<Sandbox />} />
 					}/>
-					<Route path="/user/:id" element={<User />} />
-					<Route path="/auth" element={<Auth setLogInfo={setLogInfo} />} />
+					<Route path="/user/:id" element={
+						<RequireAuth elem={<User />} />
+					} />
 					<Route path="*" element={<NotFound />} />
 				</Routes>
 				<Notifs list={notifs} setList={setNotifs} />
