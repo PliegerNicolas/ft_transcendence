@@ -5,6 +5,8 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/User.entity';
 import { Repository } from 'typeorm';
+import {toFileStream} from 'qrcode'
+import { Response } from 'express';
 
 @Injectable()
 export class TwoFactorAuthService {
@@ -28,6 +30,10 @@ export class TwoFactorAuthService {
 
 		return {secret, otpauthUrl}
 
+	}
+
+	public async pipeQrCodeSteam(stream : Response, otpauthUrl : string){
+		return toFileStream(stream, otpauthUrl);
 	}
 
 }
