@@ -225,6 +225,7 @@ const OnlineGame = () => {
 				setGameOver(true);
 				if (gameContext)
 					requestAnimationFrame(() => drawGame(new_gameState));
+				socket.emit('gameEnded', lobby);
 				setOppId('');
 			});
 			socket.on('drawEndGame', (new_gameState: InputPayloads) => {

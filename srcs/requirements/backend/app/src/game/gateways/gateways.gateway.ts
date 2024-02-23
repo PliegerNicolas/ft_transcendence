@@ -1,9 +1,10 @@
-import { OnModuleInit } from '@nestjs/common';
+import { OnModuleInit, UseGuards, Request } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io'
 import { gameState } from '../types/inputPayloads'
 import { GameServer } from '../server/game.server'
 import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../server/game.constants'
+import { AuthGuard } from '@nestjs/passport';
 
 let state: gameState[] = [];
 let player1ID: string[] = [];
@@ -33,6 +34,12 @@ export class GameGateway implements OnModuleInit {
 			});
 		});
 	}
+
+	/*@UseGuards(AuthGuard('jwt'))
+	getConnectedUser(@Request() req: any) {
+		const userId = req.user ? req.user.id : null;
+		console.log(userId);
+	}*/
 
 	@SubscribeMessage('opponentLeft')
 	handleOpponentLeft(@MessageBody() data: {userId: string, lobby: string}, @ConnectedSocket() client: Socket) {
@@ -168,7 +175,7 @@ export class GameGateway implements OnModuleInit {
 		client.leave(lobby);
 	}
 
-	@SubscribeMessage('sentLogs')
+	@SubscribeMessage('gameEnded')
 	handleSentLogs(@MessageBody() lobby: string) {
 		this.server.to(lobby).emit('drawEndGame', state[lobby]);
 	}

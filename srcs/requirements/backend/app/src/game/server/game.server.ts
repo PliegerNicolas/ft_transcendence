@@ -53,17 +53,15 @@ export class GameServer {
 			socket.to(lobby).emit('updateGame', gameState);
 			if (gameOver === false && gameState.score.player1 === MAX_SCORE) {
 				gameOver = true;
-				console.log(player1Username + ' | ' + player2Username);
 				this.gameService.createGamelogs(player1Username, player2Username, 1);
 				socket.to(lobby).emit('gameOver', gameState);
-				setTimeout(() => {clearInterval(intervalId)}, 50);
+				setTimeout(() => {clearInterval(intervalId)}, 100);
 			}
 			else if (gameOver === false && gameState.score.player2 === MAX_SCORE) {
 				gameOver = true;
-				console.log(player1Username + ' | ' + player2Username);
 				this.gameService.createGamelogs(player1Username, player2Username, 2);
 				socket.to(lobby).emit('gameOver', gameState);
-				setTimeout(() => {clearInterval(intervalId)}, 50);
+				setTimeout(() => {clearInterval(intervalId)}, 100);
 			}
 		}, 1000 / FRAME_RATE);
 	}
