@@ -49,17 +49,17 @@ export class Channel {
 
     @ManyToMany(() => User, (user) => user.channelsInvitedTo, { cascade: true })
     @JoinTable()
-    invitedUsers?: User[];
+    invitedUsers!: User[];
 
     @ManyToMany(() => User, (user) => user.channelsBannedFrom, { cascade: true })
     @JoinTable()
-    bannedUsers?: User[];
+    bannedUsers!: User[];
 
     @OneToMany(() => ChannelMember, (member) => member.channel, { cascade: true })
-    members?: ChannelMember[];
+    members!: ChannelMember[];
 
     @OneToMany(() => Message, (messages) => messages.channel) // soft deletion ?
-    messages?: Message[];
+    messages!: Message[];
 
     /* Helper Functions */
 

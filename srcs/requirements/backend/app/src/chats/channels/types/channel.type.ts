@@ -22,7 +22,7 @@ export type ReplaceChannelParams = {
     name: string;
     visibility: ChannelVisibility;
     mode: ChannelMode;
-    password: string;
+    password?: string;
     
 };
 

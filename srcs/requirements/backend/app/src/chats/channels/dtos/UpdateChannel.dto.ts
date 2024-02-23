@@ -1,6 +1,7 @@
-import { IsEnum, IsOptional, IsString, MinLength } from "class-validator";
+import { IsEnum, IsOptional, IsString } from "class-validator";
 import { ChannelMode, ChannelVisibility } from "../entities/Channel.entity";
 import { Transform } from "class-transformer";
+import { IsValidChannelPasswordWithMode } from "src/common/validators/is-valid-channel-password-with-mode";
 
 export class UpdateChannelDto {
 
@@ -16,10 +17,8 @@ export class UpdateChannelDto {
     @IsEnum(ChannelMode, { message: 'Invalid channel mode' })
     mode?: ChannelMode;
 
-    @IsOptional()
-    @IsString()
-    @Transform(({ value }) => value === '' ? null: (value ? value.trim() : null))
-    @MinLength(8)
+    @Transform(({ value }) => value?.length > 0 ? value.trim() : null)
+    @IsValidChannelPasswordWithMode()
     password?: string;
 
 }

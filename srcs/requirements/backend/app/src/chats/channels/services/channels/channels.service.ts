@@ -36,15 +36,55 @@ export class ChannelsService {
 
     async getChannel(channelId: bigint, username: string = undefined): Promise<Channel> {
         const channel = await this.channelRepository.findOne({
-            where: { id: channelId },
+            where: { id: Equal(channelId) },
             relations: ['members.user'],
         });
         
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
-        // ???
+        channel.canVisualise(username);
 
         return (channel);
+    }
+
+    async createChannel(username: string = undefined, channelDetails: CreateChannelParams): Promise<Channel> {
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+        });
+
+        if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
+
+        console.log(channelDetails);
+        //channelDetails.password ? await this.passwordHashingService.hashPassword(channelDetails.password) : null;
+
+        const channel = this.channelRepository.create({
+            ...channelDetails,
+            members: [{ user, role: ChannelRole.ADMIN }],
+        });
+
+        return (await this.channelRepository.save(channel));
+    }
+
+    async replaceChannel(channelId: bigint, username: string = undefined, channelDetails: ReplaceChannelParams): Promise<Channel> {
+        const channel = await this.channelRepository.findOne({
+            where: { id: Equal(channelId) },
+            relations: ['members.user'],
+        });
+
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+
+        return (null);
+    }
+
+    async updateChannel(channelId: bigint, username: string = undefined, channelDetails: UpdateChannelParams): Promise<Channel> {
+            const channel = await this.channelRepository.findOne({
+            where: { id: Equal(channelId) },
+            relations: ['members.user'],
+        });
+
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+
+        return (null);
     }
 
     /*

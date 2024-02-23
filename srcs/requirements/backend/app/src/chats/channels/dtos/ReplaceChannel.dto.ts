@@ -1,6 +1,7 @@
-import { IsDefined, IsEnum, IsNotEmpty, IsString, MinLength, ValidateIf } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { Transform } from "class-transformer";
 import { ChannelMode, ChannelVisibility } from "../entities/Channel.entity";
+import { IsValidChannelPasswordWithMode } from "src/common/validators/is-valid-channel-password-with-mode";
 
 export class ReplaceChannelDto {
 
@@ -16,11 +17,8 @@ export class ReplaceChannelDto {
     @IsEnum(ChannelMode, { message: 'Invalid channel mode' })
     mode: ChannelMode;
 
-    @IsDefined()
-    @IsString()
-    @Transform(({ value }) => value === '' ? null: (value ? value.trim() : null))
-    @ValidateIf((o) => o.password !== null)
-    @MinLength(8)
-    password: string;
+    @Transform(({ value }) => value?.length > 0 ? value.trim() : null)
+    @IsValidChannelPasswordWithMode()
+    password?: string;
 
 }
