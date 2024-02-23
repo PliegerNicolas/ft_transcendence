@@ -2,6 +2,7 @@ import { Players, gameState } from '../types/inputPayloads'
 import { Server } from 'socket.io'
 import { v4 as uuid } from 'uuid';
 import { WINDOW_WIDTH, WINDOW_HEIGHT, BALL_SIZE, MAX_SCORE, FRAME_RATE, PADDLE_WIDTH, PADDLE_HEIGHT, BALL_SPEED, PADDLE_SPEED } from './game.constants'
+import { GameService } from '../services/game.service';
 
 export function createGameState() {
 	return ({
@@ -46,15 +47,18 @@ export function startGameInterval(lobby: string, gameState: gameState, socket: S
 		socket.to(lobby).emit('updateGame', gameState);
 		if (gameOver === false && gameState.score.player1 === MAX_SCORE) {
 			gameOver = true;
+			let gameService: GameService;
 			console.log(player1Username + ' | ' + player2Username);
-			//here I wanna call my createGamelog function
+			gameService.createGamelogs(player1Username, player2Username, 1);
 			socket.to(lobby).emit('gameOver', gameState);
 			setTimeout(() => {clearInterval(intervalId)}, 50);
 		}
 		else if (gameOver === false && gameState.score.player2 === MAX_SCORE) {
 			gameOver = true;
+			let gameService: GameService;
 			console.log(player1Username + ' | ' + player2Username);
-			//here I wanna call my createGamelog function			socket.to(lobby).emit('gameOver', gameState);
+			gameService.createGamelogs(player1Username, player2Username, 2);
+			socket.to(lobby).emit('gameOver', gameState);
 			setTimeout(() => {clearInterval(intervalId)}, 50);
 		}
 	}, 1000 / FRAME_RATE);
