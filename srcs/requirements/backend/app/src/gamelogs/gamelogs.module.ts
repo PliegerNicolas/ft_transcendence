@@ -12,6 +12,7 @@ import { AuthService } from 'src/auth/auth.service';
     TypeOrmModule.forFeature([Gamelog, GamelogToUser, User]),
   ],
   controllers: [GamelogsController],
-  providers: [GamelogsService, AuthService]
+  providers: [GamelogsService, AuthService],
+  exports: [GamelogsService]
 })
 export class GamelogsModule {}

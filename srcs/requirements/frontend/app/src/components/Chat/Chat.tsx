@@ -16,6 +16,25 @@ export default function ChatTest()
 	const [showSidebar, setShowSidebar] =
 		useState(+(document.body.clientWidth > 900));
 
+/*	useEffect(() => {
+		socket.on('rejoinChannels', () => {
+			if (getChan.isSuccess) {
+				console.log('rejoinChannels caught', getChan.data.name);
+				socket.emit('joinChannel', getChan.data.name);
+			}
+		});
+		socket.on('onMessage', (content: string) => {
+			console.log('onMessage caught');
+			invalidate(["channels", id, "messages"]);
+			addNotif({ content: content });
+			console.log(content);
+		});
+		return () => {
+			socket.off('onMessage');
+			socket.off('rejoinsChannels');
+		};
+	}, []);*/
+	
 	return (
 		<main className="MainContent Chat">
 			<ChatContext.Provider value={{showSidebar, setShowSidebar}}>

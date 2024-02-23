@@ -7,7 +7,7 @@ import "../../styles/play.css";
 function Play() {
 	return (
 		<main className="MainContent">
-			<OnlineGame />	
+			<OnlineGame />
 		</main>
 	);
 }

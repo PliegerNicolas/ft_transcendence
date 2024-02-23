@@ -1,10 +1,5 @@
-import { useEffect, useState, useRef, useContext } from "react";
+import { useEffect, useState, useRef } from "react";
 import { io } from 'socket.io-client';
-
-import { useInvalidate } from "../../utils/utils.ts";
-import { useMutation } from "@tanstack/react-query";
-import { MyContext } from "../../utils/contexts.ts";
-import { GameResult, GameType, GamelogPostType } from "../../utils/types.ts"
 
 import "../../styles/play.css";
 
@@ -55,7 +50,6 @@ const OnlineGame = () => {
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const [gameOver, setGameOver] = useState(false);
-	const [sentLogs, setSentLogs] = useState(false);
 
 	const [inQueue, setInQueue] = useState(false);
 	const [gameReady, setGameReady] = useState(false);
@@ -221,39 +215,16 @@ const OnlineGame = () => {
 				drawTimer();
 				console.log('Start game');
 				setGameOver(false);
-				setSentLogs(false);
 			});
 			socket.on('updateGame', (new_gameState: InputPayloads) => {
 				if (gameContext && !gameOver)
 					requestAnimationFrame(() => drawGame(new_gameState));
 			});
-			socket.on('gameOver', (new_gameState: InputPayloads, player1Name: string, player2Name: string) => {
+			socket.on('gameOver', (new_gameState: InputPayloads) => {
 				console.log('game is over');
 				setGameOver(true);
 				if (gameContext)
 					requestAnimationFrame(() => drawGame(new_gameState));
-				if (sentLogs === false && playerNumber === 1 && new_gameState.score.player1 === MAX_SCORE) {
-					setSentLogs(true);
-					postGamelog.mutate({
-						userResults: [
-							{ username: player1Name, result: GameResult.VICTORY },
-							{ username: player2Name, result: GameResult.DEFEAT }
-						],
-						gameType: GameType.PONG
-					});
-					socket.emit('sentLogs', lobby);
-				}
-				else if (sentLogs === false && playerNumber === 2 && new_gameState.score.player2 === MAX_SCORE) {
-					setSentLogs(true);
-					postGamelog.mutate({
-						userResults: [
-							{ username: player1Name, result: GameResult.DEFEAT },
-							{ username: player2Name, result: GameResult.VICTORY }
-						],
-						gameType: GameType.PONG
-					});
-					socket.emit('sentLogs', lobby);
-				}
 				setOppId('');
 			});
 			socket.on('drawEndGame', (new_gameState: InputPayloads) => {
@@ -322,19 +293,6 @@ const OnlineGame = () => {
 		socket.emit('leaveLobby', lobby);
 		setLobby('');
 	}
-
-// Database related functions ==============================================================================================================
-
-	const context = useContext(MyContext);
-
-	const invalidate = useInvalidate();
-	
-	//sending the gamelogs to the database
-	const postGamelog = useMutation({
-		mutationFn: (gamelog: GamelogPostType) => context.api.post("/gamelogs", gamelog),
-		onSettled: () => invalidate(["gamelogs"]),
-		onError: error => context.addNotif({content: error.message}),
-	});
 
 // Return ==============================================================================================================
 
