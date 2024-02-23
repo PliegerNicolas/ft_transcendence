@@ -57,8 +57,8 @@ export default function User()
 	});
 
 	const delFriendship = useMutation({
-		mutationFn: (friendId: string) =>
-			api.delete("/users/" + id + "/relationships/" + friendId),
+		mutationFn: ({me, them}: {me: string, them: string}) =>
+			api.delete("/users/" + me + "/relationships/" + them),
 		onSettled: () => invalidate(["users", id, "friends"]),
 		onError: error => addNotif({content: error.message}),
 	});
@@ -107,7 +107,10 @@ export default function User()
 			case "cancel":
 			case "reject":
 			case "unblock":
-				delFriendship.mutate(other);
+				if (id == "mlaneyri")
+					delFriendship.mutate({me: "mlaneyri", them: other}); //TODO
+				else
+					delFriendship.mutate({me: "mlaneyri", them: id}); //TODO
 				break ;
 		}
 	}
@@ -128,18 +131,52 @@ export default function User()
 		const myStatus = match.user1.id == "1" ? match.status1 : match.status2;
 		const theirStatus = match.user1.id == "1" ? match.status2 : match.status1;
 
+		if (theirStatus == "blocked")
+			return ("imblocked");
 		if (myStatus == "blocked")
 			return ("blocked");
 		if (myStatus == "pending")
 			return ("approve");
 		if (theirStatus == "pending")
 			return ("pending");
-		if (theirStatus == "blocked")
-			return ("imblocked");
 		return ("");
 	}
 
-	console.log(getFriendships.data);
+	if (user.id != 1 && !getFriendships.isSuccess) return ( //TODO
+		<main className="MainContent User">
+			<section>
+				<h2>
+					{
+						user.profile?.firstName
+						+ " « " + user.username + " » "
+						+ user.profile?.lastName
+					}
+				</h2>
+			</section>
+		</main>
+	);
+
+	if (user.id != 1 && getStatus() == "imblocked") return ( //TODO
+		<main className="MainContent User">
+			<section>
+				<h2>
+					{
+						user.profile?.firstName
+						+ " « " + user.username + " » "
+						+ user.profile?.lastName
+					}
+				</h2>
+				<div className="error-msg">
+					You've been blocked by this user.
+				</div>
+				<button onClick={() =>
+					delFriendship.mutate({me: user.username, them: "mlaneyri"}) //TODO
+				}>
+					Make unblock (temp)
+				</button>
+			</section>
+		</main>
+	);
 
 	return (
 		<main className="MainContent User">
@@ -189,12 +226,12 @@ export default function User()
 						<button onClick={() =>
 							postFriendship.mutate({other: "mlaneyri", me: user.username, status: "accepted"})
 						}>
-							Make friend request me
+							Make friend request me (temp)
 						</button>
 						<button onClick={() =>
 							postFriendship.mutate({other: "mlaneyri", me: user.username, status: "blocked"})
 						}>
-							Make block me 
+							Make block me  (temp)
 						</button>
 					</div>
 				}
@@ -258,7 +295,10 @@ function OnOtherActions(
 				<div className="User__Status">
 					You are friend with {name}.
 				</div>
-				<button onClick={() => del(name)} className="reject">
+				<button
+					 className="reject"
+					 onClick={() => del({me: "mlaneyri", them: name})}
+				> {/* TODO */}
 					Unfriend
 				</button>
 			</div>
@@ -271,6 +311,12 @@ function OnOtherActions(
 				<button onClick={acceptShip} className="accept">
 					Accept as friend
 				</button>
+				<button
+					className="reject"
+					onClick={() => del({me: "mlaneyri", them: name})}
+				>
+					Reject
+				</button>
 			</div>
 		);
 		case "pending": return (
@@ -278,7 +324,10 @@ function OnOtherActions(
 				<div className="User__Status">
 					Your friend request to {name} is pending.
 				</div>
-				<button onClick={() => del(name)} className="reject">
+				<button
+					className="reject"
+					onClick={() => del({me: "mlaneyri", them: name})}
+				>
 					Cancel
 				</button>
 			</div>
@@ -290,7 +339,7 @@ function OnOtherActions(
 				</div>
 				<button
 					className="unblock"
-					onClick={() => patch({me: "mlaneyri", them: name, status: "undefined"})}
+					onClick={() => del({me: "mlaneyri", them: name})}
 				>
 					Unblock
 				</button>
