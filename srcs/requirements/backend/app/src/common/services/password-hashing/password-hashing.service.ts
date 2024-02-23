@@ -13,7 +13,8 @@ export class PasswordHashingService {
         return (await bcrypt.hash(password, 12));
     }
 
-    async comparePasswords(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
+    async comparePasswords(plainTextPassword: string = undefined, hashedPassword: string): Promise<boolean> {
+        if (!plainTextPassword) return (false);
         return (await bcrypt.compare(plainTextPassword, hashedPassword));
     }
 

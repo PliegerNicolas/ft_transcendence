@@ -8,6 +8,12 @@ export class GetChannelsQueryParam {
 
 }
 
+export type GetChannelParams = {
+
+    password?: string;
+
+}
+
 export type CreateChannelParams = {
 
     name: string;
@@ -34,3 +40,15 @@ export type UpdateChannelParams = {
     password?: string;
 
 };
+
+export type JoinChannelParams = {
+
+    password?: string;
+
+}
+
+export type LeaveChannelParams = {
+
+    password?: string;
+
+}

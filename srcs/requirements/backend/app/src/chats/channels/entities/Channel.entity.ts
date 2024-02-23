@@ -1,4 +1,4 @@
-import { IsEnum } from "class-validator";
+import { IsEnum, isIn } from "class-validator";
 import { Message } from "src/chats/messages/entities/Message.entity";
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ChannelMember, ChannelRole } from "./ChannelMember.entity";
@@ -49,17 +49,17 @@ export class Channel {
 
     @ManyToMany(() => User, (user) => user.channelsInvitedTo, { cascade: true })
     @JoinTable()
-    invitedUsers!: User[];
+    invitedUsers?: User[];
 
     @ManyToMany(() => User, (user) => user.channelsBannedFrom, { cascade: true })
     @JoinTable()
-    bannedUsers!: User[];
+    bannedUsers?: User[];
 
     @OneToMany(() => ChannelMember, (member) => member.channel, { cascade: true })
-    members!: ChannelMember[];
+    members?: ChannelMember[];
 
     @OneToMany(() => Message, (messages) => messages.channel) // soft deletion ?
-    messages!: Message[];
+    messages?: Message[];
 
     /* Helper Functions */
 
@@ -84,27 +84,27 @@ export class Channel {
     // User status
 
     public isMember(username: string): boolean {
-        return (this.members.some((member) => member.user.username === username));
+        return (this.members?.some((member) => member.user.username === username));
     }
 
     public isInvited(username: string): boolean {
-        return (this.bannedUsers.some((user) => user.username === username)); 
+        return (this.invitedUsers?.some((user) => user.username === username)); 
     }
 
     public isBanned(username: string): boolean {
-        return (this.bannedUsers.some((user) => user.username === username)); 
+        return (this.bannedUsers?.some((user) => user.username === username)); 
     }
 
     // Role in Channel
 
     public hasSuperiorRole(username: string, role: ChannelRole): boolean {
-        const member = this.members.find((member) => member.user.username === username);
-        return (member.role < role);
+        const member = this.members?.find((member) => member.user.username === username);
+        return (member?.role < role);
     }
 
     public hasSuperiorOrEquivalentRole(username: string, role: ChannelRole): boolean {
-        const member = this.members.find((member) => member.user.username === username);
-        return (member.role <= role);
+        const member = this.members?.find((member) => member.user.username === username);
+        return (member?.role <= role);
     }
 
     // Channel permissions
@@ -157,9 +157,17 @@ export class Channel {
         }
     }
 
+    public canLeave(username: string): void {
+        if (!username) throw new UnauthorizedException(`User '{undefined}' isn't identified and cannot leave Channel with ID ${this.id}`);
+
+        const isMember = this.isMember(username);
+
+        if (!isMember) throw new UnauthorizedException(`User '${username}' isn't member of Channel with ID ${this.id}`);
+    }
+
     public canEditOrUpdate(username: string): void {
         if (!username) throw new UnauthorizedException(`User '{undefined}' isn't identified and cannot alter Channel with ID ${this.id}`);
-        else if (this.isMember(username)) throw new UnauthorizedException(`User '${username}' isn't member of Channel with ID ${this.id} and cannot alter it`);
+        else if (!this.isMember(username)) throw new UnauthorizedException(`User '${username}' isn't member of Channel with ID ${this.id} and cannot alter it`);
 
         if (!this.hasSuperiorOrEquivalentRole(username, ChannelRole.MODERATOR)) throw new UnauthorizedException(`User '${username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
     }
@@ -167,10 +175,15 @@ export class Channel {
     public canWrite(username: string): void {
         if (!username) throw new UnauthorizedException(`User '{undefined}' isn't identified and cannot write in Channel with ID ${this.id}`);
 
-        const member = this.members.find((member) => member.user.username === username);
-        if (!member) throw new UnauthorizedException(`User '${username}' isn't member of Channel with ID ${this.id} and cannot write in it`);
+        if (!this.isMember(username)) throw new UnauthorizedException(`User '${username}' isn't member of Channel with ID ${this.id} and cannot write in it`);
 
         // check if muted. Not set yet.
+    }
+
+    public canDelete(username: string): void {
+        if (!username) throw new UnauthorizedException(`User '{undefined}' isn't identified and cannot write in Channel with ID ${this.id}`);
+        console.log(this.hasSuperiorOrEquivalentRole(username, ChannelRole.ADMIN));
+        if (!this.hasSuperiorOrEquivalentRole(username, ChannelRole.ADMIN)) throw new UnauthorizedException(`User '${username}' hasn't got enough permissions to delete Channel with ID ${this.id}`);
     }
 
 }
