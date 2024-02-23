@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Channel, ChannelMode, ChannelVisibility } from '../../entities/Channel.entity';
 import { Equal, Repository } from 'typeorm';
 import { CreateChannelParams, GetChannelParams, GetChannelsQueryParam, JoinChannelParams, LeaveChannelParams, ReplaceChannelParams, UpdateChannelParams } from '../../types/channel.type';
-import { User } from 'src/users/entities/User.entity';
+import { GlobalServerPrivileges, User } from 'src/users/entities/User.entity';
 import { ChannelMember, ChannelRole } from '../../entities/ChannelMember.entity';
 import { PasswordHashingService } from 'src/common/services/password-hashing/password-hashing.service';
 
@@ -42,11 +42,18 @@ export class ChannelsService {
         
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
-        channel.canVisualise(username);
-        if (
-            channel.mode === ChannelMode.PASSWORD_PROTECTED
-            //&& await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+        });
+
+        if (!user?.hasGlobalServerPrivileges())
+        {
+            channel.canVisualise(username);
+            if (
+                channel.mode === ChannelMode.PASSWORD_PROTECTED
+                //&& await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
+            ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        }
 
         return (channel);
     }
@@ -83,11 +90,14 @@ export class ChannelsService {
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'} not found`);
 
-        channel.canEditOrUpdate(user.username);
-        if (
-            channel.mode === ChannelMode.PASSWORD_PROTECTED
-            && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        if (!user?.hasGlobalServerPrivileges())
+        {
+            channel.canEditOrUpdate(user.username);
+            if (
+                channel.mode === ChannelMode.PASSWORD_PROTECTED
+                && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
+            ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        }
 
         this.channelRepository.merge(channel, {
             ...channelDetails
@@ -110,11 +120,13 @@ export class ChannelsService {
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'} not found`);
 
-        channel.canEditOrUpdate(user.username);
-        if (
-            channel.mode === ChannelMode.PASSWORD_PROTECTED
-            && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        if (!user?.hasGlobalServerPrivileges()) {
+            channel.canEditOrUpdate(user.username);
+            if (
+                channel.mode === ChannelMode.PASSWORD_PROTECTED
+                && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
+            ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        }
 
         this.channelRepository.merge(channel, {
             ...channelDetails
@@ -137,7 +149,9 @@ export class ChannelsService {
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'} not found`);
 
-        channel.canDelete(user.username);
+        if (!user?.hasGlobalServerPrivileges()) {
+            channel.canDelete(user.username);
+        }
 
         await this.channelRepository.remove(channel);
         return (`Channel with ID ${channelId} successfully deleted`);
@@ -159,11 +173,13 @@ export class ChannelsService {
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'} not found`);
 
-        channel.canJoin(user.username);
-        if (
-            channel.mode === ChannelMode.PASSWORD_PROTECTED
-            && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        if (!user?.hasGlobalServerPrivileges()) {
+            channel.canJoin(user.username);
+            if (
+                channel.mode === ChannelMode.PASSWORD_PROTECTED
+                && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
+            ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        }
 
         this.channelRepository.merge(channel, {
             members: [...channel.members, { user, role: ChannelRole.MEMBER }],
@@ -188,9 +204,11 @@ export class ChannelsService {
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'} not found`);
 
-        channel.canLeave(user.username);
-        channel.members = channel.members.filter((member) => member.user.username !== username);
-        channel.setupChannel();
+        if (!user?.hasGlobalServerPrivileges()) {
+            channel.canLeave(user.username);
+            channel.members = channel.members.filter((member) => member.user.username !== username);
+            channel.setupChannel();
+        }
 
         return (await this.channelRepository.save(channel));
     }

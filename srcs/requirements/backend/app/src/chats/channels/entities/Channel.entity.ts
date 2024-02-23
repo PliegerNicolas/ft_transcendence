@@ -3,7 +3,7 @@ import { Message } from "src/chats/messages/entities/Message.entity";
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ChannelMember, ChannelRole } from "./ChannelMember.entity";
 import { Exclude } from "class-transformer";
-import { User } from "src/users/entities/User.entity";
+import { GlobalServerPrivileges, User } from "src/users/entities/User.entity";
 import { UnauthorizedException } from "@nestjs/common";
 
 export enum ChannelVisibility {
@@ -99,12 +99,14 @@ export class Channel {
 
     public hasSuperiorRole(username: string, role: ChannelRole): boolean {
         const member = this.members?.find((member) => member.user.username === username);
-        return (member?.role < role);
+        if (!member) return (false);
+        else return (member?.role < role);
     }
 
-    public hasSuperiorOrEquivalentRole(username: string, role: ChannelRole): boolean {
+    public hasSuperiorOrEqualRole(username: string, role: ChannelRole): boolean {
         const member = this.members?.find((member) => member.user.username === username);
-        return (member?.role <= role);
+        if (!member) return (false);
+        else return (member?.role <= role);
     }
 
     // Channel permissions
@@ -169,7 +171,7 @@ export class Channel {
         if (!username) throw new UnauthorizedException(`User '{undefined}' isn't identified and cannot alter Channel with ID ${this.id}`);
         else if (!this.isMember(username)) throw new UnauthorizedException(`User '${username}' isn't member of Channel with ID ${this.id} and cannot alter it`);
 
-        if (!this.hasSuperiorOrEquivalentRole(username, ChannelRole.MODERATOR)) throw new UnauthorizedException(`User '${username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
+        if (!this.hasSuperiorOrEqualRole(username, ChannelRole.MODERATOR)) throw new UnauthorizedException(`User '${username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
     }
 
     public canWrite(username: string): void {
@@ -182,8 +184,7 @@ export class Channel {
 
     public canDelete(username: string): void {
         if (!username) throw new UnauthorizedException(`User '{undefined}' isn't identified and cannot write in Channel with ID ${this.id}`);
-        console.log(this.hasSuperiorOrEquivalentRole(username, ChannelRole.ADMIN));
-        if (!this.hasSuperiorOrEquivalentRole(username, ChannelRole.ADMIN)) throw new UnauthorizedException(`User '${username}' hasn't got enough permissions to delete Channel with ID ${this.id}`);
+        if (!this.hasSuperiorOrEqualRole(username, ChannelRole.ADMIN)) throw new UnauthorizedException(`User '${username}' hasn't got enough permissions to delete Channel with ID ${this.id}`);
     }
 
 }

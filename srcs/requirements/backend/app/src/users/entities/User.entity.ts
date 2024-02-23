@@ -71,8 +71,12 @@ export class User {
 
     /* Helper Function */
 
-    getRelationships(): Relationship[] {
+    public getRelationships(): Relationship[] {
         return ([...this.relationships1, ...this.relationships2]);
+    }
+
+    public hasGlobalServerPrivileges(): boolean {
+        return (this.globalServerPrivileges > GlobalServerPrivileges.USER);
     }
 
 }
