@@ -9,7 +9,7 @@ import { UpdateChannelDto } from '../dtos/UpdateChannel.dto';
 import { GetChannelDto } from '../dtos/GetChannel.dto';
 import { JoinChannelDto } from '../dtos/JoinChannel.dto';
 import { LeaveChannelDto } from '../dtos/LeaveChannel.dto';
-import { ManageChannelMembersDto } from '../dtos/ManageChannelAccess.dto';
+import { ChannelAccessDto } from '../dtos/ChannelAccess.dto';
 
 @Controller()
 export class ChannelsController {
@@ -108,11 +108,11 @@ export class ChannelsController {
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
     async manageMyChannelAccess(
         @Param('channelId', ParseIdPipe) channelId: bigint,
-        @Body(new ValidationPipe) manageChannelAccessDto: ManageChannelMembersDto,
+        @Body(new ValidationPipe) channelAccessDto: ChannelAccessDto,
         @Request() req: any,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return (await this.channelService.manageChannelAccess(channelId, username, manageChannelAccessDto));
+        return (await this.channelService.manageChannelAccess(channelId, username, channelAccessDto));
     }
 
     @Delete('channels/:channelId')
@@ -206,9 +206,9 @@ export class ChannelsController {
     async manageChannelAccess(
         @Param('username', ParseUsernamePipe) username: string,
         @Param('channelId', ParseIdPipe) channelId: bigint,
-        @Body(new ValidationPipe) manageChannelAccessDto: ManageChannelMembersDto,
+        @Body(new ValidationPipe) channelAccessDto: ChannelAccessDto,
     ) {
-        return (await this.channelService.manageChannelAccess(channelId, username, manageChannelAccessDto));
+        return (await this.channelService.manageChannelAccess(channelId, username, channelAccessDto));
     }
 
     @Delete('users/:username/channels/:channelId')

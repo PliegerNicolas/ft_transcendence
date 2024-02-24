@@ -116,38 +116,39 @@ export class Channel {
     /* Manage channel accessibility */
 
     public invite(users: User[]): void {
-        this.invitedUsers = [...this.invitedUsers, ...users];
+        const invitedUserIds = new Set(this.invitedUsers.map((user) => user.id))
+        this.invitedUsers.push(...users.filter((user) => !invitedUserIds.has(user.id)));
     }
 
     public ban(users: User[]): void {
-        this.bannedUsers = [...this.bannedUsers, ...users];
+        this.uninvite(users);
+        const bannedUserIds = new Set(this.bannedUsers.map((user) => user.id))
+        this.bannedUsers.push(...users.filter(user => !bannedUserIds.has(user.id)));
     }
 
     public kick(users: User[]): void {
-        // Not saved ???
-        this.members = this.members?.filter((member) => !users.includes(member.user));
-        this.invitedUsers = this.invitedUsers?.filter((user) => !users.includes(user));
+        this.uninvite(users);
+        this.members = this.members?.filter((member) => !users.some((user) => user.username === member.user.username));
     }
 
     public mute(users: User[]): void {
-        // Not saved ???
-        this.members?.forEach((member) => { if (users?.includes(member.user)) member.mute = true });
+        this.members?.forEach((member) => {
+            if (users.some((user) => user.username === member.user.username)) member.mute = true;
+        });
     }
 
     public uninvite(users: User[]): void {
-        // Not saved ???
-        this.invitedUsers = this.invitedUsers?.filter((user) => !users.includes(user));
+        this.invitedUsers = this.invitedUsers?.filter((invitedUser) => !users.some((user) => user.username === invitedUser.username));
     }
 
     public deban(users: User[]): void {
-        // Not saved ???
-        this.bannedUsers = this.bannedUsers?.filter((user) => !users.includes(user));
-        this.invitedUsers = this.invitedUsers?.filter((user) => !users.includes(user));
+        this.bannedUsers = this.bannedUsers?.filter((bannedUser) => !users.some((user) => user.username === bannedUser.username));
     }
 
     public unmute(users: User[]): void {
-        // Not saved ???
-        this.members?.forEach((member) => { if (users?.includes(member.user)) member.mute = false });
+        this.members?.forEach((member) => {
+            if (users.some((user) => user.username === member.user.username)) member.mute = false;
+        });
     }
 
     /* Channel permissions */

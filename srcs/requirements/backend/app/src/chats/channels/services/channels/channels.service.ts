@@ -2,11 +2,11 @@ import { BadRequestException, Injectable, NotFoundException, UnauthorizedExcepti
 import { InjectRepository } from '@nestjs/typeorm';
 import { Channel, ChannelMode, ChannelVisibility } from '../../entities/Channel.entity';
 import { Equal, In, Repository } from 'typeorm';
-import { CreateChannelParams, GetChannelParams, GetChannelsQueryParam, JoinChannelParams, LeaveChannelParams, ManageChannelParams, ReplaceChannelParams, UpdateChannelParams } from '../../types/channel.type';
-import { GlobalServerPrivileges, User } from 'src/users/entities/User.entity';
-import { ChannelMember, ChannelRole } from '../../entities/ChannelMember.entity';
+import { ChannelAccessParams, CreateChannelParams, GetChannelParams, GetChannelsQueryParam, JoinChannelParams, LeaveChannelParams, ReplaceChannelParams, UpdateChannelParams } from '../../types/channel.type';
+import { User } from 'src/users/entities/User.entity';
+import { ChannelRole } from '../../entities/ChannelMember.entity';
 import { PasswordHashingService } from 'src/common/services/password-hashing/password-hashing.service';
-import { ManageChannelAccessAction } from '../../dtos/ManageChannelAccess.dto';
+import { ChannelAccessAction } from '../../dtos/ChannelAccess.dto';
 
 @Injectable()
 export class ChannelsService {
@@ -189,7 +189,7 @@ export class ChannelsService {
         return (await this.channelRepository.save(channel));
     }
 
-    async manageChannelAccess(channelId: bigint, username: string = undefined, channelDetails: ManageChannelParams) {
+    async manageChannelAccess(channelId: bigint, username: string = undefined, channelAccessDetails: ChannelAccessParams) {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
             relations: ['members.user', 'invitedUsers', 'bannedUsers'],
@@ -203,30 +203,45 @@ export class ChannelsService {
 
         channel.validateEditOrUpdate(user);
 
+        const usernames = channelAccessDetails.usernames;
+        delete channelAccessDetails.usernames;
+
+        console.log(usernames);
+
+        if (usernames.length !== new Set(usernames).size) {
+            const duplicateUsernames = usernames.filter((username, i) => usernames.indexOf(username) !== i);
+            throw new BadRequestException(`Duplicate username${duplicateUsernames.length > 1 ? 's' : ''} given: ${duplicateUsernames.join(', ')}`);
+        }
+
         const users = await this.userRepository.find({
-            where: { id: In(channelDetails.userIds) },
+            where: { username: In(usernames) },
         });
 
-        switch (channelDetails.action) {
-            case (ManageChannelAccessAction.BAN):
+        if (users.length !== usernames.length) {
+            const missingUsernames = usernames.filter((username) => !users.some((user) => user.username === username));
+            throw new BadRequestException(`User${missingUsernames.length > 1 ? 's weren\'t' : ' wasn\'t'} found: ${missingUsernames.join(', ')}`);
+        }
+
+        switch (channelAccessDetails.action) {
+            case (ChannelAccessAction.BAN):
                 channel.ban(users);
                 break;
-            case (ManageChannelAccessAction.DEBAN):
+            case (ChannelAccessAction.DEBAN):
                 channel.deban(users);
                 break;
-            case (ManageChannelAccessAction.INVITE):
+            case (ChannelAccessAction.INVITE):
                 channel.invite(users);
                 break;
-            case (ManageChannelAccessAction.UNINVITE):
+            case (ChannelAccessAction.UNINVITE):
                 channel.uninvite(users);
                 break;
-            case (ManageChannelAccessAction.MUTE):
+            case (ChannelAccessAction.MUTE):
                 channel.mute(users);
                 break;
-            case (ManageChannelAccessAction.UNMUTE):
+            case (ChannelAccessAction.UNMUTE):
                 channel.unmute(users);
                 break;
-            case (ManageChannelAccessAction.KICK):
+            case (ChannelAccessAction.KICK):
                 channel.kick(users);
                 break;
             default:
