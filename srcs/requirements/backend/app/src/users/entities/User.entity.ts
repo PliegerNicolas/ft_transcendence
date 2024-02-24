@@ -6,7 +6,7 @@ import { GamelogToUser } from "src/gamelogs/entities/GamelogToUser.entity";
 import { Profile } from "src/profiles/entities/Profile.entity";
 import { Relationship } from "src/relationships/entities/Relationship.entity";
 import { Column, CreateDateColumn, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
-import { GlobalServerPrivileges } from "../enums/global-server-privileges.enum";
+import { GlobalServerPrivileges, compareGlobalServerPrivileges } from "../enums/global-server-privileges.enum";
 
 @Entity({ name: 'users' })
 @Unique(['email', 'username'])
@@ -72,7 +72,7 @@ export class User {
     }
 
     public hasGlobalServerPrivileges(): boolean {
-        return (this.globalServerPrivileges > GlobalServerPrivileges.USER);
+        return (compareGlobalServerPrivileges(this.globalServerPrivileges, GlobalServerPrivileges.OPERATOR) >= 0);
     }
 
 }

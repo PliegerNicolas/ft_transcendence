@@ -55,7 +55,7 @@ export class ChannelsService {
         if (
             channel.mode === ChannelMode.PASSWORD_PROTECTED
             //&& await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         return (channel);
     }
@@ -93,7 +93,7 @@ export class ChannelsService {
         if (
             channel.mode === ChannelMode.PASSWORD_PROTECTED
             && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         this.channelRepository.merge(channel, {
             ...channelDetails
@@ -118,7 +118,7 @@ export class ChannelsService {
         if (
             channel.mode === ChannelMode.PASSWORD_PROTECTED
             && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         this.channelRepository.merge(channel, {
             ...channelDetails
@@ -163,7 +163,7 @@ export class ChannelsService {
         if (
             channel.mode === ChannelMode.PASSWORD_PROTECTED
             && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} with mode ${channel.mode}`);
+        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         this.channelRepository.merge(channel, {
             members: [...channel.members, { user, role: ChannelRole.MEMBER }],
@@ -210,7 +210,7 @@ export class ChannelsService {
         const usernames = channelAccessDetails.usernames;
         delete channelAccessDetails.usernames;
 
-        const users = await this.userService.findStriclyUsersByUsername(usernames);
+        const users = await this.userService.findStrictlyUsersByUsername(usernames);
 
         switch (channelAccessDetails.action) {
             case (ChannelAccessAction.BAN):

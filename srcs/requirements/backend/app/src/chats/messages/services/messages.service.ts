@@ -1,10 +1,11 @@
 import { UnauthorizedException, Injectable, NotFoundException } from '@nestjs/common';
 import { Message } from '../entities/Message.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Equal, Repository } from 'typeorm';
 import { Channel } from 'src/chats/channels/entities/Channel.entity';
 import { User } from 'src/users/entities/User.entity';
 import { CreateMessageParams, ReplaceMessageParams, UpdateMessageParams } from '../types/message.type';
+import { ChannelMode } from 'src/chats/channels/enums/channel-mode.enum';
 
 @Injectable()
 export class MessagesService {
@@ -18,129 +19,149 @@ export class MessagesService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    /*
-    async getChannelMessages(userId: bigint = null, channelId: bigint): Promise<Message[]> {
+    async getChannelMessages(channelId: bigint, username: string = undefined): Promise<Message[]> {
         const channel = await this.channelRepository.findOne({
-            where: { id: channelId },
-            relations: ['messages.channelMember.user', 'members.user'],
-        });
+            where: { id: Equal(channelId)},
+            relations: ['messages.channelMember.user'],
+        })
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (channel.status !== ChannelStatus.PUBLIC
-            && !channel.members.find((member) => BigInt(member.user.id) === userId)) {
-            throw new UnauthorizedException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
-        }
 
-        console.log(channel.messages);
-        console.log(userId);
-        console.log(channel.members);
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+        });
+
+        channel.validateAccess(user);
+        if (
+            channel.mode === ChannelMode.PASSWORD_PROTECTED
+            //&& await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
+        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         return (channel.messages);
     }
 
-    async getChannelMessage(userId: bigint = null, channelId: bigint, messageId: bigint): Promise<Message> {
+    async getChannelMessage(channelId: bigint, username: string = undefined, messageId: bigint): Promise<Message> {
         const channel = await this.channelRepository.findOne({
-            where: { id: channelId },
-            relations: ['messages.channelMember.user', 'members.user'],
-        });
+            where: { id: Equal(channelId)},
+            relations: ['messages.channelMember.user'],
+        })
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-        else if (channel.status !== ChannelStatus.PUBLIC
-            && !channel.members.find((member) => BigInt(member.user.id) === userId)) {
-            throw new UnauthorizedException(`User with ID ${userId} isn't member of Channel with ID ${channelId}`);
-        }
+
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+        });
+
+        channel.validateAccess(user);
+        if (
+            channel.mode === ChannelMode.PASSWORD_PROTECTED
+            //&& await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
+        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         const message = channel.messages.find((message) => BigInt(message.id) === messageId);
 
-        if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in Channel with ID ${channelId}`);
-        
+        if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in Channel with ID ${channelId}`)
+
         return (message);
     }
 
-    async createChannelMessage(userId: bigint = null, channelId: bigint, messageDetails: CreateMessageParams): Promise<Message> {
+    async createChannelMessage(channelId: bigint, username: string = undefined, messageDetails: CreateMessageParams): Promise<Message> {
         const channel = await this.channelRepository.findOne({
-            where: { id: channelId },
-            relations: ['members.user', 'messages'],
+            where: { id: Equal(channelId)},
+            relations: ['members.user', 'messages.channelMember.user'],
+        })
+
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
         });
 
-        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`)
+        channel.validateWrite(user);
 
-        const channelMember = channel.members.find((member) => BigInt(member.user.id) === userId);
-
-        if (!channelMember) throw new NotFoundException(`User with ID ${userId} is not member of channel with ID ${channelId}`);
+        const member = channel.getMember(user.username);
 
         const message = this.messageRepository.create({
             id: this.generateNextMessageId(channel),
             channelId: channel.id,
-            channelMember,
+            channelMember: member,
             ...messageDetails,
         });
 
         return (await this.messageRepository.save(message));
     }
 
-    async replaceChannelMessage(userId: bigint = null, channelId: bigint, messageId: bigint, messageDetails: ReplaceMessageParams): Promise<Message> {
+    async replaceChannelMessage(channelId: bigint, username: string = undefined, messageId: bigint, messageDetails: ReplaceMessageParams): Promise<Message> {
         const message = await this.messageRepository.findOne({
             where: {
-                channel: { id: channelId },
-                id: messageId,
+                id: Equal(messageId),
+                channelId: Equal(channelId),
             },
-            relations: ['channelMember.user'],
-        });
+            relations: ['channel.members.user', 'channelMember.user']
+        })
 
         if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in Channel with ID ${channelId}`);
-        else if (BigInt(message.channelMember.user.id) !== userId) {
-            throw new UnauthorizedException(`User with ID ${userId} isn't author of Message with ID ${messageId} in Channel with ID ${channelId}`);
-        }
 
-        return (await this.messageRepository.save({
-            ...message,
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+        });
+
+        message.validateReplaceOrUpdate(user);
+
+        this.messageRepository.merge(message, {
             ...messageDetails,
-        }));
+        });
+
+        return (await this.messageRepository.save(message));
     }
 
-    async updateChannelMessage(userId: bigint = null, channelId: bigint, messageId: bigint, messageDetails: UpdateMessageParams): Promise<Message> {
+    async updateChannelMessage(channelId: bigint, username: string = undefined, messageId: bigint, messageDetails: UpdateMessageParams): Promise<Message> {
         const message = await this.messageRepository.findOne({
             where: {
-                channel: { id: channelId },
-                id: messageId,
+                id: Equal(messageId),
+                channelId: Equal(channelId),
             },
-            relations: ['channelMember.user'],
-        });
+            relations: ['channel.members.user', 'channelMember.user']
+        })
 
         if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in Channel with ID ${channelId}`);
-        else if (BigInt(message.channelMember.user.id) !== userId) {
-            throw new UnauthorizedException(`User with ID ${userId} isn't author of Message with ID ${messageId} in Channel with ID ${channelId}`);
-        }
 
-        return (await this.messageRepository.save({
-            ...message,
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+        });
+
+        message.validateReplaceOrUpdate(user);
+
+        this.messageRepository.merge(message, {
             ...messageDetails,
-        }));
+        });
+
+        return (await this.messageRepository.save(message));
     }
 
-    async deleteChannelMessage(userId: bigint = null, channelId: bigint, messageId: bigint): Promise<string> {
+    async deleteChannelMessage(channelId: bigint, username: string = undefined, messageId: bigint): Promise<string> {
         const message = await this.messageRepository.findOne({
             where: {
-                channel: { id: channelId },
-                id: messageId,
+                id: Equal(messageId),
+                channelId: Equal(channelId),
             },
-            relations: ['channelMember.user'],
-        });
+            relations: ['channel.members.user', 'channelMember.user']
+        })
 
         if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in Channel with ID ${channelId}`);
-        else if (BigInt(message.channelMember.user.id) !== userId) {
-            throw new UnauthorizedException(`User with ID ${userId} isn't author of Message with ID ${messageId} in Channel with ID ${channelId}`);
-        }
+
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+        });
+
+        message.validateDelete(user);
 
         await this.messageRepository.remove(message);
-        return (`Message with ID ${messageId} in Channel with ID ${channelId} successfully deleted`);
+        return (`Message with ID ${messageId} of Channel with ID ${channelId} successfully deleted`);
     }
-    */
 
     /* Helper Functions */
 
-    /*
     public generateNextMessageId(channel: Channel): bigint {
         if (!channel.messages) return (BigInt(1));
 
@@ -151,6 +172,5 @@ export class MessagesService {
 
         return (highestMessageId + BigInt(1));
     }
-    */
 
 }

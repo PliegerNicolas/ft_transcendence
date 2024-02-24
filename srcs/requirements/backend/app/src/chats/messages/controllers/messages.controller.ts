@@ -27,17 +27,18 @@ export class MessagesController {
         @Request() req: any,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return (null);
+        return (await this.messageService.getChannelMessages(channelId, username));
     }
 
-    @Get('channels/:channelId/message')
+    @Get('channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyChannelMessage(
         @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Param('messageId', ParseIdPipe) messageId: bigint,
         @Request() req: any,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return (null);
+        return (await this.messageService.getChannelMessage(channelId, username, messageId));
     }
 
     /* */
@@ -52,39 +53,42 @@ export class MessagesController {
         @Request() req: any,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return (null);
+        return (await this.messageService.createChannelMessage(channelId, username, createMessageDto));
     }
 
-    @Put('channels/:channelId/messages')
+    @Put('channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyChannelMessage(
         @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Param('messageId', ParseIdPipe) messageId: bigint,
         @Body(new ValidationPipe) replaceMessageDto: ReplaceMessageDto,
         @Request() req: any,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return (null);
+        return (await this.messageService.replaceChannelMessage(channelId, username, messageId, replaceMessageDto));
     }
 
-    @Patch('channels/:channelId/messages')
+    @Patch('channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyChannelMessage(
         @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Param('messageId', ParseIdPipe) messageId: bigint,
         @Body(new ValidationPipe) updateMessageDto: UpdateMessageDto,
         @Request() req: any,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return (null);
+        return (await this.messageService.updateChannelMessage(channelId, username, messageId, updateMessageDto));
     }
 
-    @Delete('channels/:channelId/messages')
+    @Delete('channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected and pass it's req.user
     async deleteMyChannelMessage(
         @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Param('messageId', ParseIdPipe) messageId: bigint,
         @Request() req: any,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return (null);
+        return (await this.messageService.deleteChannelMessage(channelId, username, messageId));
     }
 
     /* */
@@ -94,130 +98,62 @@ export class MessagesController {
     @Get('users/:username/channels/:channelId/messages')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getChannelMessages(
-        @Param('username', ParseUsernamePipe) username: bigint,
+        @Param('username', ParseUsernamePipe) username: string,
         @Param('channelId', ParseIdPipe) channelId: bigint,
     ) {
-        return (null);
+        return (await this.messageService.getChannelMessages(channelId, username));
     }
 
-    @Get('users/:username/channels/:channelId/message')
+    @Get('users/:username/channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getChannelMessage(
-        @Param('username', ParseUsernamePipe) username: bigint,
+        @Param('username', ParseUsernamePipe) username: string,
         @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Param('messageId', ParseIdPipe) messageId: bigint,
     ) {
-        return (null);
+        return (await this.messageService.getChannelMessage(channelId, username, messageId));
     }
 
     @Post('users/:username/channels/:channelId/messages')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async createChannelMessage(
-        @Param('username', ParseUsernamePipe) username: bigint,
+        @Param('username', ParseUsernamePipe) username: string,
         @Param('channelId', ParseIdPipe) channelId: bigint,
         @Body(new ValidationPipe) createMessageDto: CreateMessageDto,
     ) {
-        return (null);
+        return (await this.messageService.createChannelMessage(channelId, username, createMessageDto));
     }
 
-    @Put('users/:username/channels/:channelId/messages')
+    @Put('users/:username/channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceChannelMessage(
-        @Param('username', ParseUsernamePipe) username: bigint,
-        @Param('channelId', ParseIdPipe) channelId: bigint,
-        @Body(new ValidationPipe) replaceMessageDto: ReplaceMessageDto,
-    ) {
-        return (null);
-    }
-
-    @Patch('users/:username/channels/:channelId/messages')
-    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
-    async updateChannelMessage(
-        @Param('username', ParseUsernamePipe) username: bigint,
-        @Param('channelId', ParseIdPipe) channelId: bigint,
-        @Body(new ValidationPipe) updateMessageDto: UpdateMessageDto,
-    ) {
-        return (null);
-    }
-
-    @Delete('users/:username/channels/:channelId/messages')
-    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
-    async deleteChannelMessage(
-        @Param('username', ParseUsernamePipe) username: bigint,
-        @Param('channelId', ParseIdPipe) channelId: bigint,
-    ) {
-        return (null);
-    }
-
-
-
-
-
-
-    /*
-    @Get('channels/:channelId/messages')
-    async getChannelMessages(
-        @Param('channelId', ParseIdPipe) channelId: bigint,
-    ) {
-        // Should pass userId (if user is connected and passport validated or null)
-        // For this moment userId is passed as 1.
-        return (await this.messageService.getChannelMessages(BigInt(1), channelId));
-    }
-
-    @Get('channels/:channelId/messages/:messageId')
-    async getChannelMessage(
-        @Param('channelId', ParseIdPipe) channelId: bigint,
-        @Param('messageId', ParseIdPipe) messageId: bigint
-    ) {
-        // Should pass userId (if user is connected and passport validated or null)
-        // For this moment userId is passed as 1.
-        return (await this.messageService.getChannelMessage(BigInt(1), channelId, messageId));
-    }
-
-    //@UseGuards(AuthGuard('jwt'))
-    @Post('channels/:channelId/messages')
-    async createChannelMessage(
-        @Param('channelId', ParseIdPipe) channelId: bigint,
-        @Body(new ValidationPipe) createMessageDto: CreateMessageDto,
-    ) {
-        // Should pass userId (if user is connected and passport validated or null)
-        // For this moment userId is passed as 1.
-        return (await this.messageService.createChannelMessage(BigInt(1), channelId, createMessageDto));
-    }
-
-	//@UseGuards(AuthGuard('jwt'))
-    @Put('channels/:channelId/messages/:messageId')
-    async replaceChannelMessage(
+        @Param('username', ParseUsernamePipe) username: string,
         @Param('channelId', ParseIdPipe) channelId: bigint,
         @Param('messageId', ParseIdPipe) messageId: bigint,
         @Body(new ValidationPipe) replaceMessageDto: ReplaceMessageDto,
     ) {
-        // Should pass userId (if user is connected and passport validated or null)
-        // For this moment userId is passed as 1.
-        return (await this.messageService.replaceChannelMessage(BigInt(1), channelId, messageId, replaceMessageDto));
+        return (await this.messageService.replaceChannelMessage(channelId, username, messageId, replaceMessageDto));
     }
 
-	//@UseGuards(AuthGuard('jwt'))
-    @Patch('channels/:channelId/messages/:messageId')
+    @Patch('users/:username/channels/:channelId/messages/:messageId')
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateChannelMessage(
+        @Param('username', ParseUsernamePipe) username: string,
         @Param('channelId', ParseIdPipe) channelId: bigint,
         @Param('messageId', ParseIdPipe) messageId: bigint,
         @Body(new ValidationPipe) updateMessageDto: UpdateMessageDto,
     ) {
-        // Should pass userId (if user is connected and passport validated or null)
-        // For this moment userId is passed as 1.
-        return (await this.messageService.updateChannelMessage(BigInt(1), channelId, messageId, updateMessageDto));
+        return (await this.messageService.updateChannelMessage(channelId, username, messageId, updateMessageDto));
     }
 
-	//@UseGuards(AuthGuard('jwt'))
-    @Delete('channels/:channelId/messages/:messageId')
+    @Delete('users/:username/channels/:channelId/messages/:messageId')
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async deleteChannelMessage(
+        @Param('username', ParseUsernamePipe) username: string,
         @Param('channelId', ParseIdPipe) channelId: bigint,
         @Param('messageId', ParseIdPipe) messageId: bigint,
     ) {
-        // Should pass userId (if user is connected and passport validated or null)
-        // For this moment userId is passed as 1.
-        return (await this.messageService.deleteChannelMessage(BigInt(1), channelId, messageId));
+        return (await this.messageService.deleteChannelMessage(channelId, username, messageId));
     }
-    */
 
 }

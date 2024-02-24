@@ -6,7 +6,7 @@ import { User } from "src/users/entities/User.entity";
 import { UnauthorizedException } from "@nestjs/common";
 import { ChannelVisibility } from "../enums/channel-visibility.enum";
 import { ChannelMode } from "../enums/channel-mode.enum";
-import { ChannelRole } from "../enums/channel-role.enum";
+import { ChannelRole, compareChannelRoles } from "../enums/channel-role.enum";
 
 @Entity({ name: 'channels' })
 export class Channel {
@@ -18,7 +18,7 @@ export class Channel {
     name: string;
 
     @IsEnum(ChannelVisibility)
-    @Column({ type: 'enum', enum: ChannelVisibility, default: ChannelVisibility.PRIVATE })
+    @Column({ type: 'enum', enum: ChannelVisibility, default: ChannelVisibility.HIDDEN })
     visibility: ChannelVisibility;
 
     @IsEnum(ChannelMode)
@@ -79,29 +79,34 @@ export class Channel {
     /* Check channel accessibility */
 
     public getMember(username: string): ChannelMember {
-        return (this.members?.find((member) => member.user.username === username));
+        return (this.members.find((member) => member.user.username === username));
     }
 
     public isMember(username: string): boolean {
-        return (this.members?.some((member) => member.user.username === username));
+        if (!this.members) return (false);
+        return (this.members.some((member) => member.user.username === username));
     }
 
     public isInvited(username: string): boolean {
-        return (this.invitedUsers?.some((user) => user.username === username));
+        if (!this.invitedUsers) return (false);
+        return (this.invitedUsers.some((user) => user.username === username));
     }
 
     public isBanned(username: string): boolean {
-        return (this.bannedUsers?.some((user) => user.username === username));
+        if (!this.bannedUsers) return (false);
+        return (this.bannedUsers.some((user) => user.username === username));
     }
 
     public isMuted(username: string): boolean {
         const member = this.getMember(username);
-        return (member?.mute);   
+        if (!member) return (false);
+        return (member.mute);   
     }
 
     public isRankedEqualOrAbove(username: string, role: ChannelRole): boolean {
         const member = this.getMember(username);
-        return (member?.role >= role);
+        if (!member) return (false);
+        return (compareChannelRoles(member.role, role) >= 0);
     }
 
     /* Manage channel accessibility */
@@ -219,6 +224,8 @@ export class Channel {
         if (user.hasGlobalServerPrivileges()) return ;
 
         const isMember = this.isMember(user.username);
+
+        if (!isMember) throw new UnauthorizedException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot alter it`);
 
         if (!this.isRankedEqualOrAbove(user.username, ChannelRole.OWNER)) throw new UnauthorizedException(`User '${user.username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
     }

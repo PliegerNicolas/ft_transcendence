@@ -137,7 +137,7 @@ export class UsersService {
 
     /* Helper Functions */
 
-    public async findStriclyUsersByUsername(usernames: string[]): Promise<User[]> {
+    public async findStrictlyUsersByUsername(usernames: string[]): Promise<User[]> {
         if (usernames.length !== new Set(usernames).size) {
             const duplicateUsernames = usernames.filter((username, i) => usernames.indexOf(username) !== i);
             throw new BadRequestException(`Duplicate username${duplicateUsernames.length > 1 ? 's' : ''} given: ${duplicateUsernames.join(', ')}`);

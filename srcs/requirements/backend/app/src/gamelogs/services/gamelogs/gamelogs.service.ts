@@ -148,7 +148,7 @@ export class GamelogsService {
     private async setUserResultsWithUser(userResultsWithUsername: UserResultWithUsername[]): Promise<UserResultWithUser[]> {
         const usernames = userResultsWithUsername.map((userResult) => userResult.username);
 
-        const users = await this.userService.findStriclyUsersByUsername(usernames);
+        const users = await this.userService.findStrictlyUsersByUsername(usernames);
 
         const userMap = new  Map<string, User>();
         users.forEach((user) => userMap.set(user.username, user));
