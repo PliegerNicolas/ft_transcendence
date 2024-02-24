@@ -9,6 +9,7 @@ import { UpdateChannelDto } from '../dtos/UpdateChannel.dto';
 import { GetChannelDto } from '../dtos/GetChannel.dto';
 import { JoinChannelDto } from '../dtos/JoinChannel.dto';
 import { LeaveChannelDto } from '../dtos/LeaveChannel.dto';
+import { ManageChannelMembersDto } from '../dtos/ManageChannelAccess.dto';
 
 @Controller()
 export class ChannelsController {
@@ -102,6 +103,18 @@ export class ChannelsController {
         return (await this.channelService.leaveChannel(channelId, username, leaveChannelDto));
     }
 
+    @Patch('channels/:channelId/manage_access')
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
+    // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
+    async manageMyChannelAccess(
+        @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Body(new ValidationPipe) manageChannelAccessDto: ManageChannelMembersDto,
+        @Request() req: any,
+    ) {
+        const username = req.user ? req.user.username : undefined;
+        return (await this.channelService.manageChannelAccess(channelId, username, manageChannelAccessDto));
+    }
+
     @Delete('channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
@@ -185,6 +198,17 @@ export class ChannelsController {
         @Body(new ValidationPipe) leaveChannelDto: LeaveChannelDto,
     ) {
         return (await this.channelService.leaveChannel(channelId, username, leaveChannelDto));
+    }
+
+    @Patch('users/:username/channels/:channelId/manage_access')
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
+    // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
+    async manageChannelAccess(
+        @Param('username', ParseUsernamePipe) username: string,
+        @Param('channelId', ParseIdPipe) channelId: bigint,
+        @Body(new ValidationPipe) manageChannelAccessDto: ManageChannelMembersDto,
+    ) {
+        return (await this.channelService.manageChannelAccess(channelId, username, manageChannelAccessDto));
     }
 
     @Delete('users/:username/channels/:channelId')

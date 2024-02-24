@@ -1,3 +1,4 @@
+import { ManageChannelAccessAction } from "../dtos/ManageChannelAccess.dto";
 import { ChannelMode, ChannelVisibility } from "../entities/Channel.entity";
 
 export class GetChannelsQueryParam {
@@ -50,5 +51,12 @@ export type JoinChannelParams = {
 export type LeaveChannelParams = {
 
     password?: string;
+
+}
+
+export type ManageChannelParams = {
+
+    action: ManageChannelAccessAction;
+    userIds: bigint[];
 
 }

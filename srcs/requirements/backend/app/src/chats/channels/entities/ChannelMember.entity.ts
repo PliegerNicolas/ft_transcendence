@@ -5,9 +5,9 @@ import { Channel } from "./Channel.entity";
 import { Message } from "src/chats/messages/entities/Message.entity";
 
 export enum ChannelRole {
-    ADMIN = 'admin',
-    MODERATOR = 'moderator',
-    MEMBER = 'member',
+    OWNER = 2,
+    OPERATOR = 1,
+    MEMBER = 0,
 }
 
 @Entity({ name: 'channel_members' })

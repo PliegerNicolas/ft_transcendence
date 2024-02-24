@@ -4,7 +4,7 @@ import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, JoinTable
 import { ChannelMember, ChannelRole } from "./ChannelMember.entity";
 import { Exclude } from "class-transformer";
 import { GlobalServerPrivileges, User } from "src/users/entities/User.entity";
-import { UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 
 export enum ChannelVisibility {
     PUBLIC = 'public',
@@ -67,68 +67,110 @@ export class Channel {
     @BeforeUpdate()
     setupChannel(): void {
         this.updateMembersCount();
-        this.ensureAdminExists();
+        this.ensureOwnerExists();
     }
 
     private updateMembersCount(): void {
         this.membersCount = this.members ? this.members.length : 0;
     }
 
-    private ensureAdminExists(): void {
-        if (this.members.length === 0 || this.members.some((member) => member.role === ChannelRole.ADMIN)) return ;
-        let nextAdmin = this.members.find((member) => member.role === ChannelRole.MODERATOR);
-        if (!nextAdmin) nextAdmin = this.members[0];
-        nextAdmin.role = ChannelRole.ADMIN;
+    private ensureOwnerExists(): void {
+        if (!this.members || this.members.length === 0) return ;
+        else if (this.members.some((member) => member.role === ChannelRole.OWNER)) return ;
+
+        const nextOwner = this.members?.reduce((prevMember, currentMember) => {
+            return (prevMember.role < currentMember.role ? prevMember : currentMember);
+        }, this.members[0]);
+
+        nextOwner.role = ChannelRole.OWNER;
     }
 
-    // User status
+    /* Check channel accessibility */
+
+    public getMember(username: string): ChannelMember {
+        return (this.members?.find((member) => member.user.username === username));
+    }
 
     public isMember(username: string): boolean {
         return (this.members?.some((member) => member.user.username === username));
     }
 
     public isInvited(username: string): boolean {
-        return (this.invitedUsers?.some((user) => user.username === username)); 
+        return (this.invitedUsers?.some((user) => user.username === username));
     }
 
     public isBanned(username: string): boolean {
-        return (this.bannedUsers?.some((user) => user.username === username)); 
+        return (this.bannedUsers?.some((user) => user.username === username));
     }
 
-    // Role in Channel
-
-    public hasSuperiorRole(username: string, role: ChannelRole): boolean {
-        const member = this.members?.find((member) => member.user.username === username);
-        if (!member) return (false);
-        else return (member?.role < role);
+    public isMuted(username: string): boolean {
+        const member = this.getMember(username);
+        return (member?.mute);   
     }
 
-    public hasSuperiorOrEqualRole(username: string, role: ChannelRole): boolean {
-        const member = this.members?.find((member) => member.user.username === username);
-        if (!member) return (false);
-        else return (member?.role <= role);
+    public isRankedEqualOrAbove(username: string, role: ChannelRole): boolean {
+        const member = this.getMember(username);
+        return (member?.role >= role);
     }
 
-    // Channel permissions
+    /* Manage channel accessibility */
 
-    public canVisualise(username: string): void {
-        if (!username) {
-            if (this.visibility === ChannelVisibility.PUBLIC && this.mode === ChannelMode.OPEN) return;
-            throw new UnauthorizedException(`User 'undefined' isn't identified and Channel with ID ${this.id} isn't a Public and Open Channel`);
+    public invite(users: User[]): void {
+        this.invitedUsers = [...this.invitedUsers, ...users];
+    }
+
+    public ban(users: User[]): void {
+        this.bannedUsers = [...this.bannedUsers, ...users];
+    }
+
+    public kick(users: User[]): void {
+        // Not saved ???
+        this.members = this.members?.filter((member) => !users.includes(member.user));
+        this.invitedUsers = this.invitedUsers?.filter((user) => !users.includes(user));
+    }
+
+    public mute(users: User[]): void {
+        // Not saved ???
+        this.members?.forEach((member) => { if (users?.includes(member.user)) member.mute = true });
+    }
+
+    public uninvite(users: User[]): void {
+        // Not saved ???
+        this.invitedUsers = this.invitedUsers?.filter((user) => !users.includes(user));
+    }
+
+    public deban(users: User[]): void {
+        // Not saved ???
+        this.bannedUsers = this.bannedUsers?.filter((user) => !users.includes(user));
+        this.invitedUsers = this.invitedUsers?.filter((user) => !users.includes(user));
+    }
+
+    public unmute(users: User[]): void {
+        // Not saved ???
+        this.members?.forEach((member) => { if (users?.includes(member.user)) member.mute = false });
+    }
+
+    /* Channel permissions */
+
+    public validateAccess(user: User): void {
+        if (!user) {
+            if (this.visibility === ChannelVisibility.PUBLIC && this.mode === ChannelMode.OPEN) return ;
+            throw new UnauthorizedException(`User '{undefined}' isn't identified thus can only access Public and Open Channels.`);
         }
+        if (user.hasGlobalServerPrivileges()) return ;
 
-        const isBanned = this.isBanned(username);
-        const isInvited = this.isInvited(username);
-        const isMember = this.isMember(username);
+        const isMember = this.isMember(user.username);
+        const isInvited = this.isInvited(user.username);
+        const isBanned = this.isBanned(user.username);
 
-        if (isBanned) throw new UnauthorizedException(`User '${username}' is not permitted to visualise Channel with ID ${this.id}`);
+        if (isBanned) throw new UnauthorizedException(`User '${user.username}' isn't permitted to visualise Channel with ID ${this.id}`);
 
         switch(this.mode) {
             case (ChannelMode.OPEN):
                 return ;
             case (ChannelMode.INVITE_ONLY):
                 if (isInvited || isMember) return ;
-                throw new UnauthorizedException(`User '${username}' is neither member or invited to Channel with ID ${this.id}`);
+                throw new UnauthorizedException(`User '${user.username}' is neither member or invited to Channel with ID ${this.id}`);
             case (ChannelMode.PASSWORD_PROTECTED):
                 return ; // Externally check the password
             default:
@@ -136,22 +178,23 @@ export class Channel {
         }
     }
 
-    public canJoin(username: string): boolean {
-        if (!username) throw new UnauthorizedException(`User '{undefined}' isn't identified and cannot join Channel with ID ${this.id}`);
+    public validateJoin(user: User): void {
+        if (!user) throw new UnauthorizedException(`User '{undefined}' isn't identified thus cannot join Channel with ID ${this.id}`);
+        if (user.hasGlobalServerPrivileges()) return ;
 
-        const isBanned = this.isBanned(username);
-        const isInvited = this.isInvited(username);
-        const isMember = this.isMember(username);
+        const isMember = this.isMember(user.username);
+        const isInvited = this.isInvited(user.username);
+        const isBanned = this.isBanned(user.username);
 
-        if (isBanned) throw new UnauthorizedException(`User '${username}' is not permitted to join Channel with ID ${this.id}`);
-        else if (isMember) throw new UnauthorizedException(`User '${username}' is already member of Channel with ID ${this.id}`);
+        if (isBanned) throw new UnauthorizedException(`User '${user.username}' is not permitted to join Channel with ID ${this.id}`);
+        if (isMember) throw new UnauthorizedException(`User '${user.username}' is already member of Channel with ID ${this.id}`);
 
         switch(this.mode) {
             case (ChannelMode.OPEN):
                 return ;
             case (ChannelMode.INVITE_ONLY):
                 if (isInvited) return ;
-                throw new UnauthorizedException(`User '${username}' hasn't been invited to Channel with ID ${this.id}`);
+                throw new UnauthorizedException(`User '${user.username}' hasn't been invited to Channel with ID ${this.id}`);
             case (ChannelMode.PASSWORD_PROTECTED):
                 return ; // Externally check the password
             default:
@@ -159,32 +202,43 @@ export class Channel {
         }
     }
 
-    public canLeave(username: string): void {
-        if (!username) throw new UnauthorizedException(`User '{undefined}' isn't identified and cannot leave Channel with ID ${this.id}`);
+    public validateLeave(user: User): void {
+        if (!user) throw new UnauthorizedException(`User '{undefined}' isn't identified thus cannot leave Channel with ID ${this.id}`);
+        if (user.hasGlobalServerPrivileges()) return ;
 
-        const isMember = this.isMember(username);
+        const isMember = this.isMember(user.username);
 
-        if (!isMember) throw new UnauthorizedException(`User '${username}' isn't member of Channel with ID ${this.id}`);
+        if (!isMember) throw new UnauthorizedException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot leave it`);
     }
 
-    public canEditOrUpdate(username: string): void {
-        if (!username) throw new UnauthorizedException(`User '{undefined}' isn't identified and cannot alter Channel with ID ${this.id}`);
-        else if (!this.isMember(username)) throw new UnauthorizedException(`User '${username}' isn't member of Channel with ID ${this.id} and cannot alter it`);
+    public validateEditOrUpdate(user: User): void {
+        if (!user) throw new UnauthorizedException(`User '{undefined}' isn't identified thus cannot alter Channel with ID ${this.id}`);
+        if (user.hasGlobalServerPrivileges()) return ;
 
-        if (!this.hasSuperiorOrEqualRole(username, ChannelRole.MODERATOR)) throw new UnauthorizedException(`User '${username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
+        const isMember = this.isMember(user.username);
+
+        if (!isMember) throw new UnauthorizedException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot alter it`);
+
+        if (!this.isRankedEqualOrAbove(user.username, ChannelRole.OPERATOR)) throw new UnauthorizedException(`User '${user.username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
     }
 
-    public canWrite(username: string): void {
-        if (!username) throw new UnauthorizedException(`User '{undefined}' isn't identified and cannot write in Channel with ID ${this.id}`);
+    public validateDelete(user: User): void {
+        if (!user) throw new UnauthorizedException(`User '{undefined}' isn't identified thus cannot delete Channel with ID ${this.id}`);
+        if (user.hasGlobalServerPrivileges()) return ;
 
-        if (!this.isMember(username)) throw new UnauthorizedException(`User '${username}' isn't member of Channel with ID ${this.id} and cannot write in it`);
+        const isMember = this.isMember(user.username);
 
-        // check if muted. Not set yet.
+        if (!this.isRankedEqualOrAbove(user.username, ChannelRole.OWNER)) throw new UnauthorizedException(`User '${user.username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
     }
 
-    public canDelete(username: string): void {
-        if (!username) throw new UnauthorizedException(`User '{undefined}' isn't identified and cannot write in Channel with ID ${this.id}`);
-        if (!this.hasSuperiorOrEqualRole(username, ChannelRole.ADMIN)) throw new UnauthorizedException(`User '${username}' hasn't got enough permissions to delete Channel with ID ${this.id}`);
+    public validateWrite(user: User): void {
+        if (!user) throw new UnauthorizedException(`User '{undefined}' isn't identified thus cannot write in Channel with ID ${this.id}`);
+        if (user.hasGlobalServerPrivileges()) return ;
+
+        const isMember = this.isMember(user.username);
+
+        if (!isMember) throw new UnauthorizedException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot write in it`);
+        if (this.isMuted(user.username)) throw new UnauthorizedException(`User '${user.username}' is muted in Channel with ID ${this.id} thus cannot write in it`);
     }
 
 }

@@ -8,8 +8,8 @@ import { Relationship } from "src/relationships/entities/Relationship.entity";
 import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 
 export enum GlobalServerPrivileges {
-    OPERATOR = 'operator',
-    USER = 'user',
+    OPERATOR = 1,
+    USER = 0,
 }
 
 @Entity({ name: 'users' })
