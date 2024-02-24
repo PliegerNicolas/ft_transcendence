@@ -1,6 +1,6 @@
 import { IsArray, IsEnum, IsNotEmpty, ValidateNested } from "class-validator";
 import { GameType } from "../entities/Gamelog.entity";
-import { UserResult } from "./UserResult.dto";
+import { UserResultWithUsername } from "./UserResult.dto";
 import { Transform, Type } from "class-transformer";
 
 export class ReplaceGamelogDto {
@@ -8,9 +8,9 @@ export class ReplaceGamelogDto {
     @IsNotEmpty()
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => UserResult)
-    //@Transform(({ value }) => value.sort((a: UserResult, b: UserResult) => a.id - b.id))
-    userResults: UserResult[];
+    @Type(() => UserResultWithUsername)
+    @Transform(({ value }) => value.sort((a: UserResultWithUsername, b: UserResultWithUsername) => a.username.localeCompare(b.username)))
+    userResults: UserResultWithUsername[];
 
     @IsNotEmpty()
     @IsEnum(GameType, { message: 'Invalid game type' })

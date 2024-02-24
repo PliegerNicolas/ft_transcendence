@@ -1,9 +1,12 @@
 import { Exclude } from "class-transformer";
+import { IsEnum } from "class-validator";
+import { Channel } from "src/chats/channels/entities/Channel.entity";
 import { ChannelMember } from "src/chats/channels/entities/ChannelMember.entity";
 import { GamelogToUser } from "src/gamelogs/entities/GamelogToUser.entity";
 import { Profile } from "src/profiles/entities/Profile.entity";
 import { Relationship } from "src/relationships/entities/Relationship.entity";
-import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
+import { GlobalServerPrivileges, compareGlobalServerPrivileges } from "../enums/global-server-privileges.enum";
 
 @Entity({ name: 'users' })
 @Unique(['email', 'username'])
@@ -15,15 +18,20 @@ export class User {
     @Column({ type: 'bigint', unique: true })
     oauthId: bigint;
 
-    @Exclude()
+    @Exclude() // Exclude ?
     @Column()
     email: string;
 
     @Column({ unique: true, length: 25 })
     username: string;
 
-	@Column({nullable: true})
-	twoFactorAuthSecret? : string;
+    //@Exclude() // Exclude ?
+    @IsEnum(GlobalServerPrivileges)
+    @Column({ type: 'enum', enum: GlobalServerPrivileges, default: GlobalServerPrivileges.USER })
+    globalServerPrivileges: GlobalServerPrivileges;
+
+    @Column({nullable: true})
+    twoFactorAuthSecret: string;
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
@@ -49,15 +57,25 @@ export class User {
     @OneToMany(() => GamelogToUser, (userToGamelogs) => userToGamelogs.user)
     userToGamelogs?: GamelogToUser[];
 
-    /* Chat */
+    /* Chats */
 
     @OneToMany(() => ChannelMember, (member) => member.user)
     channelMembers?: ChannelMember[];
 
+    @ManyToMany(() => Channel, (channel) => channel.invitedUsers, { onDelete: 'CASCADE' })
+    channelsInvitedTo?: Channel[];
+
+    @ManyToMany(() => Channel, (channel) => channel.bannedUsers, { onDelete: 'CASCADE' })
+    channelsBannedFrom?: Channel[];
+
     /* Helper Function */
 
-    getRelationships(): Relationship[] {
+    public getRelationships(): Relationship[] {
         return ([...this.relationships1, ...this.relationships2]);
+    }
+
+    public hasGlobalServerPrivileges(): boolean {
+        return (compareGlobalServerPrivileges(this.globalServerPrivileges, GlobalServerPrivileges.OPERATOR) >= 0);
     }
 
 }

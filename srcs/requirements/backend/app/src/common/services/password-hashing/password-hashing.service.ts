@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs'
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class PasswordHashingService {
 
     private readonly saltRounds: number = process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS) : 10;
 
-    // Random crashing ???
     async hashPassword(password: string): Promise<string> {
-        return (await bcrypt.hash(password, this.saltRounds));
+        if (!password) return (null);
+        console.log(password);
+        console.log(this.saltRounds);
+        return (await bcrypt.hash(password, 12));
     }
 
-    async comparePasswords(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
+    async comparePasswords(plainTextPassword: string = undefined, hashedPassword: string): Promise<boolean> {
+        if (!plainTextPassword) return (false);
         return (await bcrypt.compare(plainTextPassword, hashedPassword));
     }
 
