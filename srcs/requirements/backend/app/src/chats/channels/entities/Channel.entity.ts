@@ -1,21 +1,12 @@
-import { IsEnum, isIn } from "class-validator";
+import { IsEnum } from "class-validator";
 import { Message } from "src/chats/messages/entities/Message.entity";
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { ChannelMember, ChannelRole } from "./ChannelMember.entity";
-import { Exclude } from "class-transformer";
-import { GlobalServerPrivileges, User } from "src/users/entities/User.entity";
-import { BadRequestException, UnauthorizedException } from "@nestjs/common";
-
-export enum ChannelVisibility {
-    PUBLIC = 'public',
-    PRIVATE = 'private',
-}
-
-export enum ChannelMode {
-    OPEN = 'open',
-    INVITE_ONLY = 'invite_only',
-    PASSWORD_PROTECTED = 'password_protected',
-}
+import { ChannelMember } from "./ChannelMember.entity";
+import { User } from "src/users/entities/User.entity";
+import { UnauthorizedException } from "@nestjs/common";
+import { ChannelVisibility } from "../enums/channel-visibility.enum";
+import { ChannelMode } from "../enums/channel-mode.enum";
+import { ChannelRole } from "../enums/channel-role.enum";
 
 @Entity({ name: 'channels' })
 export class Channel {

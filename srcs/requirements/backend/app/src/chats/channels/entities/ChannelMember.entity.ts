@@ -3,12 +3,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 import { User } from "src/users/entities/User.entity";
 import { Channel } from "./Channel.entity";
 import { Message } from "src/chats/messages/entities/Message.entity";
-
-export enum ChannelRole {
-    OWNER = 2,
-    OPERATOR = 1,
-    MEMBER = 0,
-}
+import { ChannelRole } from "../enums/channel-role.enum";
 
 @Entity({ name: 'channel_members' })
 export class ChannelMember {

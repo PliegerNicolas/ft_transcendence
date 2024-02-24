@@ -1,5 +1,6 @@
-import { ChannelAccessAction } from "../dtos/ChannelAccess.dto";
-import { ChannelMode, ChannelVisibility } from "../entities/Channel.entity";
+import { ChannelAccessAction } from "../enums/channel-access-action.enum";
+import { ChannelMode } from "../enums/channel-mode.enum";
+import { ChannelVisibility } from "../enums/channel-visibility.enum";
 
 export class GetChannelsQueryParam {
 

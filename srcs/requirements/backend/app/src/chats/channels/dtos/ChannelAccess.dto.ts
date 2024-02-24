@@ -1,14 +1,5 @@
 import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsString } from "class-validator";
-
-export enum ChannelAccessAction {
-    KICK = 'kick',
-    BAN = 'ban',
-    DEBAN = 'deban',
-    INVITE = 'invite',
-    UNINVITE = 'uninvite',
-    MUTE = 'mute',
-    UNMUTE = 'unmute',
-}
+import { ChannelAccessAction } from "../enums/channel-access-action.enum";
 
 export class ChannelAccessDto {
 

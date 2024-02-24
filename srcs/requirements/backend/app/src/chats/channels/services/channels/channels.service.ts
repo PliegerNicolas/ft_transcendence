@@ -1,13 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Channel, ChannelMode, ChannelVisibility } from '../../entities/Channel.entity';
 import { Equal, Repository } from 'typeorm';
 import { ChannelAccessParams, CreateChannelParams, GetChannelParams, GetChannelsQueryParam, JoinChannelParams, LeaveChannelParams, ReplaceChannelParams, UpdateChannelParams } from '../../types/channel.type';
 import { User } from 'src/users/entities/User.entity';
-import { ChannelRole } from '../../entities/ChannelMember.entity';
 import { PasswordHashingService } from 'src/common/services/password-hashing/password-hashing.service';
-import { ChannelAccessAction } from '../../dtos/ChannelAccess.dto';
 import { UsersService } from 'src/users/services/users/users.service';
+import { Channel } from '../../entities/Channel.entity';
+import { ChannelVisibility } from '../../enums/channel-visibility.enum';
+import { ChannelMode } from '../../enums/channel-mode.enum';
+import { ChannelAccessAction } from '../../enums/channel-access-action.enum';
+import { ChannelRole } from '../../enums/channel-role.enum';
 
 @Injectable()
 export class ChannelsService {

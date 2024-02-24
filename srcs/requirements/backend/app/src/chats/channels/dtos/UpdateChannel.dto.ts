@@ -1,7 +1,8 @@
 import { IsEnum, IsOptional, IsString } from "class-validator";
-import { ChannelMode, ChannelVisibility } from "../entities/Channel.entity";
 import { Transform } from "class-transformer";
 import { IsValidChannelPasswordWithMode } from "src/common/validators/is-valid-channel-password-with-mode";
+import { ChannelVisibility } from "../enums/channel-visibility.enum";
+import { ChannelMode } from "../enums/channel-mode.enum";
 
 export class UpdateChannelDto {
 

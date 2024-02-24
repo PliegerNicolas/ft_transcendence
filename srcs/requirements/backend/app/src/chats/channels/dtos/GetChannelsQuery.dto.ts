@@ -1,5 +1,6 @@
 import { IsEnum, IsOptional, IsString } from "class-validator";
-import { ChannelMode, ChannelVisibility } from "../entities/Channel.entity";
+import { ChannelVisibility } from "../enums/channel-visibility.enum";
+import { ChannelMode } from "../enums/channel-mode.enum";
 
 export class GetChannelsQueryDto {
 

@@ -5,12 +5,8 @@ import { ChannelMember } from "src/chats/channels/entities/ChannelMember.entity"
 import { GamelogToUser } from "src/gamelogs/entities/GamelogToUser.entity";
 import { Profile } from "src/profiles/entities/Profile.entity";
 import { Relationship } from "src/relationships/entities/Relationship.entity";
-import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
-
-export enum GlobalServerPrivileges {
-    OPERATOR = 1,
-    USER = 0,
-}
+import { Column, CreateDateColumn, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
+import { GlobalServerPrivileges } from "../enums/global-server-privileges.enum";
 
 @Entity({ name: 'users' })
 @Unique(['email', 'username'])
@@ -29,7 +25,7 @@ export class User {
     @Column({ unique: true, length: 25 })
     username: string;
 
-    @Exclude() // Exclude ?
+    //@Exclude() // Exclude ?
     @IsEnum(GlobalServerPrivileges)
     @Column({ type: 'enum', enum: GlobalServerPrivileges, default: GlobalServerPrivileges.USER })
     globalServerPrivileges: GlobalServerPrivileges;
