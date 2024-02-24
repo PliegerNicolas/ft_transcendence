@@ -5,6 +5,7 @@ import { Gamelog } from 'src/gamelogs/entities/Gamelog.entity';
 import { GameResult, GamelogToUser } from 'src/gamelogs/entities/GamelogToUser.entity';
 import { CreateGamelogParams, ReplaceGamelogParams, UpdateGamelogParams } from 'src/gamelogs/types/gamelogs.type';
 import { User } from 'src/users/entities/User.entity';
+import { UsersService } from 'src/users/services/users/users.service';
 import { Equal, In, Repository } from 'typeorm';
 
 @Injectable()
@@ -17,6 +18,8 @@ export class GamelogsService {
         private readonly gamelogToUserRepository: Repository<GamelogToUser>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+
+        private readonly userService: UsersService,
     ) {}
 
     async getAllGamelogs(): Promise<Gamelog[]> {
@@ -145,19 +148,7 @@ export class GamelogsService {
     private async setUserResultsWithUser(userResultsWithUsername: UserResultWithUsername[]): Promise<UserResultWithUser[]> {
         const usernames = userResultsWithUsername.map((userResult) => userResult.username);
 
-        if (usernames.length !== new Set(usernames).size) {
-            const duplicateUsernames = usernames.filter((username, i) => usernames.indexOf(username) !== i);
-            throw new BadRequestException(`Duplicate username${duplicateUsernames.length > 1 ? 's' : ''} given: ${duplicateUsernames.join(', ')}`);
-        }
-
-        const users = await this.userRepository.find({
-            where: { username: In(usernames) },
-        });
-
-        if (users.length !== usernames.length) {
-            const missingUsernames = usernames.filter((username) => !users.some((user) => user.username === username));
-            throw new BadRequestException(`User${missingUsernames.length > 1 ? 's weren\'t' : ' wasn\'t'} found: ${missingUsernames.join(', ')}`);
-        }
+        const users = await this.userService.findStriclyUsersByUsername(usernames);
 
         const userMap = new  Map<string, User>();
         users.forEach((user) => userMap.set(user.username, user));

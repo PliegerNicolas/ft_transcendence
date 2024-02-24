@@ -7,6 +7,7 @@ import { User } from 'src/users/entities/User.entity';
 import { ChannelRole } from '../../entities/ChannelMember.entity';
 import { PasswordHashingService } from 'src/common/services/password-hashing/password-hashing.service';
 import { ChannelAccessAction } from '../../dtos/ChannelAccess.dto';
+import { UsersService } from 'src/users/services/users/users.service';
 
 @Injectable()
 export class ChannelsService {
@@ -17,6 +18,7 @@ export class ChannelsService {
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
 
+        private readonly userService: UsersService,
         private readonly passwordHashingService: PasswordHashingService,
     ) {}
 
@@ -206,21 +208,7 @@ export class ChannelsService {
         const usernames = channelAccessDetails.usernames;
         delete channelAccessDetails.usernames;
 
-        console.log(usernames);
-
-        if (usernames.length !== new Set(usernames).size) {
-            const duplicateUsernames = usernames.filter((username, i) => usernames.indexOf(username) !== i);
-            throw new BadRequestException(`Duplicate username${duplicateUsernames.length > 1 ? 's' : ''} given: ${duplicateUsernames.join(', ')}`);
-        }
-
-        const users = await this.userRepository.find({
-            where: { username: In(usernames) },
-        });
-
-        if (users.length !== usernames.length) {
-            const missingUsernames = usernames.filter((username) => !users.some((user) => user.username === username));
-            throw new BadRequestException(`User${missingUsernames.length > 1 ? 's weren\'t' : ' wasn\'t'} found: ${missingUsernames.join(', ')}`);
-        }
+        const users = await this.userService.findStriclyUsersByUsername(usernames);
 
         switch (channelAccessDetails.action) {
             case (ChannelAccessAction.BAN):
@@ -250,5 +238,7 @@ export class ChannelsService {
 
         return (await this.channelRepository.save(channel));
     }
+
+    /* Helper Functions */
 
 }

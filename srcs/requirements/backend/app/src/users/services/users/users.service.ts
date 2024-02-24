@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/User.entity';
 import { CreateUserParams, ReplaceUserParams, UpdateUserParams } from 'src/users/types/user.type';
-import { Equal, Repository } from 'typeorm';
+import { Equal, In, Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
@@ -133,6 +133,26 @@ export class UsersService {
 
         await this.userRepository.remove(user);
         return (`User '${username}' successfully deleted`);
+    }
+
+    /* Helper Functions */
+
+    public async findStriclyUsersByUsername(usernames: string[]): Promise<User[]> {
+        if (usernames.length !== new Set(usernames).size) {
+            const duplicateUsernames = usernames.filter((username, i) => usernames.indexOf(username) !== i);
+            throw new BadRequestException(`Duplicate username${duplicateUsernames.length > 1 ? 's' : ''} given: ${duplicateUsernames.join(', ')}`);
+        }
+
+        const users = await this.userRepository.find({
+            where: { username: In(usernames) },
+        });
+
+        if (users.length !== usernames.length) {
+            const missingUsernames = usernames.filter((username) => !users.some((user) => user.username === username));
+            throw new BadRequestException(`User${missingUsernames.length > 1 ? 's weren\'t' : ' wasn\'t'} found: ${missingUsernames.join(', ')}`);
+        }
+
+        return (users);
     }
 
 }
