@@ -6,7 +6,7 @@ import { UserType, UserPostType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
 
-import { useInvalidate, stopOnHttp } from "../utils/utils.ts";
+import { useInvalidate, stopOnHttp, randomString } from "../utils/utils.ts";
 
 import close from "../assets/close.svg";
 
@@ -57,12 +57,8 @@ export default function Sandbox()
 		onError: error => context.addNotif({content: error.message}),
 	});
 
-	function random_id() {
-		return (Math.random().toString().slice(-10, -1));
-	}
-
 	function genUser() {
-		const uid = random_id();
+		const uid = "u_" + randomString(6);
 
 		return {
 			username: uid,
@@ -71,7 +67,7 @@ export default function Sandbox()
 				firstName: "Mayeul_" + uid,
 				lastName: "Laneyrie_" + uid
 			},
-			oauthId: uid
+			oauthId: 100000 + Math.floor(1000000 * Math.random())
 		};
 	}
 
@@ -81,33 +77,36 @@ export default function Sandbox()
 			<section>
 				<h3>Global context:</h3>
 				<div className="genericList Sandbox__ContextList">
-					<div className="Sandbox__ContextItem">
+					<div className="Sandbox__Item">
 						<div>Logged</div>
 						<div>{context.logged ? "Yes" : "No"}</div>
 					</div>
-					<div className="Sandbox__ContextItem">
+					<div className="Sandbox__Item">
 						<div>Token</div>
 						<div>{context.token}</div>
 					</div>
 				</div>
 				<h4>All channels:</h4>
-				<button onClick={() => postChan.mutate(random_id())}>
-					Add new chan
+				<button onClick={() => postChan.mutate("c_" + randomString(6))}>
+					Add a chan
+				</button>
+				<button onClick={() => invalidate(["allChans"])}>
+					Reload
 				</button>
 				<hr />
 				{
 					getChans?.isSuccess &&
 					<div className="genericList">
-					<div className="Sandbox__ContextItem genericListHead">
+					<div className="Sandbox__Item genericListHead">
 						<div>ID</div>
 						<div>NAME</div>
 					</div>
 					{
 						getChans.data.map((chan: {id: number, name: string}) =>
-							<div key={chan.id} className="Sandbox__ContextItem">
-								<div>#{chan.id}</div>
+							<div key={chan.id} className="Sandbox__Item">
+								<div>{chan.id}</div>
 								<div>
-									<Link to={"/chattest/" + chan.id}>
+									<Link to={"/chat/" + chan.id}>
 										<span>{chan.name}</span>
 									</Link>
 								</div>
@@ -116,7 +115,6 @@ export default function Sandbox()
 										<img src={close} alt="delete"/>
 									</button>
 								</div>
-
 							</div>
 						)
 					}
@@ -132,18 +130,12 @@ export default function Sandbox()
 					>
 						Add a user
 					</button>
-					<button
-						disabled={!getUsers.isSuccess || !getUsers.data.length}
-						onClick={() => delUser.mutate(getUsers.data.pop().id)}
-					>
-						Delete a user
-					</button>
 					<button onClick={() => invalidate(["users"])}>
 						Reload
 					</button>
 				</div>
 				<hr />
-				<UserListRender query={getUsers}/>
+				<UserListRender query={getUsers} del={delUser.mutate} />
 			</section>
 		</main>
 	);
@@ -152,43 +144,50 @@ export default function Sandbox()
 // <UserListRender /> ==========================================================
 
 function UserListRender(
-	{query}: {query: UseQueryResult<any, Error>}
+	{query, del}: {query: UseQueryResult<any, Error>, del: Function}
 )
 {
-	return (
+	if (query.isPending) return (
 		query.isPending &&
 		<div className="genericList">
 			<div><Spinner /></div>
-		</div> ||
+		</div>
+	);
 
-		query.isError &&
+	if (query.isError) return (
 		<div>
 			<span className="error-msg">
 				Failed to load user list: {query.error?.message}
 			</span><br />
-		</div> ||
+		</div>
+	);
 
-		query.isSuccess &&
+	console.log(query.data);
+
+	return (
 		<div className="Sandbox__Scrollable">
 			<div className="genericList">
-			<div className="Sandbox__UserItem genericListHead">
+			<div className="Sandbox__Item genericListHead">
 				<div>ID</div>
 				<div>USERNAME</div>
-				<div>MAIL</div>
 			</div>
 			{
 				!query.data?.length ?
 				<div><div>No user...</div></div> :
 				query.data?.map((user: UserType) =>
-					<Link
-						key={user.id}
-						to={"/user/" + user.username}
-						className="Sandbox__UserItem clickable"
-					>
-						<div>{"#" + user.id}</div>
-						<div>{user.username}</div>
-						<div>{user.email}</div>
-					</Link>
+					<div key={user.id} className="Sandbox__Item">
+						<div>{user.id}</div>
+						<div>
+							<Link to={"/user/" + user.username}>
+								<span>{user.username}</span>
+							</Link>
+						</div>
+						<div>
+							<button className="deleteChan" onClick={() => del(user.username)}>
+								<img src={close} alt="delete"/>
+							</button>
+						</div>
+					</div>
 				)
 			}
 			</div>

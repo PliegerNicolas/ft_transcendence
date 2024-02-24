@@ -11,17 +11,22 @@ export class JwtStrategy extends PassportStrategy(Strategy){
 		super({
 			jwtFromRequest : ExtractJwt.fromHeader("authorization"),
 			secretOrKey : process.env.API_SECRET ,
-			ignoreExpiration : true
+			ignoreExpiration : false
 		});
 	}
 
 	async validate(payload : any) : Promise<any>{
 		// console.log('test')
 		// console.log((await this.authService.checkUser(payload.oauth_id)).users.id)
-		if ((await this.authService.checkUser(payload.oauth_id)).users.id != payload.user_id)
+		const users = (await this.authService.checkUser(payload.oauth_id)).users
+		if (users == null)
 		{
 			throw new UnauthorizedException();
 		}
-		return {id: payload.user_id};
+		if (users.id != payload.user_id)
+		{
+			throw new UnauthorizedException();
+		}
+		return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
 	}
 }

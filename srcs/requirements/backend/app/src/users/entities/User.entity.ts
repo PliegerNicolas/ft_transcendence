@@ -30,6 +30,9 @@ export class User {
     @Column({ type: 'enum', enum: GlobalServerPrivileges, default: GlobalServerPrivileges.USER })
     globalServerPrivileges: GlobalServerPrivileges;
 
+    @Column({nullable: true})
+    twoFactorAuthSecret: string;
+
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
 

@@ -650,37 +650,3 @@
 	background: none;
 	opacity: .7;
 }
-
-/*
-** Popup =======================================================================
-*/
-
-.Popup {
-	position: absolute;
-	background: #000a;
-	top: 0; bottom: 0; left: 0; right: 0;
-	z-index: 1000;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.DeletePopup {
-	border: 1px solid var(--bg-color-5);
-	border-radius: 7px;
-	padding: 12px;
-	padding-top: 0;
-	margin: 48px;
-	background: var(--bg-color-2);
-}
-
-.DeletePopup__Notice {
-	margin-bottom: 20px;
-	font-size: .92rem;
-	font-style: italic;
-}
-
-.DeletePopup__Buttons {
-	display: flex;
-	justify-content: space-between;
-}

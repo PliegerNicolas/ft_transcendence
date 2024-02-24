@@ -1,9 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { io } from 'socket.io-client';
 
-/*import { MyContext } from "../../utils/contexts.ts";
-import { useInvalidate, stopOnHttp } from "../../utils/utils.ts";
-import { UseQueryResult, useQuery, useMutation } from "@tanstack/react-query";*/
+import { useInvalidate } from "../../utils/utils.ts";
+import { useMutation } from "@tanstack/react-query";
+import { MyContext } from "../../utils/contexts.ts";
+import { GameResult, GameType, GamelogPostType } from "../../utils/types.ts"
 
 import "../../styles/play.css";
 
@@ -54,6 +55,7 @@ const OnlineGame = () => {
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const [gameOver, setGameOver] = useState(false);
+	const [sentLogs, setSentLogs] = useState(false);
 
 	const [inQueue, setInQueue] = useState(false);
 	const [gameReady, setGameReady] = useState(false);
@@ -64,18 +66,20 @@ const OnlineGame = () => {
 	const [ballColor, setBallColor] = useState('#fff');
   
 	const destroySocketListeners = () => {
-		socket.off('createdLobby');
-		socket.off('userJoinedLobby');
-		socket.off('userLeftLobby');
-		socket.off('joinedLobby');
-		socket.off('pausedGame');
+		socket.off('userJoinedSocket');
+		socket.off('userLeftSocket');
+		socket.off('leaveLobby');
+		socket.off('gameFound');
+		socket.off('gameReady');
 		socket.off('startedGame');
 		socket.off('updateGame');
-		socket.off('updateScore');
 		socket.off('gameOver');
 	}
 
 	useEffect(() => {
+
+// Draw Functions ==============================================================================================================	
+
 		const gameCanvas = canvasRef.current;
 		const gameContext = gameCanvas?.getContext('2d');
 		
@@ -180,7 +184,8 @@ const OnlineGame = () => {
 			}, 1000);
 		}
 
-		//Create socket listeners
+// Socket Listeners ==============================================================================================================
+		
 		if (socket) {
 			socket.on('userJoinedSocket', (newUserId: string) => {
 				console.log('New user connected:', newUserId);
@@ -188,8 +193,13 @@ const OnlineGame = () => {
 			socket.on('userLeftSocket', (userId: string) => {
 				console.log('User disconnected:', userId);
 				if (userId === oppId) {
+					console.log('opponent left lobby');
 					socket.emit('opponentLeft', {userId, lobby});
 					setOppId('');
+					if (gameOver === true) {
+						setLobby('');
+						setGameReady(false);
+					}
 				}
 			});
 			socket.on('leaveLobby', () => {
@@ -202,6 +212,7 @@ const OnlineGame = () => {
 				setLobby(lobby_id);
 				setOppId(opp_id);
 				setPlayerNumber(player_number);
+				setInQueue(false);
 			});
 			socket.on('gameReady', () => {
 				setGameReady(true);
@@ -210,15 +221,44 @@ const OnlineGame = () => {
 				drawTimer();
 				console.log('Start game');
 				setGameOver(false);
+				setSentLogs(false);
 			});
 			socket.on('updateGame', (new_gameState: InputPayloads) => {
 				if (gameContext && !gameOver)
 					requestAnimationFrame(() => drawGame(new_gameState));
 			});
-			socket.on('gameOver', (new_gameState: InputPayloads) => {
+			socket.on('gameOver', (new_gameState: InputPayloads, player1Name: string, player2Name: string) => {
+				console.log('game is over');
 				setGameOver(true);
-				requestAnimationFrame(() => drawGame(new_gameState));
+				if (gameContext)
+					requestAnimationFrame(() => drawGame(new_gameState));
+				if (sentLogs === false && playerNumber === 1 && new_gameState.score.player1 === MAX_SCORE) {
+					setSentLogs(true);
+					postGamelog.mutate({
+						userResults: [
+							{ username: player1Name, result: GameResult.VICTORY },
+							{ username: player2Name, result: GameResult.DEFEAT }
+						],
+						gameType: GameType.PONG
+					});
+					socket.emit('sentLogs', lobby);
+				}
+				else if (sentLogs === false && playerNumber === 2 && new_gameState.score.player2 === MAX_SCORE) {
+					setSentLogs(true);
+					postGamelog.mutate({
+						userResults: [
+							{ username: player1Name, result: GameResult.DEFEAT },
+							{ username: player2Name, result: GameResult.VICTORY }
+						],
+						gameType: GameType.PONG
+					});
+					socket.emit('sentLogs', lobby);
+				}
 				setOppId('');
+			});
+			socket.on('drawEndGame', (new_gameState: InputPayloads) => {
+				if (gameContext)
+					requestAnimationFrame(() => drawGame(new_gameState));
 			});
 		}
 		
@@ -231,10 +271,12 @@ const OnlineGame = () => {
 			if (socket)
 				destroySocketListeners();
 		};
-	}, [[gameReady]]);
+	}, [[]]);
+
+// Handlers ==============================================================================================================
 
 	const keyDownHandler = (event: KeyboardEvent) => {
-		if (event.key === 'w' || event.key === 's') {
+		if (event.key === 'w' || event.key === 's' || event.key === 'ArrowUp' || event.key === 'ArrowDown') {
 			const key = event.key;
 			socket.emit('keyDown', {key, lobby});
 			event.preventDefault();
@@ -242,7 +284,7 @@ const OnlineGame = () => {
 	}
 
 	const keyUpHandler = (event: KeyboardEvent) => {
-		if (event.key === 'w' || event.key === 's') {
+		if (event.key === 'w' || event.key === 's' || event.key === 'ArrowUp' || event.key === 'ArrowDown') {
 			const key = event.key;
 			socket.emit('keyUp', {key, lobby});
 			event.preventDefault();
@@ -250,7 +292,10 @@ const OnlineGame = () => {
 	}
 
 	const readyCheckHandler = () => {
-		socket.emit('ready', {lobby, playerNumber});
+		if (playerNumber === 1)
+			socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: 'Maëvo'});
+		else if (playerNumber === 2)
+			socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: 'Léa'});
 		setPlayerReady(true);
 	}
 
@@ -278,30 +323,20 @@ const OnlineGame = () => {
 		setLobby('');
 	}
 
-	//database related functions
+// Database related functions ==============================================================================================================
 
-	/*const context = useContext(MyContext);
+	const context = useContext(MyContext);
 
 	const invalidate = useInvalidate();
-
-	const getGameLogs = useQuery({
-		queryKey: ["userLogs"],
-		queryFn: () => context.api.get("/"),
-		retry: stopOnHttp,
-	});
 	
-	const postUser = useMutation({
-		mutationFn: (user: UserPostType) => context.api.post("/users", user),
-		onSettled: () => invalidate(["users"]),
+	//sending the gamelogs to the database
+	const postGamelog = useMutation({
+		mutationFn: (gamelog: GamelogPostType) => context.api.post("/gamelogs", gamelog),
+		onSettled: () => invalidate(["gamelogs"]),
 		onError: error => context.addNotif({content: error.message}),
 	});
 
-	const postChan = useMutation({
-		mutationFn: (name: string) =>
-			context.api.post("/channels", {name, status: "public"}),
-		onSettled: () => invalidate(["allChans"]),
-		onError: error => context.addNotif({content: error.message}),
-	});*/
+// Return ==============================================================================================================
 
 	return (
 		<div>
@@ -311,7 +346,7 @@ const OnlineGame = () => {
 				<div className="Play__Selectors">
 					<div className="Play__PaddleSelector">
 						<span className="Play__CustomName">Paddle</span>
-						<select className="Play__PaddleSelect" onChange={(e) => setPaddlesColor(e.target.value)}>
+						<select id="PaddleSelect"  onChange={(e) => setPaddlesColor(e.target.value)}>
 							<option value="#fff">default</option>
     						<option value="#cc0000">red</option>
     						<option value="#2eb82e">green</option>
@@ -320,7 +355,7 @@ const OnlineGame = () => {
 					</div>
 					<div className="Play__BackgroundSelector">
 						<span>Background</span>
-						<select onChange={(e) => setBackgroundColor(e.target.value)}>
+						<select id="BackgroundSelect" onChange={(e) => setBackgroundColor(e.target.value)}>
 							<option value="#000">default</option>
     						<option value="#cc0000">red</option>
     						<option value="#2eb82e">green</option>
@@ -329,7 +364,7 @@ const OnlineGame = () => {
 					</div>
 					<div className="Play__BallSelector">
 						<span>Ball</span>
-						<select onChange={(e) => setBallColor(e.target.value)}>
+						<select id="BallSelect" onChange={(e) => setBallColor(e.target.value)}>
 							<option value="#fff">default</option>
     						<option value="#cc0000">red</option>
     						<option value="#2eb82e">green</option>
@@ -372,7 +407,9 @@ const OnlineGame = () => {
 					</div>}
 				</div> }
 			</div> }
-
+			{gameReady === true ? <div></div> : <div>
+				<span className="Play__Instructions">Use W/S or 🔼/🔽 to control your paddle</span>
+			</div>}
 		</div>
 	);
 };

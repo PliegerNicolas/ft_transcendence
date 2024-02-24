@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -6,12 +6,16 @@ import { FriendshipContext, MyContext } from "../utils/contexts.ts";
 import { FriendshipType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
+import ConfirmPopup from "./ConfirmPopup.tsx";
 
 import { stopOnHttp } from "../utils/utils.ts";
 
 import "../styles/user.css";
 
 import defaultPicture from "../assets/default_profile.png";
+//import addFriend from "../assets/add-friend.svg";
+//import rmFriend from "../assets/rm-friend.svg";
+//import blockUser from "../assets/user-block.svg";
 
 // <User /> ====================================================================
 
@@ -20,7 +24,9 @@ export default function User()
 	const params = useParams();
 	const id = params.id!;
 	const queryClient = useQueryClient();
-	const { api } = useContext(MyContext);
+	const { api, addNotif } = useContext(MyContext);
+
+	const [popup, setPopup] = useState(false);
 
 	const getUser = useQuery({
 		queryKey: ["users", id],
@@ -41,42 +47,46 @@ export default function User()
 	});
 
 	const patchFriendship = useMutation({
-		mutationFn: ({friendId, status}: {friendId: string, status: string}) =>
+		mutationFn: ({me, them, status}: {me: string, them: string, status: string}) =>
 			api.patch(
-				"/users/" + id + "/relationships/" + friendId,
+				"/users/" + me + "/relationships/" + them,
 				{status: status}
 			),
 		onSettled: () => invalidate(["users", id, "friends"]),
+		onError: error => addNotif({content: error.message}),
 	});
 
 	const delFriendship = useMutation({
-		mutationFn: (friendId: string) =>
-			api.delete("/users/" + id + "/relationships/" + friendId),
+		mutationFn: ({me, them}: {me: string, them: string}) =>
+			api.delete("/users/" + me + "/relationships/" + them),
 		onSettled: () => invalidate(["users", id, "friends"]),
+		onError: error => addNotif({content: error.message}),
 	});
 
 	const postFriendship = useMutation({
-		mutationFn: (username: string) =>
-			api.post("/users/mlaneyri/relationships/", {username}),
-			// HARDCODED USERNAME BECAUSE /ME WILL PROBABLY NOT BE IMPLEMENTED
-			// UNTIL THE HEAT DEATH OF THE UNIVERSE
+		mutationFn: ({me, other, status}: {me: string, other: string, status: string}) =>
+			api.post("/users/" + me + "/relationships/", {username: other, status}),
+		onSettled: () => invalidate(["users", id, "friends"]),
+		onError: error => addNotif({content: error.message}),
 	});
 
 	function invalidate(queryKey: Array<any>) {
 		queryClient.invalidateQueries({queryKey});
 	}
 
-	if (!getUser.isSuccess) return (
+	if (getUser.isPending) return (
 		<main className="MainContent">
-		{
-			getUser.isPending ?
 			<div className="p-style">
 				<Spinner />
-			</div> :
+			</div>
+		</main>
+	);
+
+	if (getUser.isError) return (
+		<main className="MainContent">
 			<div className="p-style error-msg">
 				Failed to load user #{id}: {getUser.error.message}
 			</div>
-		}
 		</main>
 	);
 
@@ -86,22 +96,90 @@ export default function User()
 		const other = ship.user1.username == id ? ship.user2.username : ship.user1.username;
 
 		switch (action) {
-			case "approve":
+			case "accept":
 				patchFriendship.mutate({
-					friendId: other,
+					me: id,
+					them: other,
 					status: "accepted"
 				});
 				break ;
-			case "delete":
+			case "unfriend":
 			case "cancel":
 			case "reject":
-				delFriendship.mutate(other);
+			case "unblock":
+				if (id == "mlaneyri")
+					delFriendship.mutate({me: "mlaneyri", them: other}); //TODO
+				else
+					delFriendship.mutate({me: "mlaneyri", them: id}); //TODO
 				break ;
 		}
 	}
+	
+	function getStatus()
+	{
+		if (!getFriendships.isSuccess)
+			return ("");
+
+		const match = getFriendships.data.find((ship: FriendshipType) =>
+			ship.user1.id == "1" || ship.user2.id == "1");
+
+		if (!match)
+			return ("");
+		if (match.status1 == "accepted" && match.status2 == "accepted")
+			return ("accepted");
+
+		const myStatus = match.user1.id == "1" ? match.status1 : match.status2;
+		const theirStatus = match.user1.id == "1" ? match.status2 : match.status1;
+
+		if (theirStatus == "blocked")
+			return ("imblocked");
+		if (myStatus == "blocked")
+			return ("blocked");
+		if (myStatus == "pending")
+			return ("approve");
+		if (theirStatus == "pending")
+			return ("pending");
+		return ("");
+	}
+
+	if (user.id != 1 && !getFriendships.isSuccess) return ( //TODO
+		<main className="MainContent User">
+			<section>
+				<h2>
+					{
+						user.profile?.firstName
+						+ " « " + user.username + " » "
+						+ user.profile?.lastName
+					}
+				</h2>
+			</section>
+		</main>
+	);
+
+	if (user.id != 1 && getStatus() == "imblocked") return ( //TODO
+		<main className="MainContent User">
+			<section>
+				<h2>
+					{
+						user.profile?.firstName
+						+ " « " + user.username + " » "
+						+ user.profile?.lastName
+					}
+				</h2>
+				<div className="error-msg">
+					You've been blocked by this user.
+				</div>
+				<button onClick={() =>
+					delFriendship.mutate({me: user.username, them: "mlaneyri"}) //TODO
+				}>
+					Make unblock (temp)
+				</button>
+			</section>
+		</main>
+	);
 
 	return (
-		<main className="MainContent">
+		<main className="MainContent User">
 			<section>
 				<h2>
 					{
@@ -132,30 +210,167 @@ export default function User()
 				/>
 				<hr />
 				{
-					user.id == 1 ?
-					<>
-						<h3>Your friendships:</h3>
-						<Friendships
-							id={id}
-							query={getFriendships}
-							action={friendshipAction}
-						/>
-					</> :
+					user.id != 1 && getFriendships.isSuccess &&
+					<OnOtherActions
+						status={getStatus()}
+						post={postFriendship.mutate}
+						patch={patchFriendship.mutate}
+						del={delFriendship.mutate}
+						name={user.username}
+					/>
+				}
+				{
+					user.id != 1 && getFriendships.isSuccess &&
 					<div className="User__ActionsButtons">
-						<button onClick={() => postFriendship.mutate(user.username)}>
-							Request as friend
+						<hr />
+						<button onClick={() =>
+							postFriendship.mutate({other: "mlaneyri", me: user.username, status: "accepted"})
+						}>
+							Make friend request me (temp)
 						</button>
-						<button>Block</button>
+						<button onClick={() =>
+							postFriendship.mutate({other: "mlaneyri", me: user.username, status: "blocked"})
+						}>
+							Make block me  (temp)
+						</button>
 					</div>
 				}
+				<h3>Relationships:</h3>
+				<Friendships
+					id={id}
+					query={getFriendships}
+					action={friendshipAction}
+				/>
 			</section>
 			<button
-				style={{margin: "0 15px", color: "#f9c"}}
-				onClick={() => delUser.mutate()}
+				style={{margin: "0 15px"}}
+				className="danger"
+				onClick={() => setPopup(true)}
 			>
-				Delete user
+				Delete account
 			</button>
+			{
+				popup &&
+				<ConfirmPopup
+					title="Are you sure you want to delete your account?"
+					text={
+						<> Of course, for now, you may delete any account, but later it will
+						be only yours.<br /><br />
+						** TODO ** remove this in due time.<br /><br />
+						Warning: This is a permanent operation! </>
+					}
+					action="Delete"
+					cancelFt={() => setPopup(false)}
+					actionFt={delUser.mutate}
+				/>
+			}
 		</main>
+	);
+}
+
+// <OnOtherActions /> ==========================================================
+
+function OnOtherActions(
+	{status, post, patch, del, name}:
+	{status: string, post: Function, patch: Function, del: Function, name: string}
+)
+{
+	function friend() {
+		post({me: "mlaneyri", other: name, status: "accepted"});
+	}
+
+	function block() {
+		post({me: "mlaneyri", other: name, status: "blocked"});
+	}
+
+	function acceptShip() {
+		patch({me: "mlaneyri", them: name, status: "accepted"});
+	}
+
+	console.log(status);
+
+	switch (status) {
+		case "accepted": return (
+			<div className="User__ActionsButtons">
+				<div className="User__Status">
+					You are friend with {name}.
+				</div>
+				<button
+					 className="reject"
+					 onClick={() => del({me: "mlaneyri", them: name})}
+				> {/* TODO */}
+					Unfriend
+				</button>
+			</div>
+		);
+		case "approve": return (
+			<div className="User__ActionsButtons">
+				<div className="User__Status">
+					{name} sent you a friend request.
+				</div>
+				<button onClick={acceptShip} className="accept">
+					Accept as friend
+				</button>
+				<button
+					className="reject"
+					onClick={() => del({me: "mlaneyri", them: name})}
+				>
+					Reject
+				</button>
+			</div>
+		);
+		case "pending": return (
+			<div className="User__ActionsButtons">
+				<div className="User__Status">
+					Your friend request to {name} is pending.
+				</div>
+				<button
+					className="reject"
+					onClick={() => del({me: "mlaneyri", them: name})}
+				>
+					Cancel
+				</button>
+			</div>
+		);
+		case "blocked": return (
+			<div className="User__ActionsButtons">
+				<div className="User__Status">
+					You are blocking {name}.
+				</div>
+				<button
+					className="unblock"
+					onClick={() => del({me: "mlaneyri", them: name})}
+				>
+					Unblock
+				</button>
+			</div>
+		);
+		case "imblocked": return (
+			<div className="User__ActionsButtons">
+				<button
+					className="accept"
+				>
+					Friend request
+				</button>
+				<button
+					className="reject"
+					onClick={() => patch({me: "mlaneyri", them: name, status: "blocked"})}
+				>
+					Block
+				</button>
+			</div>
+		);
+	}
+
+	return (
+		<div className="User__ActionsButtons">
+			<button onClick={friend} className="accept">
+				Friend request
+			</button>
+			<button onClick={block} className="reject">
+				Block
+			</button>
+		</div>
 	);
 }
 
@@ -179,21 +394,34 @@ function Friendships(props: {
 		</p>
 	);
 
-	if (!props.query.data.length) return (
+	if (!props.query.data.find((elem: FriendshipType) =>
+		((elem.status1 != "blocked" || elem.user2.username != props.id)
+		&& (elem.status2 != "blocked" || elem.user1.username != props.id))
+		|| (elem.status1 == "blocked" && elem.status2 == "blocked"))
+	) return (
 		<p className="notice-msg">
-			You have no friendships <span className="r">😢</span> (yet)
+			You have no relations <span className="r">😢</span> (yet)
 		</p>
 	);
 
 	return (
 		<FriendshipContext.Provider	value={{...props, friendships: props.query.data}}>
 			<FriendshipList
-				title="Accepted friendships"
+				title="Friends"
 				filter={
 					(item: FriendshipType) =>
 					item.status1 === "accepted" && item.status2 === "accepted"
 				}
-				actions={["delete"]}
+				actions={["unfriend"]}
+			/>
+			<FriendshipList
+				title="Friend requests"
+				filter={
+					(item: FriendshipType) =>
+						(item.status1 === "pending" && item.user1.username === props.id)
+						|| (item.status2 === "pending" && item.user2.username === props.id)
+				}
+				actions={["reject", "accept"]}
 			/>
 			<FriendshipList
 				title="Pending friendships"
@@ -204,14 +432,15 @@ function Friendships(props: {
 				}
 				actions={["cancel"]}
 			/>
+			<hr />
 			<FriendshipList
-				title="Friendships to approve"
+				title="Blocked users"
 				filter={
 					(item: FriendshipType) =>
-						(item.status1 === "pending" && item.user1.username === props.id)
-						|| (item.status2 === "pending" && item.user2.username === props.id)
+						(item.status1 === "blocked" && item.user1.username == props.id)
+						|| (item.status2 === "blocked" && item.user2.username == props.id)
 				}
-				actions={["reject", "approve"]}
+				actions={["unblock"]}
 			/>
 		</FriendshipContext.Provider>
 	);
@@ -229,6 +458,7 @@ function FriendshipList(props: {
 	const filterList = friendships.filter((item: FriendshipType) =>
 		props.filter(item)
 	);
+
 	const actionClass = props.actions.join(" ");
 
 	function friend(ship: FriendshipType) {
@@ -241,7 +471,10 @@ function FriendshipList(props: {
 
 	return (
 		<div>
-			<h4> {props.title}:</h4>
+			{
+				!!props.title.length &&
+				<h4> {props.title}:</h4>
+			}
 			<div className="genericList">
 			{
 				filterList.map((item: FriendshipType) =>
@@ -254,17 +487,19 @@ function FriendshipList(props: {
 							{"@" + friend(item).username}
 						</Link>
 						</div>
+						<div>
 						{
 							props.actions.map((actionItem, index) =>
-								<div
+								<button
 									key={index}
-									className={"clickable " + actionItem}
+									className={actionItem}
 									onClick={() => action(actionItem, item)}
 								>
 									{actionItem}
-								</div>
+								</button>
 							)
 						}
+						</div>
 					</div>)
 			}
 			</div>

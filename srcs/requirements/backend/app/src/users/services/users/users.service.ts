@@ -135,6 +135,10 @@ export class UsersService {
         return (`User '${username}' successfully deleted`);
     }
 
+    async setTwoFactorAuthSecret(userId: number, secret: string) {
+        return this.userRepository.update(userId, {twoFactorAuthSecret: secret});
+    }
+  
     /* Helper Functions */
 
     public async findStrictlyUsersByUsername(usernames: string[]): Promise<User[]> {

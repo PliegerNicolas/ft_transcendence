@@ -20,3 +20,14 @@ export function stopOnHttp(count: number, error: Error)
 {
 	return (!httpStatus(error) && count < 3)
 }
+
+export function randomString(length: number)
+{
+	const charset = "aaabcdeeeefghiiijklmnooopqrstuuuvwxyz";
+	let ret = "";
+
+	for (let i = 0; i < length; ++i) {
+		ret += charset[Math.floor(36 * Math.random())];
+	}
+	return (ret);
+}

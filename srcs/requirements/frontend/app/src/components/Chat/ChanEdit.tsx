@@ -15,6 +15,7 @@ import "../../styles/chat.css";
 
 import Spinner from "../Spinner.tsx";
 import ChatHeader from "./ChatHeader.tsx";
+import ConfirmPopup from "../ConfirmPopup.tsx";
 
 interface UserListEntry {
 	username: string,
@@ -56,7 +57,7 @@ export default function ChanEdit({id}: {id: number})
 	const delChan = useMutation({
 		mutationFn: () => api.delete("/channels/" + id),
 		onSettled: () => invalidate(["allChans"]),
-		onSuccess: () => navigate("/chattest"),
+		onSuccess: () => navigate("/chat"),
 		onError: error => addNotif({content: error.message}),
 	});
 
@@ -73,7 +74,7 @@ export default function ChanEdit({id}: {id: number})
 				return api.post("/channels", data)}) as unknown as MutationFunction<ChanType>,
 		onError: error => addNotif({content: error.message}),
 		onSettled: () => invalidate(["allChans"]),
-		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
+		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
 	});
 
 	const patchChan = useMutation({
@@ -83,7 +84,7 @@ export default function ChanEdit({id}: {id: number})
 				return api.patch("/channels/" + id, data)}) as unknown as MutationFunction<ChanType>,
 		onError: error => addNotif({content: error.message}),
 		onSettled: () => invalidate(["allChans"]),
-		onSuccess: (data: ChanType) => navigate("/chattest/" + data.id)
+		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
 	});
 
 	function updateField(field: string, value: unknown) {
@@ -243,6 +244,11 @@ export default function ChanEdit({id}: {id: number})
 						}
 						{
 							!!chan.password.length
+								&& chan.password.length < 8
+								&& <span className="error-msg">Password length must be 8 or more!</span>
+						}
+						{
+							!!chan.password.length
 								&& !!chan.passwordRepeat.length
 								&& chan.password != chan.passwordRepeat
 								&& <span className="error-msg">Passwords do not match!</span>
@@ -325,7 +331,8 @@ export default function ChanEdit({id}: {id: number})
 					onClick={(e) => {handleSubmit(e)}}
 					disabled={
 						chan.status === "public"
-						&& chan.password !== chan.passwordRepeat
+						&& (chan.password !== chan.passwordRepeat
+							|| (!!chan.password.length && chan.password.length < 8))
 					}
 				>
 					Submit
@@ -333,40 +340,30 @@ export default function ChanEdit({id}: {id: number})
 			</div>
 			{
 				popup &&
-				<DeletePopup
-					cancel={() => {setPopup(false)}}
-					del={() => delChan.mutate()} />
-				}
+				<ConfirmPopup
+					title="Are you sure you want to delete this channel?"
+					text={<>Warning: This is a permanent operation!</>}
+					action="Delete"
+					cancelFt={() => setPopup(false)}
+					actionFt={delChan.mutate}
+				/>
+			}
 			</div>
 		</div>
 	);
 }
 
-function DeletePopup({cancel, del}: {cancel: Function, del: Function})
-{
-	return (
-		<div className="Popup">
-			<div className="DeletePopup">
-				<h3>Are you sure you want to delete this channel?</h3>
-				<div className="DeletePopup__Notice">
-					Warning: This is a permanent operation!
-				</div>
-				<div className="DeletePopup__Buttons">
-					<button onClick={() => cancel()}>
-						Cancel
-					</button>
-					<button onClick={() => del()} className="danger">
-						Delete
-					</button>
-				</div>
-			</div>
-		</div>
-	);
-}
+// <UserList /> ================================================================
 
 function UserList(
 	{title, list, add, rm, owner}:
-	{title: string, list: UserListEntry[], add: Function, rm: Function, owner: UserListEntry | null}
+	{
+		title: string,
+		list: UserListEntry[],
+		add: Function,
+		rm: Function,
+		owner: UserListEntry | null
+	}
 )
 {
 	const listFilter = owner ? list.filter(user => user.id != owner.id) : list;

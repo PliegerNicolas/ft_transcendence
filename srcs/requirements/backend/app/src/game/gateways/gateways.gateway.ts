@@ -9,6 +9,8 @@ let state: gameState[] = [];
 let player1ID: string[] = [];
 let player2ID: string[] = [];
 let playersQueue: string[] = [];
+let player1Username: string[] = [];
+let player2Username: string[] = [];
 
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway implements OnModuleInit {
@@ -52,7 +54,6 @@ export class GameGateway implements OnModuleInit {
 		}
 		if (!state[data.lobby])
 			this.server.to(data.lobby).emit('leaveLobby');
-		client.leave(data.lobby);
 	}
 
 	@SubscribeMessage('joinQueue')
@@ -76,24 +77,24 @@ export class GameGateway implements OnModuleInit {
 	}
 
 	@SubscribeMessage('ready')
-	handleReady(@MessageBody() data: {lobby: string, playerNumber: number}, @ConnectedSocket() client: Socket) {
+	handleReady(@MessageBody() data: {lobby: string, playerNumber: number, playerName: string}, @ConnectedSocket() client: Socket) {
 		if (!player1ID[data.lobby] && data.playerNumber === 1) {
-			console.log("player 1 ready");
 			player1ID[data.lobby] = client.id;
+			player1Username[data.lobby] = data.playerName;
 			client.join(data.lobby);
 		}
-		else if (!player2ID[data.lobby]  && data.playerNumber === 2) {
-			console.log("player 2 ready");
+		else if (!player2ID[data.lobby] && data.playerNumber === 2) {
 			player2ID[data.lobby] = client.id;
+			player2Username[data.lobby] = data.playerName;
 			client.join(data.lobby);
 		}
 		if (player1ID[data.lobby] && player2ID[data.lobby]) {
 			this.server.to(data.lobby).emit('gameReady');
-			this.server.to(data.lobby).emit('startedGame');
+			setTimeout(() => {this.server.to(data.lobby).emit('startedGame')}, 200);
 			state[data.lobby] = createGameState();
 			state[data.lobby].player1ID = player1ID[data.lobby];
 			state[data.lobby].player2ID = player2ID[data.lobby];
-			setTimeout(() => {startGameInterval(data.lobby, state[data.lobby], this.server);}, 3000);
+			setTimeout(() => {startGameInterval(data.lobby, state[data.lobby], this.server, player1Username[data.lobby], player2Username[data.lobby])}, 3200);
 		}
 	}
 
@@ -117,7 +118,7 @@ export class GameGateway implements OnModuleInit {
 
 	@SubscribeMessage('keyDown')
 	handleKeyDown(@MessageBody() data: {key: string, lobby: string}, @ConnectedSocket() client: Socket) {
-		if (data.key === 'w') {
+		if (data.key === 'w' || data.key === 'ArrowUp') {
 			if (state[data.lobby].player1ID === client.id && state[data.lobby].player1.y - PADDLE_SPEED > 0) {
 				state[data.lobby].player1.speed = -Math.abs(PADDLE_SPEED);
 			}
@@ -125,7 +126,7 @@ export class GameGateway implements OnModuleInit {
 				state[data.lobby].player2.speed = -Math.abs(PADDLE_SPEED);
 			}
 		}
-		else if (data.key === 's') {
+		else if (data.key === 's' || data.key === 'ArrowDown') {
 			if (state[data.lobby].player1ID === client.id && state[data.lobby].player1.y + PADDLE_SPEED < WINDOW_HEIGHT) {
 				state[data.lobby].player1.speed = Math.abs(PADDLE_SPEED);
 			}
@@ -137,7 +138,7 @@ export class GameGateway implements OnModuleInit {
 
 	@SubscribeMessage('keyUp')
 	handleKeyUp(@MessageBody() data: {key: string, lobby: string}, @ConnectedSocket() client: Socket) {
-		if (data.key === 'w') {
+		if (data.key === 'w' || data.key === 'ArrowUp') {
 			if (state[data.lobby].player1ID === client.id) {
 				state[data.lobby].player1.speed = 0;
 			}
@@ -145,7 +146,7 @@ export class GameGateway implements OnModuleInit {
 				state[data.lobby].player2.speed = 0;
 			}
 		}
-		else if (data.key === 's') {
+		else if (data.key === 's' || data.key === 'ArrowDown') {
 			if (state[data.lobby].player1ID === client.id) {
 					state[data.lobby].player1.speed = 0;
 			}
@@ -158,5 +159,15 @@ export class GameGateway implements OnModuleInit {
 	@SubscribeMessage('startGame')
 	handleStartGame(@MessageBody() lobby: string) {
 		this.server.to(lobby).emit('startedGame');
+	}
+
+	@SubscribeMessage('leaveLobby')
+	handleLeaveLobby(@MessageBody() lobby: string, @ConnectedSocket() client: Socket) {
+		client.leave(lobby);
+	}
+
+	@SubscribeMessage('sentLogs')
+	handleSentLogs(@MessageBody() lobby: string) {
+		this.server.to(lobby).emit('drawEndGame', state[lobby]);
 	}
 }
