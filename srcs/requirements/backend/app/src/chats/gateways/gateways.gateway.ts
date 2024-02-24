@@ -11,6 +11,7 @@ export class ChatGateway implements OnModuleInit {
 
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
+			console.log('new chat socket connection : ' + socket.id);
 			this.server.to(socket.id).emit('rejoinChannels');
 			console.log('new chat socket connection : ' + socket.id)
 
@@ -22,7 +23,7 @@ export class ChatGateway implements OnModuleInit {
 
 	@SubscribeMessage('newMessage')
 	handleNewMessage(@MessageBody() message: MessagePayloads, @ConnectedSocket() client: Socket) {
-		client.to(message.channel).emit('onMessage', message.content);
+		client.to(message.channel).emit('onMessage', message.content, message.channel);
 		console.log('NEW MESSAGE HANDLED : ' + message.content);
 	}
   
