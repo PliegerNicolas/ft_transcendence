@@ -51,5 +51,4 @@ export class UsersController {
     async deleteUserById(@Param('username', ParseUsernamePipe) username: string) {
         return (await this.userService.deleteUser(username));
     }
-
 }

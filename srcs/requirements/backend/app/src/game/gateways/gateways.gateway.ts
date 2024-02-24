@@ -35,11 +35,11 @@ export class GameGateway implements OnModuleInit {
 		});
 	}
 
-	/*@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'))
 	getConnectedUser(@Request() req: any) {
 		const userId = req.user ? req.user.id : null;
 		console.log(userId);
-	}*/
+	}
 
 	@SubscribeMessage('opponentLeft')
 	handleOpponentLeft(@MessageBody() data: {userId: string, lobby: string}, @ConnectedSocket() client: Socket) {

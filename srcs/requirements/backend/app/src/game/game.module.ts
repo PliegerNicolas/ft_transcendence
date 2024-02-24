@@ -8,10 +8,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GamelogToUser } from 'src/gamelogs/entities/GamelogToUser.entity';
 import { Gamelog } from 'src/gamelogs/entities/Gamelog.entity';
 import { User } from 'src/users/entities/User.entity';
+import { GameController } from './controllers/game.controller';
 
 
 @Module({
   imports: [GamelogsModule, TypeOrmModule.forFeature([Gamelog, GamelogToUser, User])],
-  providers: [GameGateway, GameService, GamelogsService, GameServer]
+  providers: [GameGateway, GameService, GamelogsService, GameServer],
+  controllers: [GameController]
 })
 export class GameModule {}

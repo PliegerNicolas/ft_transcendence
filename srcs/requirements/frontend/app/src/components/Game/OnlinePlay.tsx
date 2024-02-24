@@ -1,7 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { io } from 'socket.io-client';
 
 import "../../styles/play.css";
+import { MyContext } from "../../utils/contexts";
+import { stopOnHttp } from "../../utils/utils";
+import { useQuery } from "@tanstack/react-query";
 
 const WINDOW_WIDTH = 1280;
 const WINDOW_HEIGHT = 720;
@@ -264,6 +267,8 @@ const OnlineGame = () => {
 	}
 
 	const readyCheckHandler = () => {
+		const playerName = getMe;
+		console.log(playerName.data);
 		if (playerNumber === 1)
 			socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: 'Maëvo'});
 		else if (playerNumber === 2)
@@ -294,6 +299,16 @@ const OnlineGame = () => {
 		socket.emit('leaveLobby', lobby);
 		setLobby('');
 	}
+
+// Backend http requests ==============================================================================================================
+
+	const context = useContext(MyContext);
+
+	const getMe = useQuery({
+		queryKey: ["me"],
+		queryFn: () => context.api.get("/game/me"),
+		retry: stopOnHttp,
+	});
 
 // Return ==============================================================================================================
 
