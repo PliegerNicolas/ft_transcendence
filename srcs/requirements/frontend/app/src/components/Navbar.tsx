@@ -10,6 +10,9 @@ import settingsIcon from "../assets/settings.svg";
 import aboutIcon from "../assets/about.svg";
 import sandboxIcon from "../assets/sandbox.svg";
 
+import { useContext } from "react";
+import { MyContext } from "../utils/contexts";
+
 function firstPathSegment(fullPath: string)
 {
 	const pathArray = fullPath.match(/^\/[^/]*/);
@@ -18,17 +21,18 @@ function firstPathSegment(fullPath: string)
 
 function Navbar()
 {
+	const { lastChan } = useContext(MyContext);
 	const options = [
 		{ name: "Home", path: "/", img: homeIcon },
 		{ name: "Play",	path: "/play", img: playIcon },
 		{ name: "Stats", path: "/stats", img: statsIcon },
-		{ name: "Chat", path: "/chattest", img: chatIcon },
+		{ name: "Chat", path: "/chat/" + lastChan, img: chatIcon },
 		{ name: "Settings", path: "/settings", img: settingsIcon },
 		{ name: "About", path: "/about", img: aboutIcon },
 		{ name: "Sandbox", path: "/sandbox", img: sandboxIcon }
 	];
 	const loc = useLocation();
-	const path = firstPathSegment(loc.pathname)
+	const path = firstPathSegment(loc.pathname);
 
 	const navHtml = options.map((elem, index) =>
 		<Link to={elem.path} key={index} className={

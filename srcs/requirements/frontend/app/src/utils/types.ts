@@ -57,7 +57,7 @@ export interface NotifType {
 	date: number,
 	content: string,
 	type: number,
-	id: number,
+	id: string,
 }
 
 export enum GameResult {
