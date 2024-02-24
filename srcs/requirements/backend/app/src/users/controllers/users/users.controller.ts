@@ -5,6 +5,7 @@ import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
 import { ReplaceUserDto } from 'src/users/dtos/ReplaceUser.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
+import { UsersGuard } from 'src/users/users.guard';
 
 @Controller('users')
 export class UsersController {
@@ -29,7 +30,7 @@ export class UsersController {
         return (await this.userService.createUser(createUserDto));
     }
 
-    //@UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard('jwt'), UsersGuard)
     @Put(':username')
     async replaceUserById(
         @Param('username', ParseUsernamePipe) username: string,

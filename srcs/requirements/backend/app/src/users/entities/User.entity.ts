@@ -22,6 +22,9 @@ export class User {
     @Column({ unique: true, length: 25 })
     username: string;
 
+	@Column({nullable: true})
+	twoFactorAuthSecret? : string;
+
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
 
