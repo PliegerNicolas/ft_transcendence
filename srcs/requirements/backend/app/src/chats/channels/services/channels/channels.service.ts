@@ -54,7 +54,7 @@ export class ChannelsService {
         channel.validateAccess(user);
         if (
             channel.mode === ChannelMode.PASSWORD_PROTECTED
-            //&& await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
+            && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)
         ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         return (channel);
@@ -67,7 +67,7 @@ export class ChannelsService {
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
         
-        //channelDetails.password = await this.passwordHashingService.hashPassword(channelDetails.password);
+        channelDetails.password = await this.passwordHashingService.hashPassword(channelDetails.password);
 
         const channel = this.channelRepository.create({
             ...channelDetails,
@@ -92,7 +92,7 @@ export class ChannelsService {
         channel.validateEditOrUpdate(user);
         if (
             channel.mode === ChannelMode.PASSWORD_PROTECTED
-            && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
+            && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)
         ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         this.channelRepository.merge(channel, {
@@ -117,7 +117,7 @@ export class ChannelsService {
         channel.validateEditOrUpdate(user);
         if (
             channel.mode === ChannelMode.PASSWORD_PROTECTED
-            && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
+            && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)
         ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         this.channelRepository.merge(channel, {
@@ -162,7 +162,7 @@ export class ChannelsService {
         channel.validateJoin(user);
         if (
             channel.mode === ChannelMode.PASSWORD_PROTECTED
-            && await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password)
+            && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)
         ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         this.channelRepository.merge(channel, {
