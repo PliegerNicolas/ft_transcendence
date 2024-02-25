@@ -15,6 +15,7 @@ import { AuthService } from 'src/auth/auth.service';
     TypeOrmModule.forFeature([User, Profile, Relationship, Gamelog, Channel, Message])
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthService]
+  providers: [UsersService, AuthService],
+  exports: [UsersService]
 })
 export class UsersModule {}

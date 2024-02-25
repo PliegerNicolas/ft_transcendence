@@ -23,15 +23,15 @@ export default function ChatTest()
 		const context = useContext(MyContext);
 		const invalidate = useInvalidate();
 
-		const getMe = useQuery({
+		const getUser = useQuery({
 			queryKey: ["me"],
-			queryFn: () => context.api.get("/game/me"),
+			queryFn: () => context.api.get("/me/user"),
 			retry: stopOnHttp,
 		});
 
 		const getChans = useQuery({
 			queryKey: ["channels", ],
-			queryFn: () => context.api.get("/channels/" + getMe.data),
+			queryFn: () => context.api.get("/channels/" + getUser.data.id),
 			retry: stopOnHttp
 		});
 

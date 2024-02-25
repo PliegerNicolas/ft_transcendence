@@ -64,17 +64,17 @@ function ChatContent() {
 
 	setLastChan(id);
 
-	/*useEffect(() => {
+	useEffect(() => {
 		socket.on('onMessage', (content: string) => {
-			console.log('onMessage caught', id);
-			invalidate(["channels", id, "messages"]);
+			//console.log('onMessage caught', id);
+			getMsgs.refetch();
+			//invalidate(["channels", id, "messages"]);
 			console.log(content);
 		});
 		return () => {
 			socket.off('onMessage');
-			socket.off('rejoinsChannels');
 		};
-	}, []);*/
+	}, []);
 
 	/*
 	** These lines are desirable to auto-scroll at bottom of chat.
