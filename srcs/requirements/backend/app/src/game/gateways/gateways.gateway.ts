@@ -4,7 +4,6 @@ import { Server, Socket } from 'socket.io'
 import { gameState } from '../types/inputPayloads'
 import { GameServer } from '../server/game.server'
 import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../server/game.constants'
-import { AuthGuard } from '@nestjs/passport';
 
 let state: gameState[] = [];
 let player1ID: string[] = [];
@@ -33,12 +32,6 @@ export class GameGateway implements OnModuleInit {
 				}
 			});
 		});
-	}
-
-	@UseGuards(AuthGuard('jwt'))
-	getConnectedUser(@Request() req: any) {
-		const userId = req.user ? req.user.id : null;
-		console.log(userId);
 	}
 
 	@SubscribeMessage('opponentLeft')
@@ -107,20 +100,26 @@ export class GameGateway implements OnModuleInit {
 		}
 	}
 
+	//to fix
 	@SubscribeMessage('notReady')
 	handleNotReady(@MessageBody() data: {lobby: string, playerNumber: number}, @ConnectedSocket() client: Socket) {
+		console.log('NOT READY : ' + client.id);
 		if (player1ID[data.lobby] && data.playerNumber === 1) {
 			const index = player1ID.indexOf(data.lobby, 0);
+			console.log('index = ' + index);
 			if (index > -1) {
    				player1ID.splice(index, 1);
 			}
+			console.log('player1ID should be null/undefined : ' + player1ID[data.lobby]);
 			client.leave(data.lobby);
 		}
 		else if (player2ID[data.lobby]  && data.playerNumber === 2) {
 			const index = player2ID.indexOf(data.lobby, 0);
+			console.log('index = ' + index);
 			if (index > -1) {
    				player2ID.splice(index, 1);
 			}
+			console.log('player2ID should be null/undefined : ' + player2ID[data.lobby]);
 			client.leave(data.lobby);
 		}
 	}

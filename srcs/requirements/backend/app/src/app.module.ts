@@ -15,6 +15,7 @@ import { PasswordHashingService } from './common/services/password-hashing/passw
 import { TwoFactorAuthService } from './twofactorauth/twofactorauth.service';
 import { UsersService } from './users/services/users/users.service';
 import { TwofactorauthModule } from './twofactorauth/twofactorauth.module';
+import { MeModule } from './me/me.module';
 
 const dbConfig = require('./database-config');
 
@@ -29,7 +30,8 @@ const dbConfig = require('./database-config');
 		AuthModule,
 		ChatsModule,
 		GameModule,
-		TwofactorauthModule
+		TwofactorauthModule,
+		MeModule
 	],
 	controllers: [],
 	providers: [

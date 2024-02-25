@@ -267,8 +267,7 @@ const OnlineGame = () => {
 	}
 
 	const readyCheckHandler = () => {
-		const playerName = getMe;
-		console.log(playerName.data);
+		console.log(getUser.data.username);
 		if (playerNumber === 1)
 			socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: 'Maëvo'});
 		else if (playerNumber === 2)
@@ -277,7 +276,7 @@ const OnlineGame = () => {
 	}
 
 	const notReadyCheckHandler = () => {
-		socket.emit('notReady', {lobby, playerNumber});
+		socket.emit('notReady', { lobby: lobby, playerNumber: playerNumber});
 		setPlayerReady(false);
 	}
 
@@ -304,9 +303,9 @@ const OnlineGame = () => {
 
 	const context = useContext(MyContext);
 
-	const getMe = useQuery({
-		queryKey: ["me"],
-		queryFn: () => context.api.get("/game/me"),
+	const getUser = useQuery({
+		queryKey: ["user"],
+		queryFn: () => context.api.get("/me/user"),
 		retry: stopOnHttp,
 	});
 

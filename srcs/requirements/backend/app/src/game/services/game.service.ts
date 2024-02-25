@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { GamelogsService } from 'src/gamelogs/services/gamelogs/gamelogs.service';
 import { GameType, GameResult } from '../types/inputPayloads'
 
