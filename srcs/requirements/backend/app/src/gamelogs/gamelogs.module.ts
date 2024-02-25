@@ -6,13 +6,14 @@ import { Gamelog } from './entities/Gamelog.entity';
 import { User } from 'src/users/entities/User.entity';
 import { GamelogToUser } from './entities/GamelogToUser.entity';
 import { AuthService } from 'src/auth/auth.service';
+import { UsersService } from 'src/users/services/users/users.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Gamelog, GamelogToUser, User]),
   ],
   controllers: [GamelogsController],
-  providers: [GamelogsService, AuthService],
+  providers: [GamelogsService, UsersService, AuthService],
   exports: [GamelogsService]
 })
 export class GamelogsModule {}

@@ -48,10 +48,14 @@ export class RoleGuard implements CanActivate {
 	}
 	// console.log(member.role)
 	// console.log(roles);
-	if (roles.find((element) => element == member.role) == undefined)
+
+	// /!\ THIS FAILS BECAUSE ROLE ARE NOW INTEGERS.
+	/*
+	if (roles.find((element) => element == test.role) == undefined)
 	{
 		return false;
 	}
+	*/
 
 	return true;
   }

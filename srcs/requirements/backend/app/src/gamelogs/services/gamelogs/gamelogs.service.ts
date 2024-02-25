@@ -1,16 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserResult } from 'src/gamelogs/dtos/UserResult.dto';
+import { UserResultWithUser, UserResultWithUsername } from 'src/gamelogs/dtos/UserResult.dto';
 import { Gamelog } from 'src/gamelogs/entities/Gamelog.entity';
 import { GameResult, GamelogToUser } from 'src/gamelogs/entities/GamelogToUser.entity';
 import { CreateGamelogParams, ReplaceGamelogParams, UpdateGamelogParams } from 'src/gamelogs/types/gamelogs.type';
 import { User } from 'src/users/entities/User.entity';
-import { In, Repository } from 'typeorm';
+import { UsersService } from 'src/users/services/users/users.service';
+import { Equal, In, Repository } from 'typeorm';
 
 @Injectable()
 export class GamelogsService {
-
-    // To verify. It seems to work after changing ids as usernames
 
     constructor(
         @InjectRepository(Gamelog)
@@ -19,105 +18,94 @@ export class GamelogsService {
         private readonly gamelogToUserRepository: Repository<GamelogToUser>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+
+        private readonly userService: UsersService,
     ) {}
 
-    async getGamelogs(): Promise<Gamelog[]> {
-        // Public
-
+    async getAllGamelogs(): Promise<Gamelog[]> {
         return (await this.gamelogRepository.find({
             relations: ['gamelogToUsers.user'],
         }));
     }
 
-    async getUserGamelogs(username: string): Promise<{ gamelogs: Gamelog[]; userResultCounts: Record<GameResult, number> }> {
-        // Public
+    async getGamelog(gamelogId: bigint = undefined): Promise<Gamelog> {
+        const gamelog = await this.gamelogRepository.findOne({
+            where: { id: gamelogId },
+            relations: ['gamelogToUsers.user'],
+        });
 
+        if (!gamelog) throw new NotFoundException(`Gamelog with ID ${gamelogId} not found`);
+
+        return (gamelog);
+    }
+
+    async getUserGamelogs(username: string = undefined): Promise<{ gamelogs: Gamelog[]; userResultsCount: Record<GameResult, number> }> {
         const user = await this.userRepository.findOne({
-            where: { username: username },
+            where: { username: Equal(username) },
             relations: ['userToGamelogs.gamelog.gamelogToUsers.user'],
         });
-    
-        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
-    
+
+        if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
+
         const gamelogs = user.userToGamelogs.map((userToGamelog) => userToGamelog.gamelog);
+        const userResultsCount = this.countUserResults(username, gamelogs);
 
-        const userResultCounts: Record<GameResult, number> = {} as Record<GameResult, number>;
-        Object.values(GameResult).forEach((result) => { userResultCounts[result] = 0 });
-
-        gamelogs.forEach((gamelog) => {
-            gamelog.gamelogToUsers
-                .filter((gamelogToUser) => gamelogToUser.user.username === username)
-                .forEach((gamelogToUser) => {
-                    userResultCounts[gamelogToUser.result]++;
-                });
-        });
-
-        return ({ userResultCounts, gamelogs });
+        return ({ gamelogs, userResultsCount });
     }
 
     async createGamelog(gamelogDetails: CreateGamelogParams): Promise<Gamelog> {
-        // Only the server should be autorized to access this.
-        // How to verify this ? Dunno yet.
-
-        const gamelogToUsers = await this.createGamelogToUsers(gamelogDetails.userResults, null);
-        delete gamelogDetails.userResults;
+        const gamelogToUsers = await this.createOrUpdateGamelogToUsers(gamelogDetails.userResults, undefined)
+            .finally(() => delete gamelogDetails.userResults);
 
         const gamelog = this.gamelogRepository.create({
             ...gamelogDetails,
-            gamelogToUsers,
+            gamelogToUsers: gamelogToUsers,
         });
 
         return (await this.gamelogRepository.save(gamelog));
     }
 
-    async replaceGamelog(gamelogId: bigint, gamelogDetails: ReplaceGamelogParams): Promise<Gamelog> {
-        // Only the server should be autorized to access this.
-        // How to verify this ? Dunno yet.
-
+    async replaceGamelog(gamelogId: bigint = undefined, gamelogDetails: ReplaceGamelogParams): Promise<Gamelog> {
         const gamelog = await this.gamelogRepository.findOne({
-            where: { id: gamelogId },
+            where: {  id: Equal(gamelogId) },
             relations: ['gamelogToUsers.user'],
         });
 
         if (!gamelog) throw new NotFoundException(`Gamelog with ID ${gamelogId} not found`);
 
-        const gamelogToUsers = await this.createGamelogToUsers(gamelogDetails.userResults, gamelog);
-        delete gamelogDetails.userResults;
+        const gamelogToUsers = await this.createOrUpdateGamelogToUsers(gamelogDetails.userResults, gamelog)
+            .finally(() => delete gamelogDetails.userResults);
 
-        return (await this.gamelogRepository.save({
-            ...gamelog,
+        this.gamelogRepository.merge(gamelog, {
             ...gamelogDetails,
-            gamelogToUsers,
-        }));
+            gamelogToUsers: gamelogToUsers
+        });
+
+        return (await this.gamelogRepository.save(gamelog));
     }
 
-    async updateGamelog(gamelogId: bigint, gamelogDetails: UpdateGamelogParams): Promise<Gamelog> {
-        // Only the server should be autorized to access this.
-        // How to verify this ? Dunno yet.
-
+    async updateGamelog(gamelogId: bigint = undefined, gamelogDetails: UpdateGamelogParams): Promise<Gamelog> {
         const gamelog = await this.gamelogRepository.findOne({
-            where: { id: gamelogId },
+            where: {  id: Equal(gamelogId) },
             relations: ['gamelogToUsers.user'],
         });
 
         if (!gamelog) throw new NotFoundException(`Gamelog with ID ${gamelogId} not found`);
 
-        const gamelogToUsers = await this.createGamelogToUsers(gamelogDetails.userResults, gamelog);
-        delete gamelogDetails.userResults;
+        const gamelogToUsers = await this.createOrUpdateGamelogToUsers(gamelogDetails.userResults, gamelog)
+            .finally(() => delete gamelogDetails.userResults);
 
-        return (await this.gamelogRepository.save({
-            ...gamelog,
-            ...gamelogDetails,
-            gamelogToUsers,
-        }));
+            this.gamelogRepository.merge(gamelog, {
+                ...gamelogDetails,
+                gamelogToUsers: gamelogToUsers
+            });
+
+            return (await this.gamelogRepository.save(gamelog));
     }
 
-    async deleteGamelog(gamelogId: bigint): Promise<string> {
-        // verify user permissions. You shouldn't be able to delete a gamelog. Maybe hide your name / soft delete ?
-        // How to verify this ? Dunno yet.
-
+    async deleteGamelog(gamelogId: bigint = undefined): Promise<string> {
         const gamelog = await this.gamelogRepository.findOne({
-            where: { id: gamelogId },
+            where: { id: Equal(gamelogId) },
         });
 
         if (!gamelog) throw new NotFoundException(`Gamelog with ID ${gamelogId} not found`);
@@ -128,38 +116,52 @@ export class GamelogsService {
 
     /* Helper Functions */
 
-    private async createGamelogToUsers(userResults: UserResult[], gamelog: Gamelog): Promise<GamelogToUser[]> {
-        const usernames = userResults.map((userResult) => userResult.username);
+    private countUserResults(username: string, gamelogs: Gamelog[]): Record<GameResult, number> {
+        const userResultsCount: Record<GameResult, number> = {} as Record<GameResult, number>;
+        Object.values(GameResult).forEach((result) => { userResultsCount[result] = 0 });
 
-        if (usernames.length !== new Set(usernames).size) {
-            const duplicateUsernames = usernames.filter((username, index) => usernames.indexOf(username) !== index);
-            const errMessage = duplicateUsernames.length > 1 ? `Following user IDs are duplicate: ${duplicateUsernames}` : `Following user ID is duplicate: ${duplicateUsernames}`;
-            throw new BadRequestException(errMessage);
-        }
-
-        const users = await this.userRepository.find({
-            where: { username: In(usernames) },
+        gamelogs.forEach((gamelog) => {
+            gamelog.gamelogToUsers
+                .filter((gamelogToUser) => gamelogToUser.user.username === username)
+                .forEach((gamelogToUser) => { userResultsCount[gamelogToUser.result]++; });
         });
 
-        if (users.length !== usernames.length) {
-            const missingUsernames = usernames.filter((username) => !users.some((user) => user.username === username));
-            const errMessage = missingUsernames.length > 1 ? `Following users not found : ${missingUsernames}` : `Following user not found : ${missingUsernames}`;
-            throw new NotFoundException(errMessage);
+        return (userResultsCount);
+    }
+
+    private async createOrUpdateGamelogToUsers(userResultsWithUsername: UserResultWithUsername[], gamelog: Gamelog = undefined): Promise<GamelogToUser[]> {
+        const userResultsWithUser = await this.setUserResultsWithUser(userResultsWithUsername).finally(() => userResultsWithUsername = null);
+
+        const existingGamelogToUsers = gamelog?.gamelogToUsers || [];
+        const gamelogToUsers: GamelogToUser[] = [];
+        
+        for (const userResult of userResultsWithUser) {
+            const existingGtu = existingGamelogToUsers.find((gtu) => gtu.user.username === userResult.user.username);
+
+            if (existingGtu) gamelogToUsers.push(this.gamelogToUserRepository.merge(existingGtu, { ...userResult }));
+            else gamelogToUsers.push(this.gamelogToUserRepository.create({ ...userResult }));
         }
-
-        const gamelogToUsers = userResults.map((userResult) => {
-            const existingGtu = gamelog?.gamelogToUsers.find((gamelogToUser) => gamelogToUser.user?.username === userResult.username);
-
-            return (existingGtu ? {
-                ...existingGtu,
-                result: userResult.result,
-            } : this.gamelogToUserRepository.create({
-                ...userResult,
-                user: users.find((user) => user.username === userResult.username),
-            }));
-        });
 
         return (gamelogToUsers);
+    }
+
+    private async setUserResultsWithUser(userResultsWithUsername: UserResultWithUsername[]): Promise<UserResultWithUser[]> {
+        const usernames = userResultsWithUsername.map((userResult) => userResult.username);
+
+        const users = await this.userService.findStrictlyUsersByUsername(usernames);
+
+        const userMap = new  Map<string, User>();
+        users.forEach((user) => userMap.set(user.username, user));
+
+        const userResultsWithUser = userResultsWithUsername.map((userResult) => {
+            const { username, ...rest } = userResult;
+            return ({
+                user: userMap.get(username),
+                ...rest,
+            });
+        });
+
+        return (userResultsWithUser);
     }
 
 }

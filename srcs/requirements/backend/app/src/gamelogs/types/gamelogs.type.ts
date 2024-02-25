@@ -1,23 +1,23 @@
-import { UserResult } from "../dtos/UserResult.dto";
+import { UserResultWithUsername } from "../dtos/UserResult.dto";
 import { GameType } from "../entities/Gamelog.entity";
 
 export type CreateGamelogParams = {
 
-    userResults: UserResult[];
+    userResults: UserResultWithUsername[];
     gameType: GameType;
 
 };
 
 export type ReplaceGamelogParams = {
 
-    userResults: UserResult[];
+    userResults: UserResultWithUsername[];
     gameType: GameType;
 
 };
 
 export type UpdateGamelogParams = {
 
-    userResults?: UserResult[];
+    userResults: UserResultWithUsername[];
     gameType?: GameType;
 
 };
