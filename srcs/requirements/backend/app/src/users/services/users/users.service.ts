@@ -16,12 +16,6 @@ export class UsersService {
         return (await this.userRepository.find());
     }
 
-    async getMyUsers(username: string = undefined): Promise<User[]> {
-        return (await this.userRepository.find({
-            relations: ['relationships']
-        }));
-    }
-
     async getUser(username: string = undefined): Promise<User> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },

@@ -16,27 +16,23 @@ export class UsersController {
     /* Public PATHS: anyone can access. */
     /* */
 
+    @Get('users')
+    async getUsers(
+        @Request() req: any,
+    ) {
+        return (await this.userService.getUsers());
+    }
+
     @Post('users')
     async createUser(
         @Body(new ValidationPipe) createUserDto: CreateUserDto
     ) {
         return (await this.userService.createUser(createUserDto));
     }
-
     
     /* */
     /* Public filtered PATHS: anyone can access but connected users would see additional data. */
     /* */
-
-    @Get('users')
-    // UseGuard => Verify if user is connected but permit anyone to pass.
-    async getUsers(
-        @Request() req: any,
-    ) {
-        const username = req.user ? req.user.username : undefined;
-        if (username) return (await this.userService.getMyUsers(username));
-        else return (await this.userService.getUsers());
-    }
 
     @Get('users/:username')
     // UseGuard => Verify if user is connected but permit anyone to pass.

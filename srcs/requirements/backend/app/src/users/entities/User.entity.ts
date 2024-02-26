@@ -46,9 +46,11 @@ export class User {
 
     /* Relationships */
 
+    @Exclude()
     @OneToMany(() => Relationship, (relationship) => relationship.user1, { cascade: true })
     relationships1?: Relationship[];
 
+    @Exclude()
     @OneToMany(() => Relationship, (relationship) => relationship.user2, { cascade: true })
     relationships2?: Relationship[];
 
