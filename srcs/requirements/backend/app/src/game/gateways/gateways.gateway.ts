@@ -91,7 +91,13 @@ export class GameGateway implements OnModuleInit {
 			client.join(data.lobby);
 		}
 		if (player1ID[data.lobby] && player2ID[data.lobby]) {
-			this.server.to(data.lobby).emit('gameReady');
+			this.server.to(data.lobby).emit(
+				'gameReady',
+				player1Username[data.lobby],
+				player2Username[data.lobby],
+				player1ID[data.lobby],
+				player2ID[data.lobby]
+			);
 			setTimeout(() => {this.server.to(data.lobby).emit('startedGame')}, 200);
 			state[data.lobby] = this.gameServer.createGameState();
 			state[data.lobby].player1ID = player1ID[data.lobby];

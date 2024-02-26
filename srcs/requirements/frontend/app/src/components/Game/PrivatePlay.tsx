@@ -1,25 +1,22 @@
 import { useContext, useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
 import { MyContext } from '../../utils/contexts';
 import { useQuery } from '@tanstack/react-query';
 import { stopOnHttp } from '../../utils/utils';
-
+import { redirect } from 'react-router-dom';
+import { socket } from './Play';
 import OnlineGame  from './OnlinePlay'
 
 import "../../styles/play.css";
 
-export const socket = io(`http://${location.hostname}:3450/game`);
 
-// <Play /> ====================================================================
+// <PrivatePlay /> ====================================================================
 
-function Play() {
-	const [inQueue, setInQueue] = useState(false);
+const PrivatePlay = (props: any) => {
 	const [gameReady, setGameReady] = useState(false);
 	const [playerReady, setPlayerReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
 
-	const [lobby, setLobby] = useState<string>('');
-	const [playerNumber, setPlayerNumber] = useState(1);
+	const [lobby, setLobby] = useState<string>(props.lobby);
 	const [oppId, setOppId] = useState('');
 
 	const [oppName, setOppName] = useState('');
@@ -60,26 +57,16 @@ function Play() {
 			});
 			socket.on('leaveLobby', () => {
 				setPlayerReady(false);
-				setInQueue(false);
 				setLobby('');
 			});
-			socket.on('gameFound', (player_number: number, lobby_id: string, opp_id: string) => {
-				console.log('lobby : ' + lobby_id + ' joined');
-				setLobby(lobby_id);
-				setPlayerNumber(player_number);
-				setOppId(opp_id);
-				setInQueue(false);
-			});
 			socket.on('gameReady', (player1Name: string, player2Name: string, player1ID: string, player2ID: string) => {
-				if (playerNumber === 1) {
+				if (props.playerNumber === 1) {
 					setOppName(player2Name);
-					if (!oppId)
-						setOppId(player2ID);
+					setOppId(player2ID);
 				}
-				if (playerNumber === 2) {
+				if (props.playerNumber === 2) {
 					setOppName(player1Name);
-					if (!oppId)
-						setOppId(player1ID)
+					setOppId(player1ID)
 				}
 				console.log(oppName);
 				setGameReady(true);
@@ -92,37 +79,21 @@ function Play() {
 	}, [[]]);
 
 	const readyCheckHandler = () => {
-		if (playerNumber === 1)
-			socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: getUser.data.username});
-		else if (playerNumber === 2)
-			socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: 'Maëvo'});
+		if (props.playerNumber === 1)
+			socket.emit('ready', {lobby: lobby, playerNumber: props.playerNumber, playerName: getUser.data.username});
+		else if (props.playerNumber === 2)
+			socket.emit('ready', {lobby: lobby, playerNumber: props.playerNumber, playerName: 'Maëvo'});
 		setPlayerReady(true);
 	}
 
 	const notReadyCheckHandler = () => {
-		socket.emit('notReady', { lobby: lobby, playerNumber: playerNumber});
+		socket.emit('notReady', { lobby: lobby, playerNumber: props.playerNumber});
 		setPlayerReady(false);
-	}
-
-	const joinQueueHandler = () => {
-		if (getUser.isSuccess) {
-			setInQueue(true);
-			socket.emit('joinQueue');
-		}
-	}
-
-	const leaveQueueHandler = () => {
-		setInQueue(false);
-		socket.emit('leaveQueue');
 	}
 
 	const backToMenuHandler = () => {
-		setInQueue(false);
-		setPlayerReady(false);
-		setGameReady(false);
-		setGameOver(false);
 		socket.emit('leaveLobby', lobby);
-		setLobby('');
+		redirect("/play");
 	}
 
 	// Backend http requests ==============================================================================================================
@@ -171,26 +142,13 @@ function Play() {
 					</div>
 				</div>
 			</section>}
-			{lobby.length === 0 ? <div>
-				{inQueue === true ? <div>
-					<span className="Play__InQueueText">In Queue</span>
-					<div className="Play__Ellipsis">
-  						<div className="Play__Dot" style={{ '--dot-index': 1 } as React.CSSProperties}></div>
-  						<div className="Play__Dot" style={{ '--dot-index': 2 } as React.CSSProperties}></div>
-  						<div className="Play__Dot" style={{ '--dot-index': 3 } as React.CSSProperties}></div>
-					</div>
-					<button className="Play__LeaveQueueButton Play__ButtonAnimation" onClick={leaveQueueHandler}>Leave Queue</button>
-				</div> : <div>
-					<button className="Play__JoinQueueButton Play__ButtonAnimation" onClick={joinQueueHandler}>Join Queue</button>
-				</div> }
-			</div> : <div>
 				{gameReady === true ? <div>
 						<OnlineGame 
 						lobby={lobby}
 						gameOver={gameOver}
 						oppId={oppId}
 						oppName={oppName}
-						playerNumber={playerNumber}
+						playerNumber={props.playerNumber}
 						backgroundColor={backgroundColor}
 						paddlesColor={paddlesColor}
 						ballColor={ballColor}
@@ -210,7 +168,6 @@ function Play() {
 						<button className="Play__ReadyButton Play__ButtonAnimation" onClick={readyCheckHandler}>Ready</button>
 					</div>}
 				</div> }
-			</div> }
 			{gameReady === true ? <div></div> : <div>
 				<span className="Play__Instructions">Use W/S or 🔼/🔽 to control your paddle</span>
 			</div>}
@@ -219,4 +176,4 @@ function Play() {
 	);
 }
 
-export default Play;
+export default PrivatePlay;
