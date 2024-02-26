@@ -14,6 +14,7 @@ export const MyContext = createContext({
 	token: "",
 	api: new Api(`http://${location.hostname}:3450`),
 	addNotif: (() => {}) as Function,
+	addInvite: (() => {}) as Function,
 	lastChan: "",
 	setLastChan: (() => {}) as Function,
 });

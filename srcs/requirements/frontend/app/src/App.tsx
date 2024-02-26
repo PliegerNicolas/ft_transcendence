@@ -1,11 +1,11 @@
 import "./App.css";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
-import { useMutation, MutationFunction } from "@tanstack/react-query";
+import { useMutation, MutationFunction, useQuery } from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
-import { NotifType } from "./utils/types.ts";
+import { InviteType, NotifType } from "./utils/types.ts";
 
 import { io } from 'socket.io-client';
 
@@ -22,15 +22,16 @@ import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
 import User from "./components/User.tsx";
 import Notifs from "./components/Notifs.tsx";
+import Invites from "./components/Game/Invitations.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
-import { randomString } from "./utils/utils.ts";
+import { randomString, stopOnHttp } from "./utils/utils.ts";
 
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
 
-export const socket = io(`http://${location.hostname}:3450/chat`);
+export const socket = io(`http://${location.hostname}:3450/socket`);
 
 function Auth({setLogInfo}: {setLogInfo: Function})
 {
@@ -126,12 +127,40 @@ function App()
 		setNotifs(prev => [...prev, add]);
 	}
 
+	const [invites, setInvites] = useState<InviteType[]>([]);
+
+	function addInvite(add: InviteType) {
+		setInvites(prev => [...prev, add]);
+	}
+
 	const [lastChan, setLastChan] = useState("");
+
+	const context = useContext(MyContext);
+
+	const getUser = useQuery({
+		queryKey: ["user"],
+		queryFn: () => context.api.get("/me/user"),
+		retry: stopOnHttp,
+	});
+
+	useEffect(() => {
+		if (socket) {
+			socket.on('getUserInfos', () => {
+				if (getUser.isSuccess)
+					socket.emit('userInfos', getUser.data.username);
+			});
+		}
+		return () => {
+			if (socket)
+				socket.off('getUserInfos');
+		};
+	}, [[]]);
 
 	return (
 		<MyContext.Provider value={{
 			...logInfo,
 			addNotif,
+			addInvite,
 			api: new Api(`http://${location.hostname}:3450`, logInfo.token),
 			lastChan,
 			setLastChan,
@@ -167,6 +196,7 @@ function App()
 					<Route path="*" element={<NotFound />} />
 				</Routes>
 				<Notifs list={notifs} setList={setNotifs} />
+				<Invites list={invites} setList={setInvites} />
 			</Router>
 		</MyContext.Provider>
 	);

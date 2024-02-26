@@ -60,6 +60,11 @@ export interface NotifType {
 	id: string,
 }
 
+export interface InviteType {
+	lobby: string,
+	from: string
+}
+
 export enum GameResult {
     VICTORY = 'victory',
     DEFEAT = 'defeat',

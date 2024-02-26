@@ -1,9 +1,10 @@
 import { OnModuleInit, UseGuards, Request } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io'
-import { gameState } from '../types/inputPayloads'
-import { GameServer } from '../server/game.server'
-import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../server/game.constants'
+import { gameState } from '../../game/types/inputPayloads'
+import { GameServer } from '../../game/server/game.server'
+import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../../game/server/game.constants'
+import { MessagePayloads } from '../../chats/types/messagePayloads.type';
 
 let state: gameState[] = [];
 let player1ID: string[] = [];
@@ -12,8 +13,11 @@ let playersQueue: string[] = [];
 let player1Username: string[] = [];
 let player2Username: string[] = [];
 
-@WebSocketGateway({ cors: true, namespace: 'game' })
-export class GameGateway implements OnModuleInit {
+let userByName: string[] = [];
+let userById: string[] = [];
+
+@WebSocketGateway({ cors: true, namespace: 'socket' })
+export class SocketGateway implements OnModuleInit {
 
 	constructor(private readonly gameServer: GameServer) {}
 
@@ -22,7 +26,8 @@ export class GameGateway implements OnModuleInit {
 
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
-			console.log('new game socket connection : ' + socket.id);
+			console.log('new socket connection : ' + socket.id);
+			this.server.to(socket.id).emit('getUserInfos');
 			socket.on('disconnect', () => {
 				console.log(socket.id + ' left game socket');
 				this.server.emit('userLeftSocket', socket.id);
@@ -32,6 +37,45 @@ export class GameGateway implements OnModuleInit {
 				}
 			});
 		});
+	}
+
+	@SubscribeMessage('userInfos')
+	handleGetUsername(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
+		userByName[username] = client.id;
+		userById[client.id] = username;
+		this.server.to(client.id).emit('rejoinChannels');
+	}
+	
+	@SubscribeMessage('newMessage')
+	handleNewMessage(@MessageBody() message: MessagePayloads, @ConnectedSocket() client: Socket) {
+		client.to(message.channel).emit('onMessage', message.content, message.channel);
+		console.log('NEW MESSAGE HANDLED : ' + message.content);
+	}
+  
+	@SubscribeMessage('joinChannel')
+	handleChannelJoin(@MessageBody() channel: string, @ConnectedSocket() client: Socket) {
+		client.join(channel);
+		console.log('JOINED CHANNEL : ' + channel);
+	}
+
+	@SubscribeMessage('inviteToPrivate')
+	handleInviteToPrivate(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
+		if (userByName[data.user]) {
+			this.server.to(userByName[data.user]).emit('invitedToPrivate', userById[client.id], data.lobby);
+		}
+	}
+
+	@SubscribeMessage('acceptInvite')
+	handleAcceptInvite(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
+		if (userByName[data.user]) {
+			this.server.to(userByName[data.user]).emit('acceptedInvite', userById[client.id], data.lobby);
+		}
+	}
+	@SubscribeMessage('rejectInvite')
+	handleRejectInvite(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
+		if (userByName[data.user]) {
+			this.server.to(userByName[data.user]).emit('rejectedInvite', userById[client.id], data.lobby);
+		}
 	}
 
 	@SubscribeMessage('opponentLeft')
