@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Request, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Request, UseGuards, ValidationPipe } from '@nestjs/common';
 import { ChannelsService } from '../services/channels/channels.service';
 import { ParseIdPipe } from 'src/common/pipes/parse-id/parse-id.pipe';
 import { GetChannelsQueryDto } from '../dtos/GetChannelsQuery.dto';
@@ -10,6 +10,9 @@ import { GetChannelDto } from '../dtos/GetChannel.dto';
 import { JoinChannelDto } from '../dtos/JoinChannel.dto';
 import { LeaveChannelDto } from '../dtos/LeaveChannel.dto';
 import { ChannelAccessDto } from '../dtos/ChannelAccess.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RoleGuard } from 'src/role/role.guard';
+import { Role } from 'src/role/role.decorator';
 
 @Controller()
 export class ChannelsController {
@@ -115,6 +118,8 @@ export class ChannelsController {
         return (await this.channelService.manageChannelAccess(channelId, username, channelAccessDto));
     }
 
+	@Role(['admin'])
+	@UseGuards(AuthGuard('jwt'), RoleGuard)
     @Delete('channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?

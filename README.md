@@ -173,7 +173,8 @@ Example general purpose body for channel:
 {
     "name": "Channel",
     "visibility": "public",
-    "mode": "open"
+    "mode": "password_protected",
+    "password": "Password123"
 }
 ```
 
