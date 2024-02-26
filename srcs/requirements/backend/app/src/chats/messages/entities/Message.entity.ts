@@ -1,5 +1,8 @@
+import { NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { Channel } from "src/chats/channels/entities/Channel.entity";
 import { ChannelMember } from "src/chats/channels/entities/ChannelMember.entity";
+import { ChannelRole } from "src/chats/channels/enums/channel-role.enum";
+import { User } from "src/users/entities/User.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, Unique, UpdateDateColumn } from "typeorm";
 
 @Entity({ name: 'messages' })
@@ -26,5 +29,24 @@ export class Message {
 
     @ManyToOne(() => ChannelMember, (channelMember) => channelMember.messages, { onDelete: 'CASCADE' })
     channelMember: ChannelMember;
+
+    /* Helper functions */
+
+    public isMessageOwner(user: User): boolean {
+        if (!user) return (false);
+        return (this.channelMember?.user.username === user.username);
+    }
+
+    public validateReplaceOrUpdate(user: User) {
+        if (!user) throw new NotFoundException(`User '{undefined}' not found`);
+        if (!this.channel?.isMember(user.username)) throw new UnauthorizedException(`User '${user.username}' isn't member of Channel with ID ${this.channelId}`);
+        if (!this.isMessageOwner(user)) throw new UnauthorizedException(`User '${user.username}' isn't owner of Message with ID ${this.id} of Channel with ID ${this.channelId}`);
+    }
+
+    public validateDelete(user: User) {
+        if (!user) throw new NotFoundException(`User '{undefined}' not found`);
+        if (!this.channel?.isMember(user.username)) throw new UnauthorizedException(`User '${user.username ? user.username : '{undefined}'}' isn't member of Channel with ID ${this.channelId}`);
+        if (!this.isMessageOwner(user) && !this.channel.isRankedEqualOrAbove(user.username, ChannelRole.OPERATOR)) throw new UnauthorizedException(`User '${user.username}' isn't owner of Message with ID ${this.id} of Channel with ID ${this.channelId} or has an insufficient role`);
+    }
 
 }

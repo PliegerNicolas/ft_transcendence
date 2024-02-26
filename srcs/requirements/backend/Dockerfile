@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 20:08:41 by nicolas           #+#    #+#              #
-#    Updated: 2024/02/19 11:40:45 by nicolas          ###   ########.fr        #
+#    Updated: 2024/02/25 15:42:16 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # Latest stable version of alpine linux at 8 january 2024.
@@ -18,7 +18,9 @@ ARG PORT
 RUN apk update && \
 	apk add --no-cache \
 		nodejs \
-		npm && \
+		npm \
+		python3 \
+		build-base && \
 	rm -f /var/cache/apk/*
 
 # Map /app as working directory in container.

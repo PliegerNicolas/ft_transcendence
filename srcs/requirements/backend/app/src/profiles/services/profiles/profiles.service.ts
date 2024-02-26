@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'src/profiles/entities/Profile.entity';
-import { ReplaceProfileParams, UpdateProfileParams } from 'src/profiles/types/profile.type';
+import { CreateProfileParams, ReplaceProfileParams, UpdateProfileParams } from 'src/profiles/types/profile.type';
 import { User } from 'src/users/entities/User.entity';
-import { Repository } from 'typeorm';
+import { Equal, Repository } from 'typeorm';
 
 @Injectable()
 export class ProfilesService {
@@ -15,45 +15,89 @@ export class ProfilesService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    async getProfileByUserId(username: string): Promise <Profile> {
+    async getProfile(username: string = undefined): Promise<Profile> {
         const user = await this.userRepository.findOne({
-            where: { username: username },
+            where: { username: Equal(username) },
             relations: ['profile'],
         });
 
-        if (!user) throw new NotFoundException(`User with Username '${username}' not found`);
+        if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}' }' not found`);
 
         return (user.profile);
     }
 
-    async replaceProfile(username: string, profileDetails: ReplaceProfileParams): Promise<Profile> {
-        const profile = await this.profileRepository.findOne({
-            where: {
-                user: { username: username }
-            }
+    async getMyProfile(username: string = undefined): Promise<Profile> {
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+            relations: ['profile'],
         });
 
-        if (!profile) throw new NotFoundException(`Profile of User with Username '${username}' not found`);
+        if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}' }' not found`);
 
-        return (await this.profileRepository.save({
-            ...profile,
+        return (user.profile);
+    }    
+
+    async createProfile(username: string = undefined, profileDetails: CreateProfileParams): Promise<Profile> {
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+            relations: ['profile'],
+        });
+
+        if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}' }' not found`);
+        else if (user.profile) throw new BadRequestException(`User '${username}'s Profile already exists`);
+
+        const profile = this.profileRepository.create({
+            user: user,
             ...profileDetails,
-        }));        
+        });
+
+        return (await this.profileRepository.save(profile));
     }
 
-    async updateProfile(username: string, profileDetails: UpdateProfileParams): Promise<Profile> {
+    async replaceProfile(username: string = undefined, profileDetails: ReplaceProfileParams): Promise<Profile> {
         const profile = await this.profileRepository.findOne({
-            where: {
-                user: { username: username }
-            }
+            where: { user: { username: Equal(username) } },
         });
 
-        if (!profile) throw new NotFoundException(`Profile of User with Username '${username}' not found`);
+        if (!profile) throw new NotFoundException(`Profile of User '${username ? username : '{undefined}'}' not found`);
 
-        return (await this.profileRepository.save({
-            ...profile,
-            ...profileDetails
-        }));        
+        this.profileRepository.merge(profile, {
+            ...profileDetails,
+        });
+
+        return (await this.profileRepository.save(profile));
+    }
+
+    async updateProfile(username: string = undefined, profileDetails: ReplaceProfileParams): Promise<Profile> {
+        const profile = await this.profileRepository.findOne({
+            where: { user: { username: Equal(username) } },
+        });
+
+        if (!profile) throw new NotFoundException(`Profile of User '${username ? username : '{undefined}' }' not found`);
+
+        this.profileRepository.merge(profile, {
+            ...profileDetails,
+        });
+
+        return (await this.profileRepository.save(profile));
+    }
+
+    async clearProfile(username: string = undefined): Promise<Profile> {
+        const profile = await this.profileRepository.findOne({
+            where: { user: { username: Equal(username) } },
+        });
+
+        if (!profile) throw new NotFoundException(`Profile of User '${username ? username : '{undefined}' }' not found`);
+
+        const emptyProfile: Partial<Profile> = {
+            ...Object.fromEntries(Object.keys(profile).map((key) => [key, null])),
+            id: profile.id,
+            user: profile.user,
+            created_at: profile.created_at,
+            updated_at: profile.updated_at,
+        };
+
+        return (await this.profileRepository.save(emptyProfile));
     }
 
 }

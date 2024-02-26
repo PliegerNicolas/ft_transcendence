@@ -3,12 +3,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 import { User } from "src/users/entities/User.entity";
 import { Channel } from "./Channel.entity";
 import { Message } from "src/chats/messages/entities/Message.entity";
-
-export enum ChannelRole {
-    ADMIN = 'admin',
-    MODERATOR = 'moderator',
-    MEMBER = 'member',
-}
+import { ChannelRole } from "../enums/channel-role.enum";
 
 @Entity({ name: 'channel_members' })
 export class ChannelMember {
@@ -19,6 +14,9 @@ export class ChannelMember {
     @IsEnum(ChannelRole)
     @Column({ type: 'enum', enum: ChannelRole, default: ChannelRole.MEMBER })
     role: ChannelRole;
+
+    @Column({ default: false })
+    mute: boolean;
 
     @ManyToOne(() => Channel, (channel) => channel.members, { onDelete: 'CASCADE' })
     channel: Channel;

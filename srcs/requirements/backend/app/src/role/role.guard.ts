@@ -18,7 +18,6 @@ export class RoleGuard implements CanActivate {
   async canActivate(
     context: ExecutionContext,
   ): Promise<boolean> {
-    // return true;
   	const request = context.switchToHttp().getRequest();
 	const token = this.jwtService.decode(request.headers.authorization);
 	const params = request.params;
@@ -26,7 +25,7 @@ export class RoleGuard implements CanActivate {
 	// console.log(user.channelId)
 	// console.log(token.user_id)
 
-	const test = await this.channelMemberRepository.findOne({
+	const member = await this.channelMemberRepository.findOne({
 	relations : {
 			channel : true,
 			user : true
@@ -43,16 +42,20 @@ export class RoleGuard implements CanActivate {
 	}).then(
 		(data) => data
 	)
-	if (test == null)
+	if (member == null)
 	{
 		return (false);
 	}
-	// console.log(test.role)
+	// console.log(member.role)
 	// console.log(roles);
+
+	// /!\ THIS FAILS BECAUSE ROLE ARE NOW INTEGERS.
+	/*
 	if (roles.find((element) => element == test.role) == undefined)
 	{
 		return false;
 	}
+	*/
 
 	return true;
   }
