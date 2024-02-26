@@ -35,18 +35,6 @@ export class UsersController {
     /* Public filtered PATHS: anyone can access but connected users would see additional data. */
     /* */
 
-	@UseGuards(JwtPublicGuard)
-    @Get('users')
-    // UseGuard => Verify if user is connected but permit anyone to pass.
-    async getUsers(
-        @Request() req: any,
-    ) {
-        const username = req.user ? req.user.username : undefined;
-		console.log(username)
-        if (username) return (await this.userService.getMyUsers(username));
-        else return (await this.userService.getUsers());
-    }
-
     @Get('users/:username')
     // UseGuard => Verify if user is connected but permit anyone to pass.
     async getUser(
