@@ -6,6 +6,7 @@ import { ReplaceUserDto } from 'src/users/dtos/ReplaceUser.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
 import { UsersGuard } from 'src/users/users.guard';
+import { JwtPublicGuard } from 'src/auth/jwt-public.guard';
 
 @Controller()
 export class UsersController {
@@ -28,12 +29,14 @@ export class UsersController {
     /* Public filtered PATHS: anyone can access but connected users would see additional data. */
     /* */
 
+	@UseGuards(JwtPublicGuard)
     @Get('users')
     // UseGuard => Verify if user is connected but permit anyone to pass.
     async getUsers(
         @Request() req: any,
     ) {
         const username = req.user ? req.user.username : undefined;
+		console.log(username)
         if (username) return (await this.userService.getMyUsers(username));
         else return (await this.userService.getUsers());
     }
