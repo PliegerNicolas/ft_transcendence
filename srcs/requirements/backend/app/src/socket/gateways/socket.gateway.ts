@@ -45,7 +45,10 @@ export class SocketGateway implements OnModuleInit {
 		userById[client.id] = username;
 		this.server.to(client.id).emit('rejoinChannels');
 	}
-	
+
+	// Chat Handlers ==============================================================================================================	
+
+
 	@SubscribeMessage('newMessage')
 	handleNewMessage(@MessageBody() message: MessagePayloads, @ConnectedSocket() client: Socket) {
 		client.to(message.channel).emit('onMessage', message.content, message.channel);
@@ -57,6 +60,8 @@ export class SocketGateway implements OnModuleInit {
 		client.join(channel);
 		console.log('JOINED CHANNEL : ' + channel);
 	}
+
+	// Private Play Handlers ==============================================================================================================
 
 	@SubscribeMessage('inviteToPrivate')
 	handleInviteToPrivate(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
@@ -77,6 +82,8 @@ export class SocketGateway implements OnModuleInit {
 			this.server.to(userByName[data.user]).emit('rejectedInvite', userById[client.id], data.lobby);
 		}
 	}
+
+	// Play Handlers ==============================================================================================================
 
 	@SubscribeMessage('opponentLeft')
 	handleOpponentLeft(@MessageBody() data: {userId: string, lobby: string}, @ConnectedSocket() client: Socket) {

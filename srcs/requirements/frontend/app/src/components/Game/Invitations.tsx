@@ -5,7 +5,7 @@ import { useContext, useEffect } from "react";
 import { InviteType } from "../../utils/types";
 import { MyContext } from "../../utils/contexts";
 
-export const invitePlayer = (userToInvite: string) => {
+export const InvitePlayer = (props: any) => {
 
 	const navigate = useNavigate();
 
@@ -17,7 +17,7 @@ export const invitePlayer = (userToInvite: string) => {
 			playerNumber: 1,
 		}});
 		if (socket) {
-			socket.emit('inviteToPrivate', lobby_id, userToInvite);
+			socket.emit('inviteToPrivate', lobby_id, props.user);
 		}
 	}
 
