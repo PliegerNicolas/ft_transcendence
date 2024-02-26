@@ -17,13 +17,19 @@ export class UsersController {
     /* Public PATHS: anyone can access. */
     /* */
 
+    @Get('users')
+    async getUsers(
+        @Request() req: any,
+    ) {
+        return (await this.userService.getUsers());
+    }
+
     @Post('users')
     async createUser(
         @Body(new ValidationPipe) createUserDto: CreateUserDto
     ) {
         return (await this.userService.createUser(createUserDto));
     }
-
     
     /* */
     /* Public filtered PATHS: anyone can access but connected users would see additional data. */

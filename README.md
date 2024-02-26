@@ -168,12 +168,21 @@ __CHANNELS__
 
 ૰ **@Delete** `/channels/:channelId`
 
-Example general purpose body:
+Example general purpose body for channel:
 ```
 {
     "name": "Channel",
     "visibility": "public",
-    "mode": "open"
+    "mode": "password_protected",
+    "password": "Password123"
+}
+```
+
+Example general purpose body for manage_access:
+```
+{
+    "action": "invite",
+    "usernames": ["Foo", "Bar"]
 }
 ```
 
