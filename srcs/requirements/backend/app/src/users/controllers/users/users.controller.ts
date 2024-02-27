@@ -7,6 +7,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
 import { UsersGuard } from 'src/users/users.guard';
 import { JwtPublicGuard } from 'src/auth/jwt-public.guard';
+import { GlobalRole } from 'src/role/role.decorator';
+import { RoleGlobalGuard } from 'src/role/role.guard';
 
 @Controller()
 export class UsersController {
@@ -35,6 +37,7 @@ export class UsersController {
     /* Public filtered PATHS: anyone can access but connected users would see additional data. */
     /* */
 
+	@UseGuards(JwtPublicGuard)
     @Get('users/:username')
     // UseGuard => Verify if user is connected but permit anyone to pass.
     async getUser(
@@ -49,6 +52,7 @@ export class UsersController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
+	@UseGuards(AuthGuard('jwt'))
     @Get('me')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyUser(
@@ -58,6 +62,7 @@ export class UsersController {
         return (await this.userService.getMyUser(username));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Put('me')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyUser(
@@ -68,6 +73,7 @@ export class UsersController {
         return (await this.userService.replaceUser(username, replaceUserDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Patch('me')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyUser(
@@ -78,6 +84,7 @@ export class UsersController {
         return (await this.userService.updateUser(username, updateUserDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Delete('me')
     // UseGuard => Verify if user connected and pass it's req.user
     async deleteMyUser(
@@ -91,6 +98,8 @@ export class UsersController {
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Put('users/:username')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceUser(
@@ -100,6 +109,8 @@ export class UsersController {
         return (await this.userService.replaceUser(username, replaceUserDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Patch('users/:username')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateUser(
@@ -109,6 +120,8 @@ export class UsersController {
         return (await this.userService.updateUser(username, updateUserDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Delete('users/:username')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async deleteUser(

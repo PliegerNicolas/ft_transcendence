@@ -6,6 +6,7 @@ import { ParseIdPipe } from "src/common/pipes/parse-id/parse-id.pipe";
 import { ReplaceMessageDto } from "../dtos/ReplaceMessage.dto";
 import { UpdateMessageDto } from "../dtos/UpdateMessage.dto";
 import { ParseUsernamePipe } from "src/common/pipes/parse-username/parse-username.pipe";
+import { RoleGlobalGuard } from "src/role/role.guard";
 
 @Controller()
 export class MessagesController {
@@ -20,6 +21,7 @@ export class MessagesController {
     /* Public filtered PATHS: anyone can access but connected users would see additional data. */
     /* */
 
+	@UseGuards(AuthGuard('jwt'))
     @Get('channels/:channelId/messages')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyChannelMessages(
@@ -30,6 +32,7 @@ export class MessagesController {
         return (await this.messageService.getChannelMessages(channelId, username));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Get('channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyChannelMessage(
@@ -45,6 +48,7 @@ export class MessagesController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
+	@UseGuards(AuthGuard('jwt'))
     @Post('channels/:channelId/messages')
     // UseGuard => Verify if user connected and pass it's req.user
     async createMyChannelMessage(
@@ -56,6 +60,7 @@ export class MessagesController {
         return (await this.messageService.createChannelMessage(channelId, username, createMessageDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Put('channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyChannelMessage(
@@ -68,6 +73,7 @@ export class MessagesController {
         return (await this.messageService.replaceChannelMessage(channelId, username, messageId, replaceMessageDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Patch('channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyChannelMessage(
@@ -80,6 +86,7 @@ export class MessagesController {
         return (await this.messageService.updateChannelMessage(channelId, username, messageId, updateMessageDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Delete('channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected and pass it's req.user
     async deleteMyChannelMessage(
@@ -95,6 +102,8 @@ export class MessagesController {
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Get('users/:username/channels/:channelId/messages')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getChannelMessages(
@@ -104,6 +113,8 @@ export class MessagesController {
         return (await this.messageService.getChannelMessages(channelId, username));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Get('users/:username/channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getChannelMessage(
@@ -114,6 +125,8 @@ export class MessagesController {
         return (await this.messageService.getChannelMessage(channelId, username, messageId));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Post('users/:username/channels/:channelId/messages')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async createChannelMessage(
@@ -124,6 +137,8 @@ export class MessagesController {
         return (await this.messageService.createChannelMessage(channelId, username, createMessageDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Put('users/:username/channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceChannelMessage(
@@ -135,6 +150,8 @@ export class MessagesController {
         return (await this.messageService.replaceChannelMessage(channelId, username, messageId, replaceMessageDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Patch('users/:username/channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateChannelMessage(
@@ -146,6 +163,8 @@ export class MessagesController {
         return (await this.messageService.updateChannelMessage(channelId, username, messageId, updateMessageDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Delete('users/:username/channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async deleteChannelMessage(

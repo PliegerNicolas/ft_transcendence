@@ -7,7 +7,7 @@ import { Channel } from 'src/chats/channels/entities/Channel.entity';
 import { ChannelMember } from 'src/chats/channels/entities/ChannelMember.entity';
 import { User } from 'src/users/entities/User.entity';
 import { Repository } from 'typeorm';
-import { Role } from './role.decorator';
+import { GlobalRole, Role } from './role.decorator';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -52,6 +52,47 @@ export class RoleGuard implements CanActivate {
 	// /!\ THIS FAILS BECAUSE ROLE ARE NOW INTEGERS.
 	
 	if (roles.find((element) => element == String(member.role)) == undefined)
+	{
+		return false;
+	}
+	
+
+	return true;
+  }
+
+}
+
+@Injectable()
+export class RoleGlobalGuard implements CanActivate {
+	constructor(private jwtService : JwtService,
+				@InjectRepository(User)
+				private userRepository : Repository<User>,
+				private reflector : Reflector) {}
+  async canActivate(
+    context: ExecutionContext,
+  ): Promise<boolean> {
+  	const request = context.switchToHttp().getRequest();
+	const token = this.jwtService.decode(request.headers.authorization);
+	const roles = this.reflector.get(GlobalRole, context.getHandler());
+	// console.log(user.channelId)
+	// console.log(token.user_id)
+
+	const member = await this.userRepository.findOne({
+		where : {
+			id : token.user_id
+		}
+
+	}).then(
+		(data) => data
+	)
+	if (member == null)
+	{
+		return (false);
+	}
+	// console.log(member.role)
+	// console.log(roles)
+	
+	if (roles.find((element) => element == String(member.globalServerPrivileges)) == undefined)
 	{
 		return false;
 	}
