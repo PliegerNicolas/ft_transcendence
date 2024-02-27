@@ -1,6 +1,6 @@
 import "./App.css";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import { useMutation, MutationFunction } from "@tanstack/react-query";
 
@@ -27,12 +27,14 @@ import { randomString } from "./utils/utils.ts";
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
 
-function Auth({setLogInfo}: {setLogInfo: Function})
+function Auth()
 {
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
 
 	const api = new Api(`http://${location.hostname}:3450`);
+
+	const { setLogInfo } = useContext(MyContext);
 
 	const navigate = useNavigate();
 	const redirectPath = localStorage.getItem("auth_redirect");
@@ -51,6 +53,7 @@ function Auth({setLogInfo}: {setLogInfo: Function})
 			localStorage.setItem(
 				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
 			setLogInfo({logged: true, token: data.access_token});
+			console.log("COCUCOUD");
 			setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
 		},
 
@@ -126,6 +129,7 @@ function App()
 	return (
 		<MyContext.Provider value={{
 			...logInfo,
+			setLogInfo,
 			addNotif,
 			api: new Api(`http://${location.hostname}:3450`, logInfo.token),
 			lastChan,
@@ -139,7 +143,7 @@ function App()
 					<Route path="/play" element={<Play />} />
 					<Route path="/stats" element={<Stats />} />
 					<Route path="/about" element={<About />} />
-					<Route path="/auth" element={<Auth setLogInfo={setLogInfo} />} />
+					<Route path="/auth" element={<Auth />} />
 					<Route path="/chat/*" element={
 						<RequireAuth elem={<Chat />} />
 					}/>
