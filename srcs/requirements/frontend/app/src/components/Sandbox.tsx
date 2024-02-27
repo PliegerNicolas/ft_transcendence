@@ -40,7 +40,7 @@ export default function Sandbox()
 
 	const postChan = useMutation({
 		mutationFn: (name: string) =>
-			context.api.post("/channels", {name, status: "public"}),
+			context.api.post("/channels", {name, visibility: "public", mode: "open"}),
 		onSettled: () => invalidate(["allChans"]),
 		onError: error => context.addNotif({content: error.message}),
 	});
@@ -161,8 +161,6 @@ function UserListRender(
 			</span><br />
 		</div>
 	);
-
-	console.log(query.data);
 
 	return (
 		<div className="Sandbox__Scrollable">

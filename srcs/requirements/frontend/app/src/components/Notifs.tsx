@@ -57,16 +57,18 @@ function Notif(
 
 	return (
 		<div
-			className={`Notifs__Notif ${!notif.type && "err"} ${fade && "fadeout"}`}
+			className={`Notif ${!notif.type && "err"} ${fade && "fadeout"}`}
 			onClick={() => rmSelf()}
 		>
-			<div>
+			<div className="Notif__Top">
 				<div className="Notif__Date">
 					{pad(date.getHours())}:{pad(date.getMinutes())}
 				</div>
+				<button><img src={closeIcon} /></button>
+			</div>
+			<div className="Notif__Content">
 				{notif.content}
 			</div>
-			<button><img src={closeIcon} /></button>
 		</div>
 		);
 }

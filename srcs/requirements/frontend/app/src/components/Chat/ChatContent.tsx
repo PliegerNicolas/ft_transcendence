@@ -60,7 +60,7 @@ function ChatContent() {
 		onError: error => addNotif({ content: error.message }),
 	});
 
-	setLastChan(id);
+	useEffect(() => setLastChan(id), [id]);
 
 	/*
 	** These lines are desirable to auto-scroll at bottom of chat.
@@ -78,6 +78,8 @@ function ChatContent() {
 
 		if (!inputValue)
 			return;
+
+		addNotif({content: inputValue});
 
 		postMsg.mutate(inputValue);
 		setInputValue("");
