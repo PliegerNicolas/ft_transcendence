@@ -5,7 +5,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate, stopOnHttp } from "../../utils/utils.ts";
+import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
 import { MyContext } from "../../utils/contexts";
 
 import "../../styles/chat.css";
@@ -37,6 +37,7 @@ export default function ChatContentRouter()
 function ChatContent() {
 	const { api, addNotif, setLastChan } = useContext(MyContext);
 	const invalidate = useInvalidate();
+	const stopOnHttp = useStopOnHttp();
 
 	const params = useParams();
 	const id = params.id!;
@@ -66,7 +67,10 @@ function ChatContent() {
 	** These lines are desirable to auto-scroll at bottom of chat.
 	*/
 	const anchorRef = useRef<HTMLDivElement>(null);
-	useEffect(() => anchorRef.current?.scrollIntoView(), [getMsgs]);
+	useEffect(() => {
+		if (anchorRef.current)
+			anchorRef.current.scrollIntoView()
+	}, [getMsgs]);
 
 	const [inputValue, setInputValue] = useState("");
 	function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {

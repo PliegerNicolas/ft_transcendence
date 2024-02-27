@@ -1,4 +1,6 @@
 import { useQueryClient, QueryKey } from "@tanstack/react-query";
+import { useContext } from "react";
+import { MyContext } from "./contexts";
 
 
 export function useInvalidate()
@@ -16,9 +18,20 @@ export function httpStatus(e: Error)
 	return (+statusString);
 }
 
-export function stopOnHttp(count: number, error: Error)
+export function useStopOnHttp()
 {
-	return (!httpStatus(error) && count < 3)
+	const {setLogInfo} = useContext(MyContext);
+
+	return ((count: number, error: Error) => {
+		const status = httpStatus(error);
+
+		if (status === 401) {
+			localStorage.removeItem("my_info");
+			setLogInfo({logged: false, token: ""});
+		}
+
+		return (!status && count < 3)
+	});
 }
 
 export function randomString(length: number)

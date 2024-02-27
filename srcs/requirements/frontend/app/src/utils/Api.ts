@@ -5,6 +5,7 @@ class Api
 		"Content-Type": "application/json",
 		"Authorization": ""
 	};
+	auth: boolean;
 
 	#return_switch(response: Response) {
 		if (!response.ok)
@@ -64,6 +65,7 @@ async get(endpoint: string) {
 	constructor(base_url = "http://localhost", token = "") {
 		this.base_url = base_url;
 		this.headers["Authorization"] = token;
+		this.auth = token !== "";
 	}
 }
 

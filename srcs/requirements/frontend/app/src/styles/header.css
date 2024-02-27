@@ -41,3 +41,70 @@
 	font-size: 1.6rem;
 	font-weight: 700;
 }
+
+.Header__UserInfo {
+	position: relative;
+}
+
+.Header__UserInfoContainer {
+	height: 42px;
+}
+
+.Header__UserInfo>div>img {
+	height: 42px;
+	border-radius: 9px;
+}
+.Header__UserInfo>div>img:hover {
+	cursor: pointer;
+}
+
+.Header__Popup {
+	position: fixed;
+	right: 12px;
+	top: 64px;
+	background: #262c4040;
+	backdrop-filter: blur(8px);
+	padding: 4px;
+	border-radius: 6px;
+	border: 1px solid var(--bg-color-5);
+	width: 180px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+}
+.Header__Popup>hr {
+	width: 80%;
+	margin: 0;
+}
+
+.Header__PopupLink {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	color: var(--text-normal);
+	padding: 4px 24px;
+	border-radius: 7px;
+}
+.Header__PopupLink.logged:visited {
+	color: var(--text-normal);
+}
+.Header__PopupLink.logged:hover {
+	background: #464c6080;
+	color: var(--text-accent);
+}
+
+.Header__PopupLink>img {
+	height: 64px;
+	border-radius: 14px;
+}
+
+.Header__PopupUsername {
+	font-weight: 600;
+}
+
+.Logout {
+	height: 18px;
+	margin: 12px;
+}
