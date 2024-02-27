@@ -5,6 +5,8 @@ import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-usernam
 import { ReplaceProfileDto } from 'src/profiles/dtos/ReplaceProfile.dto';
 import { UpdateProfileDto } from 'src/profiles/dtos/UpdateProfile.dto';
 import { ProfilesService } from 'src/profiles/services/profiles/profiles.service';
+import { GlobalRole } from 'src/role/role.decorator';
+import { RoleGlobalGuard } from 'src/role/role.guard';
 
 @Controller()
 export class ProfilesController {
@@ -23,6 +25,7 @@ export class ProfilesController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
+	@UseGuards(AuthGuard('jwt'))
     @Put('me/profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyProfile(
@@ -33,6 +36,7 @@ export class ProfilesController {
         return (await this.profileService.replaceProfile(username, replaceProfileDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Patch('me/profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyProfile(
@@ -43,6 +47,7 @@ export class ProfilesController {
         return (await this.profileService.updateProfile(username, updateProfileDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Delete('me/profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async clearMyprofile(
@@ -56,6 +61,8 @@ export class ProfilesController {
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Put('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceProfile(
@@ -65,6 +72,8 @@ export class ProfilesController {
         return (await this.profileService.replaceProfile(username, replaceProfileDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Patch('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateProfile(
@@ -74,6 +83,8 @@ export class ProfilesController {
         return (await this.profileService.updateProfile(username, updateProfileDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Delete('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async clearProfile(
