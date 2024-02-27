@@ -7,6 +7,7 @@ import { ReplaceMessageDto } from "../dtos/ReplaceMessage.dto";
 import { UpdateMessageDto } from "../dtos/UpdateMessage.dto";
 import { ParseUsernamePipe } from "src/common/pipes/parse-username/parse-username.pipe";
 import { RoleGlobalGuard } from "src/role/role.guard";
+import { GlobalRole } from "src/role/role.decorator";
 
 @Controller()
 export class MessagesController {
