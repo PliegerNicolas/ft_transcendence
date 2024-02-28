@@ -73,7 +73,6 @@ export default function Me()
 	);
 
 	const me = getMe.data;
-	console.log(me);
 	
 	function friendshipAction(action: string, ship: FriendshipType) {
 		const other = ship.user1.username == me.username ?
@@ -104,7 +103,7 @@ export default function Me()
 				</h2>
 				<div className="User__Infos">
 					<div className="User__PictureContainer">
-						<label htmlFor="userPicture">
+						<label className="User__Picture" htmlFor="userPicture">
 							<img className="User__Picture" src={defaultPicture}/>
 						</label>
 						<img className="User__PictureBg" src={defaultPicture}/>
