@@ -34,7 +34,8 @@ export default function ChatContentRouter()
 
 // <ChatContent /> =============================================================
 
-function ChatContent() {
+function ChatContent()
+{
 	const { api, addNotif, setLastChan } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const stopOnHttp = useStopOnHttp();
@@ -82,8 +83,6 @@ function ChatContent() {
 
 		if (!inputValue)
 			return;
-
-		addNotif({content: inputValue});
 
 		postMsg.mutate(inputValue);
 		setInputValue("");
