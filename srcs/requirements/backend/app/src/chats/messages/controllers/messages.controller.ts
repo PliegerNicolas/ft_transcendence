@@ -8,6 +8,7 @@ import { UpdateMessageDto } from "../dtos/UpdateMessage.dto";
 import { ParseUsernamePipe } from "src/common/pipes/parse-username/parse-username.pipe";
 import { RoleGlobalGuard } from "src/role/role.guard";
 import { GlobalRole } from "src/role/role.decorator";
+import { UsersGuard } from "src/users/users.guard";
 
 @Controller()
 export class MessagesController {
@@ -104,7 +105,7 @@ export class MessagesController {
     /* */
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Get('users/:username/channels/:channelId/messages')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getChannelMessages(
@@ -115,7 +116,7 @@ export class MessagesController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Get('users/:username/channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getChannelMessage(
@@ -127,7 +128,7 @@ export class MessagesController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Post('users/:username/channels/:channelId/messages')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async createChannelMessage(
@@ -139,7 +140,7 @@ export class MessagesController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Put('users/:username/channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceChannelMessage(
@@ -152,7 +153,7 @@ export class MessagesController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Patch('users/:username/channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateChannelMessage(
@@ -165,7 +166,7 @@ export class MessagesController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Delete('users/:username/channels/:channelId/messages/:messageId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async deleteChannelMessage(

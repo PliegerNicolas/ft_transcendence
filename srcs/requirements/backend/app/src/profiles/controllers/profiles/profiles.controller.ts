@@ -7,6 +7,7 @@ import { UpdateProfileDto } from 'src/profiles/dtos/UpdateProfile.dto';
 import { ProfilesService } from 'src/profiles/services/profiles/profiles.service';
 import { GlobalRole } from 'src/role/role.decorator';
 import { RoleGlobalGuard } from 'src/role/role.guard';
+import { UsersGuard } from 'src/users/users.guard';
 
 @Controller()
 export class ProfilesController {
@@ -62,7 +63,7 @@ export class ProfilesController {
     /* */
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Put('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceProfile(
@@ -73,7 +74,7 @@ export class ProfilesController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Patch('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateProfile(
@@ -84,7 +85,7 @@ export class ProfilesController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Delete('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async clearProfile(

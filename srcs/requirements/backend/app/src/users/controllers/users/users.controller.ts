@@ -9,6 +9,7 @@ import { UsersGuard } from 'src/users/users.guard';
 import { JwtPublicGuard } from 'src/auth/jwt-public.guard';
 import { GlobalRole } from 'src/role/role.decorator';
 import { RoleGlobalGuard } from 'src/role/role.guard';
+import { request } from 'http';
 
 @Controller()
 export class UsersController {
@@ -99,7 +100,7 @@ export class UsersController {
     /* */
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Put('users/:username')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceUser(
@@ -110,7 +111,7 @@ export class UsersController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Patch('users/:username')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateUser(
@@ -121,7 +122,7 @@ export class UsersController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Delete('users/:username')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async deleteUser(
