@@ -5,9 +5,9 @@ import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-usernam
 import { ReplaceProfileDto } from 'src/profiles/dtos/ReplaceProfile.dto';
 import { UpdateProfileDto } from 'src/profiles/dtos/UpdateProfile.dto';
 import { ProfilesService } from 'src/profiles/services/profiles/profiles.service';
-import { GlobalRole } from 'src/role/role.decorator';
-import { RoleGlobalGuard } from 'src/role/role.guard';
-import { UsersGuard } from 'src/users/users.guard';
+import { GlobalRole } from 'src/guards/role.decorator';
+import { RoleGlobalGuard } from 'src/guards/role.guard';
+import { UsersGuard } from 'src/guards/users.guard';
 
 @Controller()
 export class ProfilesController {

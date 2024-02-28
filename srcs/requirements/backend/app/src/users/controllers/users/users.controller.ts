@@ -5,10 +5,10 @@ import { UpdateUserDto } from 'src/users/dtos/UpdateUser.dto';
 import { ReplaceUserDto } from 'src/users/dtos/ReplaceUser.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
-import { UsersGuard } from 'src/users/users.guard';
-import { JwtPublicGuard } from 'src/auth/jwt-public.guard';
-import { GlobalRole } from 'src/role/role.decorator';
-import { RoleGlobalGuard } from 'src/role/role.guard';
+import { UsersGuard } from 'src/guards/users.guard';
+import { JwtPublicGuard } from 'src/guards/jwt-public.guard';
+import { GlobalRole } from 'src/guards/role.decorator';
+import { RoleGlobalGuard } from 'src/guards/role.guard';
 import { request } from 'http';
 
 @Controller()

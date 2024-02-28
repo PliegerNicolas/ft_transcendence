@@ -6,6 +6,8 @@ import { CreateGamelogDto } from "src/gamelogs/dtos/CreateGamelog.dto";
 import { ReplaceGamelogDto } from "src/gamelogs/dtos/ReplaceGamelog.dto";
 import { UpdateGamelogDto } from "src/gamelogs/dtos/UpdateGamelog.dto";
 import { GamelogsService } from "src/gamelogs/services/gamelogs/gamelogs.service";
+import { GlobalRole } from "src/guards/role.decorator";
+import { RoleGlobalGuard } from "src/guards/role.guard";
 
 @Controller()
 export class GamelogsController {
@@ -43,6 +45,7 @@ export class GamelogsController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
+	@UseGuards(AuthGuard('jwt'))
     @Get('gamelogs')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyGamelogs(
@@ -64,6 +67,8 @@ export class GamelogsController {
     // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
     // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Post('gamelogs')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async createGamelog(
@@ -72,6 +77,8 @@ export class GamelogsController {
         return (await this.gamelogService.createGamelog(createGamelogDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Put('gamelogs/:gamelogId')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async replaceGamelog(
@@ -81,6 +88,8 @@ export class GamelogsController {
         return (await this.gamelogService.replaceGamelog(gamelogId, replaceGamelogDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Patch('gamelogs/:gamelogId')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async updateGamelog(
@@ -90,6 +99,8 @@ export class GamelogsController {
         return (await this.gamelogService.updateGamelog(gamelogId, updateGamelogDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Delete('gamelogs/:gamelogId')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async deleteGamelog(

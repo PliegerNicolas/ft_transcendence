@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/User.entity';
+import { User } from 'src/users/entities/User.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
