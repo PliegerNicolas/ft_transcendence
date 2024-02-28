@@ -8,7 +8,7 @@ import { FriendshipType } from "../utils/types.ts"
 import Spinner from "./Spinner.tsx";
 import ConfirmPopup from "./ConfirmPopup.tsx";
 
-import { stopOnHttp } from "../utils/utils.ts";
+import { useStopOnHttp } from "../utils/utils.ts";
 
 import "../styles/user.css";
 
@@ -25,6 +25,8 @@ export default function User()
 	const id = params.id!;
 	const queryClient = useQueryClient();
 	const { api, addNotif } = useContext(MyContext);
+
+	const stopOnHttp = useStopOnHttp();
 
 	const [popup, setPopup] = useState(false);
 

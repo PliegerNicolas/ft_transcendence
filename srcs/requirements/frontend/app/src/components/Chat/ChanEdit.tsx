@@ -2,7 +2,7 @@ import { useState, useContext, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MutationFunction, useMutation, useQuery } from "@tanstack/react-query";
 
-import { useInvalidate, stopOnHttp, httpStatus } from "../../utils/utils.ts";
+import { useInvalidate, useStopOnHttp, httpStatus } from "../../utils/utils.ts";
 import { ChanType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -47,6 +47,7 @@ export default function ChanEdit({id}: {id: number})
 	const { api, addNotif } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
+	const stopOnHttp = useStopOnHttp();
 
 	const getChan = useQuery({
 		queryKey: ["chan", "" + id],

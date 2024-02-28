@@ -6,7 +6,7 @@ import { UserType, UserPostType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
 
-import { useInvalidate, stopOnHttp, randomString } from "../utils/utils.ts";
+import { useInvalidate, useStopOnHttp, randomString } from "../utils/utils.ts";
 
 import close from "../assets/close.svg";
 
@@ -19,6 +19,7 @@ export default function Sandbox()
 	const context = useContext(MyContext);
 
 	const invalidate = useInvalidate();
+	const stopOnHttp = useStopOnHttp();
 
 	const getChans = useQuery({
 		queryKey: ["allChans"],
@@ -31,6 +32,14 @@ export default function Sandbox()
 		queryFn: () => context.api.get("/users"),
 		retry: stopOnHttp,
 	});
+
+	/*
+	const getMe = useQuery({
+		queryKey: ["me"],
+		queryFn: () => context.api.get("/me"),
+		retry: stopOnHttp,
+	});
+	*/
 	
 	const postUser = useMutation({
 		mutationFn: (user: UserPostType) => context.api.post("/users", user),
@@ -74,6 +83,9 @@ export default function Sandbox()
 	return (
 		<main className="MainContent">
 			<h2>Sandbox</h2>
+			<section>
+				<h3>Me:</h3>
+			</section>
 			<section>
 				<h3>Global context:</h3>
 				<div className="genericList Sandbox__ContextList">

@@ -67,7 +67,7 @@ export class ChannelsService {
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
         
-        channelDetails.password = await this.passwordHashingService.hashPassword(channelDetails.password);
+        if (channelDetails.password) channelDetails.password = await this.passwordHashingService.hashPassword(channelDetails.password);
 
         const channel = this.channelRepository.create({
             ...channelDetails,
