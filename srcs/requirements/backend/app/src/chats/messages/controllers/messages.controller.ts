@@ -6,9 +6,9 @@ import { ParseIdPipe } from "src/common/pipes/parse-id/parse-id.pipe";
 import { ReplaceMessageDto } from "../dtos/ReplaceMessage.dto";
 import { UpdateMessageDto } from "../dtos/UpdateMessage.dto";
 import { ParseUsernamePipe } from "src/common/pipes/parse-username/parse-username.pipe";
-import { RoleGlobalGuard } from "src/role/role.guard";
-import { GlobalRole } from "src/role/role.decorator";
-import { UsersGuard } from "src/users/users.guard";
+import { RoleGlobalGuard } from "src/guards/role.guard";
+import { GlobalRole } from "src/guards/role.decorator";
+import { UsersGuard } from "src/guards/users.guard";
 
 @Controller()
 export class MessagesController {

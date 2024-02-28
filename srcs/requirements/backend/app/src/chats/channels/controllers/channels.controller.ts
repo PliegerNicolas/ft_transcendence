@@ -11,11 +11,11 @@ import { JoinChannelDto } from '../dtos/JoinChannel.dto';
 import { LeaveChannelDto } from '../dtos/LeaveChannel.dto';
 import { ChannelAccessDto } from '../dtos/ChannelAccess.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { RoleGlobalGuard, RoleGuard } from 'src/role/role.guard';
-import { GlobalRole, Role } from 'src/role/role.decorator';
-import { JwtPublicGuard } from 'src/auth/jwt-public.guard';
-import { UsersGuard } from 'src/users/users.guard';
-import { ChannelsGuard } from 'src/channels/channels.guard';
+import { RoleGlobalGuard, RoleGuard } from 'src/guards/role.guard';
+import { GlobalRole, Role } from 'src/guards/role.decorator';
+import { JwtPublicGuard } from 'src/guards/jwt-public.guard';
+import { UsersGuard } from 'src/guards/users.guard';
+import { ChannelsGuard } from 'src/guards/channels.guard';
 
 @Controller()
 export class ChannelsController {

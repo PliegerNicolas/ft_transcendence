@@ -1,5 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Request, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Request, UseGuards, ValidationPipe } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
+import { GlobalRole } from 'src/guards/role.decorator';
+import { RoleGlobalGuard } from 'src/guards/role.guard';
+import { UsersGuard } from 'src/guards/users.guard';
 import { CreateRelationshipDto } from 'src/relationships/dtos/CreateRelationship.dto';
 import { ReplaceRelationshipDto } from 'src/relationships/dtos/ReplaceRelationship.dto';
 import { UpdateRelationshipDto } from 'src/relationships/dtos/UpdateRelationship.dto';
@@ -22,6 +26,7 @@ export class RelationshipsController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
+	@UseGuards(AuthGuard('jwt'))
     @Get('relationships')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyRelationships(
@@ -31,6 +36,7 @@ export class RelationshipsController {
         return (await this.relationshipService.getRelationships(username));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Get('relationships/:targetUsername')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyRelationship(
@@ -41,6 +47,7 @@ export class RelationshipsController {
         return (await this.relationshipService.getRelationship(username, targetUsername));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Post('relationships')
     // UseGuard => Verify if user connected and pass it's req.user
     async createMyRelationship(
@@ -51,6 +58,7 @@ export class RelationshipsController {
         return (await this.relationshipService.createRelationship(username, createRelationshipDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Put('relationships/:targetUsername')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyRelationship(
@@ -62,6 +70,7 @@ export class RelationshipsController {
         return (await this.relationshipService.replaceRelationship(username, targetUsername, replaceRelationshipDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Patch('relationships/:targetUsername')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyRelationship(
@@ -73,6 +82,7 @@ export class RelationshipsController {
         return (await this.relationshipService.updateRelationship(username, targetUsername, updateRelationshipDto));
     }
 
+	@UseGuards(AuthGuard('jwt'))
     @Delete('relationships/:targetUsername')
     // UseGuard => Verify if user connected and pass it's req.user
     async deleteMyRelationship(
@@ -87,6 +97,8 @@ export class RelationshipsController {
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Get('users/:username/relationships')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getUserRelationships(
@@ -95,6 +107,8 @@ export class RelationshipsController {
         return (await this.relationshipService.getRelationships(username));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Get('users/:username/relationships/:targetUsername')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getUserRelationship(
@@ -104,6 +118,8 @@ export class RelationshipsController {
         return (await this.relationshipService.getRelationship(username, targetUsername));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Post('users/:username/relationships')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async createUserRelationship(
@@ -113,6 +129,8 @@ export class RelationshipsController {
         return (await this.relationshipService.createRelationship(username, createRelationshipDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Put('users/:username/relationships/:targetUsername')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceUserRelationship(
@@ -123,6 +141,8 @@ export class RelationshipsController {
         return (await this.relationshipService.replaceRelationship(username, targetUsername, replaceRelationshipDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Patch('users/:username/relationships/:targetUsername')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateUserRelationship(
@@ -133,6 +153,8 @@ export class RelationshipsController {
         return (await this.relationshipService.updateRelationship(username, targetUsername, updateRelationshipDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Delete('users/:username/relationships/:targetUsername')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async deleteUserRelationship(
