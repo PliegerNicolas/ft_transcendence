@@ -18,10 +18,34 @@
 }
 
 .User__Picture {
+	position: relative;
 	width: 192px;
 	height: 192px;
 	object-fit: cover;
 	border-radius: 12px;
+}
+
+.User__Camera {
+	position: absolute;
+	z-index: 2;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #000a;
+	mix-blend-mode:multiply;
+	opacity: 0;
+	transition: opacity .1s;
+}
+.User__Camera:hover {
+	opacity: .6;
+}
+
+.User__Camera>img {
+	height: 80%;
 }
 
 .User__PictureBg {
@@ -56,7 +80,7 @@
 		border: none;
 		width: 256px;
 		height: 256px;
-		box-shadow: 0 0 32px #000a;
+		box-shadow: 0 0 32px #0008;
 	}
 }
 

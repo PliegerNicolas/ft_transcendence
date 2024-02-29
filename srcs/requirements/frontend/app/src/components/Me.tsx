@@ -13,6 +13,7 @@ import { useInvalidate, useStopOnHttp } from "../utils/utils.ts";
 import "../styles/user.css";
 
 import defaultPicture from "../assets/default_profile.png";
+import camera from "../assets/camera.svg";
 
 // <Me /> ====================================================================
 
@@ -105,6 +106,9 @@ export default function Me()
 					<div className="User__PictureContainer">
 						<label className="User__Picture" htmlFor="userPicture">
 							<img className="User__Picture" src={defaultPicture}/>
+							<div className="User__Camera">
+								<img src={camera}/>
+							</div>
 						</label>
 						<img className="User__PictureBg" src={defaultPicture}/>
 					</div>
