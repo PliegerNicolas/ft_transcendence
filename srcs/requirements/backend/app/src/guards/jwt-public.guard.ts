@@ -20,6 +20,10 @@ import { AuthService } from 'src/auth/auth.service';
 		return (true);
 	  }
 	  try {
+		if (await this.authService.blacklist("check", token) == false)
+		{
+			throw new UnauthorizedException();
+		}
 		const payload = await this.jwtService.verifyAsync(
 		  token,
 		  {

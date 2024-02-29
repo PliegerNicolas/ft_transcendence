@@ -8,8 +8,23 @@ import { DataSource } from 'typeorm';
 @Injectable()
 export class AuthService
 {
-	
 	constructor(private jwtService : JwtService, private dataSource : DataSource) {}
+
+	static _blacklist : string[] = [];
+
+	async blacklist(option : string, token : string) : Promise<boolean> {
+		if (option == "add")
+		{
+			let val = AuthService._blacklist.push(token)
+			console.log(val);
+		}
+		if (option == "check")
+		{
+			if (AuthService._blacklist.indexOf(token) != -1)
+				return false
+		}
+		return (true)
+	}
 
 	async checkUser(oauthId : string) {
 
@@ -31,9 +46,10 @@ export class AuthService
 	}
 
 	async signIn(oauthToken : JSON ): Promise<any> {
-		const token = Object.values(oauthToken)
+		const token = Object.values(oauthToken);
+		let payload;
 		console.log(token)
-		let payload = await fetch("https://api.intra.42.fr/oauth/token", {method : "POST", headers: {
+		let ft_payload = await fetch("https://api.intra.42.fr/oauth/token", {method : "POST", headers: {
 			"Content-Type": "application/json"},
 			body:
 				JSON.stringify({"grant_type": "authorization_code",
@@ -45,13 +61,13 @@ export class AuthService
 			}).then(
 				(data) => data.json()
 			)
-			console.log(payload);
-			if(Object.keys(payload)[0] != "access_token")
+			// console.log(payload);
+			if(Object.keys(ft_payload)[0] != "access_token")
 			{
 				throw new UnauthorizedException()
 			}
-			const access = (Object.values(payload)[0]).toString();
-			const refresh = (Object.values(payload)[1]).toString();
+			const access = (Object.values(ft_payload)[0]).toString();
+			const refresh = (Object.values(ft_payload)[1]).toString();
 			const info = await fetch("https://api.intra.42.fr/v2/me", {method : "GET", headers: {
 			"Authorization" : "Bearer " + access},
 			}).then(
@@ -78,7 +94,7 @@ export class AuthService
 				.then(
 					(data) => data
 				)
-				payload.user_id = Object.values(Object.values(users.generatedMaps)[0])[0]
+				payload = {user_id :  Object.values(Object.values(users.generatedMaps)[0])[0]}
 				this.dataSource.createQueryBuilder()
 				.insert()
 				.into(Profile)
@@ -86,7 +102,7 @@ export class AuthService
 					{
 						"firstName" : Object.values(info)[3].toString(),
 						"lastName" : Object.values(info)[4].toString(),
-						"image" : Object.values(info)[7].toString(),
+						"image" : Object.values(Object.values(info)[11])[0].toString(),
 						"user" : {
 							//id : BigInt(1),
 							id : BigInt(payload.user_id),
@@ -98,10 +114,11 @@ export class AuthService
 	
 			}
 			else{
-				payload.user_id = Object.values(user_id)[0]
+				payload = { user_id : Object.values(user_id)[0] }
 			}
 			payload.oauth_id = Object.values(info)[0].toString()
 			console.log(JSON.stringify(payload))
+			console.log(Object.values(Object.values(info)[11])[0].toString())
 			const access_token = await this.jwtService.signAsync(payload)
 			console.log(access_token)
 		return {
