@@ -1,6 +1,6 @@
 .User__Infos {
 	display: flex;
-	gap: 12px;
+	gap: 16px;
 	max-height: min-content;
 	align-items: center;
 }
@@ -35,13 +35,14 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	background-color: #000a;
-	mix-blend-mode:multiply;
+	background-color: #0006;
 	opacity: 0;
-	transition: opacity .1s;
+	transition: .15s;
 }
 .User__Camera:hover {
-	opacity: .6;
+	backdrop-filter: blur(4px);
+	opacity: 1;
+	cursor: pointer;
 }
 
 .User__Camera>img {
@@ -92,9 +93,19 @@
 .User__InfoItems>* {
 	display: grid;
 	grid-column-gap: 20px;
-	grid-template-columns: 1fr 2.5fr;
+	grid-template-columns: 1.2fr 2.5fr;
 	min-width: fit-content;
 	overflow-x: visible;
+	height: 46px;
+}
+
+.User__InfoItems>*>* {
+	display: flex;
+	align-items: center;
+}
+.User__InfoItems>*>*:first-child {
+	border-right: 1px solid var(--bg-color-5);
+	font-weight: 600;
 }
 
 .User__FriendItem {

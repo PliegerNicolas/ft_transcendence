@@ -65,7 +65,7 @@ export default function Header()
 				<div className="Header__UserInfo">
 					<div className="Header__UserInfoContainer" ref={popupRef}>
 						<img
-							src={defaultPicture}
+							src={getMe.isSuccess && getMe.data.profile.image || defaultPicture}
 							onClick={() => setPopup(prev => !prev)}
 						/>
 					</div>
@@ -76,7 +76,7 @@ export default function Header()
 							getMe.isSuccess &&
 							<>
 								<Link to="/user/me" className="Header__PopupLink logged">
-									<img src={defaultPicture}/>
+									<img src={getMe.data.profile.image || defaultPicture}/>
 									<div className="Header__PopupUsername">
 										{getMe.data.username}
 									</div>

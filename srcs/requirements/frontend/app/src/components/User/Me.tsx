@@ -2,18 +2,17 @@ import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, UseQueryResult, useMutation } from "@tanstack/react-query";
 
-import { FriendshipContext, MyContext } from "../utils/contexts.ts";
-import { FriendshipType } from "../utils/types.ts"
+import { FriendshipContext, MyContext } from "../../utils/contexts.ts";
+import { FriendshipType } from "../../utils/types.ts"
 
-import Spinner from "./Spinner.tsx";
-import ConfirmPopup from "./ConfirmPopup.tsx";
+import Spinner from "../Spinner.tsx";
+import ConfirmPopup from "../ConfirmPopup.tsx";
 
-import { useInvalidate, useStopOnHttp } from "../utils/utils.ts";
+import UserInfos from "./UserInfos.tsx";
 
-import "../styles/user.css";
+import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
 
-import defaultPicture from "../assets/default_profile.png";
-import camera from "../assets/camera.svg";
+import "../../styles/user.css";
 
 // <Me /> ====================================================================
 
@@ -95,36 +94,7 @@ export default function Me()
 	return (
 		<main className="MainContent User">
 			<section>
-				<h2>
-					{
-						me.profile?.firstName
-						+ " « " + me.username + " » "
-						+ me.profile?.lastName
-					}
-				</h2>
-				<div className="User__Infos">
-					<div className="User__PictureContainer">
-						<label className="User__Picture" htmlFor="userPicture">
-							<img className="User__Picture" src={defaultPicture}/>
-							<div className="User__Camera">
-								<img src={camera}/>
-							</div>
-						</label>
-						<img className="User__PictureBg" src={defaultPicture}/>
-					</div>
-					<div className="genericList User__InfoItems">
-						<div><div>Id</div> <div>{"#" + me.id}</div></div>
-						<div><div>Username</div> <div>{"@" + me.username}</div></div>
-						<div><div>Email</div> <div>{me.email}</div></div>
-						<div><div>First Name</div> <div>{me.profile?.firstName}</div></div>
-						<div><div>Last Name</div> <div>{me.profile?.lastName}</div></div>
-					</div>
-				</div>
-				<input
-					type="file" id="userPicture" name="userPicture"
-					style={{display: "none"}}
-					onChange={e => {console.log(e.currentTarget.files![0]);}}
-				/>
+				<UserInfos user={me} me={true} />
 				<hr />
 				<h3>Relationships:</h3>
 				<Friendships
