@@ -65,7 +65,7 @@
 	background: #262c4040;
 	backdrop-filter: blur(8px);
 	padding: 4px;
-	border-radius: 6px;
+	border-radius: 12px;
 	border: 1px solid var(--bg-color-5);
 	width: 180px;
 	display: flex;

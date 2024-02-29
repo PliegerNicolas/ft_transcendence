@@ -1,6 +1,6 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import "../styles/header.css";
 
@@ -125,11 +125,16 @@ export default function Header()
 
 function Logout()
 {
-	const { setLogInfo } = useContext(MyContext);
+	const { setLogInfo, api } = useContext(MyContext);
+
+	const backendLogout = useMutation({
+		mutationFn: () => api.post("/auth/logout", {}),
+	});
 
 	function logoutNow() {
 		localStorage.removeItem("my_info");
 		setLogInfo({logged: false, token: ""});
+		backendLogout.mutate();
 	}
 
 	return (
