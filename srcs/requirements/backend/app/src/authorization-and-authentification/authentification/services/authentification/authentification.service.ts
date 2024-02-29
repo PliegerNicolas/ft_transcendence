@@ -1,33 +1,27 @@
-import {Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Profile } from 'src/profiles/entities/Profile.entity';
-import { User } from 'src/users/entities/User.entity';
-import { DataSource } from 'typeorm';
-
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../../../../modules/users/entities/User.entity';
+import { DataSource, Equal, Repository } from 'typeorm';
+import { Profile } from 'src/modules/profiles/entities/Profile.entity';
 
 @Injectable()
-export class AuthService
-{
-	
-	constructor(private jwtService : JwtService, private dataSource : DataSource) {}
+export class AuthentificationService {
+
+	constructor(
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>,
+
+        private readonly jwtService : JwtService,
+        private readonly dataSource : DataSource
+    ) {}
 
 	async checkUser(oauthId : string) {
+        const user = await this.userRepository.findOne({
+            where: { oauthId: Equal(BigInt(oauthId)) },
+        });
 
-
-		const users = await this.dataSource
-		.getRepository(User)
-		.createQueryBuilder()
-		.select("user")
-		.from(User, "user")
-		.where("user.oauthId = :id", { id: BigInt(oauthId) })
-		.getOne()
-		.then(
-			(data) => data
-		)
-
-		return {
-			users
-		};
+		return ({ user });
 	}
 
 	async signIn(oauthToken : JSON ): Promise<any> {
@@ -48,7 +42,7 @@ export class AuthService
 			console.log(payload);
 			if(Object.keys(payload)[0] != "access_token")
 			{
-				throw new UnauthorizedException()
+				throw new UnauthorizedException	();
 			}
 			const access = (Object.values(payload)[0]).toString();
 			const refresh = (Object.values(payload)[1]).toString();
@@ -58,7 +52,7 @@ export class AuthService
 				(data) => data.json()
 			)
 			// console.log(info)
-			const user_id = (await this.checkUser(Object.values(info)[0].toString())).users
+			const user_id = (await this.checkUser(Object.values(info)[0].toString())).user
 			if (user_id === null){
 				const users = await this.dataSource
 				.createQueryBuilder()

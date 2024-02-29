@@ -9,6 +9,7 @@ import { ProfilesModule } from "./modules/profiles/profiles.module";
 import { ChatsModule } from "./modules/chats/chats.module";
 import { GamelogsModule } from "./modules/gamelogs/gamelogs.module";
 import { RelationshipsModule } from "./modules/relationships/relationships.module";
+import { AuthoriationAndAuthentificationModule } from "./authorization-and-authentification/authoriation-and-authentification.module";
 
 @Module({
 	imports: [
@@ -20,6 +21,8 @@ import { RelationshipsModule } from "./modules/relationships/relationships.modul
 		ChatsModule,
 		GamelogsModule,
 		RelationshipsModule,
+
+		AuthoriationAndAuthentificationModule,
 	],
 	controllers: [],
 	providers: [

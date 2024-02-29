@@ -1,13 +1,11 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Observable } from 'rxjs';
-import { Channel } from 'src/modules/chats/channels/entities/Channel.entity';
-import { ChannelMember } from 'src/modules/chats/channels/entities/ChannelMember.entity';
-import { User } from 'src/users/entities/User.entity';
-import { Repository } from 'typeorm';
-import { GlobalRole, Role } from './role.decorator';
+import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { JwtService } from "@nestjs/jwt";
+import { InjectRepository } from "@nestjs/typeorm";
+import { ChannelMember } from "src/modules/chats/channels/entities/ChannelMember.entity";
+import { Repository } from "typeorm";
+import { GlobalRole, Role } from "./role.decorator";
+import { User } from "../../modules/users/entities/User.entity";
 
 @Injectable()
 export class RoleGuard implements CanActivate {

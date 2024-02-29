@@ -11,5 +11,6 @@ import { User } from "../users/entities/User.entity";
 	],
 	controllers: [RelationshipsController],
 	providers: [RelationshipsService],
+	exports: [RelationshipsService],
 })
 export class RelationshipsModule {}

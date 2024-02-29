@@ -129,8 +129,14 @@ export class UsersService {
         return (`User '${username}' successfully deleted`);
     }
 
-    async setTwoFactorAuthSecret(userId: number, secret: string) {
-        return this.userRepository.update(userId, {twoFactorAuthSecret: secret});
+    async setTwoFactorAuthSecret(user: User, secret: string): Promise<User> {
+        if (!user) return ;
+
+        this.userRepository.merge(user, {
+            twoFactorAuthSecret: secret
+        });
+
+        return (await this.userRepository.save(user));
     }
   
     /* Helper Functions */
