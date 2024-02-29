@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import { AuthService } from './auth.service';
+import { ContextCreator } from '@nestjs/core/helpers/context-creator';
+import { Request } from 'express';
 // import { JwtService } from '@nestjs/jwt';
 // import { Auth } from 'typeorm';
 
@@ -11,13 +13,20 @@ export class JwtStrategy extends PassportStrategy(Strategy){
 		super({
 			jwtFromRequest : ExtractJwt.fromHeader("authorization"),
 			secretOrKey : process.env.API_SECRET ,
-			ignoreExpiration : false
+			ignoreExpiration : false,
+			passReqToCallback: true
 		});
 	}
 
-	async validate(payload : any) : Promise<any>{
+	async validate(req: Request, payload : any) : Promise<any>{
 		// console.log('test')
 		// console.log((await this.authService.checkUser(payload.oauth_id)).users.id)
+		
+		// console.log(req.headers)
+		if (await this.authService.blacklist("check", req.headers.authorization) == false)
+		{
+			throw new UnauthorizedException();
+		}
 		const users = (await this.authService.checkUser(payload.oauth_id)).users
 		if (users == null)
 		{

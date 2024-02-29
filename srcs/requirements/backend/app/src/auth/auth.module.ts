@@ -14,7 +14,8 @@ import { Profile } from 'src/profiles/entities/Profile.entity';
 
   imports: [JwtModule.register({
 	global:true,
-	secret:jwtConstants.secret
+	secret:jwtConstants.secret,
+	signOptions : {expiresIn: '7200s'}
   }), 
   TypeOrmModule.forFeature([User, Profile]),
 	UsersModule],

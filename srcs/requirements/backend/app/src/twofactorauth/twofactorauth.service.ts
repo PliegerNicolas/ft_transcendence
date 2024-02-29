@@ -36,4 +36,20 @@ export class TwoFactorAuthService {
 		return toFileStream(stream, otpauthUrl);
 	}
 
+	public async isTwoFactorAuthSecretValid(twoFactorAuthenticationCode: string, user_id: any)
+	{
+		const user = await this.userRepository.findOne({
+			where : {
+				id : user_id
+			}
+		})
+		.then(
+			(data) => data
+		)
+		return authenticator.verify({
+			token: twoFactorAuthenticationCode,
+			secret: user.twoFactorAuthSecret
+		  })
+	}
+
 }
