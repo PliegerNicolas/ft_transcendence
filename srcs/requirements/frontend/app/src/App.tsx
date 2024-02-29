@@ -53,7 +53,6 @@ function Auth()
 			localStorage.setItem(
 				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
 			setLogInfo({logged: true, token: data.access_token});
-			console.log("COCUCOUD");
 			setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
 		},
 
@@ -113,7 +112,7 @@ function App()
 	const [logInfo, setLogInfo] = useState(() => {
 		if (data)
 			return (JSON.parse(data))
-		return { logged: false, token: ""};
+		return { logged: false, token: "" };
 	});
 
 	const [notifs, setNotifs] = useState<NotifType[]>([]);
