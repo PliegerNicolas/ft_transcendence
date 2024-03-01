@@ -19,8 +19,7 @@ export class AuthService
 	async blacklist(option : string, token : string) : Promise<boolean> {
 		if (option == "add")
 		{
-			let val = AuthService._blacklist.push(token)
-			console.log(val);
+			AuthService._blacklist.push(token)
 		}
 		if (option == "check")
 		{
