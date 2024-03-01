@@ -2,17 +2,17 @@ import { useContext } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
-import { MyContext } from "../utils/contexts.ts";
-import { FriendshipType } from "../utils/types.ts"
+import { MyContext } from "../../utils/contexts.ts";
+import { FriendshipType } from "../../utils/types.ts"
 
-import Spinner from "./Spinner.tsx";
+import Spinner from "../Spinner.tsx";
+
 import Me from "./Me.tsx";
+import UserInfos from "./UserInfos.tsx";
 
-import { useInvalidate, useStopOnHttp } from "../utils/utils.ts";
+import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
 
-import "../styles/user.css";
-
-import defaultPicture from "../assets/default_profile.png";
+import "../../styles/user.css";
 
 // <UserRouter /> ==============================================================
 
@@ -173,33 +173,7 @@ function User()
 	return (
 		<main className="MainContent User">
 			<section>
-				<h2>
-					{
-						user.profile?.firstName
-						+ " « " + user.username + " » "
-						+ user.profile?.lastName
-					}
-				</h2>
-				<div className="User__Infos">
-					<div className="User__PictureContainer">
-						<label htmlFor={user.id == 1 ? "userPicture" : "machin"}>
-							<img className="User__Picture" src={defaultPicture}/>
-						</label>
-						<img className="User__PictureBg" src={defaultPicture}/>
-					</div>
-					<div className="genericList User__InfoItems">
-						<div><div>Id</div> <div>{"#" + user.id}</div></div>
-						<div><div>Username</div> <div>{"@" + user.username}</div></div>
-						<div><div>Email</div> <div>{user.email}</div></div>
-						<div><div>First Name</div> <div>{user.profile?.firstName}</div></div>
-						<div><div>Last Name</div> <div>{user.profile?.lastName}</div></div>
-					</div>
-				</div>
-				<input
-					type="file" id="userPicture" name="userPicture"
-					style={{display: "none"}}
-					onChange={e => {console.log(e.currentTarget.files![0]);}}
-				/>
+				<UserInfos user={user} me={false} />
 				<hr />
 				{
 					getRelations.isSuccess &&
