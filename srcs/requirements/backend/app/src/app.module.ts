@@ -37,7 +37,6 @@ const dbConfig = require('./database-config');
 	],
 	controllers: [],
 	providers: [
-		AuthService,
 		{
 			provide: APP_INTERCEPTOR,
 			useClass: BigIntSerializationInterceptor,

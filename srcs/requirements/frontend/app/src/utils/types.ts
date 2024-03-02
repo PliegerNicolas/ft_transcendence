@@ -1,14 +1,17 @@
+export interface ProfileType {
+	id: string,
+	firstName: string,
+	lastName:string,
+	image: string,
+}
+
 export interface UserType {
 	id: string,
 	username: string,
 	email: string,
 	updated_at: string,
 	created_at: string,
-	profile: {
-		id: string,
-		firstName: string,
-		lastName:string
-	}
+	profile: ProfileType
 }
 
 export interface UserPostType {
@@ -47,7 +50,21 @@ export interface MsgType {
 	}
 }
 
+export interface MemberType {
+	id: string,
+	mute: boolean,
+	role: string,
+	user: UserType,
+}
+
 export interface ChanType {
+	id: string,
+	name: string,
+	membersCount: number,
+	members: Array<MemberType>,
+}
+
+export interface ChanFormType {
 	id: string,
 	name: string,
 	membersCount: number,

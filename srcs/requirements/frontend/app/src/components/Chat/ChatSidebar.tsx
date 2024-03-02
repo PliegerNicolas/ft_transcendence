@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import Spinner from "../Spinner.tsx";
 
+import { useStopOnHttp } from "../../utils/utils.ts";
 import { ChatContext, MyContext } from "../../utils/contexts.ts";
 
 import add from "../../assets/add.svg";
@@ -22,9 +23,12 @@ export default function ChatSidebar() {
 
 	const context = useContext(MyContext);
 
+	const stopOnHttp = useStopOnHttp();
+
 	const getChans = useQuery({
 		queryKey: ["allChans"],
 		queryFn: () => context.api.get("/channels").then(data => data.sort()),
+		retry: stopOnHttp
 	});
 
 	return (

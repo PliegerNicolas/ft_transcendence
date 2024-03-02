@@ -2,7 +2,7 @@ import { useState, useContext, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MutationFunction, useMutation, useQuery } from "@tanstack/react-query";
 
-import { useInvalidate, stopOnHttp, httpStatus } from "../../utils/utils.ts";
+import { useInvalidate, useStopOnHttp, httpStatus } from "../../utils/utils.ts";
 import { ChanType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -23,6 +23,13 @@ interface UserListEntry {
 	username: string,
 	id: number,
 }
+/*
+function getToForm(chan: ChanType) {
+	return ({
+		...chan,
+		allowed: chan.members.
+	});
+}*/
 
 // <ChanEdit /> ================================================================
 
@@ -30,7 +37,8 @@ export default function ChanEdit({id}: {id: number})
 {
 	const [chan, setChan] = useState({
 		name: "New Channel",
-		status: "public",
+		visibility: "public",
+		mode: "open",
 		password: "",
 		passwordRepeat: "",
 		allowed: [
@@ -48,6 +56,7 @@ export default function ChanEdit({id}: {id: number})
 	const { api, addNotif } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
+	const stopOnHttp = useStopOnHttp();
 
 	const getChan = useQuery({
 		queryKey: ["chan", "" + id],
@@ -172,9 +181,11 @@ export default function ChanEdit({id}: {id: number})
 		</div>
 	);
 
+	console.log(getChan.data);
+
 	return (
 		<div className="ChanEdit ChatContent MainContent" onSubmit={handleSubmit}>
-			<ChatHeader chan={{...chan, id: "", membersCount: 1}} edit={true} />
+			<ChatHeader name={chan.name} edit={true} />
 			<div className="ChanEdit__Scrollable">
 			<section className="ChanEdit__NameSection">
 				<label className="ChanEdit__NameLabel" htmlFor="channelName">
@@ -187,30 +198,62 @@ export default function ChanEdit({id}: {id: number})
 				/>
 			</section>
 			<section>
+				<span className="ChanEdit__Title">Visibility</span>
+				<span className="ChanEdit__ModeButtons">
+					<label htmlFor="visibilityPublic" className={`${chan.visibility === "public"}`}>
+						Public
+						<img src={chan.visibility === "public" ? radioChecked : radioUnchecked}/>
+					</label>
+					<input
+						type="radio" id="visibilityPublic" name="visibility"
+						value="public" onChange={handleChange}
+						checked={chan.visibility === "public"}
+					/>
+					<label htmlFor="visibilityHidden" className={`${chan.visibility === "hidden"}`}>
+						Hidden
+						<img src={chan.visibility === "hidden" ? radioChecked : radioUnchecked}/>
+					</label>
+					<input
+						type="radio" id="visibilityHidden" name="visibility"
+						value="hidden" onChange={handleChange}
+						checked={chan.visibility === "hidden"}
+					/>
+				</span>
+			</section>
+			<section>
 				<span className="ChanEdit__Title">Mode</span>
 				<span className="ChanEdit__ModeButtons">
-					<label htmlFor="modePublic" className={`${chan.status === "public"}`}>
-						Public
-						<img src={chan.status === "public" ? radioChecked : radioUnchecked}/>
+					<label htmlFor="modeOpen" className={`${chan.mode === "open"}`}>
+						Open
+						<img src={chan.mode === "open" ? radioChecked : radioUnchecked}/>
 					</label>
 					<input
-						type="radio" id="modePublic" name="status"
-						value="public" onChange={handleChange}
-						checked={chan.status === "public"}
+						type="radio" id="modeOpen" name="mode"
+						value="open" onChange={handleChange}
+						checked={chan.mode === "open"}
 					/>
-					<label htmlFor="modePrivate" className={`${chan.status === "private"}`}>
-						Private
-						<img src={chan.status === "private" ? radioChecked : radioUnchecked}/>
+					<label htmlFor="modeInvite" className={`${chan.mode === "invite_only"}`}>
+						Invite
+						<img src={chan.mode === "invite_only" ? radioChecked : radioUnchecked}/>
 					</label>
 					<input
-						type="radio" id="modePrivate" name="status"
-						value="private" onChange={handleChange}
-						checked={chan.status === "private"}
+						type="radio" id="modeInvite" name="mode"
+						value="invite_only" onChange={handleChange}
+						checked={chan.mode === "invite_only"}
+					/>
+					<label htmlFor="modePassword" className={`${chan.mode === "password_protected"}`}>
+						Password
+						<img src={chan.mode === "password_protected" ? radioChecked : radioUnchecked}/>
+					</label>
+					<input
+						type="radio" id="modePassword" name="mode"
+						value="password_protected" onChange={handleChange}
+						checked={chan.mode === "password_protected"}
 					/>
 				</span>
 			</section>
 			{
-				chan.status === "public" &&
+				chan.mode === "password_protected" &&
 				<div className="ChanEdit__PublicModeDiv">
 				<section className="ChanEdit__PublicModeSection">
 				<div className="ChanEdit__Title">
@@ -284,7 +327,7 @@ export default function ChanEdit({id}: {id: number})
 				</div>
 			}
 			{
-				chan.status === "private" &&
+				chan.mode === "invite_only" &&
 				<section className="allowed">
 					<UserList
 						title="Allowed users"
@@ -311,7 +354,7 @@ export default function ChanEdit({id}: {id: number})
 						title="Admins"
 						list={chan.admins}
 						add={(value: UserListEntry) => {
-							if (chan.status == "public" && isInList("banned", value))
+							if (chan.visibility == "public" && isInList("banned", value))
 								return addNotif({content: "This user is banned, please unban"
 									+ " them before making them admin."});
 							rmFromList("banned", value);
@@ -333,7 +376,7 @@ export default function ChanEdit({id}: {id: number})
 				<button
 					onClick={(e) => {handleSubmit(e)}}
 					disabled={
-						chan.status === "public"
+						chan.mode === "password_protected"
 						&& (chan.password !== chan.passwordRepeat
 							|| (!!chan.password.length && chan.password.length < 8))
 					}

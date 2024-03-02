@@ -5,7 +5,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate, stopOnHttp } from "../../utils/utils.ts";
+import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
 import { MyContext } from "../../utils/contexts";
 
 import { socket } from "../../App.tsx"
@@ -36,9 +36,11 @@ export default function ChatContentRouter()
 
 // <ChatContent /> =============================================================
 
-function ChatContent() {
+function ChatContent()
+{
 	const { api, addNotif, setLastChan } = useContext(MyContext);
 	const invalidate = useInvalidate();
+	const stopOnHttp = useStopOnHttp();
 
 	const params = useParams();
 	const id = params.id!;
@@ -62,7 +64,7 @@ function ChatContent() {
 		onError: error => addNotif({ content: error.message }),
 	});
 
-	setLastChan(id);
+	useEffect(() => setLastChan(id), [id]);
 
 	useEffect(() => {
 		socket.on('onMessage', (content: string) => {
@@ -80,7 +82,10 @@ function ChatContent() {
 	** These lines are desirable to auto-scroll at bottom of chat.
 	*/
 	const anchorRef = useRef<HTMLDivElement>(null);
-	useEffect(() => anchorRef.current?.scrollIntoView(), [getMsgs]);
+	useEffect(() => {
+		if (anchorRef.current)
+			anchorRef.current.scrollIntoView()
+	}, [getMsgs]);
 
 	const [inputValue, setInputValue] = useState("");
 	function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -113,7 +118,7 @@ function ChatContent() {
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
-				<ChatHeader chan={getChan.data} edit={false} />
+				<ChatHeader name={getChan.data.name} edit={false} />
 				<Spinner />
 			</div>
 		);
@@ -127,7 +132,7 @@ function ChatContent() {
 
 	return (
 		<div className="ChatContent">
-			<ChatHeader chan={getChan.data} edit={false} />
+			<ChatHeader name={getChan.data.name} edit={false} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
 					{

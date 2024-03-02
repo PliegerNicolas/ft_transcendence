@@ -5,9 +5,9 @@ import {
 	UnauthorizedException,
   } from '@nestjs/common';
   import { JwtService } from '@nestjs/jwt';
-  import { jwtConstants } from './constant';
+  import { jwtConstants } from 'src/auth/constant';
   import { Request } from 'express';
-import { AuthService } from './auth.service';
+import { AuthService } from 'src/auth/auth.service';
   
   @Injectable()
   export class JwtPublicGuard implements CanActivate {
@@ -20,14 +20,17 @@ import { AuthService } from './auth.service';
 		return (true);
 	  }
 	  try {
+		if (await this.authService.blacklist("check", token) == false)
+		{
+			throw new UnauthorizedException();
+		}
 		const payload = await this.jwtService.verifyAsync(
 		  token,
 		  {
-			secret: jwtConstants.secret
+			secret: jwtConstants.secret,
+			ignoreExpiration: false
 		  }
 		);
-		// 💡 We're assigning the payload to the request object here
-		// so that we can access it in our route handlers
 		const users = (await this.authService.checkUser(payload.oauth_id)).users
 		if (users == null)
 		{
@@ -43,9 +46,4 @@ import { AuthService } from './auth.service';
 	  }
 	  return true;
 	}
-  
-	// private extractTokenFromHeader(request: Request): string | undefined {
-	//   const [type, token] = request.headers.authorization?.split(' ') ?? [];
-	//   return type === 'Bearer' ? token : undefined;
-	// }
   }

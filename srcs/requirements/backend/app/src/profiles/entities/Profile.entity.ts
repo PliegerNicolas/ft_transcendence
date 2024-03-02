@@ -13,8 +13,7 @@ export class Profile {
     @Column({ nullable: true })
     lastName: string;
     
-    @Column({nullable : true})
-    image: string;
+
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;

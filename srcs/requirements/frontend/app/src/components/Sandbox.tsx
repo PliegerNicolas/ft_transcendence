@@ -6,7 +6,7 @@ import { UserType, UserPostType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
 
-import { useInvalidate, stopOnHttp, randomString } from "../utils/utils.ts";
+import { useInvalidate, useStopOnHttp, randomString } from "../utils/utils.ts";
 
 import close from "../assets/close.svg";
 
@@ -19,6 +19,7 @@ export default function Sandbox()
 	const context = useContext(MyContext);
 
 	const invalidate = useInvalidate();
+	const stopOnHttp = useStopOnHttp();
 
 	const getChans = useQuery({
 		queryKey: ["allChans"],
@@ -31,7 +32,7 @@ export default function Sandbox()
 		queryFn: () => context.api.get("/users"),
 		retry: stopOnHttp,
 	});
-	
+
 	const postUser = useMutation({
 		mutationFn: (user: UserPostType) => context.api.post("/users", user),
 		onSettled: () => invalidate(["users"]),
@@ -40,7 +41,7 @@ export default function Sandbox()
 
 	const postChan = useMutation({
 		mutationFn: (name: string) =>
-			context.api.post("/channels", {name, status: "public"}),
+			context.api.post("/channels", {name, visibility: "public", mode: "open"}),
 		onSettled: () => invalidate(["allChans"]),
 		onError: error => context.addNotif({content: error.message}),
 	});
@@ -161,8 +162,6 @@ function UserListRender(
 			</span><br />
 		</div>
 	);
-
-	console.log(query.data);
 
 	return (
 		<div className="Sandbox__Scrollable">

@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 
-import { ChanType } from "../../utils/types.ts";
 import { ChatContext } from "../../utils/contexts";
 
 import closeLeft from "../../assets/close-left.svg";
@@ -12,10 +11,7 @@ import "../../styles/chat.css";
 
 // <ChatHeader /> ==============================================================
 
-export default function ChatHeader(
-	{chan, edit}:
-	{chan: ChanType, edit: boolean}
-)
+export default function ChatHeader({name, edit}: {name: string, edit: boolean})
 {
 	const {showSidebar, setShowSidebar} = useContext(ChatContext);
 
@@ -29,7 +25,7 @@ export default function ChatHeader(
 			</div>
 			<div className="ChatHeader__Main">
 				<div className="ChatHeader__Title">
-					{chan.name}
+					{name}
 				</div>
 				{
 					!edit &&

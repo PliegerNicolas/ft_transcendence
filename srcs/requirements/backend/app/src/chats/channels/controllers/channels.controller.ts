@@ -11,8 +11,11 @@ import { JoinChannelDto } from '../dtos/JoinChannel.dto';
 import { LeaveChannelDto } from '../dtos/LeaveChannel.dto';
 import { ChannelAccessDto } from '../dtos/ChannelAccess.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { RoleGuard } from 'src/role/role.guard';
-import { Role } from 'src/role/role.decorator';
+import { RoleGlobalGuard, RoleGuard } from 'src/guards/role.guard';
+import { GlobalRole, Role } from 'src/guards/role.decorator';
+import { JwtPublicGuard } from 'src/guards/jwt-public.guard';
+import { UsersGuard } from 'src/guards/users.guard';
+import { ChannelsGuard } from 'src/guards/channels.guard';
 
 @Controller()
 export class ChannelsController {
@@ -27,6 +30,8 @@ export class ChannelsController {
     /* Public filtered PATHS: anyone can access but connected users would see additional data. */
     /* */
 
+
+	@UseGuards(JwtPublicGuard)
     @Get('channels')
     // UseGuard => Verify if user is connected but permit anyone to pass.
     async getMyChannels(
@@ -37,6 +42,7 @@ export class ChannelsController {
         return (await this.channelService.getChannels(username, queryDto));
     }
 
+	@UseGuards(JwtPublicGuard)
     @Get('channels/:channelId')
     // UseGuard => Verify if user is connected but permit anyone to pass.
     async getMyChannel(
@@ -52,6 +58,7 @@ export class ChannelsController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
+	@UseGuards(AuthGuard('jwt'))
     @Post('channels')
     // UseGuard => Verify if user connected and pass it's req.user
     async createMyChannel(
@@ -62,6 +69,8 @@ export class ChannelsController {
         return (await this.channelService.createChannel(username, createChannelDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), ChannelsGuard || RoleGlobalGuard)
     @Put('channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceMyChannel(
@@ -73,6 +82,8 @@ export class ChannelsController {
         return (await this.channelService.replaceChannel(channelId, username, replaceChannelDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), ChannelsGuard || RoleGlobalGuard)
     @Patch('channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateMyChannel(
@@ -84,6 +95,7 @@ export class ChannelsController {
         return (await this.channelService.updateChannel(channelId, username, updateChannelDto));
     }
 
+	@UseGuards(AuthGuard('jwt'), ChannelsGuard || RoleGlobalGuard)
     @Patch('channels/:channelId/join')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async joinMyChannel(
@@ -95,6 +107,8 @@ export class ChannelsController {
         return (await this.channelService.joinChannel(channelId, username, joinChannelDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), ChannelsGuard || RoleGlobalGuard)
     @Patch('channels/:channelId/leave')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async leaveMyChannel(
@@ -106,6 +120,10 @@ export class ChannelsController {
         return (await this.channelService.leaveChannel(channelId, username, leaveChannelDto));
     }
 
+
+	@GlobalRole(['operator'])
+	@Role(['owner', 'operator'])
+	@UseGuards(AuthGuard('jwt'), ChannelsGuard || RoleGlobalGuard || RoleGuard)
     @Patch('channels/:channelId/manage_access')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
@@ -118,8 +136,9 @@ export class ChannelsController {
         return (await this.channelService.manageChannelAccess(channelId, username, channelAccessDto));
     }
 
-	@Role(['admin'])
-	@UseGuards(AuthGuard('jwt'), RoleGuard)
+	@GlobalRole(['operator'])
+	@Role(['owner', 'operator'])
+	@UseGuards(AuthGuard('jwt'), ChannelsGuard || RoleGlobalGuard || RoleGuard)
     @Delete('channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
@@ -135,6 +154,8 @@ export class ChannelsController {
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Get('users/:username/channels')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getChannels(
@@ -144,6 +165,8 @@ export class ChannelsController {
         return (await this.channelService.getChannels(username, queryDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Get('users/:username/channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getChannel(
@@ -154,6 +177,8 @@ export class ChannelsController {
         return (await this.channelService.getChannel(channelId, username, getChannelDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Post('users/:username/channels')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async createChannel(
@@ -163,6 +188,9 @@ export class ChannelsController {
         return (await this.channelService.createChannel(username, createChannelDto));
     }
 
+	@GlobalRole(['operator'])
+	@Role(['owner', 'operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard || RoleGuard)
     @Put('users/:username/channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
@@ -174,6 +202,9 @@ export class ChannelsController {
         return (await this.channelService.replaceChannel(channelId, username, replaceChannelDto));
     }
 
+	@GlobalRole(['operator'])
+	@Role(['owner', 'operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard || RoleGuard)
     @Patch('users/:username/channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
@@ -185,6 +216,8 @@ export class ChannelsController {
         return (await this.channelService.updateChannel(channelId, username, updateChannelDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Patch('users/:username/channels/:channelId/join')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async joinChannel(
@@ -195,6 +228,8 @@ export class ChannelsController {
         return (await this.channelService.joinChannel(channelId, username, joinChannelDto));
     }
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Patch('users/:username/channels/:channelId/leave')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async leaveChannel(
@@ -205,6 +240,9 @@ export class ChannelsController {
         return (await this.channelService.leaveChannel(channelId, username, leaveChannelDto));
     }
 
+	@GlobalRole(['operator'])
+	@Role(['owner', 'operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard || RoleGuard)
     @Patch('users/:username/channels/:channelId/manage_access')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
@@ -216,6 +254,9 @@ export class ChannelsController {
         return (await this.channelService.manageChannelAccess(channelId, username, channelAccessDto));
     }
 
+	@GlobalRole(['operator'])
+	@Role(['owner', 'operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard || RoleGuard)
     @Delete('users/:username/channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?

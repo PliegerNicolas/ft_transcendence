@@ -156,19 +156,6 @@
 	border-radius: 7px;
 }
 
-.genericList > *.clickable:hover {
-	border: 1px solid var(--text-faint);
-
-	filter: brightness(1.1) saturate(1.4);
-	cursor: pointer;
-	color: var(--text-accent);
-	text-shadow: 0 0 6px #fff4;
-}
-
-.genericList > *.clickable:active {
-	filter: none;
-}
-
 .genericList > * > * {
 	font-size: .86rem;
 	border: 2px solid #0000;
@@ -195,38 +182,57 @@
 	pointer-events: none;
 }
 
-.Notifs__Notif {
+.Notif {
 	font-size: .92rem;
 	color: var(--text-accent);
 	background-color: #464c60cc;
 	border: 1px solid var(--text-faint);
-	padding: 10px 10px;
+	padding: 5px;
 	margin-top: 3px;
-	width: 240px;
+	width: 250px;
+	max-height: 100px;
 	border-radius: 7px;
 	display: flex;
+	flex-direction: column;
+	gap: 0px;
+}
+
+.Notif__Top {
+	display: flex;
 	justify-content: space-between;
+	align-items: center;
 }
 
 .Notif__Date {
 	color: var(--text-faint);
 	font-size: .74rem;
-	margin-bottom: 4px;
 }
 
-.Notifs__Notif button {
+.Notif button {
 	padding: 0;
 	margin: 0;
-	width: 24px;
-	height: 24px;
+	width: 20px;
+	height: 20px;
 	pointer-events: auto;
 }
 
-.Notifs__Notif img {
+.Notif img {
 	width: 100%;
 }
 
-.Notifs__Notif.err {
+.Notif__Content {
+	padding: 5px;
+	font-size: .88rem;
+	line-height: 1rem;
+	max-height: 3.6rem;
+	display: -webkit-box;
+	-webkit-line-clamp: 4;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;	
+}
+
+.Notif.err {
 	background: #d35c;
 	border-color: #f9a;
 }
@@ -306,7 +312,8 @@
 
 .Popup__Bg {
 	position: absolute;
-	background: #000a;
+	background: #0008;
+	backdrop-filter: blur(4px);
 	top: 0; bottom: 0; left: 0; right: 0;
 	z-index: 1000;
 	display: flex;
