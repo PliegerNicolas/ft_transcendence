@@ -1,22 +1,25 @@
 import {Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'src/profiles/entities/Profile.entity';
 import { User } from 'src/users/entities/User.entity';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 
 @Injectable()
 export class AuthService
 {
-	constructor(private jwtService : JwtService, private dataSource : DataSource) {}
+	constructor(private jwtService : JwtService,
+		private dataSource : DataSource,
+		@InjectRepository(User)
+		private readonly userRepository : Repository<User>) {}
 
 	static _blacklist : string[] = [];
 
 	async blacklist(option : string, token : string) : Promise<boolean> {
 		if (option == "add")
 		{
-			let val = AuthService._blacklist.push(token)
-			console.log(val);
+			AuthService._blacklist.push(token)
 		}
 		if (option == "check")
 		{
@@ -84,6 +87,7 @@ export class AuthService
 					{"email" : Object.values(info)[1].toString(),
 					"oauthId" :BigInt(Object.values(info)[0].toString()),
 					"username" : Object.values(info)[2].toString(),
+					"image" : Object.values(Object.values(info)[11])[0].toString(),
 					"profile" : {
 						"firstName" : Object.values(info)[3].toString(),
 						"lastName" : Object.values(info)[4].toString(),
@@ -102,7 +106,6 @@ export class AuthService
 					{
 						"firstName" : Object.values(info)[3].toString(),
 						"lastName" : Object.values(info)[4].toString(),
-						"image" : Object.values(Object.values(info)[11])[0].toString(),
 						"user" : {
 							//id : BigInt(1),
 							id : BigInt(payload.user_id),
@@ -124,5 +127,21 @@ export class AuthService
 		return {
 			access_token,
 		};
+	}
+
+	async log_as(username : string) : Promise<any>{
+
+		const member = await this.userRepository.findOne({
+			where : {
+				username : username
+			}
+		}).then(
+			(data) => data
+		)
+		const payload = {user_id : member.id, oauth_id : member.oauthId}
+		const access_token = await this.jwtService.signAsync(payload)
+		return {
+			access_token
+		}
 	}
 }

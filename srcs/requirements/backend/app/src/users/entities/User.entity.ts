@@ -37,6 +37,9 @@ export class User {
     @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt: Date;
 
+	@Column({nullable : true})
+    image: string;
+
     /* Profile */
 
     @OneToOne(() => Profile, (profile) => profile.user, { cascade: true })
