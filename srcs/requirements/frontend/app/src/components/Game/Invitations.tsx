@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { v4 as uuid } from 'uuid';
-import { socket } from './Play';
+import { socket } from "../../App.tsx"
 import { useContext, useEffect } from "react";
 import { InviteType } from "../../utils/types";
 import { MyContext } from "../../utils/contexts";

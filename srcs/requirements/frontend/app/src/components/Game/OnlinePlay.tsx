@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { socket } from './Play';
+import { socket } from "../../App.tsx"
 
 import "../../styles/play.css";
 

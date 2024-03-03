@@ -25,23 +25,25 @@ export default function ChatTest()
 
 		const getUser = useQuery({
 			queryKey: ["me"],
-			queryFn: () => context.api.get("/me/user"),
-			retry: useStopOnHttp(),
+			queryFn: () => context.api.get("/me"),
+			retry: useStopOnHttp()
 		});
 
 		const getChans = useQuery({
-			queryKey: ["channels", ],
-			queryFn: () => context.api.get("/channels/" + getUser.data.id),
+			queryKey: ["users", getUser.data.username, "channels"],
+			queryFn: () => context.api.get("/users/" + getUser.data.username + "/channels"),
 			retry: useStopOnHttp()
 		});
 
 		useEffect(() => {
-			console.log('use effect ?');
+			console.log(getChans.data);
 			socket.on('rejoinChannels', () => {
 				console.log('rejoinChannels caught');
-				if (getChans.isSuccess) {
-					console.log('rejoinChannels successfull', getChans.data.id);
-					socket.emit('joinChannel', getChans.data.id);
+				if (getUser.isSuccess) {
+					if (getChans.isSuccess) {
+						console.log('rejoinChannels successfull', getChans.data.name);
+						socket.emit('joinChannel', getChans.data.name);
+					}
 				}
 			});
 			socket.on('onMessage', (content: string, channel: string) => {

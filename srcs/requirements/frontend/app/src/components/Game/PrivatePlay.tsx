@@ -3,7 +3,7 @@ import { MyContext } from '../../utils/contexts';
 import { useQuery } from '@tanstack/react-query';
 import { useStopOnHttp } from '../../utils/utils';
 import { redirect } from 'react-router-dom';
-import { socket } from './Play';
+import { socket } from "../../App.tsx"
 import OnlineGame  from './OnlinePlay'
 
 import "../../styles/play.css";
@@ -102,7 +102,7 @@ const PrivatePlay = (props: any) => {
 
 	const getUser = useQuery({
 		queryKey: ["user"],
-		queryFn: () => context.api.get("/me/user"),
+		queryFn: () => context.api.get("/me"),
 		retry: useStopOnHttp(),
 	});
 

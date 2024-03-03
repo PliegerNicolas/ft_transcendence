@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import { socket } from "../../App.tsx"
 import { MyContext } from '../../utils/contexts';
 import { useQuery } from '@tanstack/react-query';
 import { useStopOnHttp } from '../../utils/utils';
@@ -7,8 +7,6 @@ import { useStopOnHttp } from '../../utils/utils';
 import OnlineGame  from './OnlinePlay'
 
 import "../../styles/play.css";
-
-export const socket = io(`http://${location.hostname}:3450/game`);
 
 // <Play /> ====================================================================
 
@@ -105,10 +103,9 @@ function Play() {
 	}
 
 	const joinQueueHandler = () => {
-		if (getUser.isSuccess) {
-			setInQueue(true);
-			socket.emit('joinQueue');
-		}
+		setInQueue(true);
+		socket.emit('joinQueue');
+		console.log('joinedQueue');
 	}
 
 	const leaveQueueHandler = () => {

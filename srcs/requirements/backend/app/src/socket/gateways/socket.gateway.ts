@@ -27,7 +27,7 @@ export class SocketGateway implements OnModuleInit {
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
 			console.log('new socket connection : ' + socket.id);
-			this.server.to(socket.id).emit('getUserInfos');
+			setTimeout(() => {this.server.to(socket.id).emit('getUserInfos')}, 100);
 			socket.on('disconnect', () => {
 				console.log(socket.id + ' left game socket');
 				this.server.emit('userLeftSocket', socket.id);
@@ -43,6 +43,7 @@ export class SocketGateway implements OnModuleInit {
 	handleGetUsername(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
 		userByName[username] = client.id;
 		userById[client.id] = username;
+		console.log("USER : " + userById[client.id] + " has joined the socket !");
 		this.server.to(client.id).emit('rejoinChannels');
 	}
 

@@ -140,8 +140,8 @@ function App()
 	const context = useContext(MyContext);
 
 	const getUser = useQuery({
-		queryKey: ["user"],
-		queryFn: () => context.api.get("/me/user"),
+		queryKey: ["me"],
+		queryFn: () => context.api.get("/me"),
 		retry: useStopOnHttp(),
 	});
 
