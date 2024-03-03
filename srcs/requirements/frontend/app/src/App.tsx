@@ -26,7 +26,7 @@ import Invites from "./components/Game/Invitations.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
-import { randomString } from "./utils/utils.ts";
+import { randomString, useStopOnHttp } from "./utils/utils.ts";
 
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
@@ -142,7 +142,7 @@ function App()
 	const getUser = useQuery({
 		queryKey: ["user"],
 		queryFn: () => context.api.get("/me/user"),
-		retry: stopOnHttp,
+		retry: useStopOnHttp(),
 	});
 
 	useEffect(() => {

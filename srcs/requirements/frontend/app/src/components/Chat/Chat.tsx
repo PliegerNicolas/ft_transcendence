@@ -11,7 +11,7 @@ import ChatSidebar from "./ChatSidebar.tsx";
 import NewChan from "./ChanEdit.tsx";
 import ChatContent from "./ChatContent.tsx";
 import { useQuery } from "@tanstack/react-query";
-import { stopOnHttp, useInvalidate } from "../../utils/utils.ts";
+import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
 
 // <Chat /> ====================================================================
 
@@ -26,13 +26,13 @@ export default function ChatTest()
 		const getUser = useQuery({
 			queryKey: ["me"],
 			queryFn: () => context.api.get("/me/user"),
-			retry: stopOnHttp,
+			retry: useStopOnHttp(),
 		});
 
 		const getChans = useQuery({
 			queryKey: ["channels", ],
 			queryFn: () => context.api.get("/channels/" + getUser.data.id),
-			retry: stopOnHttp
+			retry: useStopOnHttp()
 		});
 
 		useEffect(() => {

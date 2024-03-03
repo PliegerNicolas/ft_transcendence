@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { MyContext } from '../../utils/contexts';
 import { useQuery } from '@tanstack/react-query';
-import { stopOnHttp } from '../../utils/utils';
+import { useStopOnHttp } from '../../utils/utils';
 
 import OnlineGame  from './OnlinePlay'
 
@@ -132,7 +132,7 @@ function Play() {
 	const getUser = useQuery({
 		queryKey: ["user"],
 		queryFn: () => context.api.get("/me/user"),
-		retry: stopOnHttp,
+		retry: useStopOnHttp(),
 	});
 
 	return (
