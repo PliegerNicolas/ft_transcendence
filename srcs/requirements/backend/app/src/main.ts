@@ -17,6 +17,7 @@ async function bootstrap() {
 		}),
 	);
 
+	//app.setGlobalPrefix('api');
 	await app.listen(3450);
 }
 bootstrap();

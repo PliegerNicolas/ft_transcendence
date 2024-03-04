@@ -18,6 +18,7 @@ export const MyContext = createContext({
 	addInvite: (() => {}) as Function,
 	lastChan: "",
 	setLastChan: (() => {}) as Function,
+	setGlobalPopup: (() => {}) as Function,
 });
 
 export const ChatContext = createContext({

@@ -11,6 +11,7 @@ export interface UserType {
 	email: string,
 	updated_at: string,
 	created_at: string,
+	image: string,
 	profile: ProfileType
 }
 
@@ -99,6 +100,14 @@ export interface GamelogPostType {
         { username: string, result: GameResult }
 	],
     gameType: GameType
+}
+
+export interface PopupType {
+	title: string,
+	text: JSX.Element,
+	action: string,
+	cancelFt: Function,
+	actionFt: Function
 }
 
 export interface MessagePayloads {

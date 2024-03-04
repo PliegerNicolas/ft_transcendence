@@ -27,11 +27,13 @@ import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
 import { randomString, useStopOnHttp } from "./utils/utils.ts";
+import { PopupType } from "./utils/types.ts";
 
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
 
 export const socket = io(`http://${location.hostname}:3450/socket`);
+import ConfirmPopup from "./components/ConfirmPopup.tsx";
 
 function Auth()
 {
@@ -135,6 +137,14 @@ function App()
 		setInvites(prev => [...prev, add]);
 	}
 
+	const [popup, setPopup] = useState<PopupType | null>(null);
+
+	function setGlobalPopup(param: PopupType) {
+		if (param)
+			param.cancelFt = () => setPopup(null);
+		setPopup(param);
+	}
+
 	const [lastChan, setLastChan] = useState("");
 
 	const context = useContext(MyContext);
@@ -170,6 +180,7 @@ function App()
 			api: new Api(`http://${location.hostname}:3450`, logInfo.token),
 			lastChan,
 			setLastChan,
+			setGlobalPopup,
 		}}>
 			<Router>
 				<Header/>
@@ -203,6 +214,16 @@ function App()
 				</Routes>
 				<Notifs list={notifs} setList={setNotifs} />
 				<Invites list={invites} setList={setInvites} />
+				{
+					popup &&
+					<ConfirmPopup
+						title={popup.title}
+						text={popup.text}
+						action={popup.action}
+						cancelFt={popup.cancelFt}
+						actionFt={popup.actionFt}
+					/>
+				}
 			</Router>
 		</MyContext.Provider>
 	);
