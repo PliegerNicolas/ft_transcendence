@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
 import { MsgType } from "../../utils/types.ts";
 
-import defaultPicture from "../../assets/default_profile.png";
-
 import "../../styles/chat.css";
 
 // <Msg /> =====================================================================
