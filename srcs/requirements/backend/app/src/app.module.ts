@@ -12,6 +12,7 @@ import { RelationshipsModule } from "./modules/relationships/relationships.modul
 import { PasswordHashingModule } from "./modules/password-hashing/password-hashing.module";
 import { GuardsModule } from './guards/guards.module';
 import { AuthModule } from "./auth/auth.module";
+import { TwofactorauthModule } from './twofactorauth/twofactorauth.module';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { AuthModule } from "./auth/auth.module";
 
 		AuthModule,
 		GuardsModule,
+		TwofactorauthModule,
 		PasswordHashingModule,
 
 		UsersModule,

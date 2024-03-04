@@ -33,14 +33,6 @@ export default function Sandbox()
 		retry: stopOnHttp,
 	});
 
-	/*
-	const getMe = useQuery({
-		queryKey: ["me"],
-		queryFn: () => context.api.get("/me"),
-		retry: stopOnHttp,
-	});
-	*/
-	
 	const postUser = useMutation({
 		mutationFn: (user: UserPostType) => context.api.post("/users", user),
 		onSettled: () => invalidate(["users"]),
@@ -83,9 +75,6 @@ export default function Sandbox()
 	return (
 		<main className="MainContent">
 			<h2>Sandbox</h2>
-			<section>
-				<h3>Me:</h3>
-			</section>
 			<section>
 				<h3>Global context:</h3>
 				<div className="genericList Sandbox__ContextList">

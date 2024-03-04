@@ -33,8 +33,6 @@ export class User {
     @Column({ type: 'enum', enum: GlobalServerPrivileges, default: GlobalServerPrivileges.USER })
     globalServerPrivileges: GlobalServerPrivileges;
 
-    @Column({nullable: true})
-    twoFactorAuthSecret: string;
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
@@ -72,6 +70,14 @@ export class User {
 
     @ManyToMany(() => Channel, (channel) => channel.bannedUsers, { onDelete: 'CASCADE' })
     channelsBannedFrom?: Channel[];
+	
+	/* Two Factor Authentification */
+
+    @Column({nullable: true})
+    twoFactorAuthSecret: string;
+
+	@Column({default: false})
+	isTwoFactorAuthEnabled: boolean;
 
     /* Helper Function */
 

@@ -17,7 +17,7 @@ import Chat from "./components/Chat/Chat.tsx";
 import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
-import User from "./components/User.tsx";
+import User from "./components/User/User.tsx";
 import Notifs from "./components/Notifs.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
@@ -53,7 +53,6 @@ function Auth()
 			localStorage.setItem(
 				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
 			setLogInfo({logged: true, token: data.access_token});
-			console.log("COCUCOUD");
 			setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
 		},
 
@@ -113,7 +112,7 @@ function App()
 	const [logInfo, setLogInfo] = useState(() => {
 		if (data)
 			return (JSON.parse(data))
-		return { logged: false, token: ""};
+		return { logged: false, token: "" };
 	});
 
 	const [notifs, setNotifs] = useState<NotifType[]>([]);

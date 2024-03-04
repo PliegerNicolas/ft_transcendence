@@ -34,7 +34,8 @@ export default function ChatContentRouter()
 
 // <ChatContent /> =============================================================
 
-function ChatContent() {
+function ChatContent()
+{
 	const { api, addNotif, setLastChan } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const stopOnHttp = useStopOnHttp();
@@ -83,8 +84,6 @@ function ChatContent() {
 		if (!inputValue)
 			return;
 
-		addNotif({content: inputValue});
-
 		postMsg.mutate(inputValue);
 		setInputValue("");
 	}
@@ -104,7 +103,7 @@ function ChatContent() {
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
-				<ChatHeader chan={getChan.data} edit={false} />
+				<ChatHeader name={getChan.data.name} edit={false} />
 				<Spinner />
 			</div>
 		);
@@ -118,7 +117,7 @@ function ChatContent() {
 
 	return (
 		<div className="ChatContent">
-			<ChatHeader chan={getChan.data} edit={false} />
+			<ChatHeader name={getChan.data.name} edit={false} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
 					{

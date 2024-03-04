@@ -129,6 +129,8 @@ export class UsersService {
         return (`User '${username}' successfully deleted`);
     }
 
+	/* Two Factor Authentification */
+
     async setTwoFactorAuthSecret(user: User, secret: string): Promise<User> {
         if (!user) return ;
 
@@ -138,7 +140,13 @@ export class UsersService {
 
         return (await this.userRepository.save(user));
     }
-  
+
+	async turnOnTwoFactorAuthentication(userId: number) {
+		return this.userRepository.update(userId, {
+		  isTwoFactorAuthEnabled: true
+		});
+	}
+
     /* Helper Functions */
 
     public async findStrictlyUsersByUsername(usernames: string[]): Promise<User[]> {
