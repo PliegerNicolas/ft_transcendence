@@ -128,7 +128,7 @@ function Play() {
 
 	const getUser = useQuery({
 		queryKey: ["user"],
-		queryFn: () => context.api.get("/me/user"),
+		queryFn: () => context.api.get("/me"),
 		retry: useStopOnHttp(),
 	});
 

@@ -60,6 +60,7 @@ export class UsersController {
         @Request() req: any,
     ) {
         const username = req.user ? req.user.username : undefined;
+        console.log("REQ USERNAME : " + req.user.username);
         return (await this.userService.getMyUser(username));
     }
 
