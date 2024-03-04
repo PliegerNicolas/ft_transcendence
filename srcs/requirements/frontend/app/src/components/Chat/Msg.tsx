@@ -61,7 +61,7 @@ export default function Msg(
 		}>
 			<div className="Msg__PictureDiv">
 				<Link to={"/user/" + member.user.username}>
-					<img src={defaultPicture} />
+					<img src={member.user.image} />
 				</Link>
 			</div>
 			<div>

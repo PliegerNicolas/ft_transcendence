@@ -17,6 +17,7 @@ export const MyContext = createContext({
 	addNotif: (() => {}) as Function,
 	lastChan: "",
 	setLastChan: (() => {}) as Function,
+	setGlobalPopup: (() => {}) as Function,
 });
 
 export const ChatContext = createContext({
