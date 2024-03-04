@@ -1,8 +1,8 @@
 import {Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Profile } from 'src/profiles/entities/Profile.entity';
-import { User } from 'src/users/entities/User.entity';
+import { Profile } from '../modules/profiles/entities/Profile.entity';
+import { User } from '../modules/users/entities/User.entity';
 import { DataSource, Repository } from 'typeorm';
 
 
