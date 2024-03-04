@@ -139,6 +139,10 @@ export class AuthService
 		}).then(
 			(data) => data
 		)
+		if (member == null)
+		{
+			throw new UnauthorizedException();
+		}
 		const payload = {user_id : member.id, oauth_id : member.oauthId}
 		const access_token = await this.jwtService.signAsync(payload)
 		return {
