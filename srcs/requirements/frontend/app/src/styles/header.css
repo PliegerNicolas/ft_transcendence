@@ -24,7 +24,7 @@
 }
 
 .Header__Title:hover {
-	filter: drop-shadow(3px 3px 0px #000) drop-shadow(0 0 10px #fff8);
+	filter: drop-shadow(3px 3px 1px #000) drop-shadow(0 0 10px #fff8);
 }
 
 .Header__Title:active {
@@ -65,7 +65,7 @@
 	background: #262c4040;
 	backdrop-filter: blur(8px);
 	padding: 4px;
-	border-radius: 6px;
+	border-radius: 12px;
 	border: 1px solid var(--bg-color-5);
 	width: 180px;
 	display: flex;

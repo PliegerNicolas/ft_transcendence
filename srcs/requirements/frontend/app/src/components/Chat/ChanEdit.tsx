@@ -21,6 +21,13 @@ interface UserListEntry {
 	username: string,
 	id: number,
 }
+/*
+function getToForm(chan: ChanType) {
+	return ({
+		...chan,
+		allowed: chan.members.
+	});
+}*/
 
 // <ChanEdit /> ================================================================
 
@@ -171,9 +178,11 @@ export default function ChanEdit({id}: {id: number})
 		</div>
 	);
 
+	console.log(getChan.data);
+
 	return (
 		<div className="ChanEdit ChatContent MainContent" onSubmit={handleSubmit}>
-			<ChatHeader chan={{...chan, id: "", membersCount: 1}} edit={true} />
+			<ChatHeader name={chan.name} edit={true} />
 			<div className="ChanEdit__Scrollable">
 			<section className="ChanEdit__NameSection">
 				<label className="ChanEdit__NameLabel" htmlFor="channelName">

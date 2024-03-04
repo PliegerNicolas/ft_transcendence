@@ -103,7 +103,7 @@ function ChatContent()
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
-				<ChatHeader chan={getChan.data} edit={false} />
+				<ChatHeader name={getChan.data.name} edit={false} />
 				<Spinner />
 			</div>
 		);
@@ -117,7 +117,7 @@ function ChatContent()
 
 	return (
 		<div className="ChatContent">
-			<ChatHeader chan={getChan.data} edit={false} />
+			<ChatHeader name={getChan.data.name} edit={false} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
 					{

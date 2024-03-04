@@ -1,6 +1,6 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import "../styles/header.css";
 
@@ -65,7 +65,7 @@ export default function Header()
 				<div className="Header__UserInfo">
 					<div className="Header__UserInfoContainer" ref={popupRef}>
 						<img
-							src={defaultPicture}
+							src={getMe.isSuccess && getMe.data.profile.image || defaultPicture}
 							onClick={() => setPopup(prev => !prev)}
 						/>
 					</div>
@@ -76,7 +76,7 @@ export default function Header()
 							getMe.isSuccess &&
 							<>
 								<Link to="/user/me" className="Header__PopupLink logged">
-									<img src={defaultPicture}/>
+									<img src={getMe.data.profile.image || defaultPicture}/>
 									<div className="Header__PopupUsername">
 										{getMe.data.username}
 									</div>
@@ -125,11 +125,16 @@ export default function Header()
 
 function Logout()
 {
-	const { setLogInfo } = useContext(MyContext);
+	const { setLogInfo, api } = useContext(MyContext);
+
+	const backendLogout = useMutation({
+		mutationFn: () => api.post("/auth/logout", {}),
+	});
 
 	function logoutNow() {
 		localStorage.removeItem("my_info");
 		setLogInfo({logged: false, token: ""});
+		backendLogout.mutate();
 	}
 
 	return (
