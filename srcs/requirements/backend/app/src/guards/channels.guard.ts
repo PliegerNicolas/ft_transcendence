@@ -1,9 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Observable } from 'rxjs';
-import { ChannelMember } from 'src/chats/channels/entities/ChannelMember.entity';
-import { User } from 'src/users/entities/User.entity';
+import { ChannelMember } from '../modules/chats/channels/entities/ChannelMember.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

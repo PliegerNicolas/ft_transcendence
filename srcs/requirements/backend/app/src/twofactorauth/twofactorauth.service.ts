@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from 'src/users/services/users/users.service';
 import { authenticator } from 'otplib';
-import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/users/entities/User.entity';
 import { Repository } from 'typeorm';
 import {toFileStream} from 'qrcode'
 import { Response } from 'express';
+import { UsersService } from '../modules/users/services/users/users.service';
+import { User } from '../modules/users/entities/User.entity';
 
 @Injectable()
 export class TwoFactorAuthService {
-	constructor(private usersService: UsersService,
+	constructor(
 		@InjectRepository(User)
-		private userRepository : Repository<User>){}
+		private readonly userRepository : Repository<User>,
+		private readonly usersService: UsersService,
+	){}
 
 	public async generateTwoFactorAuthSecret(oauth_id : bigint){
 		
@@ -26,7 +27,7 @@ export class TwoFactorAuthService {
 
 		const otpauthUrl = authenticator.keyuri(user.email, 'Ft_pong', secret);
 
-		await this.usersService.setTwoFactorAuthSecret(Number(user.id), secret);
+		await this.usersService.setTwoFactorAuthSecret(user, secret);
 
 		return {secret, otpauthUrl}
 

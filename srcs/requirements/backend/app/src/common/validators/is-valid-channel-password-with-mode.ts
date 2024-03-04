@@ -1,6 +1,6 @@
 import { ValidationArguments, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface, registerDecorator } from "class-validator";
-import { CreateChannelDto } from "src/chats/channels/dtos/CreateChannel.dto";
-import { ChannelMode } from "src/chats/channels/enums/channel-mode.enum";
+import { CreateChannelDto } from "src/modules/chats/channels/dtos/CreateChannel.dto";
+import { ChannelMode } from "src/modules/chats/channels/enums/channel-mode.enum";
 
 @ValidatorConstraint({ name: 'isValidChannelPasswordWithMode', async: false })
 export class isValidChannelPasswordWithModeConstraint implements ValidatorConstraintInterface {

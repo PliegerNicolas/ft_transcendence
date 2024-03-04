@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { TwoFactorAuthService } from './twofactorauth.service';
 import { Response } from 'express';
 import { TwoFactorAuthCodeDto } from './dtos/TwoFactorAuthCode.dto';
-import { UsersService } from 'src/users/services/users/users.service';
+import { UsersService } from '../modules/users/services/users/users.service';
 
 @Controller('2fa')
 @UseInterceptors(ClassSerializerInterceptor)
