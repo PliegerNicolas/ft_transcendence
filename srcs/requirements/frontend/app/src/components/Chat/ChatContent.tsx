@@ -68,11 +68,13 @@ function ChatContent()
 
 	useEffect(() => {
 		socket.on('onMessage', (content: string) => {
-			//console.log('onMessage caught', id);
-			getMsgs.refetch();
-			//invalidate(["channels", id, "messages"]);
-			console.log(content);
+			setTimeout(() => {
+				invalidate(["channels", id, "messages"]);
+				getMsgs.refetch();
+			}, 100);
+			console.log('onMessage caught', content);
 		});
+		socket.emit('rejoinChannels');
 		return () => {
 			socket.off('onMessage');
 		};
@@ -157,6 +159,7 @@ function ChatContent()
 			</div>
 			<div className="Chat__Input">
 				<textarea
+					id="SendMessage"
 					placeholder={`Send a message to « ${getChan.data.name} »`}
 					value={inputValue}
 					onChange={handleInputChange}

@@ -14,6 +14,7 @@ import { UsersService } from 'src/users/services/users/users.service';
     TypeOrmModule.forFeature([Channel, ChannelMember, User]),
   ],
   controllers: [ChannelsController],
-  providers: [ChannelsService, AuthService, UsersService, PasswordHashingService]
+  providers: [ChannelsService, AuthService, UsersService, PasswordHashingService],
+  exports:[ChannelsService]
 })
 export class ChannelsModule {}

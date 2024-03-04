@@ -7,10 +7,17 @@ import { User } from 'src/users/entities/User.entity';
 import { UsersModule } from 'src/users/users.module';
 import { SocketGateway } from './gateways/socket.gateway';
 import { GameModule } from 'src/game/game.module';
+import { ChannelsModule } from 'src/chats/channels/channels.module';
+import { Channel } from 'src/chats/channels/entities/Channel.entity';
 
 
 @Module({
-  imports: [GameModule, GamelogsModule, UsersModule, TypeOrmModule.forFeature([Gamelog, GamelogToUser, User])],
+  imports: [
+    GameModule,
+    GamelogsModule,
+    UsersModule,
+    TypeOrmModule.forFeature([Gamelog, GamelogToUser, User, Channel]),
+    ChannelsModule],
   providers: [SocketGateway],
 })
 export class SocketModule {}

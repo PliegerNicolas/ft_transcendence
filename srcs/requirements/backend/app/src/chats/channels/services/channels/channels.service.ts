@@ -39,6 +39,14 @@ export class ChannelsService {
         ));
     }
 
+    async getAllChannels(username: string = undefined): Promise<Channel[]> {
+        return (await this.channelRepository.find({
+            where: [
+                { members: { user: { username: Equal(username) } } },
+            ],
+        }));
+    }
+
     async getChannel(channelId: bigint, username: string = undefined, channelDetails: GetChannelParams): Promise<Channel> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },

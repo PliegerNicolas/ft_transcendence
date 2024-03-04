@@ -1,62 +1,21 @@
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 
-import { ChatContext, MyContext } from "../../utils/contexts.ts";
+import { ChatContext } from "../../utils/contexts.ts";
 
-import { socket } from "../../App.tsx"
 
 import "../../styles/chat.css";
 
 import ChatSidebar from "./ChatSidebar.tsx";
 import NewChan from "./ChanEdit.tsx";
 import ChatContent from "./ChatContent.tsx";
-import { useQuery } from "@tanstack/react-query";
-import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
 
 // <Chat /> ====================================================================
 
 export default function ChatTest()
 {
 	const [showSidebar, setShowSidebar] =
-		useState(+(document.body.clientWidth > 900));
-
-		const context = useContext(MyContext);
-		const invalidate = useInvalidate();
-
-		const getUser = useQuery({
-			queryKey: ["me"],
-			queryFn: () => context.api.get("/me"),
-			retry: useStopOnHttp()
-		});
-
-		const getChans = useQuery({
-			queryKey: ["users", getUser.data.username, "channels"],
-			queryFn: () => context.api.get("/users/" + getUser.data.username + "/channels"),
-			retry: useStopOnHttp()
-		});
-
-		useEffect(() => {
-			console.log(getChans.data);
-			socket.on('rejoinChannels', () => {
-				console.log('rejoinChannels caught');
-				if (getUser.isSuccess) {
-					if (getChans.isSuccess) {
-						console.log('rejoinChannels successfull', getChans.data.name);
-						socket.emit('joinChannel', getChans.data.name);
-					}
-				}
-			});
-			socket.on('onMessage', (content: string, channel: string) => {
-				console.log('onMessage caught');
-				invalidate(["channels", channel, "messages"]);
-				context.addNotif({ content: content });
-				console.log(content);
-			});
-			return () => {
-				socket.off('onMessage');
-				socket.off('rejoinsChannels');
-			};
-		}, []);
+	useState(+(document.body.clientWidth > 900));
 	
 	return (
 		<main className="MainContent Chat">

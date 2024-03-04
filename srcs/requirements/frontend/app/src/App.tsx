@@ -148,13 +148,16 @@ function App()
 	useEffect(() => {
 		if (socket) {
 			socket.on('getUserInfos', () => {
-				if (getUser.isSuccess)
+				if (getUser.isSuccess) {
+					console.log("huh ?");
 					socket.emit('userInfos', getUser.data.username);
+				}
 			});
 		}
 		return () => {
-			if (socket)
+			if (socket) {
 				socket.off('getUserInfos');
+			}
 		};
 	}, [[]]);
 

@@ -5,6 +5,7 @@ import { gameState } from '../../game/types/inputPayloads'
 import { GameServer } from '../../game/server/game.server'
 import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../../game/server/game.constants'
 import { MessagePayloads } from '../../chats/types/messagePayloads.type';
+import { ChannelsService } from 'src/chats/channels/services/channels/channels.service';
 
 let state: gameState[] = [];
 let player1ID: string[] = [];
@@ -19,7 +20,8 @@ let userById: string[] = [];
 @WebSocketGateway({ cors: true, namespace: 'socket' })
 export class SocketGateway implements OnModuleInit {
 
-	constructor(private readonly gameServer: GameServer) {}
+	constructor(private readonly gameServer: GameServer,
+				private readonly channelService: ChannelsService) {}
 
 	@WebSocketServer()
 	server: Server;
@@ -27,14 +29,26 @@ export class SocketGateway implements OnModuleInit {
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
 			console.log('new socket connection : ' + socket.id);
-			setTimeout(() => {this.server.to(socket.id).emit('getUserInfos')}, 100);
-			socket.on('disconnect', () => {
-				console.log(socket.id + ' left game socket');
-				this.server.emit('userLeftSocket', socket.id);
-				const index = playersQueue.indexOf(socket.id, 0);
-				if (index > -1) {
-					playersQueue.splice(index, 1);
+			this.server.to(socket.id).emit('getUserInfos');
+			setTimeout(() => {
+				if (userById[socket.id]) {
+					this.channelService.getAllChannels(userById[socket.id]).then((chan) => {
+						for (let i = 0; chan[i]; i++) {
+							console.log("CLIENT JOINED CHANNEL : " + chan[i].name);
+							socket.join(chan[i].name);
+						}
+					});
 				}
+			}, 100);
+			socket.on('disconnect', () => {
+				console.log(socket.id + ' left socket');
+				this.server.emit('userLeftSocket', socket.id);
+				var i = 0;
+				while (playersQueue[i] && playersQueue[i] != socket.id) {
+					i++;
+				}
+				if (playersQueue[i])
+					playersQueue.splice(i, 1);
 			});
 		});
 	}
@@ -43,12 +57,20 @@ export class SocketGateway implements OnModuleInit {
 	handleGetUsername(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
 		userByName[username] = client.id;
 		userById[client.id] = username;
-		console.log("USER : " + userById[client.id] + " has joined the socket !");
-		this.server.to(client.id).emit('rejoinChannels');
+		console.log("USER : " + userById[client.id] + " with id : " + client.id + " has joined the socket !");
+	}
+
+	@SubscribeMessage('rejoinChannels')
+	handleRejoinChannels(@ConnectedSocket() client: Socket) {
+		this.channelService.getAllChannels(userById[client.id]).then((chan) => {
+			for (let i = 0; chan[i]; i++) {
+				console.log("CLIENT JOINED CHANNEL : " + chan[i].name);
+				client.join(chan[i].name);
+			}
+		});
 	}
 
 	// Chat Handlers ==============================================================================================================	
-
 
 	@SubscribeMessage('newMessage')
 	handleNewMessage(@MessageBody() message: MessagePayloads, @ConnectedSocket() client: Socket) {
