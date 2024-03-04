@@ -8,11 +8,15 @@ import { User } from "../../users/entities/User.entity";
 import { ChannelMember } from "./entities/ChannelMember.entity";
 import { UsersModule } from "../../users/users.module";
 import { PasswordHashingModule } from "../../password-hashing/password-hashing.module";
+import { AuthModule } from "../../../auth/auth.module";
+import { GuardsModule } from "../../../guards/guards.module";
 
 @Module({
 	imports: [
 		TypeOrmModule.forFeature([Channel, ChannelMember, Message, User]),
 		forwardRef(() => UsersModule),
+		forwardRef(() => AuthModule),
+		forwardRef(() => GuardsModule),
 		forwardRef(() => PasswordHashingModule),
 	],
 	controllers: [ChannelsController],

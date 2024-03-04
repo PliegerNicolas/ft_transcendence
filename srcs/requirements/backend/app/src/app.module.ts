@@ -9,15 +9,17 @@ import { ProfilesModule } from "./modules/profiles/profiles.module";
 import { ChatsModule } from "./modules/chats/chats.module";
 import { GamelogsModule } from "./modules/gamelogs/gamelogs.module";
 import { RelationshipsModule } from "./modules/relationships/relationships.module";
-import { AuthoriationAndAuthentificationModule } from "./authorization-and-authentification/authoriation-and-authentification.module";
 import { PasswordHashingModule } from "./modules/password-hashing/password-hashing.module";
+import { GuardsModule } from './guards/guards.module';
+import { AuthModule } from "./auth/auth.module";
 
 @Module({
 	imports: [
 		ConfigModule.forRoot(),
 		TypeOrmModule.forRoot(dbConfig),
 
-		AuthoriationAndAuthentificationModule,
+		AuthModule,
+		GuardsModule,
 		PasswordHashingModule,
 
 		UsersModule,

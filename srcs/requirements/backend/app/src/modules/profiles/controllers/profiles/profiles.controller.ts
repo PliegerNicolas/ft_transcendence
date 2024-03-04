@@ -1,8 +1,12 @@
-import { Body, Controller, Delete, Param, Patch, Put, Request, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Param, Patch, Put, Request, UseGuards, ValidationPipe } from "@nestjs/common";
 import { ProfilesService } from "../../services/profiles/profiles.service";
 import { ReplaceProfileDto } from "../../dtos/ReplaceProfile.dto";
 import { UpdateProfileDto } from "../../dtos/UpdateProfile.dto";
 import { ParseUsernamePipe } from "../../../../common/pipes/parse-username/parse-username.pipe";
+import { AuthGuard } from "@nestjs/passport";
+import { GlobalRole } from "../../../../guards/role.decorator";
+import { UsersGuard } from "../../../../guards/users.guard";
+import { RoleGlobalGuard } from "../../../../guards/role.guard";
 
 @Controller()
 export class ProfilesController {
@@ -21,7 +25,7 @@ export class ProfilesController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
-	//@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'))
     @Put('me/profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyProfile(
@@ -32,7 +36,7 @@ export class ProfilesController {
         return (await this.profileService.replaceProfile(username, replaceProfileDto));
     }
 
-	//@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'))
     @Patch('me/profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyProfile(
@@ -43,7 +47,7 @@ export class ProfilesController {
         return (await this.profileService.updateProfile(username, updateProfileDto));
     }
 
-	//@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'))
     @Delete('me/profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async clearMyprofile(
@@ -57,8 +61,8 @@ export class ProfilesController {
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
 
-	//@GlobalRole(['operator'])
-	//@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Put('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceProfile(
@@ -68,8 +72,8 @@ export class ProfilesController {
         return (await this.profileService.replaceProfile(username, replaceProfileDto));
     }
 
-	//@GlobalRole(['operator'])
-	//@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Patch('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateProfile(
@@ -79,8 +83,8 @@ export class ProfilesController {
         return (await this.profileService.updateProfile(username, updateProfileDto));
     }
 
-	//@GlobalRole(['operator'])
-	//@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Delete('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async clearProfile(

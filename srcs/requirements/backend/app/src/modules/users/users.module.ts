@@ -8,12 +8,14 @@ import { Relationship } from "../relationships/entities/Relationship.entity";
 import { GamelogToUser } from "../gamelogs/entities/GamelogToUser.entity";
 import { Channel } from "../chats/channels/entities/Channel.entity";
 import { ChannelMember } from "../chats/channels/entities/ChannelMember.entity";
-import { AuthoriationAndAuthentificationModule } from "../../authorization-and-authentification/authoriation-and-authentification.module";
+import { AuthModule } from "../../auth/auth.module";
+import { GuardsModule } from "../../guards/guards.module";
 
 @Module({
 	imports: [
 		TypeOrmModule.forFeature([User, Profile, Relationship, GamelogToUser, Channel, ChannelMember]),
-		forwardRef(() => AuthoriationAndAuthentificationModule),
+		forwardRef(() => AuthModule),
+		forwardRef(() => GuardsModule),
 	],
 	controllers: [UsersController],
 	providers: [UsersService],

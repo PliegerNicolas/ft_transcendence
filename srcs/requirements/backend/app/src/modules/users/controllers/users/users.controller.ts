@@ -4,11 +4,11 @@ import { CreateUserDto } from "../../dtos/CreateUser.dto";
 import { ParseUsernamePipe } from "src/common/pipes/parse-username/parse-username.pipe";
 import { ReplaceUserDto } from "../../dtos/ReplaceUser.dto";
 import { UpdateUserDto } from "../../dtos/UpdateUser.dto";
-import { JwtPublicGuard } from "../../../../authorization-and-authentification/guards/jwt-public.guard";
 import { AuthGuard } from "@nestjs/passport";
-import { GlobalRole } from "../../../../authorization-and-authentification/guards/role.decorator";
-import { UsersGuard } from "../../../../authorization-and-authentification/guards/users.guard";
-import { RoleGlobalGuard } from "../../../../authorization-and-authentification/guards/role.guard";
+import { JwtPublicGuard } from "../../../../guards/jwt-public.guard";
+import { GlobalRole } from "../../../../guards/role.decorator";
+import { UsersGuard } from "../../../../guards/users.guard";
+import { RoleGlobalGuard } from "../../../../guards/role.guard";
 
 @Controller()
 export class UsersController {

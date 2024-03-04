@@ -1,10 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Request, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Request, UseGuards, ValidationPipe } from "@nestjs/common";
 import { GamelogsService } from "../../services/gamelogs/gamelogs.service";
 import { ParseIdPipe } from "../../../../common/pipes/parse-id/parse-id.pipe";
 import { ParseUsernamePipe } from "../../../../common/pipes/parse-username/parse-username.pipe";
 import { CreateGamelogDto } from "../../dtos/CreateGamelog.dto";
 import { ReplaceGamelogDto } from "../../dtos/ReplaceGamelog.dto";
 import { UpdateGamelogDto } from "../../dtos/UpdateGamelog.dto";
+import { AuthGuard } from "@nestjs/passport";
+import { GlobalRole } from "../../../../guards/role.decorator";
+import { RoleGlobalGuard } from "../../../../guards/role.guard";
 
 @Controller()
 export class GamelogsController {
@@ -42,7 +45,7 @@ export class GamelogsController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
-	//@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwt'))
     @Get('gamelogs')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyGamelogs(
@@ -64,8 +67,8 @@ export class GamelogsController {
     // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
     // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
-	//@GlobalRole(['operator'])
-	//@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Post('gamelogs')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async createGamelog(
@@ -74,8 +77,8 @@ export class GamelogsController {
         return (await this.gamelogService.createGamelog(createGamelogDto));
     }
 
-	//@GlobalRole(['operator'])
-	//@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Put('gamelogs/:gamelogId')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async replaceGamelog(
@@ -85,8 +88,8 @@ export class GamelogsController {
         return (await this.gamelogService.replaceGamelog(gamelogId, replaceGamelogDto));
     }
 
-	//@GlobalRole(['operator'])
-	//@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Patch('gamelogs/:gamelogId')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async updateGamelog(
@@ -96,8 +99,8 @@ export class GamelogsController {
         return (await this.gamelogService.updateGamelog(gamelogId, updateGamelogDto));
     }
 
-	//@GlobalRole(['operator'])
-	//@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
     @Delete('gamelogs/:gamelogId')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async deleteGamelog(
