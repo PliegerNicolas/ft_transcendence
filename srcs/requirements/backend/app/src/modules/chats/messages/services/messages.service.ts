@@ -5,8 +5,8 @@ import { Equal, Repository } from "typeorm";
 import { Channel } from "../../channels/entities/Channel.entity";
 import { User } from "../../../users/entities/User.entity";
 import { ChannelMode } from "../../channels/enums/channel-mode.enum";
-import { PasswordHashingService } from "../../../../common/services/password-hashing/password-hashing.service";
 import { CreateMessageParams, ReplaceMessageParams, UpdateMessageParams } from "../types/message.type";
+import { PasswordHashingService } from "../../../password-hashing/services/password-hashing/password-hashing.service";
 
 @Injectable()
 export class MessagesService {

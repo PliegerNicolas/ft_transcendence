@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { UsersController } from "./controllers/users/users.controller";
 import { UsersService } from "./services/users/users.service";
@@ -13,7 +13,7 @@ import { AuthoriationAndAuthentificationModule } from "../../authorization-and-a
 @Module({
 	imports: [
 		TypeOrmModule.forFeature([User, Profile, Relationship, GamelogToUser, Channel, ChannelMember]),
-		AuthoriationAndAuthentificationModule,
+		forwardRef(() => AuthoriationAndAuthentificationModule),
 	],
 	controllers: [UsersController],
 	providers: [UsersService],

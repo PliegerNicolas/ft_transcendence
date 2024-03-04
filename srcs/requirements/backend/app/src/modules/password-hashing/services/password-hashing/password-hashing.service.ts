@@ -11,13 +11,13 @@ export class PasswordHashingService {
     }
 
     async hashPassword(password: string): Promise<string> {
-        if (!password) throw new Error(`Password should be provided`);
+        if (!password) throw new Error(`A password should be provided`);
         return (await argon2.hash(password, this.settings));
     }
 
     async comparePasswords(hashedPassword: string, plainTextPassword: string): Promise<boolean> {
-        if (!plainTextPassword || !hashedPassword) throw new Error(`Both plainTextPassword and hashedPassword should be provided`);
+        if (!plainTextPassword || !hashedPassword) throw new Error(`A plainTextPassword and a hashedPassword should be provided`);
         return (await argon2.verify(hashedPassword, plainTextPassword))
     }
-
+    
 }

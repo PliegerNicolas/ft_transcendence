@@ -10,10 +10,10 @@ import { UsersModule } from 'src/modules/users/users.module';
 @Module({
 	imports: [
 		TypeOrmModule.forFeature([User, Profile]),
-		JwtModule.register({
+		/*JwtModule.register({
 			secret: process.env.API_SECRET,
 			signOptions: { expiresIn: '1h' },
-		}),
+		}),*/
 		forwardRef(() => UsersModule),
 	],
 	controllers: [AuthentificationController],

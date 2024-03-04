@@ -10,24 +10,24 @@ import { ChatsModule } from "./modules/chats/chats.module";
 import { GamelogsModule } from "./modules/gamelogs/gamelogs.module";
 import { RelationshipsModule } from "./modules/relationships/relationships.module";
 import { AuthoriationAndAuthentificationModule } from "./authorization-and-authentification/authoriation-and-authentification.module";
+import { PasswordHashingModule } from "./modules/password-hashing/password-hashing.module";
 
 @Module({
 	imports: [
 		ConfigModule.forRoot(),
 		TypeOrmModule.forRoot(dbConfig),
 
+		AuthoriationAndAuthentificationModule,
+		PasswordHashingModule,
+
 		UsersModule,
 		ProfilesModule,
 		ChatsModule,
 		GamelogsModule,
 		RelationshipsModule,
-
-		AuthoriationAndAuthentificationModule,
 	],
 	controllers: [],
 	providers: [
-		//PasswordHashingService
-		//AuthService,
 		{
 			provide: APP_INTERCEPTOR,
 			useClass: BigIntSerializationInterceptor,

@@ -4,12 +4,12 @@ import { Channel } from "../../entities/Channel.entity";
 import { Equal, Repository } from "typeorm";
 import { User } from "../../../../users/entities/User.entity";
 import { UsersService } from "src/modules/users/services/users/users.service";
-import { PasswordHashingService } from "../../../../../common/services/password-hashing/password-hashing.service";
 import { ChannelAccessParams, CreateChannelParams, GetChannelParams, GetChannelsQueryParam, JoinChannelParams, LeaveChannelParams, ReplaceChannelParams, UpdateChannelParams } from "../../types/channel.type";
 import { ChannelVisibility } from "../../enums/channel-visibility.enum";
 import { ChannelMode } from "../../enums/channel-mode.enum";
 import { ChannelRole } from "../../enums/channel-role.enum";
 import { ChannelAccessAction } from "../../enums/channel-access-action.enum";
+import { PasswordHashingService } from "../../../../password-hashing/services/password-hashing/password-hashing.service";
 
 @Injectable()
 export class ChannelsService {
