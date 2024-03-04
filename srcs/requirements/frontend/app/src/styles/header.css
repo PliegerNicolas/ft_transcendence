@@ -42,6 +42,22 @@
 	font-weight: 700;
 }
 
+.Header__Right {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border-radius: 9px;
+	padding-left: 8px;
+}
+.Header__Right:hover {
+	cursor: pointer;
+	background-color: var(--bg-color-4);
+}
+
+.Header__Username {
+	font-weight: 600;
+}
+
 .Header__UserInfo {
 	position: relative;
 }
@@ -107,4 +123,8 @@
 .Logout {
 	height: 18px;
 	margin: 12px;
+}
+
+.Header__LogAs {
+	margin-top: -8px;
 }

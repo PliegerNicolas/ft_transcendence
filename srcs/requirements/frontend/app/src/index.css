@@ -27,8 +27,7 @@
 	--border-color-2: #475a9e;
 }
 
-/*
-:root {
+:root_ {
 	--bg-color-1: #ffffff;
 	--bg-color-2: #f2f2ff;
 	--bg-color-3: #e4e4ff;
@@ -49,7 +48,6 @@
 	--error: #f37;
 	--error-bg: #fab;
 }
-*/
 
 body {
 	background: var(--bg-color-1);

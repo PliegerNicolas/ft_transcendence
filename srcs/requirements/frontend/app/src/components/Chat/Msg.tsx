@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
 import { MsgType } from "../../utils/types.ts";
 
-import defaultPicture from "../../assets/default_profile.png";
-
 import "../../styles/chat.css";
 
 // <Msg /> =====================================================================
@@ -61,7 +59,7 @@ export default function Msg(
 		}>
 			<div className="Msg__PictureDiv">
 				<Link to={"/user/" + member.user.username}>
-					<img src={defaultPicture} />
+					<img src={member.user.image} />
 				</Link>
 			</div>
 			<div>

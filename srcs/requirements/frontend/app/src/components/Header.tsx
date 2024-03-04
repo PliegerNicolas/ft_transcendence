@@ -1,6 +1,6 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, MutationFunction } from "@tanstack/react-query";
 
 import "../styles/header.css";
 
@@ -36,7 +36,7 @@ function useOutsideClick(callback: (event: MouseEvent) => void) {
 
 export default function Header()
 {
-	const { logged, api } = useContext(MyContext);
+	const { logged, api, setGlobalPopup, addNotif } = useContext(MyContext);
 	const stopOnHttp = useStopOnHttp();
 
 	const [ popup, setPopup ] = useState(false);
@@ -52,6 +52,50 @@ export default function Header()
 			setTimeout(() => setPopup(false), 0);
 	});
 
+	const [logAsUsername, setLogAsUsername] = useState("");
+
+	const setMe = useMutation({
+		mutationFn: (() =>
+			api.post("/auth/log_as/" + logAsUsername, {})) as unknown as
+			MutationFunction<{ access_token: string; }, unknown>,
+		onSuccess: (data: {access_token: string}) => {
+			localStorage.setItem(
+				"my_info", JSON.stringify({logged: true, token: data.access_token}));
+			window.location.reload();
+		},
+		onError: e => addNotif({content: "Failed to log as: " + logAsUsername +
+		", " + e.message}),
+	});
+
+	function setLogAsPopup(value: string) {
+		setGlobalPopup({
+			title: "Log as another user",
+			text:
+				<>
+					/!\ This is a debug feature <br />
+					Please don't do anything dumb using it.<br /><br />
+					<div style={{textAlign: "center"}}>
+						<input
+							type="text"
+							value={value}
+							onChange={handleUsernameChange}
+						/>
+					</div>
+				</>,
+			action: "Done",
+			cancelFt: () => {},
+			actionFt: () => {
+				setMe.mutate(logAsUsername);
+				setGlobalPopup(null);
+			}
+		});
+	}
+
+	function handleUsernameChange(e: React.ChangeEvent<HTMLInputElement>) {
+		setLogAsUsername(e.target.value);
+		setLogAsPopup(e.target.value);
+	}
+
 	return (
 		<header className="Header">
 			<Link to="/">
@@ -60,13 +104,20 @@ export default function Header()
 					<span className="Header__TitleText">Pong</span>
 				</div>
 			</Link>
+			<div
+				ref={popupRef}
+				className="Header__Right"
+				onClick={() => setPopup(prev => !prev)}
+			>
+			<div className="Header__Username">
+				{logged && getMe.isSuccess ? getMe.data.username : "Guest"}
+			</div>
 			{
 				logged ?
 				<div className="Header__UserInfo">
-					<div className="Header__UserInfoContainer" ref={popupRef}>
+					<div className="Header__UserInfoContainer">
 						<img
-							src={getMe.isSuccess && getMe.data.profile.image || defaultPicture}
-							onClick={() => setPopup(prev => !prev)}
+							src={getMe.isSuccess && getMe.data.image || defaultPicture}
 						/>
 					</div>
 					{
@@ -76,7 +127,7 @@ export default function Header()
 							getMe.isSuccess &&
 							<>
 								<Link to="/user/me" className="Header__PopupLink logged">
-									<img src={getMe.data.profile.image || defaultPicture}/>
+									<img src={getMe.data.image || defaultPicture}/>
 									<div className="Header__PopupUsername">
 										{getMe.data.username}
 									</div>
@@ -86,6 +137,12 @@ export default function Header()
 									My profile
 								</Link>
 								<Logout />
+								<div
+									className="Login Logout Header__LogAs"
+									onClick={() => setLogAsPopup("")}
+								>
+									Log as
+								</div>
 							</>
 							|| getMe.isPending &&
 							<Spinner />
@@ -98,10 +155,9 @@ export default function Header()
 					}
 				</div> :
 				<div className="Header__UserInfo">
-					<div className="Header__UserInfoContainer" ref={popupRef}>
+					<div className="Header__UserInfoContainer" >
 						<img
 							src={defaultPicture}
-							onClick={() => setPopup(prev => !prev)}
 						/>
 					</div>
 					{
@@ -119,6 +175,7 @@ export default function Header()
 					}
 				</div>
 			}
+			</div>
 		</header>
 	);
 }
