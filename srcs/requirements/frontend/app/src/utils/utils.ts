@@ -34,6 +34,23 @@ export function useStopOnHttp()
 	});
 }
 
+export function useMutateError()
+{
+	const {addNotif} = useContext(MyContext);
+
+	return ((error: Error) => {
+		const status = httpStatus(error);
+
+		addNotif({content: error.message});
+		if (status === 401) {
+			addNotif({content: `401 == USER NOT LOGGED,
+				SHOULD A 401 TRULY BE RETURNED IN THIS CASE?`});
+			addNotif({content: `403 is the prefered way of signaling an
+				authenticated user isn't allowed to access a resource.`});
+		}
+	})
+}
+
 export function randomString(length: number)
 {
 	const charset = "aaabcdeeeefghiiijklmnooopqrstuuuvwxyz";

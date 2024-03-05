@@ -6,7 +6,7 @@ import { UserType, UserPostType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
 
-import { useInvalidate, useStopOnHttp, randomString } from "../utils/utils.ts";
+import { useInvalidate, useStopOnHttp, randomString, useMutateError } from "../utils/utils.ts";
 
 import close from "../assets/close.svg";
 
@@ -16,46 +16,47 @@ import "../styles/sandbox.css";
 
 export default function Sandbox()
 {
-	const context = useContext(MyContext);
+	const {api, logged, token} = useContext(MyContext);
 
 	const invalidate = useInvalidate();
 	const stopOnHttp = useStopOnHttp();
+	const mutateError = useMutateError();
 
 	const getChans = useQuery({
 		queryKey: ["allChans"],
-		queryFn: () => context.api.get("/channels"),
+		queryFn: () => api.get("/channels"),
 		retry: stopOnHttp,
 	});
 
 	const getUsers = useQuery({
 		queryKey: ["users"],
-		queryFn: () => context.api.get("/users"),
+		queryFn: () => api.get("/users"),
 		retry: stopOnHttp,
 	});
 
 	const postUser = useMutation({
-		mutationFn: (user: UserPostType) => context.api.post("/users", user),
+		mutationFn: (user: UserPostType) => api.post("/users", user),
 		onSettled: () => invalidate(["users"]),
-		onError: error => context.addNotif({content: error.message}),
+		onError: mutateError,
 	});
 
 	const postChan = useMutation({
 		mutationFn: (name: string) =>
-			context.api.post("/channels", {name, visibility: "public", mode: "open"}),
+			api.post("/channels", {name, visibility: "public", mode: "open"}),
 		onSettled: () => invalidate(["allChans"]),
-		onError: error => context.addNotif({content: error.message}),
+		onError: mutateError,
 	});
 
 	const delChan = useMutation({
-		mutationFn: (id: number) => context.api.delete("/channels/" + id),
+		mutationFn: (id: number) => api.delete("/channels/" + id),
 		onSettled: () => invalidate(["allChans"]),
-		onError: error => context.addNotif({content: error.message}),
+		onError: mutateError,
 	});
 
 	const delUser = useMutation({
-		mutationFn: (id: string) => context.api.delete("/users/" + id),
+		mutationFn: (id: string) => api.delete("/users/" + id),
 		onSettled: () => invalidate(["users"]),
-		onError: error => context.addNotif({content: error.message}),
+		onError: mutateError,
 	});
 
 	function genUser() {
@@ -80,11 +81,11 @@ export default function Sandbox()
 				<div className="genericList Sandbox__ContextList">
 					<div className="Sandbox__Item">
 						<div>Logged</div>
-						<div>{context.logged ? "Yes" : "No"}</div>
+						<div>{logged ? "Yes" : "No"}</div>
 					</div>
 					<div className="Sandbox__Item">
 						<div>Token</div>
-						<div>{context.token}</div>
+						<div>{token}</div>
 					</div>
 				</div>
 				<h4>All channels:</h4>

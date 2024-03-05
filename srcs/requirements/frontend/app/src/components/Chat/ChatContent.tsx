@@ -5,7 +5,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
+import { useInvalidate, useMutateError, useStopOnHttp } from "../../utils/utils.ts";
 import { MyContext } from "../../utils/contexts";
 
 import "../../styles/chat.css";
@@ -36,9 +36,10 @@ export default function ChatContentRouter()
 
 function ChatContent()
 {
-	const { api, addNotif, setLastChan } = useContext(MyContext);
+	const { api, setLastChan } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const stopOnHttp = useStopOnHttp();
+	const mutateError = useMutateError();
 
 	const params = useParams();
 	const id = params.id!;
@@ -59,7 +60,7 @@ function ChatContent()
 		mutationFn: (content: string) =>
 			api.post("/channels/" + id + "/messages", { content }),
 		onSettled: () => invalidate(["channels", id, "messages"]),
-		onError: error => addNotif({ content: error.message }),
+		onError: mutateError,
 	});
 
 	useEffect(() => setLastChan(id), [id]);

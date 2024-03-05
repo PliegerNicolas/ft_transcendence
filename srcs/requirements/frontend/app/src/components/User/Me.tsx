@@ -10,7 +10,7 @@ import ConfirmPopup from "../ConfirmPopup.tsx";
 
 import UserInfos from "./UserInfos.tsx";
 
-import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
+import { useInvalidate, useMutateError, useStopOnHttp } from "../../utils/utils.ts";
 
 import "../../styles/user.css";
 
@@ -18,10 +18,11 @@ import "../../styles/user.css";
 
 export default function Me()
 {
-	const { api, addNotif } = useContext(MyContext);
+	const { api } = useContext(MyContext);
 
 	const stopOnHttp = useStopOnHttp();
 	const invalidate = useInvalidate();
+	const mutateError = useMutateError();
 
 	const [popup, setPopup] = useState(false);
 
@@ -47,13 +48,13 @@ export default function Me()
 		mutationFn: ({them, status}: {them: string, status: string}) =>
 			api.patch("/relationships/" + them, {status: status}),
 		onSettled: () => invalidate(["relations"]),
-		onError: error => addNotif({content: error.message}),
+		onError: mutateError,
 	});
 
 	const delRelation = useMutation({
 		mutationFn: (them: string) => api.delete("/relationships/" + them),
 		onSettled: () => invalidate(["relations"]),
-		onError: error => addNotif({content: error.message}),
+		onError: mutateError,
 	});
 
 	if (getMe.isPending) return (

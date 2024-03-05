@@ -2,7 +2,7 @@ import { useState, useContext, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MutationFunction, useMutation, useQuery } from "@tanstack/react-query";
 
-import { useInvalidate, useStopOnHttp, httpStatus } from "../../utils/utils.ts";
+import { useInvalidate, useStopOnHttp, httpStatus, useMutateError } from "../../utils/utils.ts";
 import { ChanType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -55,6 +55,7 @@ export default function ChanEdit({id}: {id: number})
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
 	const stopOnHttp = useStopOnHttp();
+	const mutateError = useMutateError();
 
 	const getChan = useQuery({
 		queryKey: ["chan", "" + id],
@@ -67,7 +68,7 @@ export default function ChanEdit({id}: {id: number})
 		mutationFn: () => api.delete("/channels/" + id),
 		onSettled: () => invalidate(["allChans"]),
 		onSuccess: () => navigate("/chat"),
-		onError: error => addNotif({content: error.message}),
+		onError: mutateError,
 	});
 
 	useEffect(() => {
@@ -81,7 +82,7 @@ export default function ChanEdit({id}: {id: number})
 			((data: ChanType) => {
 				console.log(data);
 				return api.post("/channels", data)}) as unknown as MutationFunction<ChanType>,
-		onError: error => addNotif({content: error.message}),
+		onError: mutateError,
 		onSettled: () => invalidate(["allChans"]),
 		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
 	});
@@ -91,7 +92,7 @@ export default function ChanEdit({id}: {id: number})
 			((data: ChanType) => {
 				console.log(data);
 				return api.patch("/channels/" + id, data)}) as unknown as MutationFunction<ChanType>,
-		onError: error => addNotif({content: error.message}),
+		onError: mutateError,
 		onSettled: () => invalidate(["allChans"]),
 		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
 	});
