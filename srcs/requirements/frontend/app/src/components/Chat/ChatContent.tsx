@@ -13,6 +13,7 @@ import "../../styles/chat.css";
 import ChatHeader from "./ChatHeader.tsx";
 import Msg from "./Msg.tsx";
 import ChanEdit from "./ChanEdit.tsx";
+import { ChanType } from "../../utils/types.ts";
 
 // <ChatContentRouter /> =======================================================
 
@@ -30,6 +31,15 @@ export default function ChatContentRouter()
 			}/>
 		</Routes>
 	);
+}
+
+function getChanRole(chan: ChanType, id: string)
+{
+	const member = chan.members.find(item => item.user.id == id);
+
+	if (!member)
+		return ("");
+	return (member.role);
 }
 
 // <ChatContent /> =============================================================
@@ -54,6 +64,12 @@ function ChatContent()
 		queryKey: ["channels", id, "messages"],
 		queryFn: () => api.get("/channels/" + id + "/messages"),
 		retry: stopOnHttp
+	});
+
+	const getMe = useQuery({
+		queryKey: ["me"],
+		queryFn: () => api.get("/me"),
+		retry: stopOnHttp,
 	});
 
 	const postMsg = useMutation({
@@ -101,10 +117,12 @@ function ChatContent()
 		</div>
 	);
 
+	const imOwner = getMe.isSuccess && getChanRole(getChan.data, getMe.data.id);
+
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
-				<ChatHeader name={getChan.data.name} edit={false} />
+				<ChatHeader name={getChan.data.name} edit={!imOwner} />
 				<Spinner />
 			</div>
 		);
@@ -118,7 +136,7 @@ function ChatContent()
 
 	return (
 		<div className="ChatContent">
-			<ChatHeader name={getChan.data.name} edit={false} />
+			<ChatHeader name={getChan.data.name} edit={!imOwner} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
 					{
