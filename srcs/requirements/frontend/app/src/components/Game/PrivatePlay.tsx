@@ -159,9 +159,6 @@ const PrivatePlay = (props: any) => {
 						<button className="Play__BackToMenu" onClick={backToMenuHandler}>Back to Menu</button>
 					</div> : <div></div>}
 				</div> : <div>
-					<div className="Play__ReadyCheckText">
-						<span>You have found an opponent !</span>
-					</div>
 					{playerReady === true ? <div>
 						<button className="Play__NotReadyButton Play__ButtonAnimation" onClick={notReadyCheckHandler}>Not Ready</button>
 					</div> : <div>

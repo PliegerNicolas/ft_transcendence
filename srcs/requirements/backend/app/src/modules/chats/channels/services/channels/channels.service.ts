@@ -50,7 +50,7 @@ export class ChannelsService {
     async getChannel(channelId: bigint, username: string = undefined, channelDetails: GetChannelParams): Promise<Channel> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
         });
         
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -88,7 +88,7 @@ export class ChannelsService {
     async replaceChannel(channelId: bigint, username: string = undefined, channelDetails: ReplaceChannelParams): Promise<Channel> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -113,7 +113,7 @@ export class ChannelsService {
     async updateChannel(channelId: bigint, username: string = undefined, channelDetails: UpdateChannelParams): Promise<Channel> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -158,7 +158,7 @@ export class ChannelsService {
     async joinChannel(channelId: bigint, username: string = undefined, channelDetails: JoinChannelParams): Promise<Channel> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -185,7 +185,7 @@ export class ChannelsService {
     async leaveChannel(channelId: bigint, username: string = undefined, channelDetails: LeaveChannelParams): Promise<Channel> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -204,7 +204,7 @@ export class ChannelsService {
     async manageChannelAccess(channelId: bigint, username: string = undefined, channelAccessDetails: ChannelAccessParams) {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -241,6 +241,12 @@ export class ChannelsService {
                 break;
             case (ChannelAccessAction.KICK):
                 channel.kick(users);
+                break;
+            case (ChannelAccessAction.PROMOTE):
+                channel.promote(user, users);
+                break;
+            case (ChannelAccessAction.DEMOTE):
+                channel.demote(user, users);
                 break;
             default:
                 throw new BadRequestException(`Action not recognized`);

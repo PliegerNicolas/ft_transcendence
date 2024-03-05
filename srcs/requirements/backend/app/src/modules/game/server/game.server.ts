@@ -91,7 +91,6 @@ export class GameServer {
 		) {
 			ball.speedX = Math.abs(ball.speedX) + BALL_SPEED;
 			const coef = (ball.y - (player1.y + (PADDLE_HEIGHT / 2))) / (PADDLE_HEIGHT * 0.5);
-			console.log(coef);
 			ball.speedY = ball.maxSpeedY * coef;
 			ball.maxSpeedY += 0.4;
 		}
@@ -102,7 +101,6 @@ export class GameServer {
 		) {
 			ball.speedX = -(Math.abs(ball.speedX) + BALL_SPEED);
 			const coef = (ball.y - (player2.y + (PADDLE_HEIGHT / 2))) / (PADDLE_HEIGHT * 0.5);
-			console.log(coef);
 			ball.speedY = ball.maxSpeedY * coef;
 			ball.maxSpeedY += 0.4;
 		}

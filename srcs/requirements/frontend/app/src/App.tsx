@@ -156,6 +156,12 @@ function App()
 	});
 
 	useEffect(() => {
+		if (getUser.isSuccess) {
+			socket.emit('userInfos', getUser.data.username);
+		}
+	}, [[logInfo]]);
+
+	useEffect(() => {
 		if (socket) {
 			socket.on('getUserInfos', () => {
 				if (getUser.isSuccess) {
@@ -163,10 +169,15 @@ function App()
 					socket.emit('userInfos', getUser.data.username);
 				}
 			});
+			socket.on('invitedToPrivate', (user: string, lobby: string) => {
+				console.log("invitation de : " + user);
+				context.addInvite({from: user, lobby: lobby});
+			});
 		}
 		return () => {
 			if (socket) {
 				socket.off('getUserInfos');
+				socket.off('invitedToPrivate');
 			}
 		};
 	}, [[]]);

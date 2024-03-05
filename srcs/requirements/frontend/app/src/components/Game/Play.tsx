@@ -90,10 +90,7 @@ function Play() {
 	}, [[]]);
 
 	const readyCheckHandler = () => {
-		if (playerNumber === 1)
-			socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: getUser.data.username});
-		else if (playerNumber === 2)
-			socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: 'Maëvo'});
+		socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: getUser.data.username});
 		setPlayerReady(true);
 	}
 

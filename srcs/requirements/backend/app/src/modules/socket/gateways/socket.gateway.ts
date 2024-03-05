@@ -6,6 +6,7 @@ import { GameServer } from '../../game/server/game.server'
 import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../../game/server/game.constants'
 import { MessagePayloads } from '../../chats/types/messagePayloads.type';
 import { ChannelsService } from 'src/modules/chats/channels/services/channels/channels.service';
+import { async } from 'rxjs';
 
 let state: gameState[] = [];
 let player1ID: string[] = [];
@@ -55,9 +56,11 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('userInfos')
 	handleGetUsername(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
-		userByName[username] = client.id;
-		userById[client.id] = username;
-		console.log("USER : " + userById[client.id] + " with id : " + client.id + " has joined the socket !");
+		if (!userById[client.id]) {
+			userByName[username] = client.id;
+			userById[client.id] = username;
+			console.log("USER : " + userById[client.id] + " with id : " + client.id + " has joined the socket !");
+		}
 	}
 
 	@SubscribeMessage('rejoinChannels')
@@ -88,7 +91,9 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('inviteToPrivate')
 	handleInviteToPrivate(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
+		console.log("INVITING USER : " + data.user + " WITH ID : " + userByName[data.user]);
 		if (userByName[data.user]) {
+			console.log("oui");
 			this.server.to(userByName[data.user]).emit('invitedToPrivate', userById[client.id], data.lobby);
 		}
 	}

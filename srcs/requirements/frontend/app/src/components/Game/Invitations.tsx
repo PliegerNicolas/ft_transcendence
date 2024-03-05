@@ -1,9 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { v4 as uuid } from 'uuid';
 import { socket } from "../../App.tsx"
-import { useContext, useEffect } from "react";
 import { InviteType } from "../../utils/types";
-import { MyContext } from "../../utils/contexts";
 
 export const InvitePlayer = (props: any) => {
 
@@ -17,13 +15,13 @@ export const InvitePlayer = (props: any) => {
 			playerNumber: 1,
 		}});
 		if (socket) {
-			socket.emit('inviteToPrivate', lobby_id, props.user);
+			socket.emit('inviteToPrivate', {user: props.user, lobby: lobby_id});
 		}
 	}
 
 	return (
 		<div>
-			<div><a onClick={()=>{toPrivatePlay()}}>Invite to play</a></div>
+			<div><button onClick={()=>{toPrivatePlay()}}>Invite to play</button></div>
 		</div>
 	);
 }
@@ -33,24 +31,10 @@ export default function Invitations(
 	{list: InviteType[], setList: Function}
 )
 {
-	const context = useContext(MyContext);
-
 	function rmInvite(lobby: string) {
 		setList((prev: {from: string, lobby: string}[]) =>
 			prev.filter(invite => invite.lobby !== lobby));
 	}
-
-	useEffect(() => {
-		if (socket) {
-			socket.on('invitedToPrivate', (user: string, lobby: string) => {
-			context.addInvite({from: user, lobby: lobby});
-			});
-		}
-		return () => {
-			if (socket)
-				socket.off('invitedToPrivate');
-		};
-	}, [[]]);
 
 	return (
 		<div className="Invites">

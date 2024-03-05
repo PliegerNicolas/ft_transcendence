@@ -5,8 +5,8 @@ import { ChannelMode } from "../enums/channel-mode.enum";
 import { User } from "../../../users/entities/User.entity";
 import { ChannelMember } from "./ChannelMember.entity";
 import { Message } from "../../messages/entities/Message.entity";
-import { ChannelRole, compareChannelRoles } from "../enums/channel-role.enum";
-import { UnauthorizedException } from "@nestjs/common";
+import { ChannelRole, compareChannelRoles, demoteChannelRole, promoteChannelRole } from "../enums/channel-role.enum";
+import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 
 @Entity({ name: 'channels' })
 export class Channel {
@@ -45,6 +45,10 @@ export class Channel {
     @ManyToMany(() => User, (user) => user.channelsBannedFrom, { cascade: true })
     @JoinTable()
     bannedUsers?: User[];
+
+    @ManyToMany(() => User, (user) => user.channelsMutedFrom, { cascade: true })
+    @JoinTable()
+    mutedUsers?: User[];
 
     @OneToMany(() => ChannelMember, (member) => member.channel, { cascade: true })
     members?: ChannelMember[];
@@ -98,9 +102,8 @@ export class Channel {
     }
 
     public isMuted(username: string): boolean {
-        const member = this.getMember(username);
-        if (!member) return (false);
-        return (member.mute);   
+        if (!this.mutedUsers) return (false);
+        return (this.mutedUsers.some((user) => user.username === username)); 
     }
 
     public isRankedEqualOrAbove(username: string, role: ChannelRole): boolean {
@@ -128,9 +131,8 @@ export class Channel {
     }
 
     public mute(users: User[]): void {
-        this.members?.forEach((member) => {
-            if (users.some((user) => user.username === member.user.username)) member.mute = true;
-        });
+        const mutedUserIds = new Set(this.mutedUsers.map((user) => user.id))
+        this.mutedUsers.push(...users.filter(user => !mutedUserIds.has(user.id)));
     }
 
     public uninvite(users: User[]): void {
@@ -142,8 +144,26 @@ export class Channel {
     }
 
     public unmute(users: User[]): void {
+        this.mutedUsers = this.mutedUsers?.filter((mutedUser) => !users.some((user) => user.username === mutedUser.username))
+    }
+
+    public promote(user: User, users: User[]): void {
+        const actingMember = this.getMember(user.username);
+        if (!actingMember) throw new BadRequestException(`User ${actingMember.user.username ? actingMember.user.username : '{undefined}'} isn't member of Channel with ID ${this.id}`);
+
         this.members?.forEach((member) => {
-            if (users.some((user) => user.username === member.user.username)) member.mute = false;
+            const foundUser = users.find((user) => user.username === member.user.username);
+            if (foundUser && compareChannelRoles(actingMember.role, member.role) > 0) member.role = promoteChannelRole(member.role);
+        });
+    }
+
+    public demote(user: User, users: User[]): void {
+        const actingMember = this.getMember(user.username);
+        if (!actingMember) throw new BadRequestException(`User ${actingMember.user.username ? actingMember.user.username : '{undefined}'} isn't member of Channel with ID ${this.id}`);
+
+        this.members?.forEach((member) => {
+            const foundUser = users.find((user) => user.username === member.user.username);
+            if (foundUser && compareChannelRoles(actingMember.role, member.role) > 0) member.role = demoteChannelRole(member.role);
         });
     }
 

@@ -13,6 +13,7 @@ import UserInfos from "./UserInfos.tsx";
 import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
 
 import "../../styles/user.css";
+import { InvitePlayer } from "../Game/Invitations.tsx";
 
 // <UserRouter /> ==============================================================
 
@@ -185,6 +186,7 @@ function User()
 						name={user.username}
 					/>
 				}
+				<InvitePlayer user={user.username} />
 			</section>
 		</main>
 	);
