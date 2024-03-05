@@ -119,6 +119,9 @@ function ChatContent()
 
 	const imOwner = getMe.isSuccess && getChanRole(getChan.data, getMe.data.id);
 
+	if (getMe.isSuccess)
+		console.log(getChanRole(getChan.data, getMe.data.id));
+
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">

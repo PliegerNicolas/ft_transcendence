@@ -422,6 +422,39 @@
 	padding-bottom: 24px;
 }
 
+.ChanEdit__GlobOrLists {
+	margin: 5px 15px;
+	padding: 10px 15px;
+	display: flex;
+	gap: 10px;
+	font-weight: 600;
+}
+
+.ChanEdit__GlobOrListsItem {
+	flex: 1;
+	border-radius: 7px;
+	display: flex;
+	gap: 6px;
+	justify-content: center;
+	align-items: center;
+	font-size: .96rem;
+	width: 120px;
+	height: 36px;
+	transition: .1s;
+}
+.ChanEdit__GlobOrListsItem:hover {
+	cursor: pointer;
+	background-color: var(--bg-color-3);
+}
+.ChanEdit__GlobOrListsItem:active {
+	background-color: var(--bg-color-4);
+}
+
+.ChanEdit__GlobOrListsItem.true {
+	color: var(--text-accent);
+	background-color: var(--bg-color-4);
+}
+
 .ChanEdit__NameSection {
 	display: flex;
 	align-items: center;
@@ -482,24 +515,16 @@
 	display: none;
 }
 
-.ChanEdit__PublicModeDiv {
-	display: flex;
-	flex-direction: column;
-	margin-bottom: 15px;
-	gap: 15px;
-}
-
-.ChanEdit__PublicModeSection {
-	flex: 1;
-	margin-top: 0;
-	margin-bottom: 0;
-}
-.ChanEdit__PublicModeSection.banned {
+.ChanEdit .banned {
 	border-color: var(--error-bg);
 }
 
 .ChanEdit .allowed {
 	border-color: var(--yes);
+}
+
+.ChanEdit .admins {
+	border-color: var(--link-normal);
 }
 
 @media (min-width: 1400px)

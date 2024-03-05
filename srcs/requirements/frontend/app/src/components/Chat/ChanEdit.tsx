@@ -21,13 +21,6 @@ interface UserListEntry {
 	username: string,
 	id: number,
 }
-/*
-function getToForm(chan: ChanType) {
-	return ({
-		...chan,
-		allowed: chan.members.
-	});
-}*/
 
 // <ChanEdit /> ================================================================
 
@@ -39,19 +32,15 @@ export default function ChanEdit({id}: {id: number})
 		mode: "open",
 		password: "",
 		passwordRepeat: "",
-		allowed: [
-			{username: "Your username", id: 1},
-		],
-		banned: [],
-		admins: [
-			{username: "Your username", id: 1},
-		],
 	});
 
 	const [setPasswd, setSetPasswd] = useState(!id);
 	const [popup, setPopup] = useState(false);
 
-	const { api, addNotif } = useContext(MyContext);
+	const [globOrLists, setGlobOrLists] = useState("global");
+
+	const { api } = useContext(MyContext);
+
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
 	const stopOnHttp = useStopOnHttp();
@@ -101,33 +90,6 @@ export default function ChanEdit({id}: {id: number})
 		setChan(prev => {
 			return {...prev, [field]: value };
 		});
-	}
-
-	function isInList(field: keyof typeof chan, value: UserListEntry) {
-		const list = chan[field];
-
-		if (!Array.isArray(list))
-			return false;
-		return (list.some(elem => elem.id == value.id));
-	}
-
-	function rmFromList(field: keyof typeof chan, value: UserListEntry) {
-		const list = chan[field];
-
-		if (!Array.isArray(list))
-			return ;
-		updateField(field, list.filter(elem => elem.id != value.id));
-	}
-
-	function addToList(field: keyof typeof chan, value: UserListEntry) {
-		if (isInList(field, value))
-			return ;
-
-		const list = chan[field];
-
-		if (!Array.isArray(list))
-			return ;
-		updateField(field, [...list, value]);
 	}
 
 	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -185,6 +147,22 @@ export default function ChanEdit({id}: {id: number})
 		<div className="ChanEdit ChatContent MainContent" onSubmit={handleSubmit}>
 			<ChatHeader name={chan.name} edit={true} />
 			<div className="ChanEdit__Scrollable">
+
+			<div className="ChanEdit__GlobOrLists">
+				<div
+					className={"ChanEdit__GlobOrListsItem " + (globOrLists === "global")}
+					onClick={() => setGlobOrLists("global")}
+				>
+					General Infos
+				</div>
+				<div
+					className={"ChanEdit__GlobOrListsItem " + (globOrLists === "lists")}
+					onClick={() => setGlobOrLists("lists")}
+				>
+					User lists
+				</div>
+			</div>
+
 			<section className="ChanEdit__NameSection">
 				<label className="ChanEdit__NameLabel" htmlFor="channelName">
 					Name
@@ -230,15 +208,6 @@ export default function ChanEdit({id}: {id: number})
 						value="open" onChange={handleChange}
 						checked={chan.mode === "open"}
 					/>
-					<label htmlFor="modeInvite" className={`${chan.mode === "invite_only"}`}>
-						Invite
-						<img src={chan.mode === "invite_only" ? radioChecked : radioUnchecked}/>
-					</label>
-					<input
-						type="radio" id="modeInvite" name="mode"
-						value="invite_only" onChange={handleChange}
-						checked={chan.mode === "invite_only"}
-					/>
 					<label htmlFor="modePassword" className={`${chan.mode === "password_protected"}`}>
 						Password
 						<img src={chan.mode === "password_protected" ? radioChecked : radioUnchecked}/>
@@ -248,12 +217,20 @@ export default function ChanEdit({id}: {id: number})
 						value="password_protected" onChange={handleChange}
 						checked={chan.mode === "password_protected"}
 					/>
+					<label htmlFor="modeInvite" className={`${chan.mode === "invite_only"}`}>
+						Invite
+						<img src={chan.mode === "invite_only" ? radioChecked : radioUnchecked}/>
+					</label>
+					<input
+						type="radio" id="modeInvite" name="mode"
+						value="invite_only" onChange={handleChange}
+						checked={chan.mode === "invite_only"}
+					/>
 				</span>
 			</section>
 			{
 				chan.mode === "password_protected" &&
-				<div className="ChanEdit__PublicModeDiv">
-				<section className="ChanEdit__PublicModeSection">
+				<section>
 				<div className="ChanEdit__Title">
 					Password
 					{
@@ -276,7 +253,7 @@ export default function ChanEdit({id}: {id: number})
 						<input
 							type="password" id="channelPassword" name="password"
 							value={chan.password} onChange={handleChange}
-							placeholder="Leave blank for no password"
+							placeholder="Password"
 						/>
 						{
 							!!chan.password.length &&
@@ -300,75 +277,12 @@ export default function ChanEdit({id}: {id: number})
 					</div>
 				}
 				</section>
-				{
-					!!id &&
-					<section className="ChanEdit__PublicModeSection banned">
-						<UserList
-							title="Banned users"
-							list={chan.banned}
-							add={(value: UserListEntry) => {
-								if (value.id == 1)
-									return addNotif({content: "You cannot ban yourself!"});
-								else if (isInList("admins", value))
-									return addNotif({content: "This user is an admin, please"
-									+ " unadmin them before banning them."});
-								rmFromList("allowed", value);
-								addToList("banned", value);
-							}}
-							rm={(value: UserListEntry) => {
-								rmFromList("banned", value)
-							}}
-							owner={null}
-						/>
-					</section>
-				}
-				</div>
-			}
-			{
-				chan.mode === "invite_only" &&
-				<section className="allowed">
-					<UserList
-						title="Allowed users"
-						list={chan.allowed}
-						add={(value: UserListEntry) => {
-							addToList("allowed", value);
-							rmFromList("banned", value);
-						}}
-						rm={(value: UserListEntry) => {
-							if (isInList("admins", value))
-								return addNotif({content: "This user is an admin, please"
-									+ " unadmin them before taking them access."});
-							rmFromList("admins", value);
-							rmFromList("allowed", value);
-						}}
-						owner={chan.allowed[0]}
-					/>
-				</section>
-			}
-			{
-				!!id &&
-				<section>
-					<UserList
-						title="Admins"
-						list={chan.admins}
-						add={(value: UserListEntry) => {
-							if (chan.visibility == "public" && isInList("banned", value))
-								return addNotif({content: "This user is banned, please unban"
-									+ " them before making them admin."});
-							rmFromList("banned", value);
-							addToList("allowed", value);
-							addToList("admins", value);
-						}}
-						rm={(value: UserListEntry) => rmFromList("admins", value)}
-						owner={chan.admins[0]}
-					/>
-				</section>
 			}
 			<div className="ChanEdit__FinalButtons" style={{marginLeft: "15px"}}>
 				{
 					!!id &&
 					<button className="danger" onClick={() => setPopup(true)}>
-						Delete
+						Delete channel
 					</button>
 				}
 				<button
@@ -376,7 +290,7 @@ export default function ChanEdit({id}: {id: number})
 					disabled={
 						chan.mode === "password_protected"
 						&& (chan.password !== chan.passwordRepeat
-							|| (!!chan.password.length && chan.password.length < 8))
+							|| (chan.password.length < 8))
 					}
 				>
 					Submit
@@ -396,6 +310,80 @@ export default function ChanEdit({id}: {id: number})
 		</div>
 	);
 }
+
+/*
+function UserListsForm() {
+
+	const id = true;
+
+	return (
+		<div>
+			{
+				!!id && chan.mode !== "invite_only" &&
+				<section className="banned">
+					<UserList
+						title="Banned users"
+						list={chan.banned_users}
+						add={(value: UserListEntry) => {
+							if (value.id == 1)
+								return addNotif({content: "You cannot ban yourself!"});
+							else if (isInList("admins", value))
+								return addNotif({content: "This user is an admin, please"
+								+ " unadmin them before banning them."});
+							rmFromList("allowed_users", value);
+							addToList("banned_users", value);
+						}}
+						rm={(value: UserListEntry) => {
+							rmFromList("banned_users", value)
+						}}
+						owner={null}
+					/>
+				</section>
+			}
+			{
+				chan.mode === "invite_only" &&
+				<section className="allowed">
+					<UserList
+						title="Allowed users"
+						list={chan.allowed_users}
+						add={(value: UserListEntry) => {
+							addToList("allowed_users", value);
+							rmFromList("banned_users", value);
+						}}
+						rm={(value: UserListEntry) => {
+							if (isInList("admins", value))
+								return addNotif({content: "This user is an admin, please"
+									+ " unadmin them before taking them access."});
+							rmFromList("admins", value);
+							rmFromList("allowed_users", value);
+						}}
+						owner={chan.allowed_users[0]}
+					/>
+				</section>
+			}
+			{
+				!!id &&
+				<section className="admins">
+					<UserList
+						title="Admins"
+						list={chan.admins}
+						add={(value: UserListEntry) => {
+							if (chan.visibility == "public" && isInList("banned_users", value))
+								return addNotif({content: "This user is banned, please unban"
+									+ " them before making them admin."});
+							rmFromList("banned_users", value);
+							addToList("allowed_users", value);
+							addToList("admins", value);
+						}}
+						rm={(value: UserListEntry) => rmFromList("admins", value)}
+						owner={chan.admins[0]}
+					/>
+				</section>
+			}
+		</div>
+	);
+}
+*/
 
 // <UserList /> ================================================================
 
