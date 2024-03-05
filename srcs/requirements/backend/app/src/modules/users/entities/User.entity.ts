@@ -70,6 +70,9 @@ export class User {
 
     @ManyToMany(() => Channel, (channel) => channel.bannedUsers, { onDelete: 'CASCADE' })
     channelsBannedFrom?: Channel[];
+
+    @ManyToMany(() => Channel, (channel) => channel.mutedUsers, { onDelete: 'CASCADE' })
+    channelsMutedFrom?: Channel[];
 	
 	/* Two Factor Authentification */
 
