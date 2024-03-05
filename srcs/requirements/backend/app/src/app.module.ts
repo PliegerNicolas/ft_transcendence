@@ -13,6 +13,7 @@ import { PasswordHashingModule } from "./modules/password-hashing/password-hashi
 import { GuardsModule } from './guards/guards.module';
 import { AuthModule } from "./auth/auth.module";
 import { TwofactorauthModule } from './twofactorauth/twofactorauth.module';
+import { FileUploadsModule } from './modules/file-uploads/file-uploads.module';
 
 @Module({
 	imports: [
@@ -29,6 +30,7 @@ import { TwofactorauthModule } from './twofactorauth/twofactorauth.module';
 		ChatsModule,
 		GamelogsModule,
 		RelationshipsModule,
+		FileUploadsModule,
 	],
 	controllers: [],
 	providers: [
