@@ -61,14 +61,20 @@ export interface MemberType {
 export interface ChanType {
 	id: string,
 	name: string,
+	mode: string,
+	visibility: string,
 	membersCount: number,
 	members: Array<MemberType>,
+	bannedUsers: Array<UserType>,
+	invitedUsers: Array<UserType>,
 }
 
 export interface ChanFormType {
-	id: string,
 	name: string,
-	membersCount: number,
+	visibility: string,
+	mode: string,
+	password: string,
+	passwordRepeat: string,
 }
 
 export interface NotifType {

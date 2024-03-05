@@ -1,50 +1,26 @@
-import { useState, useContext, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { MutationFunction, useMutation, useQuery } from "@tanstack/react-query";
+import { useState, useContext, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-import { useInvalidate, useStopOnHttp, httpStatus, useMutateError } from "../../utils/utils.ts";
-import { ChanType } from "../../utils/types.ts";
+import { useStopOnHttp, httpStatus } from "../../utils/utils.ts";
+import { ChanType, UserType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
 import closeIcon from "../../assets/close.svg";
-import radioChecked from "../../assets/radio-checked.svg";
-import radioUnchecked from "../../assets/radio-unchecked.svg";
 import addIcon from "../../assets/add.svg";
 
 import "../../styles/chat.css";
 
 import Spinner from "../Spinner.tsx";
 import ChatHeader from "./ChatHeader.tsx";
-import ConfirmPopup from "../ConfirmPopup.tsx";
-
-interface UserListEntry {
-	username: string,
-	id: number,
-}
+import GeneralInfos from "./EditGeneralInfos.tsx";
 
 // <ChanEdit /> ================================================================
 
 export default function ChanEdit({id}: {id: number})
 {
-	const [chan, setChan] = useState({
-		name: "New Channel",
-		visibility: "public",
-		mode: "open",
-		password: "",
-		passwordRepeat: "",
-	});
-
-	const [setPasswd, setSetPasswd] = useState(!id);
-	const [popup, setPopup] = useState(false);
-
+	const {api} = useContext(MyContext);
 	const [globOrLists, setGlobOrLists] = useState("global");
-
-	const { api } = useContext(MyContext);
-
-	const invalidate = useInvalidate();
-	const navigate = useNavigate();
 	const stopOnHttp = useStopOnHttp();
-	const mutateError = useMutateError();
 
 	const getChan = useQuery({
 		queryKey: ["chan", "" + id],
@@ -52,82 +28,6 @@ export default function ChanEdit({id}: {id: number})
 		retry: stopOnHttp,
 		enabled: !!id,
 	});
-
-	const delChan = useMutation({
-		mutationFn: () => api.delete("/channels/" + id),
-		onSettled: () => invalidate(["allChans"]),
-		onSuccess: () => navigate("/chat"),
-		onError: mutateError,
-	});
-
-	useEffect(() => {
-		if (!getChan.isSuccess)
-			return ;
-		setChan(prev => {return {...prev, ...getChan.data, password: ""}});
-	}, [getChan.isSuccess]);
-
-	const postChan = useMutation({
-		mutationFn:
-			((data: ChanType) => {
-				console.log(data);
-				return api.post("/channels", data)}) as unknown as MutationFunction<ChanType>,
-		onError: mutateError,
-		onSettled: () => invalidate(["allChans"]),
-		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
-	});
-
-	const patchChan = useMutation({
-		mutationFn:
-			((data: ChanType) => {
-				console.log(data);
-				return api.patch("/channels/" + id, data)}) as unknown as MutationFunction<ChanType>,
-		onError: mutateError,
-		onSettled: () => invalidate(["allChans"]),
-		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
-	});
-
-	function updateField(field: string, value: unknown) {
-		setChan(prev => {
-			return {...prev, [field]: value };
-		});
-	}
-
-	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-		if (e.target.name === "password" && e.target.value === "") {
-			setChan({
-				...chan,
-				password: "",
-				passwordRepeat: "",
-			});
-		}
-		else updateField(e.target.name, e.target.value);
-	}
-
-	function patch<T>(a: T, b: T) {
-		const ret: Partial<T> = {};
-
-		for (const key in b) {
-			if (
-				a[key] !== b[key]
-				&& (key !== "password" || setPasswd)
-				&& key !== "passwordRepeat"
-			)
-				ret[key] = b[key];
-		}
-
-		return (ret);
-	}
-
-	function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-
-		if (!id) {
-			postChan.mutate(chan);
-			return ;
-		}
-
-		patchChan.mutate(patch(getChan.data, chan));
-	}
 
 	if (id && getChan.isPending) return (
 		<div className="ChatContent spinner">
@@ -141,191 +41,81 @@ export default function ChanEdit({id}: {id: number})
 		</div>
 	);
 
-	console.log(getChan.data);
+	const chan = !!id ?
+		{...getChan.data, password: ""} :
+		{
+			name: "New Channel",
+			visibility: "public",
+			mode: "open",
+			password: "",
+			passwordRepeat: "",
+	};
+
+	console.log(chan);
 
 	return (
-		<div className="ChanEdit ChatContent MainContent" onSubmit={handleSubmit}>
+		<div className="ChanEdit ChatContent MainContent">
 			<ChatHeader name={chan.name} edit={true} />
 			<div className="ChanEdit__Scrollable">
-
-			<div className="ChanEdit__GlobOrLists">
-				<div
-					className={"ChanEdit__GlobOrListsItem " + (globOrLists === "global")}
-					onClick={() => setGlobOrLists("global")}
-				>
-					General Infos
-				</div>
-				<div
-					className={"ChanEdit__GlobOrListsItem " + (globOrLists === "lists")}
-					onClick={() => setGlobOrLists("lists")}
-				>
-					User lists
-				</div>
-			</div>
-
-			<section className="ChanEdit__NameSection">
-				<label className="ChanEdit__NameLabel" htmlFor="channelName">
-					Name
-				</label>
-				<input
-					type="text" id="channelName" name="name"
-					value={chan.name} onChange={handleChange}
-					placeholder="Cannot be empty!"
-				/>
-			</section>
-			<section>
-				<span className="ChanEdit__Title">Visibility</span>
-				<span className="ChanEdit__ModeButtons">
-					<label htmlFor="visibilityPublic" className={`${chan.visibility === "public"}`}>
-						Public
-						<img src={chan.visibility === "public" ? radioChecked : radioUnchecked}/>
-					</label>
-					<input
-						type="radio" id="visibilityPublic" name="visibility"
-						value="public" onChange={handleChange}
-						checked={chan.visibility === "public"}
-					/>
-					<label htmlFor="visibilityHidden" className={`${chan.visibility === "hidden"}`}>
-						Hidden
-						<img src={chan.visibility === "hidden" ? radioChecked : radioUnchecked}/>
-					</label>
-					<input
-						type="radio" id="visibilityHidden" name="visibility"
-						value="hidden" onChange={handleChange}
-						checked={chan.visibility === "hidden"}
-					/>
-				</span>
-			</section>
-			<section>
-				<span className="ChanEdit__Title">Mode</span>
-				<span className="ChanEdit__ModeButtons">
-					<label htmlFor="modeOpen" className={`${chan.mode === "open"}`}>
-						Open
-						<img src={chan.mode === "open" ? radioChecked : radioUnchecked}/>
-					</label>
-					<input
-						type="radio" id="modeOpen" name="mode"
-						value="open" onChange={handleChange}
-						checked={chan.mode === "open"}
-					/>
-					<label htmlFor="modePassword" className={`${chan.mode === "password_protected"}`}>
-						Password
-						<img src={chan.mode === "password_protected" ? radioChecked : radioUnchecked}/>
-					</label>
-					<input
-						type="radio" id="modePassword" name="mode"
-						value="password_protected" onChange={handleChange}
-						checked={chan.mode === "password_protected"}
-					/>
-					<label htmlFor="modeInvite" className={`${chan.mode === "invite_only"}`}>
-						Invite
-						<img src={chan.mode === "invite_only" ? radioChecked : radioUnchecked}/>
-					</label>
-					<input
-						type="radio" id="modeInvite" name="mode"
-						value="invite_only" onChange={handleChange}
-						checked={chan.mode === "invite_only"}
-					/>
-				</span>
-			</section>
 			{
-				chan.mode === "password_protected" &&
-				<section>
-				<div className="ChanEdit__Title">
-					Password
-					{
-						!!id &&
-						<span className="ChanEdit__SetPasswd">
-							<label htmlFor="setPasswd">
-								Change:
-								<div className={"checkBox " + setPasswd}></div>
-							</label>
-							<input
-								type="checkbox" id="setPasswd" checked={setPasswd}
-								onChange={() => setSetPasswd(prev => !prev)}
-							/>
-						</span>
-					}
-				</div>
-				{
-					setPasswd &&
-					<div className="ChanEdit__PasswdFields">
-						<input
-							type="password" id="channelPassword" name="password"
-							value={chan.password} onChange={handleChange}
-							placeholder="Password"
-						/>
-						{
-							!!chan.password.length &&
-							<input
-								type="password" id="channelPasswordRepeat" name="passwordRepeat"
-								value={chan.passwordRepeat} onChange={handleChange}
-								placeholder="Repeat password"
-							/>
-						}
-						{
-							!!chan.password.length
-								&& chan.password.length < 8
-								&& <span className="error-msg">Password length must be 8 or more!</span>
-						}
-						{
-							!!chan.password.length
-								&& !!chan.passwordRepeat.length
-								&& chan.password != chan.passwordRepeat
-								&& <span className="error-msg">Passwords do not match!</span>
-						}
+				!!id &&
+				<div className="ChanEdit__GlobOrLists">
+					<div
+						className={"ChanEdit__GlobOrListsItem " + (globOrLists === "global")}
+						onClick={() => setGlobOrLists("global")}
+					>
+						General Infos
 					</div>
-				}
-				</section>
+					<div
+						className={"ChanEdit__GlobOrListsItem " + (globOrLists === "lists")}
+						onClick={() => setGlobOrLists("lists")}
+					>
+						User lists
+					</div>
+				</div>
 			}
-			<div className="ChanEdit__FinalButtons" style={{marginLeft: "15px"}}>
-				{
-					!!id &&
-					<button className="danger" onClick={() => setPopup(true)}>
-						Delete channel
-					</button>
-				}
-				<button
-					onClick={(e) => {handleSubmit(e)}}
-					disabled={
-						chan.mode === "password_protected"
-						&& (chan.password !== chan.passwordRepeat
-							|| (chan.password.length < 8))
-					}
-				>
-					Submit
-				</button>
-			</div>
 			{
-				popup &&
-				<ConfirmPopup
-					title="Are you sure you want to delete this channel?"
-					text={<>Warning: This is a permanent operation!</>}
-					action="Delete"
-					cancelFt={() => setPopup(false)}
-					actionFt={delChan.mutate}
-				/>
+				globOrLists === "global" ?
+				<GeneralInfos id={id} origChan={chan} /> :
+				<UserLists chan={getChan.data} />
 			}
 			</div>
 		</div>
 	);
 }
 
-/*
-function UserListsForm() {
+// <UserLists /> ===============================================================
 
-	const id = true;
+function UserLists({chan}: {chan: ChanType})
+{
+	const {addNotif} = useContext(MyContext);
+
+	function isInList(name: string, user: UserType) {
+		name + user;
+		addNotif({type: 1, content: "SOON™"});
+		return (false);
+	}
+
+	function rmFromList(name: string, user: UserType) {
+		name + user;
+		addNotif({type: 1, content: "SOON™"});
+	}
+
+	function addToList(name: string, user: UserType) {
+		name + user;
+		addNotif({type: 1, content: "SOON™"});
+	}
 
 	return (
 		<div>
 			{
-				!!id && chan.mode !== "invite_only" &&
+				chan.mode !== "invite_only" &&
 				<section className="banned">
 					<UserList
 						title="Banned users"
-						list={chan.banned_users}
-						add={(value: UserListEntry) => {
-							if (value.id == 1)
+						list={chan.bannedUsers}
+						add={(value: UserType) => {
+							if (value.id == "1")
 								return addNotif({content: "You cannot ban yourself!"});
 							else if (isInList("admins", value))
 								return addNotif({content: "This user is an admin, please"
@@ -333,7 +123,7 @@ function UserListsForm() {
 							rmFromList("allowed_users", value);
 							addToList("banned_users", value);
 						}}
-						rm={(value: UserListEntry) => {
+						rm={(value: UserType) => {
 							rmFromList("banned_users", value)
 						}}
 						owner={null}
@@ -345,29 +135,28 @@ function UserListsForm() {
 				<section className="allowed">
 					<UserList
 						title="Allowed users"
-						list={chan.allowed_users}
-						add={(value: UserListEntry) => {
+						list={chan.invitedUsers}
+						add={(value: UserType) => {
 							addToList("allowed_users", value);
 							rmFromList("banned_users", value);
 						}}
-						rm={(value: UserListEntry) => {
+						rm={(value: UserType) => {
 							if (isInList("admins", value))
 								return addNotif({content: "This user is an admin, please"
 									+ " unadmin them before taking them access."});
 							rmFromList("admins", value);
 							rmFromList("allowed_users", value);
 						}}
-						owner={chan.allowed_users[0]}
+						owner={chan.invitedUsers[0]}
 					/>
 				</section>
 			}
-			{
-				!!id &&
+			{/*
 				<section className="admins">
 					<UserList
 						title="Admins"
 						list={chan.admins}
-						add={(value: UserListEntry) => {
+						add={(value: UserType) => {
 							if (chan.visibility == "public" && isInList("banned_users", value))
 								return addNotif({content: "This user is banned, please unban"
 									+ " them before making them admin."});
@@ -375,15 +164,14 @@ function UserListsForm() {
 							addToList("allowed_users", value);
 							addToList("admins", value);
 						}}
-						rm={(value: UserListEntry) => rmFromList("admins", value)}
+						rm={(value: UserType) => rmFromList("admins", value)}
 						owner={chan.admins[0]}
 					/>
 				</section>
-			}
+			*/}
 		</div>
 	);
 }
-*/
 
 // <UserList /> ================================================================
 
@@ -391,10 +179,10 @@ function UserList(
 	{title, list, add, rm, owner}:
 	{
 		title: string,
-		list: UserListEntry[],
+		list: UserType[],
 		add: Function,
 		rm: Function,
-		owner: UserListEntry | null
+		owner: UserType | null
 	}
 )
 {
