@@ -8,19 +8,6 @@ import { FileUploadsConfig } from '../../configs/file-uploads.config';
 @Controller('file-uploads')
 export class FileUploadsController {
 
-    private pathSuffix: string;
-
-    constructor(
-        private readonly configService: FileUploadsConfig,
-    ) {
-        this.pathSuffix = this.getPathSuffix();
-    }
-
-    private getPathSuffix(): string {
-        if (!this.pathSuffix) this.pathSuffix = this.configService.pathSuffix || 'files';
-        return (this.pathSuffix);
-    }
-
 /* */
     /* Public PATHS: anyone can access. */
     /* */
@@ -34,7 +21,7 @@ export class FileUploadsController {
     /* */
 
 	@UseGuards(AuthGuard('jwt'))
-    @Post(`upload/${this.pathSuffix}`)
+    @Post(`upload/file`)
     async upload(
 
     ) {
@@ -47,7 +34,7 @@ export class FileUploadsController {
 
 	@GlobalRole(['operator'])
 	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
-    @Post(`users/:username/upload/${this.pathSuffix}`)
+    @Post(`users/:username/upload/file`)
     async myUpload(
 
     ) {
