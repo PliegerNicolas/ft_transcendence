@@ -18,7 +18,7 @@ export class ProfilesService {
     async getProfile(username: string = undefined): Promise<Profile> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile'],
+            relations: ['profile', 'profile.image'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}' }' not found`);
@@ -29,7 +29,7 @@ export class ProfilesService {
     async getMyProfile(username: string = undefined): Promise<Profile> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile'],
+            relations: ['profile', 'profile.image'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}' }' not found`);
@@ -40,7 +40,7 @@ export class ProfilesService {
     async createProfile(username: string = undefined, profileDetails: CreateProfileParams): Promise<Profile> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile'],
+            relations: ['profile', 'profile.image'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}' }' not found`);
@@ -57,6 +57,7 @@ export class ProfilesService {
     async replaceProfile(username: string = undefined, profileDetails: ReplaceProfileParams): Promise<Profile> {
         const profile = await this.profileRepository.findOne({
             where: { user: { username: Equal(username) } },
+            relations: ['image'],
         });
 
         if (!profile) throw new NotFoundException(`Profile of User '${username ? username : '{undefined}'}' not found`);
@@ -71,6 +72,7 @@ export class ProfilesService {
     async updateProfile(username: string = undefined, profileDetails: UpdateProfileParams): Promise<Profile> {
         const profile = await this.profileRepository.findOne({
             where: { user: { username: Equal(username) } },
+            relations: ['image'],
         });
 
         if (!profile) throw new NotFoundException(`Profile of User '${username ? username : '{undefined}' }' not found`);
@@ -85,6 +87,7 @@ export class ProfilesService {
     async clearProfile(username: string = undefined): Promise<Profile> {
         const profile = await this.profileRepository.findOne({
             where: { user: { username: Equal(username) } },
+            relations: ['image'],
         });
 
         if (!profile) throw new NotFoundException(`Profile of User '${username ? username : '{undefined}' }' not found`);
@@ -95,6 +98,7 @@ export class ProfilesService {
             user: profile.user,
             created_at: profile.created_at,
             updated_at: profile.updated_at,
+            image: null,
         };
 
         return (await this.profileRepository.save(emptyProfile));
