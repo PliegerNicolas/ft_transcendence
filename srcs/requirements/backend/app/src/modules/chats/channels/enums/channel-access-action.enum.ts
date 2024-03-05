@@ -6,4 +6,6 @@ export enum ChannelAccessAction {
     UNINVITE = 'uninvite',
     MUTE = 'mute',
     UNMUTE = 'unmute',
+    PROMOTE = 'promote',
+    DEMOTE = 'demote',
 }
