@@ -106,8 +106,7 @@ export default function ChanEdit({id}: {id: number})
 		e.preventDefault();
 
 		if (!id)
-			postChan.mutate(chan);
-			socket.emit('joinChannel', chan.name);
+			postChan.mutate(chan);	
 		else if (setPasswd)
 			patchChan.mutate({
 				name: chan.name,
@@ -121,6 +120,7 @@ export default function ChanEdit({id}: {id: number})
 				visibility: chan.visibility,
 				mode: chan.mode,
 		});
+		socket.emit('joinChannel', chan.name);
 	}
 
 	if (!id) return (
