@@ -17,7 +17,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 			<div className="User__Infos">
 				<div className="User__PictureContainer">
 					<label className="User__Picture" htmlFor={me ? "userPicture" : "machin"}>
-						<img className="User__Picture" src={user.image || defaultPicture}/>
+						<img className="User__Picture" src={user.profile.picture || defaultPicture}/>
 						{
 							me &&
 							<div className="User__Camera">
@@ -25,7 +25,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 							</div>
 						}
 					</label>
-					<img className="User__PictureBg" src={user.image || defaultPicture}/>
+					<img className="User__PictureBg" src={user.profile.picture || defaultPicture}/>
 				</div>
 				<div className="genericList User__InfoItems">
 					<div><div>Id</div> <div>{"#" + user.id}</div></div>
