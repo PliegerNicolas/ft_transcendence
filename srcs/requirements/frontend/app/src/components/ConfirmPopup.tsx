@@ -1,12 +1,7 @@
+import { PopupType } from "../utils/types";
+
 export default function ConfirmPopup(
-	{title, text, action, cancelFt, actionFt}:
-	{
-		title: string,
-		text: JSX.Element,
-		action: string,
-		cancelFt: Function,
-		actionFt: Function
-	}
+	{title, text, action, cancelFt, actionFt}: PopupType
 )
 {
 	return (

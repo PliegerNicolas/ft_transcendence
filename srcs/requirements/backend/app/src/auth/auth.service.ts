@@ -1,8 +1,8 @@
 import {Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Profile } from 'src/profiles/entities/Profile.entity';
-import { User } from 'src/users/entities/User.entity';
+import { Profile } from '../modules/profiles/entities/Profile.entity';
+import { User } from '../modules/users/entities/User.entity';
 import { DataSource, Repository } from 'typeorm';
 
 
@@ -92,10 +92,10 @@ export class AuthService
 					{"email" : Object.values(info)[1].toString(),
 					"oauthId" :BigInt(Object.values(info)[0].toString()),
 					"username" : Object.values(info)[2].toString(),
-					"image" : Object.values(Object.values(info)[11])[0].toString(),
 					"profile" : {
 						"firstName" : Object.values(info)[3].toString(),
 						"lastName" : Object.values(info)[4].toString(),
+						"image" : Object.values(Object.values(info)[11])[0].toString(),
 						}
 					}
 				])
