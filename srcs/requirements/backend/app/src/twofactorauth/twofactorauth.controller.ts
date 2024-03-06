@@ -4,12 +4,14 @@ import { TwoFactorAuthService } from './twofactorauth.service';
 import { Response } from 'express';
 import { TwoFactorAuthCodeDto } from './dtos/TwoFactorAuthCode.dto';
 import { UsersService } from 'src/users/services/users/users.service';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('2fa')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TwofactorauthController {
 	constructor (private readonly twoFactorAuthService: TwoFactorAuthService,
-				private usersService: UsersService){}
+				private usersService: UsersService,
+				private authService : AuthService){}
 
 	@Post('generate')
 	@HttpCode(200)
@@ -37,6 +39,22 @@ export class TwofactorauthController {
 			throw new UnauthorizedException('Wrong authentication code');
 		  }
 		  await this.usersService.turnOnTwoFactorAuthentication(req.user.user_id);
+	}
+
+	@Post('authenticate')
+	@HttpCode(200)
+	@UseGuards(AuthGuard('jwt'))
+	async authenticate(
+		@Request() req : any,
+		@Body() {twoFactorAuthCode} : TwoFactorAuthCodeDto
+	){
+		const isCodeValid = this.twoFactorAuthService.isTwoFactorAuthSecretValid(
+			twoFactorAuthCode, req.user.user_id
+		  );
+		  if (!isCodeValid) {
+			throw new UnauthorizedException('Wrong authentication code');
+		  }
+		return (await this.authService.createJwt({user_id : req.user_id, oauth_id : req.oauth_id}, true));
 	}
 
 }

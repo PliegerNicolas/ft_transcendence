@@ -8,12 +8,12 @@ import { Request } from 'express';
 // import { Auth } from 'typeorm';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy){
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh'){
 	constructor(private authService : AuthService) {
 		super({
 			jwtFromRequest : ExtractJwt.fromHeader("authorization"),
 			secretOrKey : process.env.API_SECRET ,
-			ignoreExpiration : false,
+			ignoreExpiration : true,
 			passReqToCallback: true
 		});
 	}

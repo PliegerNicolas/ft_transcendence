@@ -190,7 +190,7 @@ export class ChannelsController {
 
 	@GlobalRole(['operator'])
 	@Role(['owner', 'operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard || RoleGuard)
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard || RoleGuard)
     @Put('users/:username/channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
@@ -204,7 +204,7 @@ export class ChannelsController {
 
 	@GlobalRole(['operator'])
 	@Role(['owner', 'operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard || RoleGuard)
+	@UseGuards(AuthGuard('jwt'),RoleGlobalGuard || RoleGuard)
     @Patch('users/:username/channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
@@ -242,7 +242,7 @@ export class ChannelsController {
 
 	@GlobalRole(['operator'])
 	@Role(['owner', 'operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard || RoleGuard)
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard || RoleGuard)
     @Patch('users/:username/channels/:channelId/manage_access')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
@@ -255,8 +255,8 @@ export class ChannelsController {
     }
 
 	@GlobalRole(['operator'])
-	@Role(['owner', 'operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard || RoleGuard)
+	@Role(['owner'])
+	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard || RoleGuard)
     @Delete('users/:username/channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?

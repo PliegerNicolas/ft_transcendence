@@ -7,11 +7,12 @@ import { User } from 'src/users/entities/User.entity';
 import { Profile } from 'src/profiles/entities/Profile.entity';
 import { ProfilesService } from 'src/profiles/services/profiles/profiles.service';
 import { TwofactorauthController } from './twofactorauth.controller';
+import { AuthService } from 'src/auth/auth.service';
 
 @Module({
 
 	imports: [TypeOrmModule.forFeature([User, Profile])],
 	controllers: [TwofactorauthController],
-	providers: [TwoFactorAuthService, UsersService, ProfilesService]
+	providers: [TwoFactorAuthService, UsersService, ProfilesService, AuthService]
   })
 export class TwofactorauthModule {}

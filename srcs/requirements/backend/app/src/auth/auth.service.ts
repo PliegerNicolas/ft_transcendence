@@ -48,7 +48,12 @@ export class AuthService
 		};
 	}
 
-	async signIn(oauthToken : JSON ): Promise<any> {
+	async createJwt(payload : any, isTwoFactorAuthLogged : boolean = false){
+		payload.isTwoFactorAuthLogged = isTwoFactorAuthLogged;
+		await this.jwtService.signAsync(payload)
+	}
+
+	async signIn(oauthToken : JSON ): Promise<{access_token : any, isTwoFactorAuthEnabled : any}> {
 		const token = Object.values(oauthToken);
 		let payload;
 		console.log(token)
@@ -122,10 +127,11 @@ export class AuthService
 			payload.oauth_id = Object.values(info)[0].toString()
 			console.log(JSON.stringify(payload))
 			console.log(Object.values(Object.values(info)[11])[0].toString())
-			const access_token = await this.jwtService.signAsync(payload)
+			const access_token = await this.createJwt(payload)
 			console.log(access_token)
 		return {
 			access_token,
+			isTwoFactorAuthEnabled : payload.isTwoFactorAuthEnabled
 		};
 	}
 
