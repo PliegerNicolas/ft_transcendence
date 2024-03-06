@@ -87,10 +87,10 @@ export class AuthService
 					{"email" : Object.values(info)[1].toString(),
 					"oauthId" :BigInt(Object.values(info)[0].toString()),
 					"username" : Object.values(info)[2].toString(),
-					"image" : Object.values(Object.values(info)[11])[0].toString(),
 					"profile" : {
 						"firstName" : Object.values(info)[3].toString(),
 						"lastName" : Object.values(info)[4].toString(),
+						"image" : Object.values(Object.values(info)[11])[0].toString(),
 						}
 					}
 				])
