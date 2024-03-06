@@ -48,7 +48,12 @@ export class AuthService
 		};
 	}
 
-	async signIn(oauthToken : JSON ): Promise<any> {
+	async createJwt(payload : any, isTwoFactorAuthLogged : boolean = false){
+		payload.isTwoFactorAuthLogged = isTwoFactorAuthLogged;
+		return (await this.jwtService.signAsync(payload))
+	}
+
+	async signIn(oauthToken : JSON ): Promise<{access_token : any, isTwoFactorAuthEnabled : any}> {
 		const token = Object.values(oauthToken);
 		let payload;
 		console.log(token)
@@ -87,6 +92,7 @@ export class AuthService
 					{"email" : Object.values(info)[1].toString(),
 					"oauthId" :BigInt(Object.values(info)[0].toString()),
 					"username" : Object.values(info)[2].toString(),
+					"isTwoFactorAuthEnabled" : false,
 					"profile" : {
 						"firstName" : Object.values(info)[3].toString(),
 						"lastName" : Object.values(info)[4].toString(),
@@ -98,7 +104,7 @@ export class AuthService
 				.then(
 					(data) => data
 				)
-				payload = {user_id :  Object.values(Object.values(users.generatedMaps)[0])[0]}
+				payload = {user_id :  Object.values(Object.values(users.generatedMaps)[0])[0], isTwoFactorAuthEnabled: false}
 				this.dataSource.createQueryBuilder()
 				.insert()
 				.into(Profile)
@@ -117,15 +123,16 @@ export class AuthService
 	
 			}
 			else{
-				payload = { user_id : Object.values(user_id)[0] }
+				payload = { user_id : Object.values(user_id)[0], isTwoFactorAuthEnabled : user_id.isTwoFactorAuthEnabled }
 			}
 			payload.oauth_id = Object.values(info)[0].toString()
-			console.log(JSON.stringify(payload))
-			console.log(Object.values(Object.values(info)[11])[0].toString())
-			const access_token = await this.jwtService.signAsync(payload)
-			console.log(access_token)
+			// console.log(JSON.stringify(payload))
+			// console.log(Object.values(Object.values(info)[11])[0].toString())
+			const access_token = await this.createJwt(payload)
+			// console.log(access_token)
 		return {
 			access_token,
+			isTwoFactorAuthEnabled : payload.isTwoFactorAuthEnabled
 		};
 	}
 
@@ -138,6 +145,10 @@ export class AuthService
 		}).then(
 			(data) => data
 		)
+		if (member == null)
+		{
+			throw new UnauthorizedException();
+		}
 		const payload = {user_id : member.id, oauth_id : member.oauthId}
 		const access_token = await this.jwtService.signAsync(payload)
 		return {

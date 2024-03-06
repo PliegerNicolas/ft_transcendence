@@ -9,9 +9,16 @@ export class AuthController {
 	
 	@HttpCode(HttpStatus.OK)
 	@Post()
-	signIn(@Body() oauthToken:JSON) {
+	async signIn(@Body() oauthToken:JSON) {
 		console.log("controller")
-		return this.authService.signIn(oauthToken);
+		const ret = await (this.authService.signIn(oauthToken)).then(
+			(data) => data
+		);
+		// console.log(ret)
+		if (ret.isTwoFactorAuthEnabled == true)
+			return ;
+		console.log(ret.access_token);
+		return ret.access_token;
 	  }
 
 	@UseGuards(AuthGuard('jwt'))
