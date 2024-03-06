@@ -87,6 +87,11 @@ export interface NotifType {
 	id: string,
 }
 
+export interface InviteType {
+	lobby: string,
+	from: string
+}
+
 export enum GameResult {
     VICTORY = 'victory',
     DEFEAT = 'defeat',
@@ -112,4 +117,9 @@ export interface PopupType {
 	action: string,
 	cancelFt: Function,
 	actionFt: Function
+}
+
+export interface MessagePayloads {
+	content: string,
+	channel: string,
 }

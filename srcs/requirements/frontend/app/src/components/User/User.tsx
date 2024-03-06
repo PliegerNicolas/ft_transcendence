@@ -14,6 +14,7 @@ import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
 
 import "../../styles/user.css";
 import ConfirmPopup from "../ConfirmPopup.tsx";
+import { InvitePlayer } from "../Game/Invitations.tsx";
 
 // <UserRouter /> ==============================================================
 
@@ -186,6 +187,7 @@ function User()
 						name={user.username}
 					/>
 				}
+				<InvitePlayer user={user.username} />
 				<hr />
 				<div style={{textAlign: "center"}}>
 					<button onClick={() => setPopup(true)}>Log as {user.username}</button>

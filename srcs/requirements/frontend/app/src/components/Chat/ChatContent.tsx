@@ -10,6 +10,8 @@ import { getChanRole } from "../../utils/utils.ts";
 
 import { MyContext } from "../../utils/contexts";
 
+import { socket } from "../../App.tsx"
+
 import "../../styles/chat.css";
 
 import ChatHeader from "./ChatHeader.tsx";
@@ -58,6 +60,20 @@ function ChatContent()
 
 	useEffect(() => setLastChan(id), [id]);
 
+	useEffect(() => {
+		socket.on('onMessage', (content: string) => {
+			setTimeout(() => {
+				invalidate(["channels", id, "messages"]);
+				getMsgs.refetch();
+			}, 100);
+			console.log('onMessage caught', content);
+		});
+		socket.emit('rejoinChannels');
+		return () => {
+			socket.off('onMessage');
+		};
+	}, []);
+
 	/*
 	** These lines are desirable to auto-scroll at bottom of chat.
 	*/
@@ -79,6 +95,7 @@ function ChatContent()
 			return;
 
 		postMsg.mutate(inputValue);
+		socket.emit('newMessage', { content: inputValue, channel: getChan.data.name });
 		setInputValue("");
 	}
 
@@ -141,6 +158,7 @@ function ChatContent()
 			</div>
 			<div className="Chat__Input">
 				<textarea
+					id="SendMessage"
 					placeholder={`Send a message to « ${getChan.data.name} »`}
 					value={inputValue}
 					onChange={handleInputChange}

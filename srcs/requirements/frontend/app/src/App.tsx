@@ -2,16 +2,19 @@ import "./App.css";
 
 import { useState, useEffect, useContext, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate} from "react-router-dom";
-import { useMutation, MutationFunction } from "@tanstack/react-query";
+import { useMutation, MutationFunction, useQuery } from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
-import { NotifType } from "./utils/types.ts";
+import { InviteType, NotifType } from "./utils/types.ts";
+
+import { io } from 'socket.io-client';
 
 import Header from "./components/Header.tsx";
 import Navbar from "./components/Navbar.tsx";
 
 import Home from "./components/Home.tsx";
 import Play from "./components/Game/Play.tsx";
+import PrivatePlay from "./components/Game/PrivatePlay.tsx";
 import Stats from "./components/Stats.tsx";
 import Chat from "./components/Chat/Chat.tsx";
 import Settings from "./components/Settings.tsx";
@@ -19,14 +22,18 @@ import About from "./components/About.tsx";
 import Sandbox from "./components/Sandbox.tsx";
 import User from "./components/User/User.tsx";
 import Notifs from "./components/Notifs.tsx";
+import Invites from "./components/Game/Invitations.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
 import { randomString } from "./utils/utils.ts";
+import { useStopOnHttp } from "./utils/hooks.ts";
 import { PopupType } from "./utils/types.ts";
 
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
+
+export const socket = io(`http://${location.hostname}:3450/socket`);
 import ConfirmPopup from "./components/ConfirmPopup.tsx";
 
 function Auth()
@@ -132,6 +139,12 @@ function App()
 		setNotifs(prev => [...prev, add]);
 	}
 
+	const [invites, setInvites] = useState<InviteType[]>([]);
+
+	function addInvite(add: InviteType) {
+		setInvites(prev => [...prev, add]);
+	}
+
 	const [popup, setPopup] = useState<PopupType | null>(null);
 
 	function setGlobalPopup(param: PopupType) {
@@ -142,11 +155,46 @@ function App()
 
 	const [lastChan, setLastChan] = useState("");
 
+	const context = useContext(MyContext);
+
+	const getUser = useQuery({
+		queryKey: ["me"],
+		queryFn: () => context.api.get("/me"),
+		retry: useStopOnHttp(),
+	});
+
+	useEffect(() => {
+		if (getUser.isSuccess) {
+			socket.emit('userInfos', getUser.data.username);
+		}
+	}, [[logInfo]]);
+
+	useEffect(() => {
+		if (socket) {
+			socket.on('getUserInfos', () => {
+				if (getUser.isSuccess) {
+					socket.emit('userInfos', getUser.data.username);
+				}
+			});
+			socket.on('invitedToPrivate', (user: string, lobby: string) => {
+				console.log("invitation de : " + user);
+				context.addInvite({from: user, lobby: lobby});
+			});
+		}
+		return () => {
+			if (socket) {
+				socket.off('getUserInfos');
+				socket.off('invitedToPrivate');
+			}
+		};
+	}, [[]]);
+
 	return (
 		<MyContext.Provider value={{
 			...logInfo,
 			setLogInfo,
 			addNotif,
+			addInvite,
 			api: new Api(`http://${location.hostname}:3450`, logInfo.token),
 			lastChan,
 			setLastChan,
@@ -157,8 +205,15 @@ function App()
 				<Navbar />
 				<Routes>
 					<Route path="/"	element={<Home />} />
-					<Route path="/play" element={<Play />} />
-					<Route path="/stats" element={<Stats />} />
+					<Route path="/play" element={
+						<RequireAuth elem={<Play />} />
+					} />
+					<Route path="/play/private" element={
+						<RequireAuth elem={<PrivatePlay />} />
+					} />
+					<Route path="/stats" element={
+						<RequireAuth elem={<Stats />} />
+					} />
 					<Route path="/about" element={<About />} />
 					<Route path="/auth" element={<Auth />} />
 					<Route path="/chat/*" element={
@@ -176,6 +231,7 @@ function App()
 					<Route path="*" element={<NotFound />} />
 				</Routes>
 				<Notifs list={notifs} setList={setNotifs} />
+				<Invites list={invites} setList={setInvites} />
 				{
 					popup &&
 					<ConfirmPopup
