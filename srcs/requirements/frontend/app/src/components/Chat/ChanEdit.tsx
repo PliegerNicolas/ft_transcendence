@@ -1,13 +1,9 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useMutation, MutationFunction } from "@tanstack/react-query";
+import { useMutation, MutationFunction } from "@tanstack/react-query";
 
-import {
-	useStopOnHttp,
-	httpStatus,
-	useMutateError,
-	useInvalidate,
-} from "../../utils/utils.ts";
+import { useMutateError, useInvalidate, useGet } from "../../utils/hooks.ts";
+import { httpStatus } from "../../utils/utils.ts";
 import { ChanType, UserType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -21,6 +17,7 @@ import "../../styles/chat.css";
 import Spinner from "../Spinner.tsx";
 import ChatHeader from "./ChatHeader.tsx";
 import GeneralInfos from "./EditGeneralInfos.tsx";
+import ConfirmPopup from "../ConfirmPopup.tsx";
 
 // <ChanEdit /> ================================================================
 
@@ -28,7 +25,6 @@ export default function ChanEdit({id}: {id: number})
 {
 	const {api} = useContext(MyContext);
 	const [globOrLists, setGlobOrLists] = useState("global");
-	const stopOnHttp = useStopOnHttp();
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
@@ -48,13 +44,9 @@ export default function ChanEdit({id}: {id: number})
 	});
 
 	const [setPasswd, setSetPasswd] = useState(!id);
+	const [popup, setPopup] = useState(false);
 
-	const getChan = useQuery({
-		queryKey: ["chan", "" + id],
-		queryFn: () => api.get("/channels/" + id),
-		retry: stopOnHttp,
-		enabled: !!id,
-	});
+	const getChan = useGet(["channels", "" + id], !!id);
 
 	useEffect(() => {
 		if (!getChan.isSuccess)
@@ -70,13 +62,10 @@ export default function ChanEdit({id}: {id: number})
 	}
 
 	const postChan = useMutation({
-		mutationFn:
-			((data: ChanType) => {
-				console.log(data);
-				return api.post("/channels", data)}) as
-					unknown as MutationFunction<ChanType>,
+		mutationFn: ((data: ChanType) => api.post("/channels", data)) as
+			unknown as MutationFunction<ChanType>,
 		onError: mutateError,
-		onSettled: () => invalidate(["allChans"]),
+		onSettled: () => invalidate(["channels"]),
 		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
 	});
 
@@ -87,8 +76,15 @@ export default function ChanEdit({id}: {id: number})
 				return api.patch("/channels/" + id, data)}) as
 					unknown as MutationFunction<ChanType>,
 		onError: mutateError,
-		onSettled: () => invalidate(["allChans"]),
+		onSettled: () => invalidate(["channels"]),
 		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
+	});
+
+	const patchChanNoRedirect = useMutation({
+		mutationFn: ((data: ChanType) => api.patch("/channels/" + id, data)) as
+			unknown as MutationFunction<ChanType>,
+		onError: mutateError,
+		onSuccess: (data: ChanType) => invalidate(["channels", data.id])
 	});
 
 	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -102,20 +98,25 @@ export default function ChanEdit({id}: {id: number})
 		else updateField(e.target.name, e.target.value);
 	}
 
-	function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
+	function handleSubmit(redirect = true) {
+		const patchFn = redirect ? patchChan : patchChanNoRedirect;
 
 		if (!id)
-			postChan.mutate(chan);	
+			postChan.mutate({
+				name: chan.name,
+				visibility: chan.visibility,
+				mode: chan.mode,
+				password: chan.password,
+			});
 		else if (setPasswd)
-			patchChan.mutate({
+			patchFn.mutate({
 				name: chan.name,
 				visibility: chan.visibility,
 				mode: chan.mode,
 				password: chan.password,
 			});
 		else
-			patchChan.mutate({
+			patchFn.mutate({
 				name: chan.name,
 				visibility: chan.visibility,
 				mode: chan.mode,
@@ -158,13 +159,22 @@ export default function ChanEdit({id}: {id: number})
 				<div className="ChanEdit__GlobOrLists">
 					<div
 						className={"ChanEdit__GlobOrListsItem " + (globOrLists === "global")}
-						onClick={() => setGlobOrLists("global")}
+						onClick={() => {
+							setGlobOrLists("global");
+							console.log(getChan.data.mode + " vs. " + chan.mode);
+						}}
 					>
 						General Infos
 					</div>
 					<div
 						className={"ChanEdit__GlobOrListsItem " + (globOrLists === "lists")}
-						onClick={() => setGlobOrLists("lists")}
+						onClick={() => {
+							if (getChan.data.mode !== chan.mode)
+								setPopup(true);
+							else
+								setGlobOrLists("lists");
+							console.log("coucou");
+						}}
 					>
 						User lists
 					</div>
@@ -180,9 +190,26 @@ export default function ChanEdit({id}: {id: number})
 					setPasswd={setPasswd}
 					setSetPasswd={setSetPasswd}
 				/> :
-				<UserLists chan={chan} />
+				<UserLists chan={getChan.data} />
 			}
 			</div>
+			{
+				popup &&
+				<ConfirmPopup
+					title="Warning"
+					text={<>
+						The channel mode has been modified.<br /><br />If you want to edit
+						the user lists, you first need to submit the changes.
+					</>}
+					cancelFt={() => setPopup(false)}
+					action="Submit"
+					actionFt={() => {
+						handleSubmit(false);
+						setGlobOrLists("lists");
+						setPopup(false);
+					}}
+				/>
+			}
 		</div>
 	);
 }
@@ -200,11 +227,13 @@ function UserLists({chan}: {chan: ChanType})
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
 
+	//const getMe = useGet(["me"]);
+
 	const action = useMutation({
 		mutationFn: (action: actionType) =>
 			api.patch("/channels/" + chan.id + "/manage_access", action),
 		onError: mutateError,
-		onSuccess: () => invalidate(["/channels/", chan.id]),
+		onSuccess: () => invalidate(["channels", chan.id]),
 	});
 
 	function isInList(name: string, user: UserType) {
@@ -220,53 +249,36 @@ function UserLists({chan}: {chan: ChanType})
 
 	return (
 		<div>
-			{
-				chan.mode !== "invite_only" &&
-				<section className="banned">
-					<UserList
-						title="Banned users"
-						list={chan.bannedUsers}
-						add={(value: UserType) => {
-							/*
-							A BUNCH OF LOGIC THAT SHOULD BE USELESS NOW:
-
-							if (value.id == "1")
-								return addNotif({content: "You cannot ban yourself!"});
-							else if (isInList("admins", value))
-								return addNotif({content: "This user is an admin, please"
-								+ " unadmin them before banning them."});
-							rmFromList("allowed_users", value);
-							addToList("banned_users", value);
-							*/
-							action.mutate({action: "ban", usernames: [value.username]});
-						}}
-						rm={(value: UserType) => {
-							action.mutate({action: "deban", usernames: [value.username]});
-						}}
-						owner={null}
-					/>
-				</section>
-			}
-			{
-				chan.mode === "invite_only" &&
-				<section className="allowed">
-					<UserList
-						title="Allowed users"
-						list={chan.invitedUsers}
-						add={(value: UserType) => {
-							action.mutate({action: "invite", usernames: [value.username]})
-						}}
-						rm={(value: UserType) => {
-							if (isInList("admins", value))
-								return addNotif({content: "This user is an admin, please"
-									+ " unadmin them before taking them access."});
-							rmFromList("admins", value);
-							rmFromList("allowed_users", value);
-						}}
-						owner={chan.invitedUsers[0]}
-					/>
-				</section>
-			}
+			<section className="banned">
+				<UserList
+					title="Banned users"
+					list={chan.bannedUsers}
+					add={(value: UserType) => {
+						action.mutate({action: "ban", usernames: [value.username]});
+					}}
+					rm={(value: UserType) => {
+						action.mutate({action: "deban", usernames: [value.username]});
+					}}
+					owner={null}
+				/>
+			</section>
+			<section className="allowed">
+				<UserList
+					title="Allowed users"
+					list={chan.invitedUsers}
+					add={(value: UserType) => {
+						action.mutate({action: "invite", usernames: [value.username]})
+					}}
+					rm={(value: UserType) => {
+						if (isInList("admins", value))
+							return addNotif({content: "This user is an admin, please"
+								+ " unadmin them before taking them access."});
+						rmFromList("admins", value);
+						rmFromList("allowed_users", value);
+					}}
+					owner={chan.invitedUsers[0]}
+				/>
+			</section>
 			{/*
 				<section className="admins">
 					<UserList

@@ -1,8 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { socket } from "../../App.tsx"
-import { MyContext } from '../../utils/contexts';
-import { useQuery } from '@tanstack/react-query';
-import { useStopOnHttp } from '../../utils/utils';
+import { useGet } from '../../utils/hooks.ts';
 
 import OnlineGame  from './OnlinePlay'
 
@@ -121,13 +119,7 @@ function Play() {
 
 	// Backend http requests ==============================================================================================================
 
-	const context = useContext(MyContext);
-
-	const getUser = useQuery({
-		queryKey: ["user"],
-		queryFn: () => context.api.get("/me"),
-		retry: useStopOnHttp(),
-	});
+	const getUser = useGet(["me"]);
 
 	return (
 		<main className="MainContent">

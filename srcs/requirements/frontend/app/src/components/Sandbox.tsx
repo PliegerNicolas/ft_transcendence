@@ -1,12 +1,13 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { UseQueryResult, useQuery, useMutation } from "@tanstack/react-query";
+import { UseQueryResult, useMutation } from "@tanstack/react-query";
 import { MyContext } from "../utils/contexts.ts";
 import { UserType, UserPostType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
 
-import { useInvalidate, useStopOnHttp, randomString, useMutateError } from "../utils/utils.ts";
+import { randomString } from "../utils/utils.ts";
+import { useInvalidate, useMutateError, useGet } from "../utils/hooks.ts";
 
 import close from "../assets/close.svg";
 
@@ -19,20 +20,10 @@ export default function Sandbox()
 	const {api, logged, token} = useContext(MyContext);
 
 	const invalidate = useInvalidate();
-	const stopOnHttp = useStopOnHttp();
 	const mutateError = useMutateError();
 
-	const getChans = useQuery({
-		queryKey: ["allChans"],
-		queryFn: () => api.get("/channels"),
-		retry: stopOnHttp,
-	});
-
-	const getUsers = useQuery({
-		queryKey: ["users"],
-		queryFn: () => api.get("/users"),
-		retry: stopOnHttp,
-	});
+	const getChans = useGet(["channels"]);
+	const getUsers = useGet(["users"]);
 
 	const postUser = useMutation({
 		mutationFn: (user: UserPostType) => api.post("/users", user),
@@ -43,13 +34,13 @@ export default function Sandbox()
 	const postChan = useMutation({
 		mutationFn: (name: string) =>
 			api.post("/channels", {name, visibility: "public", mode: "open"}),
-		onSettled: () => invalidate(["allChans"]),
+		onSettled: () => invalidate(["channels"]),
 		onError: mutateError,
 	});
 
 	const delChan = useMutation({
 		mutationFn: (id: number) => api.delete("/channels/" + id),
-		onSettled: () => invalidate(["allChans"]),
+		onSettled: () => invalidate(["channels"]),
 		onError: mutateError,
 	});
 
@@ -109,7 +100,7 @@ export default function Sandbox()
 				<button onClick={() => postChan.mutate("c_" + randomString(6))}>
 					Add a chan
 				</button>
-				<button onClick={() => invalidate(["allChans"])}>
+				<button onClick={() => invalidate(["channels"])}>
 					Reload
 				</button>
 				<hr />

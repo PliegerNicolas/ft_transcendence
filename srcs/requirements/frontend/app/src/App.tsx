@@ -26,7 +26,8 @@ import Invites from "./components/Game/Invitations.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
-import { randomString, useStopOnHttp } from "./utils/utils.ts";
+import { randomString } from "./utils/utils.ts";
+import { useStopOnHttp } from "./utils/hooks.ts";
 import { PopupType } from "./utils/types.ts";
 
 import closeIcon from "./assets/close.svg";
