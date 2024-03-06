@@ -75,14 +75,17 @@ export class AuthService
 		);
 
 		// console.log(info)
-		const user_id = (await this.checkUser(Object.values(info)[0].toString())).users
-		if (user_id === null) {
+		const user = (await this.checkUser(Object.values(info)[0].toString())).users;
+
+		console.log(user);
+
+		if (user === null) {
 			const createUserDto = this.transformInfoToCreateUserDto(info);
 			const users = await this.userService.createUser(createUserDto);
 
 			payload = { user_id :  users.id, isTwoFactorAuthEnabled: false}
 		} else {
-			payload = { user_id : Object.values(user_id)[0] }
+			payload = { user_id : Object.values(user.id)[0] }
 		}
 		console.log(payload);
 		payload.oauth_id = Object.values(info)[0].toString()

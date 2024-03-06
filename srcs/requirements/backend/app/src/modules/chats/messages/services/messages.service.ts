@@ -26,7 +26,8 @@ export class MessagesService {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId)},
             relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
-        })
+            // exclude profile here
+        });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
@@ -47,7 +48,8 @@ export class MessagesService {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId)},
             relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
-        })
+            // exclude profile here
+        });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
