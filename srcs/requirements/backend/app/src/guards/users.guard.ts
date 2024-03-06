@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../modules/users/entities/User.entity';
@@ -18,6 +18,16 @@ export class UsersGuard implements CanActivate {
 	const request = context.switchToHttp().getRequest();
 	const token = this.jwtService.decode(request.headers.authorization);
 	const params = request.params;
+	
+	const usercheck = await this.userRepository.findOne({
+		where : {
+			username : params.username
+		}
+	})
+	if (usercheck == null)
+	{
+		throw new NotFoundException();
+	}
 
 	const user = await this.userRepository.findOne({
 		where : {

@@ -6,7 +6,7 @@ import { User } from "../../../users/entities/User.entity";
 import { ChannelMember } from "./ChannelMember.entity";
 import { Message } from "../../messages/entities/Message.entity";
 import { ChannelRole, compareChannelRoles, demoteChannelRole, promoteChannelRole } from "../enums/channel-role.enum";
-import { BadRequestException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException } from "@nestjs/common";
 
 @Entity({ name: 'channels' })
 export class Channel {
@@ -172,92 +172,96 @@ export class Channel {
     public validateAccess(user: User): void {
         if (!user) {
             if (this.visibility === ChannelVisibility.PUBLIC && this.mode === ChannelMode.OPEN) return ;
-            throw new UnauthorizedException(`User '{undefined}' isn't identified thus can only access Public and Open Channels.`);
+            throw new ForbiddenException(`User '{undefined}' isn't identified thus can only access Public and Open Channels.`);
         }
         if (user.hasGlobalServerPrivileges()) return ;
+
+        console.log(this);
 
         const isMember = this.isMember(user.username);
         const isInvited = this.isInvited(user.username);
         const isBanned = this.isBanned(user.username);
 
-        if (isBanned) throw new UnauthorizedException(`User '${user.username}' isn't permitted to visualise Channel with ID ${this.id}`);
+        if (isBanned) throw new ForbiddenException(`User '${user.username}' isn't permitted to visualise Channel with ID ${this.id}`);
 
         switch(this.mode) {
             case (ChannelMode.OPEN):
                 return ;
             case (ChannelMode.INVITE_ONLY):
+                console.log(isInvited);
+                console.log(isMember);
                 if (isInvited || isMember) return ;
-                throw new UnauthorizedException(`User '${user.username}' is neither member or invited to Channel with ID ${this.id}`);
+                throw new ForbiddenException(`User '${user.username}' is neither member or invited to Channel with ID ${this.id}`);
             case (ChannelMode.PASSWORD_PROTECTED):
                 return ; // Externally check the password
             default:
-                throw new UnauthorizedException(`Channel with ID ${this.id}'s mode not recognized`);
+                throw new ForbiddenException(`Channel with ID ${this.id}'s mode not recognized`);
         }
     }
 
     public validateJoin(user: User): void {
-        if (!user) throw new UnauthorizedException(`User '{undefined}' isn't identified thus cannot join Channel with ID ${this.id}`);
+        if (!user) throw new ForbiddenException(`User '{undefined}' isn't identified thus cannot join Channel with ID ${this.id}`);
         if (user.hasGlobalServerPrivileges()) return ;
 
         const isMember = this.isMember(user.username);
         const isInvited = this.isInvited(user.username);
         const isBanned = this.isBanned(user.username);
 
-        if (isBanned) throw new UnauthorizedException(`User '${user.username}' is not permitted to join Channel with ID ${this.id}`);
-        if (isMember) throw new UnauthorizedException(`User '${user.username}' is already member of Channel with ID ${this.id}`);
+        if (isBanned) throw new ForbiddenException(`User '${user.username}' is not permitted to join Channel with ID ${this.id}`);
+        if (isMember) throw new ForbiddenException(`User '${user.username}' is already member of Channel with ID ${this.id}`);
 
         switch(this.mode) {
             case (ChannelMode.OPEN):
                 return ;
             case (ChannelMode.INVITE_ONLY):
                 if (isInvited) return ;
-                throw new UnauthorizedException(`User '${user.username}' hasn't been invited to Channel with ID ${this.id}`);
+                throw new ForbiddenException(`User '${user.username}' hasn't been invited to Channel with ID ${this.id}`);
             case (ChannelMode.PASSWORD_PROTECTED):
                 return ; // Externally check the password
             default:
-                throw new UnauthorizedException(`Channel with ID ${this.id}'s mode not recognized`);
+                throw new ForbiddenException(`Channel with ID ${this.id}'s mode not recognized`);
         }
     }
 
     public validateLeave(user: User): void {
-        if (!user) throw new UnauthorizedException(`User '{undefined}' isn't identified thus cannot leave Channel with ID ${this.id}`);
+        if (!user) throw new ForbiddenException(`User '{undefined}' isn't identified thus cannot leave Channel with ID ${this.id}`);
         if (user.hasGlobalServerPrivileges()) return ;
 
         const isMember = this.isMember(user.username);
 
-        if (!isMember) throw new UnauthorizedException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot leave it`);
+        if (!isMember) throw new ForbiddenException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot leave it`);
     }
 
     public validateEditOrUpdate(user: User): void {
-        if (!user) throw new UnauthorizedException(`User '{undefined}' isn't identified thus cannot alter Channel with ID ${this.id}`);
+        if (!user) throw new ForbiddenException(`User '{undefined}' isn't identified thus cannot alter Channel with ID ${this.id}`);
         if (user.hasGlobalServerPrivileges()) return ;
 
         const isMember = this.isMember(user.username);
 
-        if (!isMember) throw new UnauthorizedException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot alter it`);
+        if (!isMember) throw new ForbiddenException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot alter it`);
 
-        if (!this.isRankedEqualOrAbove(user.username, ChannelRole.OPERATOR)) throw new UnauthorizedException(`User '${user.username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
+        if (!this.isRankedEqualOrAbove(user.username, ChannelRole.OPERATOR)) throw new ForbiddenException(`User '${user.username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
     }
 
     public validateDelete(user: User): void {
-        if (!user) throw new UnauthorizedException(`User '{undefined}' isn't identified thus cannot delete Channel with ID ${this.id}`);
+        if (!user) throw new ForbiddenException(`User '{undefined}' isn't identified thus cannot delete Channel with ID ${this.id}`);
         if (user.hasGlobalServerPrivileges()) return ;
 
         const isMember = this.isMember(user.username);
 
-        if (!isMember) throw new UnauthorizedException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot alter it`);
+        if (!isMember) throw new ForbiddenException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot alter it`);
 
-        if (!this.isRankedEqualOrAbove(user.username, ChannelRole.OWNER)) throw new UnauthorizedException(`User '${user.username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
+        if (!this.isRankedEqualOrAbove(user.username, ChannelRole.OWNER)) throw new ForbiddenException(`User '${user.username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
     }
 
     public validateWrite(user: User): void {
-        if (!user) throw new UnauthorizedException(`User '{undefined}' isn't identified thus cannot write in Channel with ID ${this.id}`);
+        if (!user) throw new ForbiddenException(`User '{undefined}' isn't identified thus cannot write in Channel with ID ${this.id}`);
         if (user.hasGlobalServerPrivileges()) return ;
 
         const isMember = this.isMember(user.username);
 
-        if (!isMember) throw new UnauthorizedException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot write in it`);
-        if (this.isMuted(user.username)) throw new UnauthorizedException(`User '${user.username}' is muted in Channel with ID ${this.id} thus cannot write in it`);
+        if (!isMember) throw new ForbiddenException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot write in it`);
+        if (this.isMuted(user.username)) throw new ForbiddenException(`User '${user.username}' is muted in Channel with ID ${this.id} thus cannot write in it`);
     }
 
 }

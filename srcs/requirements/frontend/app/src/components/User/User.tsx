@@ -10,7 +10,7 @@ import Spinner from "../Spinner.tsx";
 import Me from "./Me.tsx";
 import UserInfos from "./UserInfos.tsx";
 
-import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
+import { useInvalidate, useMutateError, useStopOnHttp } from "../../utils/utils.ts";
 
 import "../../styles/user.css";
 import { InvitePlayer } from "../Game/Invitations.tsx";
@@ -36,8 +36,9 @@ function User()
 
 	const stopOnHttp = useStopOnHttp();
 	const invalidate = useInvalidate();
+	const mutateError = useMutateError();
 
-	const { api, addNotif } = useContext(MyContext);
+	const { api } = useContext(MyContext);
 
 	const getUser = useQuery({
 		queryKey: ["users", id],
@@ -62,20 +63,20 @@ function User()
 		mutationFn: ({them, status}: {them: string, status: string}) =>
 			api.patch("/relationships/" + them, {status: status}),
 		onSettled: () => invalidate(["relations"]),
-		onError: error => addNotif({content: error.message}),
+		onError: mutateError,
 	});
 
 	const delRelation = useMutation({
 		mutationFn: (them: string) => api.delete("/relationships/" + them),
 		onSettled: () => invalidate(["relations"]),
-		onError: error => addNotif({content: error.message}),
+		onError: mutateError,
 	});
 
 	const postRelation = useMutation({
 		mutationFn: ({them, status}: {them: string, status: string}) =>
 			api.post("/relationships/", {username: them, status}),
 		onSettled: () => invalidate(["relations"]),
-		onError: error => addNotif({content: error.message}),
+		onError: mutateError,
 	});
 
 	if (getUser.isPending || getMe.isPending) return (

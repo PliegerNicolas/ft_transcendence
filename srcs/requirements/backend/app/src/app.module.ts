@@ -15,6 +15,7 @@ import { AuthModule } from "./auth/auth.module";
 import { TwofactorauthModule } from './twofactorauth/twofactorauth.module';
 import { SocketModule } from './modules/socket/socket.module';
 import { GameModule } from "./modules/game/game.module";
+import { FileUploadsModule } from './modules/file-uploads/file-uploads.module';
 
 @Module({
 	imports: [
@@ -37,6 +38,7 @@ import { GameModule } from "./modules/game/game.module";
 		GameModule,
 		SocketModule,
 		TwofactorauthModule,
+		FileUploadsModule,
 	],
 	controllers: [],
 	providers: [

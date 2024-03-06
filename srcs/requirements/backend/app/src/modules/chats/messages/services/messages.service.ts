@@ -25,7 +25,7 @@ export class MessagesService {
     async getChannelMessages(channelId: bigint, username: string = undefined): Promise<Message[]> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId)},
-            relations: ['messages.channelMember.user'],
+            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
         })
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -46,7 +46,7 @@ export class MessagesService {
     async getChannelMessage(channelId: bigint, username: string = undefined, messageId: bigint): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId)},
-            relations: ['messages.channelMember.user'],
+            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
         })
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -71,7 +71,7 @@ export class MessagesService {
     async createChannelMessage(channelId: bigint, username: string = undefined, messageDetails: CreateMessageParams): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId)},
-            relations: ['members.user', 'messages.channelMember.user'],
+            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
         })
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -100,7 +100,7 @@ export class MessagesService {
                 id: Equal(messageId),
                 channelId: Equal(channelId),
             },
-            relations: ['channel.members.user', 'channelMember.user']
+            relations: ['channel.members.user', 'channelMember.user'],
         })
 
         if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in Channel with ID ${channelId}`);
@@ -124,7 +124,7 @@ export class MessagesService {
                 id: Equal(messageId),
                 channelId: Equal(channelId),
             },
-            relations: ['channel.members.user', 'channelMember.user']
+            relations: ['channel.members.user', 'channelMember.user'],
         })
 
         if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in Channel with ID ${channelId}`);
@@ -148,7 +148,7 @@ export class MessagesService {
                 id: Equal(messageId),
                 channelId: Equal(channelId),
             },
-            relations: ['channel.members.user', 'channelMember.user']
+            relations: ['channel.members.user', 'channelMember.user'],
         })
 
         if (!message) throw new NotFoundException(`Message with ID ${messageId} not found in Channel with ID ${channelId}`);

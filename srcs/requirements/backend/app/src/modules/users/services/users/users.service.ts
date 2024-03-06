@@ -19,7 +19,7 @@ export class UsersService {
     async getUser(username: string = undefined): Promise<User> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile'],
+            relations: ['profile.image'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
@@ -30,7 +30,7 @@ export class UsersService {
     async getMyUser(username: string = undefined): Promise<User> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile'],
+            relations: ['profile.image'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
@@ -77,7 +77,7 @@ export class UsersService {
     
         user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile'],
+            relations: ['profile.image'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
@@ -106,7 +106,7 @@ export class UsersService {
     
         user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile'],
+            relations: ['profile.image'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);

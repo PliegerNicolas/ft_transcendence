@@ -1,7 +1,7 @@
 import "./App.css";
 
-import { useEffect, useState, useRef, useContext } from "react";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import { useState, useEffect, useContext, useRef } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate} from "react-router-dom";
 import { useMutation, MutationFunction, useQuery } from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
@@ -37,8 +37,15 @@ import ConfirmPopup from "./components/ConfirmPopup.tsx";
 
 function Auth()
 {
+
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
+/*
+return (<div className="MainContent Auth">
+	{code}<br />
+	{`http://${location.host}/auth`}
+</div>)
+*/
 
 	const api = new Api(`http://${location.hostname}:3450`);
 

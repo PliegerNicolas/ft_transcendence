@@ -2,7 +2,7 @@ export interface ProfileType {
 	id: string,
 	firstName: string,
 	lastName:string,
-	image: string,
+	picture: string,
 }
 
 export interface UserType {
@@ -61,14 +61,23 @@ export interface MemberType {
 export interface ChanType {
 	id: string,
 	name: string,
+	mode: string,
+	password: string | undefined,
+	passwordRepeat: string | undefined,
+	visibility: string,
 	membersCount: number,
 	members: Array<MemberType>,
+	bannedUsers: Array<UserType>,
+	invitedUsers: Array<UserType>,
+	mutedUsers: Array<UserType>,
 }
 
 export interface ChanFormType {
-	id: string,
 	name: string,
-	membersCount: number,
+	visibility: string,
+	mode: string,
+	password: string,
+	passwordRepeat: string,
 }
 
 export interface NotifType {
