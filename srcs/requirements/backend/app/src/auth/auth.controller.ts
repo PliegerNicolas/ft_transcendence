@@ -16,9 +16,9 @@ export class AuthController {
 		);
 		// console.log(ret)
 		if (ret.isTwoFactorAuthEnabled == true)
-			return ;
-		console.log(ret.access_token);
-		return {access_token: ret.access_token};
+			return {access_token : "2fa"};
+		// console.log(ret.access_token);
+		return {access_token : ret.access_token};
 	  }
 
 	@UseGuards(AuthGuard('jwt'))
