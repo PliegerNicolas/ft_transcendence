@@ -11,6 +11,8 @@ import {
 import { ChanType, UserType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
+import { socket } from "../../App.tsx"
+
 import closeIcon from "../../assets/close.svg";
 import addIcon from "../../assets/add.svg";
 
@@ -105,6 +107,7 @@ export default function ChanEdit({id}: {id: number})
 
 		if (!id)
 			postChan.mutate(chan);
+			socket.emit('joinChannel', chan.name);
 		else if (setPasswd)
 			patchChan.mutate({
 				name: chan.name,

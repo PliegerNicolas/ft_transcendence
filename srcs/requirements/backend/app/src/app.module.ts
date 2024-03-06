@@ -13,6 +13,8 @@ import { PasswordHashingModule } from "./modules/password-hashing/password-hashi
 import { GuardsModule } from './guards/guards.module';
 import { AuthModule } from "./auth/auth.module";
 import { TwofactorauthModule } from './twofactorauth/twofactorauth.module';
+import { SocketModule } from './modules/socket/socket.module';
+import { GameModule } from "./modules/game/game.module";
 import { FileUploadsModule } from './modules/file-uploads/file-uploads.module';
 
 @Module({
@@ -30,6 +32,12 @@ import { FileUploadsModule } from './modules/file-uploads/file-uploads.module';
 		ChatsModule,
 		GamelogsModule,
 		RelationshipsModule,
+		GamelogsModule,
+		AuthModule,
+		ChatsModule,
+		GameModule,
+		SocketModule,
+		TwofactorauthModule,
 		FileUploadsModule,
 	],
 	controllers: [],

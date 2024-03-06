@@ -30,3 +30,14 @@ export type Players = {
 	id: string,
 	elo: number
 }
+
+export enum GameType {
+    PONG = "pong",
+    UNDEFINED = "undefined",
+}
+
+export enum GameResult {
+    VICTORY = 'victory',
+    DEFEAT = 'defeat',
+    TIE = 'tie',
+}
