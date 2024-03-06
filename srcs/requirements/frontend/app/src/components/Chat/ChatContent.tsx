@@ -1,16 +1,12 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import {
-	useInvalidate,
-	useMutateError,
-	useStopOnHttp,
-	getChanRole
-} from "../../utils/utils.ts";
+import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
+import { getChanRole } from "../../utils/utils.ts";
 
 import { MyContext } from "../../utils/contexts";
 
@@ -46,29 +42,14 @@ function ChatContent()
 {
 	const { api, setLastChan } = useContext(MyContext);
 	const invalidate = useInvalidate();
-	const stopOnHttp = useStopOnHttp();
 	const mutateError = useMutateError();
 
 	const params = useParams();
 	const id = params.id!;
 
-	const getChan = useQuery({
-		queryKey: ["chan", id],
-		queryFn: () => api.get("/channels/" + id),
-		retry: stopOnHttp
-	});
-
-	const getMsgs = useQuery({
-		queryKey: ["channels", id, "messages"],
-		queryFn: () => api.get("/channels/" + id + "/messages"),
-		retry: stopOnHttp
-	});
-
-	const getMe = useQuery({
-		queryKey: ["me"],
-		queryFn: () => api.get("/me"),
-		retry: stopOnHttp,
-	});
+	const getChan = useGet(["channels", id]);
+	const getMsgs = useGet(["channels", id, "messages"]);
+	const getMe = useGet(["me"]);
 
 	const postMsg = useMutation({
 		mutationFn: (content: string) =>

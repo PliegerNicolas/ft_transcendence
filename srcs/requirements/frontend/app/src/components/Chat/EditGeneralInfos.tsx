@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 
-import { useInvalidate, useMutateError } from "../../utils/utils.ts";
+import { useInvalidate, useMutateError } from "../../utils/hooks.ts";
 import { ChanType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -35,7 +35,7 @@ export default function GeneralInfos(
 
 	const delChan = useMutation({
 		mutationFn: () => api.delete("/channels/" + id),
-		onSettled: () => invalidate(["allChans"]),
+		onSettled: () => invalidate(["channels"]),
 		onSuccess: () => navigate("/chat"),
 		onError: mutateError,
 	});
@@ -170,14 +170,14 @@ export default function GeneralInfos(
 					</button>
 				}
 				<button
-					onClick={e => submit(e)}
+					onClick={() => submit()}
 					disabled={
 						chan.mode === "password_protected"
 						&& (chan.password !== chan.passwordRepeat
 							|| (chan.password!.length < 8))
 					}
 				>
-					Submit
+					Done
 				</button>
 			</div>
 			{

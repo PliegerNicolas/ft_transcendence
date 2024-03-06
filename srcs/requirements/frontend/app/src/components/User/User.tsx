@@ -1,6 +1,6 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import { MyContext } from "../../utils/contexts.ts";
 import { FriendshipType } from "../../utils/types.ts"
@@ -10,9 +10,10 @@ import Spinner from "../Spinner.tsx";
 import Me from "./Me.tsx";
 import UserInfos from "./UserInfos.tsx";
 
-import { useInvalidate, useMutateError, useStopOnHttp } from "../../utils/utils.ts";
+import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
 
 import "../../styles/user.css";
+import ConfirmPopup from "../ConfirmPopup.tsx";
 import { InvitePlayer } from "../Game/Invitations.tsx";
 
 // <UserRouter /> ==============================================================
@@ -34,49 +35,48 @@ function User()
 	const params = useParams();
 	const id = params.id!;
 
-	const stopOnHttp = useStopOnHttp();
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 
-	const { api } = useContext(MyContext);
+	const { api, addNotif } = useContext(MyContext);
 
-	const getUser = useQuery({
-		queryKey: ["users", id],
-		queryFn: () => api.get("/users/" + id),
-		retry: stopOnHttp
-	});
+	const [popup, setPopup] = useState(false);
 
-	const getMe = useQuery({
-		queryKey: ["me"],
-		queryFn: () => api.get("/me"),
-		retry: stopOnHttp
-	});
-
-	const getRelations = useQuery({
-		queryKey: ["relations"],
-		queryFn: () => api.get("/relationships"),
-		enabled: getUser.isSuccess,
-		retry: stopOnHttp
-	});
+	const getUser = useGet(["users", id]);
+	const getMe = useGet(["me"]);
+	const getRelations = useGet(["relationships"], getUser.isSuccess);
 
 	const patchRelation = useMutation({
 		mutationFn: ({them, status}: {them: string, status: string}) =>
 			api.patch("/relationships/" + them, {status: status}),
-		onSettled: () => invalidate(["relations"]),
+		onSettled: () => invalidate(["relationships"]),
 		onError: mutateError,
 	});
 
 	const delRelation = useMutation({
 		mutationFn: (them: string) => api.delete("/relationships/" + them),
-		onSettled: () => invalidate(["relations"]),
+		onSettled: () => invalidate(["relationships"]),
 		onError: mutateError,
 	});
 
 	const postRelation = useMutation({
 		mutationFn: ({them, status}: {them: string, status: string}) =>
 			api.post("/relationships/", {username: them, status}),
-		onSettled: () => invalidate(["relations"]),
+		onSettled: () => invalidate(["relationships"]),
 		onError: mutateError,
+	});
+
+	const setMe = useMutation({
+		mutationFn: ((name: string) =>
+			api.post("/auth/log_as/" + name, {})) as unknown as
+			MutationFunction<{ access_token: string; }, unknown>,
+		onSuccess: (data: {access_token: string}) => {
+			localStorage.setItem(
+				"my_info", JSON.stringify({logged: true, token: data.access_token}));
+			window.location.reload();
+		},
+		onError: e => addNotif({content: "Failed to log as: "
+			+ getUser.data.username + ", " + e.message}),
 	});
 
 	if (getUser.isPending || getMe.isPending) return (
@@ -188,7 +188,22 @@ function User()
 					/>
 				}
 				<InvitePlayer user={user.username} />
+				<hr />
+				<div style={{textAlign: "center"}}>
+					<button onClick={() => setPopup(true)}>Log as {user.username}</button>
+				</div>
 			</section>
+			{
+				popup &&
+				<ConfirmPopup
+					title={"Log as " + user.username}
+					text={<>/!\ This is a debug feature<br />
+						Please don't do anything dumb using it.</>}
+					cancelFt={() => setPopup(false)}
+					action="Done"
+					actionFt={() => setMe.mutate(user.username)}
+				/>
+			}
 		</main>
 	);
 }

@@ -1,7 +1,5 @@
-import { useContext, useEffect, useState } from 'react';
-import { MyContext } from '../../utils/contexts';
-import { useQuery } from '@tanstack/react-query';
-import { useStopOnHttp } from '../../utils/utils';
+import { useEffect, useState } from 'react';
+import { useGet } from '../../utils/hooks.ts';
 import { redirect } from 'react-router-dom';
 import { socket } from "../../App.tsx"
 import OnlineGame  from './OnlinePlay'
@@ -98,13 +96,7 @@ const PrivatePlay = (props: any) => {
 
 	// Backend http requests ==============================================================================================================
 
-	const context = useContext(MyContext);
-
-	const getUser = useQuery({
-		queryKey: ["user"],
-		queryFn: () => context.api.get("/me"),
-		retry: useStopOnHttp(),
-	});
+	const getUser = useGet(["me"]);
 
 	return (
 		<main className="MainContent">
