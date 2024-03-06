@@ -25,9 +25,6 @@ export class User {
     @Column({ unique: true, length: 25 })
     username: string;
 
-    @Column({ nullable: true })
-    image: string;
-
     //@Exclude() // Exclude ?
     @IsEnum(GlobalServerPrivileges)
     @Column({ type: 'enum', enum: GlobalServerPrivileges, default: GlobalServerPrivileges.USER })

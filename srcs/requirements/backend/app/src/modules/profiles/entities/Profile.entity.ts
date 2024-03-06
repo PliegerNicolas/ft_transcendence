@@ -1,3 +1,4 @@
+import { File } from "../../file-uploads/entities/file.entity";
 import { User } from "../../users/entities/User.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -12,8 +13,6 @@ export class Profile {
 
     @Column({ nullable: true })
     lastName: string;
-    
-
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
@@ -23,5 +22,9 @@ export class Profile {
 
     @OneToOne(() => User, (user) => user.profile, { onDelete: 'CASCADE' })
     @JoinColumn()
-    user: User
+    user?: User
+
+    @OneToOne(() => File, { cascade: true })
+    @JoinColumn()
+    image?: File;
 }
