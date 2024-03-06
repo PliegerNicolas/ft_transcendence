@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useContext } from "react";
 import { io } from 'socket.io-client';
 
-import { useInvalidate, useMutateError } from "../../utils/utils.ts";
+import { useInvalidate, useMutateError } from "../../utils/hooks.ts";
 import { useMutation } from "@tanstack/react-query";
 import { MyContext } from "../../utils/contexts.ts";
 import { GameResult, GameType, GamelogPostType } from "../../utils/types.ts"

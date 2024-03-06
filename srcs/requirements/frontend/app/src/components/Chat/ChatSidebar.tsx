@@ -1,11 +1,10 @@
 import { useContext } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 
 import Spinner from "../Spinner.tsx";
 
-import { useStopOnHttp } from "../../utils/utils.ts";
-import { ChatContext, MyContext } from "../../utils/contexts.ts";
+import { useGet } from "../../utils/hooks.ts";
+import { ChatContext } from "../../utils/contexts.ts";
 
 import add from "../../assets/add.svg";
 
@@ -21,15 +20,7 @@ export default function ChatSidebar() {
 
 	const { showSidebar } = useContext(ChatContext);
 
-	const context = useContext(MyContext);
-
-	const stopOnHttp = useStopOnHttp();
-
-	const getChans = useQuery({
-		queryKey: ["allChans"],
-		queryFn: () => context.api.get("/channels").then(data => data.sort()),
-		retry: stopOnHttp
-	});
+	const getChans = useGet(["channels"]);
 
 	return (
 		<div className={
