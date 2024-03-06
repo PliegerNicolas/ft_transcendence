@@ -51,7 +51,7 @@ export default function GeneralInfos(
 				</label>
 				<input
 					type="text" id="channelName" name="name"
-					value={chan.name} onChange={() => change}
+					value={chan.name} onChange={e => change(e)}
 					placeholder="Cannot be empty!"
 				/>
 			</section>
@@ -65,7 +65,7 @@ export default function GeneralInfos(
 					</label>
 					<input
 						type="radio" id="visibilityPublic" name="visibility"
-						value="public" onChange={() => change}
+						value="public" onChange={e => change(e)}
 						checked={chan.visibility === "public"}
 					/>
 					<label htmlFor="visibilityHidden" className={`${chan.visibility === "hidden"}`}>
@@ -74,7 +74,7 @@ export default function GeneralInfos(
 					</label>
 					<input
 						type="radio" id="visibilityHidden" name="visibility"
-						value="hidden" onChange={() => change}
+						value="hidden" onChange={e => change(e)}
 						checked={chan.visibility === "hidden"}
 					/>
 				</span>
@@ -89,7 +89,7 @@ export default function GeneralInfos(
 					</label>
 					<input
 						type="radio" id="modeOpen" name="mode"
-						value="open" onChange={() => change}
+						value="open" onChange={e => change(e)}
 						checked={chan.mode === "open"}
 					/>
 					<label htmlFor="modePassword" className={`${chan.mode === "password_protected"}`}>
@@ -98,7 +98,7 @@ export default function GeneralInfos(
 					</label>
 					<input
 						type="radio" id="modePassword" name="mode"
-						value="password_protected" onChange={() => change}
+						value="password_protected" onChange={e => change(e)}
 						checked={chan.mode === "password_protected"}
 					/>
 					<label htmlFor="modeInvite" className={`${chan.mode === "invite_only"}`}>
@@ -107,7 +107,7 @@ export default function GeneralInfos(
 					</label>
 					<input
 						type="radio" id="modeInvite" name="mode"
-						value="invite_only" onChange={() => change}
+						value="invite_only" onChange={e => change(e)}
 						checked={chan.mode === "invite_only"}
 					/>
 				</span>
@@ -136,14 +136,14 @@ export default function GeneralInfos(
 					<div className="ChanEdit__PasswdFields">
 						<input
 							type="password" id="channelPassword" name="password"
-							value={chan.password} onChange={() => change}
+							value={chan.password} onChange={e => change(e)}
 							placeholder="Password"
 						/>
 						{
 							!!chan.password!.length &&
 							<input
 								type="password" id="channelPasswordRepeat" name="passwordRepeat"
-								value={chan.passwordRepeat} onChange={() => change}
+								value={chan.passwordRepeat} onChange={e => change(e)}
 								placeholder="Repeat password"
 							/>
 						}
@@ -170,7 +170,7 @@ export default function GeneralInfos(
 					</button>
 				}
 				<button
-					onClick={() => submit}
+					onClick={e => submit(e)}
 					disabled={
 						chan.mode === "password_protected"
 						&& (chan.password !== chan.passwordRepeat

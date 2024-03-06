@@ -52,7 +52,7 @@ export default function ChanEdit({id}: {id: number})
 	useEffect(() => {
 		if (!getChan.isSuccess)
 			return ;
-		setChan({...getChan.data, password: ""})
+		setChan({...getChan.data, password: "", passwordRepeat: "",})
 		console.log(getChan.data);
 	}, [getChan.isSuccess]);
 
@@ -101,7 +101,12 @@ export default function ChanEdit({id}: {id: number})
 		if (!id)
 			postChan.mutate(chan);
 		else if (setPasswd)
-			patchChan.mutate(chan);
+			patchChan.mutate({
+				name: chan.name,
+				visibility: chan.visibility,
+				mode: chan.mode,
+				password: chan.password,
+			});
 		else
 			patchChan.mutate({
 				name: chan.name,

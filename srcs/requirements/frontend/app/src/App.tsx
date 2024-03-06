@@ -51,7 +51,6 @@ function Auth()
 			MutationFunction<{access_token: string}>,
 
 		onSuccess: (data: {access_token: string}) => {
-			console.log(data);
 			setStatus("success");
 			localStorage.setItem(
 				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
