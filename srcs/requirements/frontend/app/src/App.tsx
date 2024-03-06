@@ -172,7 +172,6 @@ function App()
 		if (socket) {
 			socket.on('getUserInfos', () => {
 				if (getUser.isSuccess) {
-					console.log("huh ?");
 					socket.emit('userInfos', getUser.data.username);
 				}
 			});
