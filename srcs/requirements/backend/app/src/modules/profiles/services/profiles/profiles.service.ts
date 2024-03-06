@@ -98,7 +98,7 @@ export class ProfilesService {
             user: profile.user,
             created_at: profile.created_at,
             updated_at: profile.updated_at,
-            image: null,
+            picture: null,
         };
 
         return (await this.profileRepository.save(emptyProfile));

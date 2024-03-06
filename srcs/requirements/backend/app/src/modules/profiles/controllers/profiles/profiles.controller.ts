@@ -26,7 +26,7 @@ export class ProfilesController {
     /* */
 
 	@UseGuards(AuthGuard('jwt'))
-    @Put('me/profile')
+    @Put('profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyProfile(
         @Body(new ValidationPipe) replaceProfileDto: ReplaceProfileDto,
@@ -37,7 +37,7 @@ export class ProfilesController {
     }
 
 	@UseGuards(AuthGuard('jwt'))
-    @Patch('me/profile')
+    @Patch('profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyProfile(
         @Body(new ValidationPipe) updateProfileDto: UpdateProfileDto,
@@ -48,7 +48,7 @@ export class ProfilesController {
     }
 
 	@UseGuards(AuthGuard('jwt'))
-    @Delete('me/profile')
+    @Delete('profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async clearMyprofile(
         @Request() req: any,

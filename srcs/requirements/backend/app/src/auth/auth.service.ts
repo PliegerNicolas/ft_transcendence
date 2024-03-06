@@ -90,7 +90,7 @@ export class AuthService
 					"profile" : {
 						"firstName" : Object.values(info)[3].toString(),
 						"lastName" : Object.values(info)[4].toString(),
-						"image" : Object.values(Object.values(info)[11])[0].toString(),
+						"picture" : Object.values(Object.values(info)[11])[0].toString(),
 						}
 					}
 				])
