@@ -1,7 +1,8 @@
 import { useState, useContext, useRef, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, MutationFunction } from "@tanstack/react-query";
 
-import { useStopOnHttp, httpStatus } from "../../utils/utils.ts";
+import { useStopOnHttp, httpStatus, useMutateError, useInvalidate } from "../../utils/utils.ts";
 import { ChanType, UserType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -21,8 +22,11 @@ export default function ChanEdit({id}: {id: number})
 	const {api} = useContext(MyContext);
 	const [globOrLists, setGlobOrLists] = useState("global");
 	const stopOnHttp = useStopOnHttp();
+	const mutateError = useMutateError();
+	const invalidate = useInvalidate();
+	const navigate = useNavigate();
 
-	const [chan, setChan] = useState({
+	const [chan, setChan] = useState<ChanType>({
 		name: "New Channel",
 		visibility: "public",
 		mode: "open",
@@ -36,6 +40,8 @@ export default function ChanEdit({id}: {id: number})
 		members: [],
 	});
 
+	const [setPasswd, setSetPasswd] = useState(!id);
+
 	const getChan = useQuery({
 		queryKey: ["chan", "" + id],
 		queryFn: () => api.get("/channels/" + id),
@@ -44,17 +50,78 @@ export default function ChanEdit({id}: {id: number})
 	});
 
 	useEffect(() => {
-		if (!id)
+		if (!getChan.isSuccess)
 			return ;
 		setChan({...getChan.data, password: ""})
+		console.log(getChan.data);
 	}, [getChan.isSuccess]);
 
+	function updateField(field: string, value: unknown) {
+		setChan((prev: ChanType) => {
+			return {...prev, [field]: value };
+		});
+	}
+
+	const postChan = useMutation({
+		mutationFn:
+			((data: ChanType) => {
+				console.log(data);
+				return api.post("/channels", data)}) as
+					unknown as MutationFunction<ChanType>,
+		onError: mutateError,
+		onSettled: () => invalidate(["allChans"]),
+		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
+	});
+
+	const patchChan = useMutation({
+		mutationFn:
+			((data: ChanType) => {
+				console.log(data);
+				return api.patch("/channels/" + id, data)}) as
+					unknown as MutationFunction<ChanType>,
+		onError: mutateError,
+		onSettled: () => invalidate(["allChans"]),
+		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
+	});
+
+	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+		if (e.target.name === "password" && e.target.value === "") {
+			setChan({
+				...chan,
+				password: "",
+				passwordRepeat: "",
+			});
+		}
+		else updateField(e.target.name, e.target.value);
+	}
+
+	function handleSubmit(e: React.FormEvent) {
+		e.preventDefault();
+
+		if (!id)
+			postChan.mutate(chan);
+		else if (setPasswd)
+			patchChan.mutate(chan);
+		else
+			patchChan.mutate({
+				name: chan.name,
+				visibility: chan.visibility,
+				mode: chan.mode,
+		});
+	}
 
 	if (!id) return (
 		<div className="ChanEdit ChatContent MainContent">
 			<ChatHeader name={chan.name} edit={true} />
 			<div className="ChanEdit__Scrollable">
-				<GeneralInfos id={id} chan={chan} setChan={setChan} />
+				<GeneralInfos
+					id={id}
+					chan={chan}
+					change={handleChange}
+					submit={handleSubmit}
+					setPasswd={setPasswd}
+					setSetPasswd={setSetPasswd}
+				/>
 			</div>
 		</div>
 	);
@@ -70,8 +137,6 @@ export default function ChanEdit({id}: {id: number})
 			Failed to load this channel's data: {getChan.error.message}
 		</div>
 	);
-
-	console.log(chan);
 
 	return (
 		<div className="ChanEdit ChatContent MainContent">
@@ -94,7 +159,14 @@ export default function ChanEdit({id}: {id: number})
 			{
 				(getChan.isSuccess) &&
 				globOrLists === "global" ?
-				<GeneralInfos id={id} chan={chan} setChan={setChan} /> :
+				<GeneralInfos
+					id={id}
+					chan={chan}
+					change={handleChange}
+					submit={handleSubmit}
+					setPasswd={setPasswd}
+					setSetPasswd={setSetPasswd}
+				/> :
 				<UserLists chan={chan} />
 			}
 			</div>

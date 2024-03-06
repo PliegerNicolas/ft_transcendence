@@ -1,9 +1,9 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { MutationFunction, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { useInvalidate, useMutateError } from "../../utils/utils.ts";
-import { ChanType, ChanFormType } from "../../utils/types.ts";
+import { ChanType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
 import radioChecked from "../../assets/radio-checked.svg";
@@ -14,8 +14,15 @@ import "../../styles/chat.css";
 import ConfirmPopup from "../ConfirmPopup.tsx";
 
 export default function GeneralInfos(
-	{id, chan, setChan}:
-	{id: number, chan: ChanFormType, setChan: Function}
+	{id, chan, change, submit, setPasswd, setSetPasswd}:
+	{
+		id: number,
+		chan: ChanType,
+		change: Function,
+		submit: Function,
+		setPasswd: boolean,
+		setSetPasswd: Function
+	}
 )
 {
 	const {api} = useContext(MyContext);
@@ -24,7 +31,6 @@ export default function GeneralInfos(
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
 
-	const [setPasswd, setSetPasswd] = useState(!id);
 	const [popup, setPopup] = useState(false);
 
 	const delChan = useMutation({
@@ -33,62 +39,6 @@ export default function GeneralInfos(
 		onSuccess: () => navigate("/chat"),
 		onError: mutateError,
 	});
-
-	const postChan = useMutation({
-		mutationFn:
-			((data: ChanType) => {
-				console.log(data);
-				return api.post("/channels", data)}) as
-					unknown as MutationFunction<ChanType>,
-		onError: mutateError,
-		onSettled: () => invalidate(["allChans"]),
-		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
-	});
-
-	const patchChan = useMutation({
-		mutationFn:
-			((data: ChanType) => {
-				console.log(data);
-				return api.patch("/channels/" + id, data)}) as
-					unknown as MutationFunction<ChanType>,
-		onError: mutateError,
-		onSettled: () => invalidate(["allChans"]),
-		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
-	});
-
-	// SOME USEFUL FUNCTIONS -----------------------------------------------------
-
-	function updateField(field: string, value: unknown) {
-		setChan((prev: ChanFormType) => {
-			return {...prev, [field]: value };
-		});
-	}
-
-	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-		if (e.target.name === "password" && e.target.value === "") {
-			setChan({
-				...chan,
-				password: "",
-				passwordRepeat: "",
-			});
-		}
-		else updateField(e.target.name, e.target.value);
-	}
-
-	function handleSubmit(e: React.FormEvent) {
-		e.preventDefault();
-
-		if (!id)
-			postChan.mutate(chan);
-		else if (setPasswd)
-			patchChan.mutate(chan);
-		else
-			patchChan.mutate({
-				name: chan.name,
-				visibility: chan.visibility,
-				mode: chan.mode,
-		});
-	}
 
 	// RENDER --------------------------------------------------------------------
 
@@ -101,7 +51,7 @@ export default function GeneralInfos(
 				</label>
 				<input
 					type="text" id="channelName" name="name"
-					value={chan.name} onChange={handleChange}
+					value={chan.name} onChange={() => change}
 					placeholder="Cannot be empty!"
 				/>
 			</section>
@@ -115,7 +65,7 @@ export default function GeneralInfos(
 					</label>
 					<input
 						type="radio" id="visibilityPublic" name="visibility"
-						value="public" onChange={handleChange}
+						value="public" onChange={() => change}
 						checked={chan.visibility === "public"}
 					/>
 					<label htmlFor="visibilityHidden" className={`${chan.visibility === "hidden"}`}>
@@ -124,7 +74,7 @@ export default function GeneralInfos(
 					</label>
 					<input
 						type="radio" id="visibilityHidden" name="visibility"
-						value="hidden" onChange={handleChange}
+						value="hidden" onChange={() => change}
 						checked={chan.visibility === "hidden"}
 					/>
 				</span>
@@ -139,7 +89,7 @@ export default function GeneralInfos(
 					</label>
 					<input
 						type="radio" id="modeOpen" name="mode"
-						value="open" onChange={handleChange}
+						value="open" onChange={() => change}
 						checked={chan.mode === "open"}
 					/>
 					<label htmlFor="modePassword" className={`${chan.mode === "password_protected"}`}>
@@ -148,7 +98,7 @@ export default function GeneralInfos(
 					</label>
 					<input
 						type="radio" id="modePassword" name="mode"
-						value="password_protected" onChange={handleChange}
+						value="password_protected" onChange={() => change}
 						checked={chan.mode === "password_protected"}
 					/>
 					<label htmlFor="modeInvite" className={`${chan.mode === "invite_only"}`}>
@@ -157,7 +107,7 @@ export default function GeneralInfos(
 					</label>
 					<input
 						type="radio" id="modeInvite" name="mode"
-						value="invite_only" onChange={handleChange}
+						value="invite_only" onChange={() => change}
 						checked={chan.mode === "invite_only"}
 					/>
 				</span>
@@ -176,7 +126,7 @@ export default function GeneralInfos(
 							</label>
 							<input
 								type="checkbox" id="setPasswd" checked={setPasswd}
-								onChange={() => setSetPasswd(prev => !prev)}
+								onChange={() => setSetPasswd((prev: boolean) => !prev)}
 							/>
 						</span>
 					}
@@ -186,25 +136,25 @@ export default function GeneralInfos(
 					<div className="ChanEdit__PasswdFields">
 						<input
 							type="password" id="channelPassword" name="password"
-							value={chan.password} onChange={handleChange}
+							value={chan.password} onChange={() => change}
 							placeholder="Password"
 						/>
 						{
-							!!chan.password.length &&
+							!!chan.password!.length &&
 							<input
 								type="password" id="channelPasswordRepeat" name="passwordRepeat"
-								value={chan.passwordRepeat} onChange={handleChange}
+								value={chan.passwordRepeat} onChange={() => change}
 								placeholder="Repeat password"
 							/>
 						}
 						{
-							!!chan.password.length
-								&& chan.password.length < 8
+							!!chan.password!.length
+								&& chan.password!.length < 8
 								&& <span className="error-msg">Password length must be 8 or more!</span>
 						}
 						{
-							!!chan.password.length
-								&& !!chan.passwordRepeat.length
+							!!chan.password!.length
+								&& !!chan.passwordRepeat!.length
 								&& chan.password != chan.passwordRepeat
 								&& <span className="error-msg">Passwords do not match!</span>
 						}
@@ -220,11 +170,11 @@ export default function GeneralInfos(
 					</button>
 				}
 				<button
-					onClick={handleSubmit}
+					onClick={() => submit}
 					disabled={
 						chan.mode === "password_protected"
 						&& (chan.password !== chan.passwordRepeat
-							|| (chan.password.length < 8))
+							|| (chan.password!.length < 8))
 					}
 				>
 					Submit

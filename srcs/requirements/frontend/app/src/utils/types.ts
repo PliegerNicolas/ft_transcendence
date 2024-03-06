@@ -62,11 +62,14 @@ export interface ChanType {
 	id: string,
 	name: string,
 	mode: string,
+	password: string | undefined,
+	passwordRepeat: string | undefined,
 	visibility: string,
 	membersCount: number,
 	members: Array<MemberType>,
 	bannedUsers: Array<UserType>,
 	invitedUsers: Array<UserType>,
+	mutedUsers: Array<UserType>,
 }
 
 export interface ChanFormType {
