@@ -100,7 +100,12 @@ export default function ChanEdit({id}: {id: number})
 		const patchFn = redirect ? patchChan : patchChanNoRedirect;
 
 		if (!id)
-			postChan.mutate(chan);
+			postChan.mutate({
+				name: chan.name,
+				visibility: chan.visibility,
+				mode: chan.mode,
+				password: chan.password,
+			});
 		else if (setPasswd)
 			patchFn.mutate({
 				name: chan.name,
