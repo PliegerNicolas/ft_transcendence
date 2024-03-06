@@ -1,4 +1,4 @@
-import { useState, useContext, useRef } from "react";
+import { useState, useContext, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { useStopOnHttp, httpStatus } from "../../utils/utils.ts";
@@ -22,6 +22,20 @@ export default function ChanEdit({id}: {id: number})
 	const [globOrLists, setGlobOrLists] = useState("global");
 	const stopOnHttp = useStopOnHttp();
 
+	const [chan, setChan] = useState({
+		name: "New Channel",
+		visibility: "public",
+		mode: "open",
+		password: "",
+		passwordRepeat: "",
+		bannedUsers: [],
+		invitedUsers: [],
+		mutedUsers: [],
+		id: "",
+		membersCount: 1,
+		members: [],
+	});
+
 	const getChan = useQuery({
 		queryKey: ["chan", "" + id],
 		queryFn: () => api.get("/channels/" + id),
@@ -29,27 +43,33 @@ export default function ChanEdit({id}: {id: number})
 		enabled: !!id,
 	});
 
-	if (id && getChan.isPending) return (
+	useEffect(() => {
+		if (!id)
+			return ;
+		setChan({...getChan.data, password: ""})
+	}, [getChan.isSuccess]);
+
+
+	if (!id) return (
+		<div className="ChanEdit ChatContent MainContent">
+			<ChatHeader name={chan.name} edit={true} />
+			<div className="ChanEdit__Scrollable">
+				<GeneralInfos id={id} chan={chan} setChan={setChan} />
+			</div>
+		</div>
+	);
+
+	if (getChan.isPending) return (
 		<div className="ChatContent spinner">
 			<Spinner />
 		</div>
 	);
 
-	if (id && getChan.isError) return (
+	if (getChan.isError) return (
 		<div className="ChatContent error">
 			Failed to load this channel's data: {getChan.error.message}
 		</div>
 	);
-
-	const chan = !!id ?
-		{...getChan.data, password: ""} :
-		{
-			name: "New Channel",
-			visibility: "public",
-			mode: "open",
-			password: "",
-			passwordRepeat: "",
-	};
 
 	console.log(chan);
 
@@ -57,8 +77,6 @@ export default function ChanEdit({id}: {id: number})
 		<div className="ChanEdit ChatContent MainContent">
 			<ChatHeader name={chan.name} edit={true} />
 			<div className="ChanEdit__Scrollable">
-			{
-				!!id &&
 				<div className="ChanEdit__GlobOrLists">
 					<div
 						className={"ChanEdit__GlobOrListsItem " + (globOrLists === "global")}
@@ -73,11 +91,11 @@ export default function ChanEdit({id}: {id: number})
 						User lists
 					</div>
 				</div>
-			}
 			{
+				(getChan.isSuccess) &&
 				globOrLists === "global" ?
-				<GeneralInfos id={id} origChan={chan} /> :
-				<UserLists chan={getChan.data} />
+				<GeneralInfos id={id} chan={chan} setChan={setChan} /> :
+				<UserLists chan={chan} />
 			}
 			</div>
 		</div>

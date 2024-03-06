@@ -2,7 +2,7 @@ export interface ProfileType {
 	id: string,
 	firstName: string,
 	lastName:string,
-	image: string,
+	picture: string,
 }
 
 export interface UserType {

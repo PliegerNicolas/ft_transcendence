@@ -478,10 +478,14 @@
 }
 
 .ChanEdit__ModeButtons {
-	margin-left: 20px;
 	display: inline-flex;
+	width: calc(100%);
 	gap: 5px;
 	user-select: none;
+}
+
+.ChanEdit__ModeButtons>.ChanEdit__Title {
+	margin-right: 20px;
 }
 
 .ChanEdit__ModeButtons>label {
@@ -491,9 +495,11 @@
 	justify-content: center;
 	align-items: center;
 	font-size: .96rem;
-	width: 120px;
+	flex: 1;
 	height: 36px;
 	transition: .1s;
+	padding: 0 10px;
+	min-height: 36px;
 }
 .ChanEdit__ModeButtons>label:hover {
 	cursor: pointer;
@@ -501,6 +507,23 @@
 }
 .ChanEdit__ModeButtons>label:active {
 	background-color: var(--bg-color-4);
+}
+
+@media (max-width: 900px)
+{
+	.ChanEdit__ModeButtons {
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.ChanEdit__ModeButtons>.ChanEdit__Title {
+		width: 100%;
+		margin-left: 15px;
+	}
+
+	.ChanEdit__ModeButtons>label {
+		width: min(100%, 240px);
+	}
 }
 
 .ChanEdit__ModeButtons>label>img {

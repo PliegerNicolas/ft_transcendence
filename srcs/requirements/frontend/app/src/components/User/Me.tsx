@@ -74,6 +74,8 @@ export default function Me()
 	);
 
 	const me = getMe.data;
+
+	console.log(me);
 	
 	function friendshipAction(action: string, ship: FriendshipType) {
 		const other = ship.user1.username == me.username ?

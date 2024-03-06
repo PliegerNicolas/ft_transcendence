@@ -14,8 +14,8 @@ import "../../styles/chat.css";
 import ConfirmPopup from "../ConfirmPopup.tsx";
 
 export default function GeneralInfos(
-	{id, origChan}:
-	{id: number, origChan: ChanFormType}
+	{id, chan, setChan}:
+	{id: number, chan: ChanFormType, setChan: Function}
 )
 {
 	const {api} = useContext(MyContext);
@@ -26,7 +26,6 @@ export default function GeneralInfos(
 
 	const [setPasswd, setSetPasswd] = useState(!id);
 	const [popup, setPopup] = useState(false);
-	const [chan, setChan] = useState(origChan);
 
 	const delChan = useMutation({
 		mutationFn: () => api.delete("/channels/" + id),
@@ -60,7 +59,7 @@ export default function GeneralInfos(
 	// SOME USEFUL FUNCTIONS -----------------------------------------------------
 
 	function updateField(field: string, value: unknown) {
-		setChan(prev => {
+		setChan((prev: ChanFormType) => {
 			return {...prev, [field]: value };
 		});
 	}
@@ -108,8 +107,8 @@ export default function GeneralInfos(
 			</section>
 			{/* VISIBILITY SECTION ----------------------------------------------- */}
 			<section>
+			<span className="ChanEdit__ModeButtons">
 				<span className="ChanEdit__Title">Visibility</span>
-				<span className="ChanEdit__ModeButtons">
 					<label htmlFor="visibilityPublic" className={`${chan.visibility === "public"}`}>
 						Public
 						<img src={chan.visibility === "public" ? radioChecked : radioUnchecked}/>
@@ -132,8 +131,8 @@ export default function GeneralInfos(
 			</section>
 			{/* MODE SECTION ----------------------------------------------------- */}
 			<section>
-				<span className="ChanEdit__Title">Mode</span>
-				<span className="ChanEdit__ModeButtons">
+			<span className="ChanEdit__ModeButtons">
+					<span className="ChanEdit__Title">Mode</span>
 					<label htmlFor="modeOpen" className={`${chan.mode === "open"}`}>
 						Open
 						<img src={chan.mode === "open" ? radioChecked : radioUnchecked}/>
