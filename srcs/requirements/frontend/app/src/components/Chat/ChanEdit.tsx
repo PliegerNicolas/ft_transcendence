@@ -2,7 +2,12 @@ import { useState, useContext, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, MutationFunction } from "@tanstack/react-query";
 
-import { useStopOnHttp, httpStatus, useMutateError, useInvalidate } from "../../utils/utils.ts";
+import {
+	useStopOnHttp,
+	httpStatus,
+	useMutateError,
+	useInvalidate,
+} from "../../utils/utils.ts";
 import { ChanType, UserType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -181,9 +186,23 @@ export default function ChanEdit({id}: {id: number})
 
 // <UserLists /> ===============================================================
 
+interface actionType {
+	action: string,
+	usernames: Array<string>,
+}
+
 function UserLists({chan}: {chan: ChanType})
 {
-	const {addNotif} = useContext(MyContext);
+	const {addNotif, api} = useContext(MyContext);
+	const mutateError = useMutateError();
+	const invalidate = useInvalidate();
+
+	const action = useMutation({
+		mutationFn: (action: actionType) =>
+			api.patch("/channels/" + chan.id + "/manage_access", action),
+		onError: mutateError,
+		onSuccess: () => invalidate(["/channels/", chan.id]),
+	});
 
 	function isInList(name: string, user: UserType) {
 		name + user;
@@ -192,11 +211,6 @@ function UserLists({chan}: {chan: ChanType})
 	}
 
 	function rmFromList(name: string, user: UserType) {
-		name + user;
-		addNotif({type: 1, content: "SOON™"});
-	}
-
-	function addToList(name: string, user: UserType) {
 		name + user;
 		addNotif({type: 1, content: "SOON™"});
 	}
@@ -210,6 +224,9 @@ function UserLists({chan}: {chan: ChanType})
 						title="Banned users"
 						list={chan.bannedUsers}
 						add={(value: UserType) => {
+							/*
+							A BUNCH OF LOGIC THAT SHOULD BE USELESS NOW:
+
 							if (value.id == "1")
 								return addNotif({content: "You cannot ban yourself!"});
 							else if (isInList("admins", value))
@@ -217,9 +234,11 @@ function UserLists({chan}: {chan: ChanType})
 								+ " unadmin them before banning them."});
 							rmFromList("allowed_users", value);
 							addToList("banned_users", value);
+							*/
+							action.mutate({action: "ban", usernames: [value.username]});
 						}}
 						rm={(value: UserType) => {
-							rmFromList("banned_users", value)
+							action.mutate({action: "deban", usernames: [value.username]});
 						}}
 						owner={null}
 					/>
@@ -232,8 +251,7 @@ function UserLists({chan}: {chan: ChanType})
 						title="Allowed users"
 						list={chan.invitedUsers}
 						add={(value: UserType) => {
-							addToList("allowed_users", value);
-							rmFromList("banned_users", value);
+							action.mutate({action: "invite", usernames: [value.username]})
 						}}
 						rm={(value: UserType) => {
 							if (isInList("admins", value))
@@ -293,21 +311,21 @@ function UserList(
 			</button>
 		</div>);
 
-	const [newAdmin, setNewAdmin] = useState("");
+	const [newUser, setNewUser] = useState("");
 
 	const anchorRef = useRef<HTMLDivElement>(null);
 
 	const { api, addNotif } = useContext(MyContext);
 
 	async function addUser() {
-		setNewAdmin("");
+		setNewUser("");
 		try {
-			const query = await api.get("/users/" + newAdmin);
+			const query = await api.get("/users/" + newUser);
 
 			if (list.some(elem => elem.id === query.id))
-				addNotif({content: "This user is already in the list: " + newAdmin});
+				addNotif({content: "This user is already in the list: " + newUser});
 			else
-				add({username: newAdmin, id: query.id});
+				add({username: newUser, id: query.id});
 			setTimeout(() =>
 				anchorRef.current?.scrollIntoView({block: "end", inline: "nearest"}),
 				1
@@ -317,7 +335,7 @@ function UserList(
 			if (!(error instanceof Error))
 				return ;
 			if (httpStatus(error) == 404)
-				addNotif({content: "No such user: '" + newAdmin + "'"})
+				addNotif({content: "No such user: '" + newUser + "'"})
 			else
 				addNotif({content: error.message})
 		}
@@ -354,12 +372,12 @@ function UserList(
 				<div className="UserList__InputContainer">
 					<input
 						type="text"
-						value={newAdmin}
-						onChange={e => setNewAdmin(e.target.value)}
+						value={newUser}
+						onChange={e => setNewUser(e.target.value)}
 						onKeyDown={e => {
 							if (e.key !== 'Enter')
 								return;
-							if (newAdmin.length)
+							if (newUser.length)
 								addUser();
 						}}
 						placeholder="Add a user"
@@ -368,7 +386,7 @@ function UserList(
 				<button
 					type="button" className="add"
 					onClick={addUser}
-					disabled={!newAdmin.length}
+					disabled={!newUser.length}
 				>
 					<img src={addIcon}/>
 				</button>

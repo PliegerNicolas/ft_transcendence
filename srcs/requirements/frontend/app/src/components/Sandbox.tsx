@@ -59,6 +59,11 @@ export default function Sandbox()
 		onError: mutateError,
 	});
 
+	const post2fa = useMutation({
+		mutationFn: () => api.post("/2fa/generate", {}),
+		onError: mutateError,
+	});
+
 	function genUser() {
 		const uid = "u_" + randomString(6);
 
@@ -76,6 +81,18 @@ export default function Sandbox()
 	return (
 		<main className="MainContent">
 			<h2>Sandbox</h2>
+			<section>
+				<h3>2FA Stuff:</h3>
+				<button onClick={() => post2fa.mutate()}>
+					Get QR code
+				</button>
+				{
+					post2fa.isSuccess &&
+					<div style={{textAlign: "center"}}>
+						<img src={post2fa.data} />
+					</div>
+				}
+			</section>
 			<section>
 				<h3>Global context:</h3>
 				<div className="genericList Sandbox__ContextList">

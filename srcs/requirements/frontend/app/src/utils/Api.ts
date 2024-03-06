@@ -6,15 +6,21 @@ class Api
 		"Authorization": ""
 	};
 	debug: boolean;
+	auth: boolean;
 
-	#return_switch(response: Response) {
+	async #return_switch(response: Response) {
 		if (!response.ok)
 			return (Promise.reject(new Error(response.status + " " + response.statusText)));
 		const content_type = response.headers.get("content-type");
 		if (content_type && content_type.toLowerCase().includes("application/json"))
 			return (response.json());
-		else
+		else try {
+			const blob = await response.blob();
+			return (URL.createObjectURL(blob));
+		}
+		catch {
 			return ({});
+		}
 	}
 
 	async get(endpoint: string) {
@@ -76,6 +82,7 @@ class Api
 		this.base_url = base_url;
 		this.headers["Authorization"] = token;
 		this.debug = true;
+		this.auth = token !== "";
 	}
 }
 

@@ -18,7 +18,7 @@ export class AuthController {
 		if (ret.isTwoFactorAuthEnabled == true)
 			return ;
 		console.log(ret.access_token);
-		return ret.access_token;
+		return {access_token: ret.access_token};
 	  }
 
 	@UseGuards(AuthGuard('jwt'))

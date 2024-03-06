@@ -5,7 +5,13 @@ import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate, useMutateError, useStopOnHttp } from "../../utils/utils.ts";
+import {
+	useInvalidate,
+	useMutateError,
+	useStopOnHttp,
+	getChanRole
+} from "../../utils/utils.ts";
+
 import { MyContext } from "../../utils/contexts";
 
 import "../../styles/chat.css";
@@ -13,7 +19,6 @@ import "../../styles/chat.css";
 import ChatHeader from "./ChatHeader.tsx";
 import Msg from "./Msg.tsx";
 import ChanEdit from "./ChanEdit.tsx";
-import { ChanType } from "../../utils/types.ts";
 
 // <ChatContentRouter /> =======================================================
 
@@ -31,15 +36,6 @@ export default function ChatContentRouter()
 			}/>
 		</Routes>
 	);
-}
-
-function getChanRole(chan: ChanType, id: string)
-{
-	const member = chan.members.find(item => item.user.id == id);
-
-	if (!member)
-		return ("");
-	return (member.role);
 }
 
 // <ChatContent /> =============================================================
