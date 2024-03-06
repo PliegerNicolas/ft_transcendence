@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useContext } from "react";
 import { io } from 'socket.io-client';
 
-import { useInvalidate } from "../../utils/utils.ts";
+import { useInvalidate, useMutateError } from "../../utils/utils.ts";
 import { useMutation } from "@tanstack/react-query";
 import { MyContext } from "../../utils/contexts.ts";
 import { GameResult, GameType, GamelogPostType } from "../../utils/types.ts"
@@ -328,12 +328,13 @@ const OnlineGame = () => {
 	const context = useContext(MyContext);
 
 	const invalidate = useInvalidate();
+	const mutateError = useMutateError();
 	
 	//sending the gamelogs to the database
 	const postGamelog = useMutation({
 		mutationFn: (gamelog: GamelogPostType) => context.api.post("/gamelogs", gamelog),
 		onSettled: () => invalidate(["gamelogs"]),
-		onError: error => context.addNotif({content: error.message}),
+		onError: mutateError,
 	});
 
 // Return ==============================================================================================================

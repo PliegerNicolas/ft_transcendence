@@ -5,7 +5,13 @@ import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
+import {
+	useInvalidate,
+	useMutateError,
+	useStopOnHttp,
+	getChanRole
+} from "../../utils/utils.ts";
+
 import { MyContext } from "../../utils/contexts";
 
 import "../../styles/chat.css";
@@ -36,9 +42,10 @@ export default function ChatContentRouter()
 
 function ChatContent()
 {
-	const { api, addNotif, setLastChan } = useContext(MyContext);
+	const { api, setLastChan } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const stopOnHttp = useStopOnHttp();
+	const mutateError = useMutateError();
 
 	const params = useParams();
 	const id = params.id!;
@@ -55,11 +62,17 @@ function ChatContent()
 		retry: stopOnHttp
 	});
 
+	const getMe = useQuery({
+		queryKey: ["me"],
+		queryFn: () => api.get("/me"),
+		retry: stopOnHttp,
+	});
+
 	const postMsg = useMutation({
 		mutationFn: (content: string) =>
 			api.post("/channels/" + id + "/messages", { content }),
 		onSettled: () => invalidate(["channels", id, "messages"]),
-		onError: error => addNotif({ content: error.message }),
+		onError: mutateError,
 	});
 
 	useEffect(() => setLastChan(id), [id]);
@@ -100,10 +113,15 @@ function ChatContent()
 		</div>
 	);
 
+	const imOwner = getMe.isSuccess && getChanRole(getChan.data, getMe.data.id);
+
+	if (getMe.isSuccess)
+		console.log(getChanRole(getChan.data, getMe.data.id));
+
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
-				<ChatHeader name={getChan.data.name} edit={false} />
+				<ChatHeader name={getChan.data.name} edit={!imOwner} />
 				<Spinner />
 			</div>
 		);
@@ -117,7 +135,7 @@ function ChatContent()
 
 	return (
 		<div className="ChatContent">
-			<ChatHeader name={getChan.data.name} edit={false} />
+			<ChatHeader name={getChan.data.name} edit={!imOwner} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
 					{
