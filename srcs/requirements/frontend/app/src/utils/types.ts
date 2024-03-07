@@ -61,14 +61,23 @@ export interface MemberType {
 export interface ChanType {
 	id: string,
 	name: string,
+	mode: string,
+	password: string | undefined,
+	passwordRepeat: string | undefined,
+	visibility: string,
 	membersCount: number,
 	members: Array<MemberType>,
+	bannedUsers: Array<UserType>,
+	invitedUsers: Array<UserType>,
+	mutedUsers: Array<UserType>,
 }
 
 export interface ChanFormType {
-	id: string,
 	name: string,
-	membersCount: number,
+	visibility: string,
+	mode: string,
+	password: string,
+	passwordRepeat: string,
 }
 
 export interface NotifType {
@@ -76,6 +85,11 @@ export interface NotifType {
 	content: string,
 	type: number,
 	id: string,
+}
+
+export interface InviteType {
+	lobby: string,
+	from: string
 }
 
 export enum GameResult {
@@ -103,4 +117,9 @@ export interface PopupType {
 	action: string,
 	cancelFt: Function,
 	actionFt: Function
+}
+
+export interface MessagePayloads {
+	content: string,
+	channel: string,
 }

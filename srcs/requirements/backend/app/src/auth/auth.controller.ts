@@ -9,12 +9,17 @@ export class AuthController {
 	
 	@HttpCode(HttpStatus.OK)
 	@Post()
-	signIn(@Body() oauthToken:JSON) {
+	async signIn(@Body() oauthToken:JSON) {
 		console.log("controller")
-		return this.authService.signIn(oauthToken);
+		const ret = await (this.authService.signIn(oauthToken)).then(
+			(data) => data
+		);
+		console.log(ret)
+		// console.log(ret.access_token);
+		return {access_token : ret.access_token, isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled};
 	  }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
 	@Post('logout')
 	addBlacklist(@Request() req){
 		return this.authService.blacklist("add", req.headers.authorization)

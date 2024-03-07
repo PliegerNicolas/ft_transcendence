@@ -1,6 +1,6 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useMutation, useQuery, MutationFunction } from "@tanstack/react-query";
+import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import "../styles/header.css";
 
@@ -12,7 +12,7 @@ import Login from "./Login.tsx";
 import Spinner from "./Spinner.tsx";
 
 import { MyContext } from "../utils/contexts.ts";
-import { useStopOnHttp } from "../utils/utils.ts";
+import { useGet } from "../utils/hooks.ts";
 
 function useOutsideClick(callback: (event: MouseEvent) => void) {
   const ref = useRef<HTMLDivElement>(null);
@@ -37,16 +37,10 @@ function useOutsideClick(callback: (event: MouseEvent) => void) {
 export default function Header()
 {
 	const { logged, api, setGlobalPopup, addNotif } = useContext(MyContext);
-	const stopOnHttp = useStopOnHttp();
 
 	const [ popup, setPopup ] = useState(false);
 
-	const getMe = useQuery({
-		queryKey: ["me"],
-		queryFn: () => api.get("/me"),
-		enabled: api.auth,
-		retry: stopOnHttp,
-	});
+	const getMe = useGet(["me"], api.auth);
 
 	const popupRef = useOutsideClick(() => {
 			setTimeout(() => setPopup(false), 0);

@@ -36,7 +36,7 @@ export default function Msg(
 	function fmtDate(createdAt: string) {
 		const date = new Date(createdAt);
 		const now = new Date();
-	
+
 		return (
 			sameDate(date, now) ?
 				pad(date.getHours()) + ":" + pad(date.getMinutes()) :

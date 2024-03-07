@@ -1,12 +1,16 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
+import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
+import { getChanRole } from "../../utils/utils.ts";
+
 import { MyContext } from "../../utils/contexts";
+
+import { socket } from "../../App.tsx"
 
 import "../../styles/chat.css";
 
@@ -36,33 +40,39 @@ export default function ChatContentRouter()
 
 function ChatContent()
 {
-	const { api, addNotif, setLastChan } = useContext(MyContext);
+	const { api, setLastChan } = useContext(MyContext);
 	const invalidate = useInvalidate();
-	const stopOnHttp = useStopOnHttp();
+	const mutateError = useMutateError();
 
 	const params = useParams();
 	const id = params.id!;
 
-	const getChan = useQuery({
-		queryKey: ["chan", id],
-		queryFn: () => api.get("/channels/" + id),
-		retry: stopOnHttp
-	});
-
-	const getMsgs = useQuery({
-		queryKey: ["channels", id, "messages"],
-		queryFn: () => api.get("/channels/" + id + "/messages"),
-		retry: stopOnHttp
-	});
+	const getChan = useGet(["channels", id]);
+	const getMsgs = useGet(["channels", id, "messages"]);
+	const getMe = useGet(["me"]);
 
 	const postMsg = useMutation({
 		mutationFn: (content: string) =>
 			api.post("/channels/" + id + "/messages", { content }),
 		onSettled: () => invalidate(["channels", id, "messages"]),
-		onError: error => addNotif({ content: error.message }),
+		onError: mutateError,
 	});
 
 	useEffect(() => setLastChan(id), [id]);
+
+	useEffect(() => {
+		socket.on('onMessage', (content: string) => {
+			setTimeout(() => {
+				invalidate(["channels", id, "messages"]);
+				getMsgs.refetch();
+			}, 100);
+			console.log('onMessage caught', content);
+		});
+		socket.emit('rejoinChannels');
+		return () => {
+			socket.off('onMessage');
+		};
+	}, []);
 
 	/*
 	** These lines are desirable to auto-scroll at bottom of chat.
@@ -85,6 +95,7 @@ function ChatContent()
 			return;
 
 		postMsg.mutate(inputValue);
+		socket.emit('newMessage', { content: inputValue, channel: getChan.data.name });
 		setInputValue("");
 	}
 
@@ -100,10 +111,15 @@ function ChatContent()
 		</div>
 	);
 
+	const imOwner = getMe.isSuccess && getChanRole(getChan.data, getMe.data.id);
+
+	if (getMe.isSuccess)
+		console.log(getChanRole(getChan.data, getMe.data.id));
+
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
-				<ChatHeader name={getChan.data.name} edit={false} />
+				<ChatHeader name={getChan.data.name} edit={!imOwner} />
 				<Spinner />
 			</div>
 		);
@@ -117,7 +133,7 @@ function ChatContent()
 
 	return (
 		<div className="ChatContent">
-			<ChatHeader name={getChan.data.name} edit={false} />
+			<ChatHeader name={getChan.data.name} edit={!imOwner} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
 					{
@@ -142,6 +158,7 @@ function ChatContent()
 			</div>
 			<div className="Chat__Input">
 				<textarea
+					id="SendMessage"
 					placeholder={`Send a message to « ${getChan.data.name} »`}
 					value={inputValue}
 					onChange={handleInputChange}

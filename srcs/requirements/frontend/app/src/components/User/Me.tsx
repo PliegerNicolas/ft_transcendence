@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery, UseQueryResult, useMutation } from "@tanstack/react-query";
+import { UseQueryResult, useMutation } from "@tanstack/react-query";
 
 import { FriendshipContext, MyContext } from "../../utils/contexts.ts";
 import { FriendshipType } from "../../utils/types.ts"
@@ -10,7 +10,7 @@ import ConfirmPopup from "../ConfirmPopup.tsx";
 
 import UserInfos from "./UserInfos.tsx";
 
-import { useInvalidate, useStopOnHttp } from "../../utils/utils.ts";
+import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
 
 import "../../styles/user.css";
 
@@ -18,42 +18,32 @@ import "../../styles/user.css";
 
 export default function Me()
 {
-	const { api, addNotif } = useContext(MyContext);
+	const { api } = useContext(MyContext);
 
-	const stopOnHttp = useStopOnHttp();
 	const invalidate = useInvalidate();
+	const mutateError = useMutateError();
 
 	const [popup, setPopup] = useState(false);
 
-	const getMe = useQuery({
-		queryKey: ["me"],
-		queryFn: () => api.get("/me"),
-		retry: stopOnHttp
-	});
+	const getMe = useGet(["me"]);
+	const getRelations = useGet(["relationships"]);
 
 	const delMe = useMutation({
 		mutationFn: () => api.delete("/me"),
 		onSettled: () => invalidate(["me"])
 	});
 
-	const getRelations = useQuery({
-		queryKey: ["relations"],
-		queryFn: () => api.get("/relationships"),
-		enabled: getMe.isSuccess,
-		retry: stopOnHttp
-	});
-
 	const patchRelation = useMutation({
 		mutationFn: ({them, status}: {them: string, status: string}) =>
 			api.patch("/relationships/" + them, {status: status}),
-		onSettled: () => invalidate(["relations"]),
-		onError: error => addNotif({content: error.message}),
+		onSettled: () => invalidate(["relationships"]),
+		onError: mutateError,
 	});
 
 	const delRelation = useMutation({
 		mutationFn: (them: string) => api.delete("/relationships/" + them),
-		onSettled: () => invalidate(["relations"]),
-		onError: error => addNotif({content: error.message}),
+		onSettled: () => invalidate(["relationships"]),
+		onError: mutateError,
 	});
 
 	if (getMe.isPending) return (
@@ -73,6 +63,8 @@ export default function Me()
 	);
 
 	const me = getMe.data;
+
+	console.log(me);
 	
 	function friendshipAction(action: string, ship: FriendshipType) {
 		const other = ship.user1.username == me.username ?

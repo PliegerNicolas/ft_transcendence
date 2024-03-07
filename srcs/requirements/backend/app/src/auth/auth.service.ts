@@ -38,7 +38,14 @@ export class AuthService
 		return ({ users });
 	}
 
-	async signIn(oauthToken : JSON ): Promise<any> {
+	async createJwt(payload : any, isTwoFactorAuthLogged : boolean = false){
+		payload.isTwoFactorAuthLogged = isTwoFactorAuthLogged;
+		console.log("payload")
+		console.log(payload)
+		return (await this.jwtService.signAsync(payload))
+	}
+
+	async signIn(oauthToken : JSON ): Promise<{access_token : any, isTwoFactorAuthEnabled : any}> {
 		const token = Object.values(oauthToken);
 		let payload;
 
@@ -85,16 +92,18 @@ export class AuthService
 
 			payload = { user_id :  users.id, isTwoFactorAuthEnabled: false}
 		} else {
-			payload = { user_id : Object.values(user.id)[0] }
+				payload = { user_id : Object.values(user_id)[0], isTwoFactorAuthEnabled : user_id.isTwoFactorAuthEnabled }
 		}
-		console.log(payload);
-		payload.oauth_id = Object.values(info)[0].toString()
-		console.log(JSON.stringify(payload))
-		console.log(Object.values(Object.values(info)[11])[0].toString())
-		const access_token = await this.jwtService.signAsync(payload)
-		console.log(access_token)
+			payload.oauth_id = Object.values(info)[0].toString()
+			// console.log(JSON.stringify(payload))
+			// console.log(Object.values(Object.values(info)[11])[0].toString())
+			const access_token = await this.createJwt(payload)
+			// console.log(access_token)
 
-		return ({ access_token });
+		return ({
+			access_token,
+			isTwoFactorAuthEnabled : payload.isTwoFactorAuthEnabled
+		});
 	}
 
 	async log_as(username : string) : Promise<any>{
@@ -106,7 +115,11 @@ export class AuthService
 		}).then(
 			(data) => data
 		)
-		const payload = {user_id : member.id, oauth_id : member.oauthId}
+		if (member == null)
+		{
+			throw new UnauthorizedException();
+		}
+		const payload = {user_id : member.id, oauth_id : member.oauthId, isTwoFactorAuthLogged: true}
 		const access_token = await this.jwtService.signAsync(payload)
 		return ({ access_token });
 	}

@@ -1,14 +1,4 @@
-import { useQueryClient, QueryKey } from "@tanstack/react-query";
-import { useContext } from "react";
-import { MyContext } from "./contexts";
-
-
-export function useInvalidate()
-{
-	const queryClient = useQueryClient();
-
-	return ((key: QueryKey) => queryClient.invalidateQueries({queryKey: key}))
-}
+import { ChanType } from "./types";
 
 export function httpStatus(e: Error)
 {
@@ -16,22 +6,6 @@ export function httpStatus(e: Error)
 	if (isNaN(+statusString) || isNaN(parseFloat(statusString)))
 		return (0);
 	return (+statusString);
-}
-
-export function useStopOnHttp()
-{
-	const {setLogInfo} = useContext(MyContext);
-
-	return ((count: number, error: Error) => {
-		const status = httpStatus(error);
-
-		if (status === 401) {
-			localStorage.removeItem("my_info");
-			setLogInfo({logged: false, token: ""});
-		}
-
-		return (!status && count < 3)
-	});
 }
 
 export function randomString(length: number)
@@ -43,4 +17,13 @@ export function randomString(length: number)
 		ret += charset[Math.floor(36 * Math.random())];
 	}
 	return (ret);
+}
+
+export function getChanRole(chan: ChanType, id: string)
+{
+	const member = chan.members.find(item => item.user.id == id);
+
+	if (!member)
+		return ("");
+	return (member.role);
 }

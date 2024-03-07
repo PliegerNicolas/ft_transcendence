@@ -8,12 +8,12 @@ import { Request } from 'express';
 // import { Auth } from 'typeorm';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy){
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh'){
 	constructor(private authService : AuthService) {
 		super({
 			jwtFromRequest : ExtractJwt.fromHeader("authorization"),
 			secretOrKey : process.env.API_SECRET ,
-			ignoreExpiration : false,
+			ignoreExpiration : true,
 			passReqToCallback: true
 		});
 	}
@@ -36,15 +36,10 @@ export class JwtStrategy extends PassportStrategy(Strategy){
 		{
 			throw new UnauthorizedException();
 		}
-		// if (!users.isTwoFactorAuthEnabled)
-		// {
-		// 	return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
-		// }
-		// if (payload.isTwoFactorAuthLogged)
-		// {
-		// 	return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
-		// }
+		if (users.isTwoFactorAuthEnabled && !payload.isTwoFactorAuthLogged)
+		{
+			throw new UnauthorizedException();
+		}
 		return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
 	}
 }
-

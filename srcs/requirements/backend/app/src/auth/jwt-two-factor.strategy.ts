@@ -4,11 +4,9 @@ import { ExtractJwt, Strategy } from 'passport-jwt'
 import { AuthService } from './auth.service';
 import { ContextCreator } from '@nestjs/core/helpers/context-creator';
 import { Request } from 'express';
-// import { JwtService } from '@nestjs/jwt';
-// import { Auth } from 'typeorm';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy){
+export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFactor'){
 	constructor(private authService : AuthService) {
 		super({
 			jwtFromRequest : ExtractJwt.fromHeader("authorization"),
@@ -36,15 +34,10 @@ export class JwtStrategy extends PassportStrategy(Strategy){
 		{
 			throw new UnauthorizedException();
 		}
-		// if (!users.isTwoFactorAuthEnabled)
-		// {
-		// 	return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
-		// }
-		// if (payload.isTwoFactorAuthLogged)
-		// {
-		// 	return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
-		// }
+		if (users.isTwoFactorAuthEnabled && !payload.isTwoFactorAuthLogged)
+		{
+			throw new UnauthorizedException();
+		}
 		return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
 	}
 }
-

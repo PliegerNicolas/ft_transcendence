@@ -15,6 +15,7 @@ export const MyContext = createContext({
 	setLogInfo: (() => {}) as Function,
 	api: new Api(`http://${location.hostname}:3450`),
 	addNotif: (() => {}) as Function,
+	addInvite: (() => {}) as Function,
 	lastChan: "",
 	setLastChan: (() => {}) as Function,
 	setGlobalPopup: (() => {}) as Function,

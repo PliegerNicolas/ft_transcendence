@@ -313,7 +313,7 @@
 .Popup__Bg {
 	position: absolute;
 	background: #0008;
-	backdrop-filter: blur(1px);
+	backdrop-filter: blur(4px);
 	top: 0; bottom: 0; left: 0; right: 0;
 	z-index: 1000;
 	display: flex;

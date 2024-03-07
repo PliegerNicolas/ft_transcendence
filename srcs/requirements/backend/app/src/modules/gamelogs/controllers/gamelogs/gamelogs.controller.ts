@@ -45,7 +45,7 @@ export class GamelogsController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Get('gamelogs')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyGamelogs(
@@ -68,7 +68,7 @@ export class GamelogsController {
     // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), RoleGlobalGuard)
     @Post('gamelogs')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async createGamelog(
@@ -78,7 +78,7 @@ export class GamelogsController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), RoleGlobalGuard)
     @Put('gamelogs/:gamelogId')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async replaceGamelog(
@@ -89,7 +89,7 @@ export class GamelogsController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), RoleGlobalGuard)
     @Patch('gamelogs/:gamelogId')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async updateGamelog(
@@ -100,7 +100,7 @@ export class GamelogsController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), RoleGlobalGuard)
     @Delete('gamelogs/:gamelogId')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async deleteGamelog(
