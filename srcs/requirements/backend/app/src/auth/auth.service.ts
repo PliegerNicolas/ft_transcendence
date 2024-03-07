@@ -92,13 +92,13 @@ export class AuthService
 
 			payload = { user_id :  users.id, isTwoFactorAuthEnabled: false}
 		} else {
-				payload = { user_id : Object.values(user_id)[0], isTwoFactorAuthEnabled : user_id.isTwoFactorAuthEnabled }
+			payload = { user_id : Object.values(user)[0], isTwoFactorAuthEnabled : user.isTwoFactorAuthEnabled }
 		}
-			payload.oauth_id = Object.values(info)[0].toString()
-			// console.log(JSON.stringify(payload))
-			// console.log(Object.values(Object.values(info)[11])[0].toString())
-			const access_token = await this.createJwt(payload)
-			// console.log(access_token)
+		payload.oauth_id = Object.values(info)[0].toString()
+		// console.log(JSON.stringify(payload))
+		// console.log(Object.values(Object.values(info)[11])[0].toString())
+		const access_token = await this.createJwt(payload)
+		// console.log(access_token)
 
 		return ({
 			access_token,
