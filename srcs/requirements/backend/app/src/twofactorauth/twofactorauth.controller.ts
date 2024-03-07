@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, HttpCode, Post, Request, Res, UnauthorizedException, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, ForbiddenException, HttpCode, Post, Request, Res, UnauthorizedException, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TwoFactorAuthService } from './twofactorauth.service';
 import { Response } from 'express';
@@ -33,12 +33,16 @@ export class TwofactorauthController {
 		@Request() req : any,
 		@Body() {twoFactorAuthCode} : TwoFactorAuthCodeDto
 	){
-		const isCodeValid = this.twoFactorAuthService.isTwoFactorAuthSecretValid(
+		console.log(twoFactorAuthCode)
+
+		const isCodeValid = await this.twoFactorAuthService.isTwoFactorAuthSecretValid(
 			twoFactorAuthCode, req.user.user_id
-		  );
+		  ).then((data) => data);
+		  console.log(isCodeValid)
 		  if (!isCodeValid) {
-			throw new UnauthorizedException('Wrong authentication code');
+			throw new ForbiddenException('Wrong authentication code');
 		  }
+		  console.log(req.user.user_id)
 		  await this.usersService.turnOnTwoFactorAuthentication(req.user.user_id);
 	}
 
@@ -55,7 +59,7 @@ export class TwofactorauthController {
 		  if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
 		  }
-		return (await this.authService.createJwt({user_id : req.user_id, oauth_id : req.oauth_id}, true));
+		return {access_token: await this.authService.createJwt({user_id : req.user_id, oauth_id : req.oauth_id}, true)};
 	}
 
 }

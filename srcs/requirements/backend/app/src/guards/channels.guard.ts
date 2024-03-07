@@ -45,3 +45,45 @@ export class ChannelsGuard implements CanActivate {
 		return true;
 	  }
 }
+
+@Injectable()
+export class ChannelsNotGuard implements CanActivate {
+
+	constructor(private jwtService : JwtService,
+		@InjectRepository(ChannelMember)
+		private channelMemberRepository : Repository<ChannelMember>,
+		// private reflector : Reflector
+		) {}
+
+	async canActivate(
+		context: ExecutionContext,
+	  ): Promise<boolean> {
+		const request = context.switchToHttp().getRequest();
+		const token = this.jwtService.decode(request.headers.authorization);
+		const params = request.params;
+	
+		const member = await this.channelMemberRepository.findOne({
+			relations : {
+					channel : true,
+					user : true
+				},
+				where : {
+					channel : {
+						id: params.channelId
+					},
+					user : {
+						id : token.user_id
+					}
+				}
+		
+			}).then(
+				(data) => data
+			)
+			if (member == null)
+			{
+				return (true);
+			}
+	
+		return false;
+	  }
+}

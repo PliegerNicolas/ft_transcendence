@@ -13,7 +13,7 @@ import { GetChannelsQueryDto } from "../dtos/GetChannelsQuery.dto";
 import { JwtPublicGuard } from "../../../../guards/jwt-public.guard";
 import { AuthGuard } from "@nestjs/passport";
 import { GlobalRole, Role } from "../../../../guards/role.decorator";
-import { ChannelsGuard } from "../../../../guards/channels.guard";
+import { ChannelsGuard, ChannelsNotGuard } from "../../../../guards/channels.guard";
 import { RoleGlobalGuard, RoleGuard } from "../../../../guards/role.guard";
 import { UsersGuard } from "../../../../guards/users.guard";
 
@@ -95,7 +95,7 @@ export class ChannelsController {
         return (await this.channelService.updateChannel(channelId, username, updateChannelDto));
     }
 
-	@UseGuards(AuthGuard('jwt'), ChannelsGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwt'), ChannelsNotGuard || RoleGlobalGuard)
     @Patch('channels/:channelId/join')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async joinMyChannel(
