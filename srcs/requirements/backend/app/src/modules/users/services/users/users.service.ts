@@ -19,7 +19,7 @@ export class UsersService {
     async getUser(username: string = undefined): Promise<User> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile.image'],
+            relations: ['profile.picture'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
@@ -30,7 +30,7 @@ export class UsersService {
     async getMyUser(username: string = undefined): Promise<User> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile.image'],
+            relations: ['profile.picture'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
@@ -77,7 +77,7 @@ export class UsersService {
     
         user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile.image'],
+            relations: ['profile.picture'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
@@ -106,7 +106,7 @@ export class UsersService {
     
         user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile.image'],
+            relations: ['profile.picture'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
@@ -142,9 +142,8 @@ export class UsersService {
     }
 
 	async turnOnTwoFactorAuthentication(userId: number) {
-		return this.userRepository.update(userId, {
-		  isTwoFactorAuthEnabled: true
-		});
+		console.log(userId)
+		return this.userRepository.update(userId, {isTwoFactorAuthEnabled: true});
 	}
 
     /* Helper Functions */

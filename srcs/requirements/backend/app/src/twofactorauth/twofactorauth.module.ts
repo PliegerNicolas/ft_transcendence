@@ -8,10 +8,17 @@ import { AuthService } from 'src/auth/auth.service';
 import { UsersService } from 'src/modules/users/services/users/users.service';
 import { Profile } from 'src/modules/profiles/entities/Profile.entity';
 import { ProfilesService } from 'src/modules/profiles/services/profiles/profiles.service';
+import { JwtModule } from '@nestjs/jwt';
+import { jwtConstants } from 'src/auth/constant';
 
 @Module({
 
-	imports: [TypeOrmModule.forFeature([User, Profile])],
+	imports: [TypeOrmModule.forFeature([User, Profile]),
+	JwtModule.register({
+		global:true,
+		secret:jwtConstants.secret,
+		signOptions : {expiresIn: '7200s'}
+	  })],
 	controllers: [TwofactorauthController],
 	providers: [TwoFactorAuthService, UsersService, ProfilesService, AuthService]
   })

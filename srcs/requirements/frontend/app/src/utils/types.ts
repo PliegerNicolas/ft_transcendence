@@ -11,7 +11,7 @@ export interface UserType {
 	email: string,
 	updated_at: string,
 	created_at: string,
-	image: string,
+	picture: string,
 	profile: ProfileType
 }
 

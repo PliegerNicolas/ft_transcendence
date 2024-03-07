@@ -10,6 +10,8 @@ import { FileUploadsModule } from "../file-uploads/file-uploads.module";
 import { MimeTypes } from "../file-uploads/enums/mime-types.enum";
 import { MB_MULTIPLICATOR } from "../file-uploads/configs/file-uploads.config";
 import { File } from "../file-uploads/entities/file.entity";
+import { ProfilePicturesController } from './controllers/profile-pictures/profile-pictures.controller';
+import { ProfilePicturesService } from './services/profile-pictures/profile-pictures.service';
 
 @Module({
 	imports: [
@@ -22,8 +24,8 @@ import { File } from "../file-uploads/entities/file.entity";
 		forwardRef(() => AuthModule),
 		forwardRef(() => GuardsModule),
 	],
-	controllers: [ProfilesController],
-	providers: [ProfilesService],
+	controllers: [ProfilesController, ProfilePicturesController],
+	providers: [ProfilesService, ProfilePicturesService],
 	exports: [ProfilesService],
 })
 export class ProfilesModule {}

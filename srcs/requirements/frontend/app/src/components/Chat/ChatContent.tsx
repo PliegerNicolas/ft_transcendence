@@ -112,7 +112,7 @@ function ChatContent()
 	function popupFn(text: JSX.Element, action: Function) {
 		setPopup({
 			text,
-			action,
+			action: () => {action(); setPopup(null)},
 		});
 	}
 
@@ -127,8 +127,6 @@ function ChatContent()
 			Failed to load this channel: {getChan.error.message}
 		</div>
 	);
-
-	console.log(getChan.data);
 
 	const role = getMe.isSuccess ? getChanRole(getChan.data, getMe.data.id) : "";
 

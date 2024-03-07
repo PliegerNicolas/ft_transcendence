@@ -52,7 +52,7 @@ export class UsersController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Get('me')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyUser(
@@ -62,7 +62,7 @@ export class UsersController {
         return (await this.userService.getMyUser(username));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Put('me')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyUser(
@@ -73,7 +73,7 @@ export class UsersController {
         return (await this.userService.replaceUser(username, replaceUserDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Patch('me')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyUser(
@@ -84,7 +84,7 @@ export class UsersController {
         return (await this.userService.updateUser(username, updateUserDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Delete('me')
     // UseGuard => Verify if user connected and pass it's req.user
     async deleteMyUser(
@@ -99,7 +99,7 @@ export class UsersController {
     /* */
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Put('users/:username')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceUser(
@@ -110,7 +110,7 @@ export class UsersController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Patch('users/:username')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateUser(
@@ -121,7 +121,7 @@ export class UsersController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Delete('users/:username')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async deleteUser(

@@ -71,7 +71,7 @@ export default function Msg(
 		}>
 			<div className="Msg__PictureDiv">
 				<Link to={"/user/" + member.user.username}>
-					<img src={member.user.image || defaultPicture} />
+					<img src={member.user.picture || defaultPicture} />
 				</Link>
 			</div>
 			<div>
@@ -80,7 +80,7 @@ export default function Msg(
 					<Link
 						to={"/user/" + member.user.username}
 						className="Msg__Sender"
-						style={{color: `hsl(${(360 / size) * +member.id} 80% 80%)`}}
+						style={{color: `hsl(${(360 / size) * (+member.id - 1)} 80% 80%)`}}
 					>
 						{member.user.username}
 					</Link>
@@ -90,7 +90,7 @@ export default function Msg(
 					</span>
 					{
 						(role === "operator" || role === "owner") &&
-				//			me && me.id !== member.user.id &&
+						me && me.id !== member.user.id &&
 						<ModActions msg={data} role={role} popupFn={popupFn}/>
 					}
 				</div>
