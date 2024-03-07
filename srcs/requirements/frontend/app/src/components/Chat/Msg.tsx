@@ -1,17 +1,29 @@
 import { Link } from "react-router-dom";
-import { MsgType } from "../../utils/types.ts";
+import { MsgType, UserType } from "../../utils/types.ts";
 
 import "../../styles/chat.css";
+import defaultPicture from "../../assets/default_profile.png"
+import { useMutation } from "@tanstack/react-query";
+import { useInvalidate, useMutateError } from "../../utils/hooks.ts";
+import { useContext } from "react";
+import { MyContext } from "../../utils/contexts.ts";
 
 // <Msg /> =====================================================================
 
 export default function Msg(
-	{data, prev, next, size}:
-	{data: MsgType, prev: MsgType | null, next: MsgType | null, size: number}
+	{data, prev, next, size, role, me, popupFn}:
+	{
+		data: MsgType,
+		prev: MsgType | null,
+		next: MsgType | null,
+		size: number,
+		role: string,
+		me: UserType | undefined
+		popupFn: Function
+	}
 )
 {
 	const date = fmtDate(data.createdAt);
-
 	const member = data.channelMember;
 
 	const connectPrev =
@@ -53,13 +65,13 @@ export default function Msg(
 	return (
 		<div className={
 			`Msg
-			${member.user.id == "1" && "me"}
+			${me && member.user.id == me.id && "me"}
 			${connectPrev && "connectPrev"}
 			${connectNext && "connectNext"}`
 		}>
 			<div className="Msg__PictureDiv">
 				<Link to={"/user/" + member.user.username}>
-					<img src={member.user.image} />
+					<img src={member.user.image || defaultPicture} />
 				</Link>
 			</div>
 			<div>
@@ -76,10 +88,96 @@ export default function Msg(
 					<span className="Msg__Date">
 						{date}
 					</span>
+					{
+						(role === "operator" || role === "owner") &&
+				//			me && me.id !== member.user.id &&
+						<ModActions msg={data} role={role} popupFn={popupFn}/>
+					}
 				</div>
 			}
 				{data.content}
 			</div>
+		</div>
+	);
+}
+
+// <ModActions /> ==============================================================
+
+function ModActions(
+	{msg, role, popupFn}:
+	{msg: MsgType, role: string, popupFn: Function}
+)
+{
+	const member = msg.channelMember;
+	const username = member.user.username;
+
+	const { api } = useContext(MyContext);
+	const mutateError = useMutateError();
+	const invalidate = useInvalidate();
+
+	const action = useMutation({
+		mutationFn: (action: string) =>
+			api.patch(
+				"/channels/" + msg.channelId + "/manage_access",
+				{action, usernames: [username]}
+			),
+		onError: mutateError,
+		onSuccess: () => invalidate(["channels", msg.channelId]),
+	});
+
+	return (
+		<div className="Msg__ModActions">
+			<button
+				className="ban"
+				onClick={() => popupFn(
+					<>Are you sure you want to ban {username} from this channel?</>,
+					() => {action.mutate("ban")}
+				)}
+			>
+				Ban
+			</button>
+			<button
+				className="kick"
+				onClick={() => popupFn(
+					<>Are you sure you want to kick {username} from this channel?</>,
+					() => {action.mutate("kick")}
+				)}
+			>
+				Kick
+			</button>
+			<button
+				className="mute"
+				onClick={() => popupFn(
+					<>Are you sure you want to mute {username} on this channel?</>,
+					() => {action.mutate("mute")}
+				)}
+			>
+				Mute
+			</button>
+			{
+				role === "owner" && (
+					member.role !== "operator" ?
+					<button
+						className="admin"
+						onClick={() => popupFn(
+							<>Are you sure you want to make {username} an admin on this channel?</>,
+							() => {action.mutate("promote")}
+						)}
+					>
+						Admin
+					</button> :
+					<button
+						className="unadmin"
+						onClick={() => popupFn(
+							<>Are you sure you want to retrieve {username}'s admin privileges
+							on this channel?</>,
+							() => {action.mutate("demote")}
+						)}
+					>
+						Unadmin
+					</button>
+				)
+			}
 		</div>
 	);
 }

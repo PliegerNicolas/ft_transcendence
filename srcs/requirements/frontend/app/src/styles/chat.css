@@ -244,6 +244,15 @@
 	border: 2px solid var(--bg-color-5);
 }
 
+.Chat__Input.join {
+	font-size: .92rem;
+	font-style: italic;
+	background: var(--bg-color-2);
+	border-top: 1px solid var(--bg-color-5);
+	flex-direction: column;
+	gap: 10px;
+}
+
 /*
 ** <ChatHeader /> ==============================================================
 */
@@ -399,6 +408,47 @@
 	font-style: italic;
 }
 
+.Msg__ModActions {
+	display: inline-flex;
+	gap: 4px;
+	align-items: center;
+	margin-left: 15px;
+	opacity: .5;
+	transition: 1.5s ease-in;
+}
+.Msg__ModActions:hover {
+	opacity: 1;
+	transition: .1s;
+}
+
+.Msg__ModActions>button {
+	padding: 2px 6px;
+	margin: 0;
+	border-radius: 7px;
+	font-size: .84rem;
+}
+
+.Msg__ModActions>button.ban {
+	border: 1px solid #e7a;
+	color: #e7a;
+}
+.Msg__ModActions>button.kick {
+	border: 1px solid #c9a;
+	color: #c9a;
+}
+.Msg__ModActions>button.mute {
+	border: 1px solid #baa;
+	color: #baa;
+}
+.Msg__ModActions>button.admin {
+	border: 1px solid #69d;
+	color: #69d;
+}
+.Msg__ModActions>button.unadmin {
+	border: 1px solid #98d;
+	color: #98d;
+}
+
 /*
 ** <ChanEdit /> ================================================================
 */
@@ -540,6 +590,10 @@
 
 .ChanEdit .banned {
 	border-color: var(--error-bg);
+}
+
+.ChanEdit .muted {
+	border-color: #b85;
 }
 
 .ChanEdit .allowed {

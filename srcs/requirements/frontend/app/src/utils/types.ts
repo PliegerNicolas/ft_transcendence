@@ -39,23 +39,19 @@ export interface MyInfoType {
 	token: string
 }
 
+export interface MemberType {
+	id: string,
+	mute: boolean,
+	role: "owner" | "operator" | "member",
+	user: UserType,
+}
+
 export interface MsgType {
 	id: string
 	channelId: string,
 	content: string,
 	createdAt: string,
-	channelMember: {
-		id: string,
-		role: "admin" | "owner",
-		user: UserType,
-	}
-}
-
-export interface MemberType {
-	id: string,
-	mute: boolean,
-	role: string,
-	user: UserType,
+	channelMember: MemberType
 }
 
 export interface ChanType {

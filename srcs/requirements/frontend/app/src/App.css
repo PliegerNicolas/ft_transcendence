@@ -310,15 +310,21 @@
 ** Popup =======================================================================
 */
 
+@keyframes fadeinBG
+{
+	0% { background: #0000; }
+	100% { background: #0008; }
+}
+
 .Popup__Bg {
 	position: absolute;
-	background: #0008;
 	backdrop-filter: blur(4px);
 	top: 0; bottom: 0; left: 0; right: 0;
 	z-index: 1000;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	animation: fadein .1s ease-in-out, fadeinBG .3s ease-in-out forwards;
 }
 
 .Popup {
