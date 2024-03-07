@@ -14,11 +14,9 @@ export class AuthController {
 		const ret = await (this.authService.signIn(oauthToken)).then(
 			(data) => data
 		);
-		// console.log(ret)
-		if (ret.isTwoFactorAuthEnabled == true)
-			return {access_token : "2fa"};
+		console.log(ret)
 		// console.log(ret.access_token);
-		return {access_token : ret.access_token};
+		return {access_token : ret.access_token, isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled};
 	  }
 
 	@UseGuards(AuthGuard('jwt'))

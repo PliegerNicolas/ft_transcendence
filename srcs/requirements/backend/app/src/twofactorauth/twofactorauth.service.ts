@@ -47,6 +47,8 @@ export class TwoFactorAuthService {
 		.then(
 			(data) => data
 		)
+		console.log(user.twoFactorAuthSecret)
+		console.log(twoFactorAuthenticationCode)
 		return authenticator.verify({
 			token: twoFactorAuthenticationCode,
 			secret: user.twoFactorAuthSecret

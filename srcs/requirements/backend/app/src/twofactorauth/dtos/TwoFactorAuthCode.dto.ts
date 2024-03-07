@@ -1,3 +1,3 @@
 export class TwoFactorAuthCodeDto{
-	twoFactorAuthCode : string
+	twoFactorAuthCode : number
 }
