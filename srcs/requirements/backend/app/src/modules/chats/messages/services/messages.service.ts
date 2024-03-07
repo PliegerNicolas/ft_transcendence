@@ -1,12 +1,10 @@
-import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Message } from "../entities/Message.entity";
 import { Equal, Repository } from "typeorm";
 import { Channel } from "../../channels/entities/Channel.entity";
 import { User } from "../../../users/entities/User.entity";
-import { ChannelMode } from "../../channels/enums/channel-mode.enum";
 import { CreateMessageParams, ReplaceMessageParams, UpdateMessageParams } from "../types/message.type";
-import { PasswordHashingService } from "../../../password-hashing/services/password-hashing/password-hashing.service";
 
 @Injectable()
 export class MessagesService {
@@ -18,8 +16,6 @@ export class MessagesService {
         private readonly channelRepository: Repository<Channel>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
-
-        private readonly passwordHashingService: PasswordHashingService,
     ) {}
 
     async getChannelMessages(channelId: bigint, username: string = undefined): Promise<Message[]> {
@@ -36,10 +32,6 @@ export class MessagesService {
         });
 
         channel.validateAccess(user);
-        if (
-            channel.mode === ChannelMode.PASSWORD_PROTECTED
-            //&& await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password) // Add dto for get
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         return (channel.messages);
     }
@@ -58,10 +50,6 @@ export class MessagesService {
         });
 
         channel.validateAccess(user);
-        if (
-            channel.mode === ChannelMode.PASSWORD_PROTECTED
-            //&& await this.passwordHashingService.comparePasswords(channelDetails.password, channel.password) // Add dto for get
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         const message = channel.messages.find((message) => BigInt(message.id) === messageId);
 

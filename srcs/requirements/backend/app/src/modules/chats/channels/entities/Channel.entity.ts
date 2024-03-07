@@ -176,8 +176,6 @@ export class Channel {
         }
         if (user.hasGlobalServerPrivileges()) return ;
 
-        console.log(this);
-
         const isMember = this.isMember(user.username);
         const isInvited = this.isInvited(user.username);
         const isBanned = this.isBanned(user.username);
@@ -188,12 +186,11 @@ export class Channel {
             case (ChannelMode.OPEN):
                 return ;
             case (ChannelMode.INVITE_ONLY):
-                console.log(isInvited);
-                console.log(isMember);
                 if (isInvited || isMember) return ;
                 throw new ForbiddenException(`User '${user.username}' is neither member or invited to Channel with ID ${this.id}`);
             case (ChannelMode.PASSWORD_PROTECTED):
-                return ; // Externally check the password
+                if (isMember) return ;
+                throw new ForbiddenException(`User '${user.username}' is neither member of Channel with ID ${this.id}`);
             default:
                 throw new ForbiddenException(`Channel with ID ${this.id}'s mode not recognized`);
         }
