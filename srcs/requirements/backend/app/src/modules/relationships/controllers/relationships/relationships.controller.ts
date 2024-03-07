@@ -26,7 +26,7 @@ export class RelationshipsController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Get('relationships')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyRelationships(
@@ -36,7 +36,7 @@ export class RelationshipsController {
         return (await this.relationshipService.getRelationships(username));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Get('relationships/:targetUsername')
     // UseGuard => Verify if user connected and pass it's req.user
     async getMyRelationship(
@@ -47,7 +47,7 @@ export class RelationshipsController {
         return (await this.relationshipService.getRelationship(username, targetUsername));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Post('relationships')
     // UseGuard => Verify if user connected and pass it's req.user
     async createMyRelationship(
@@ -58,7 +58,7 @@ export class RelationshipsController {
         return (await this.relationshipService.createRelationship(username, createRelationshipDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Put('relationships/:targetUsername')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyRelationship(
@@ -70,7 +70,7 @@ export class RelationshipsController {
         return (await this.relationshipService.replaceRelationship(username, targetUsername, replaceRelationshipDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Patch('relationships/:targetUsername')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyRelationship(
@@ -82,7 +82,7 @@ export class RelationshipsController {
         return (await this.relationshipService.updateRelationship(username, targetUsername, updateRelationshipDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Delete('relationships/:targetUsername')
     // UseGuard => Verify if user connected and pass it's req.user
     async deleteMyRelationship(
@@ -98,7 +98,7 @@ export class RelationshipsController {
     /* */
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Get('users/:username/relationships')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getUserRelationships(
@@ -108,7 +108,7 @@ export class RelationshipsController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Get('users/:username/relationships/:targetUsername')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getUserRelationship(
@@ -119,7 +119,7 @@ export class RelationshipsController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Post('users/:username/relationships')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async createUserRelationship(
@@ -130,7 +130,7 @@ export class RelationshipsController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Put('users/:username/relationships/:targetUsername')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceUserRelationship(
@@ -142,7 +142,7 @@ export class RelationshipsController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Patch('users/:username/relationships/:targetUsername')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateUserRelationship(
@@ -154,7 +154,7 @@ export class RelationshipsController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Delete('users/:username/relationships/:targetUsername')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async deleteUserRelationship(

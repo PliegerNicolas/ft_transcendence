@@ -25,7 +25,7 @@ export class ProfilesController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Put('me/profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyProfile(
@@ -36,7 +36,7 @@ export class ProfilesController {
         return (await this.profileService.replaceProfile(username, replaceProfileDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Patch('me/profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyProfile(
@@ -47,7 +47,7 @@ export class ProfilesController {
         return (await this.profileService.updateProfile(username, updateProfileDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Delete('me/profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async clearMyprofile(
@@ -62,7 +62,7 @@ export class ProfilesController {
     /* */
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Put('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceProfile(
@@ -73,7 +73,7 @@ export class ProfilesController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Patch('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateProfile(
@@ -84,7 +84,7 @@ export class ProfilesController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Delete('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async clearProfile(

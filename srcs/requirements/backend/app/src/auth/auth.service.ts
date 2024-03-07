@@ -50,6 +50,8 @@ export class AuthService
 
 	async createJwt(payload : any, isTwoFactorAuthLogged : boolean = false){
 		payload.isTwoFactorAuthLogged = isTwoFactorAuthLogged;
+		console.log("payload")
+		console.log(payload)
 		return (await this.jwtService.signAsync(payload))
 	}
 
@@ -149,7 +151,7 @@ export class AuthService
 		{
 			throw new UnauthorizedException();
 		}
-		const payload = {user_id : member.id, oauth_id : member.oauthId}
+		const payload = {user_id : member.id, oauth_id : member.oauthId, isTwoFactorAuthLogged: true}
 		const access_token = await this.jwtService.signAsync(payload)
 		return {
 			access_token
