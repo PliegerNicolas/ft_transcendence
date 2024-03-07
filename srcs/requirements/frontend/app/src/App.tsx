@@ -2,7 +2,7 @@ import "./App.css";
 
 import { useState, useEffect, useContext, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate} from "react-router-dom";
-import { useMutation, MutationFunction, useQuery } from "@tanstack/react-query";
+import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
 import { InviteType, NotifType } from "./utils/types.ts";
@@ -27,7 +27,7 @@ import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
 import { randomString } from "./utils/utils.ts";
-import { useStopOnHttp } from "./utils/hooks.ts";
+import { useGet } from "./utils/hooks.ts";
 import { PopupType } from "./utils/types.ts";
 
 import closeIcon from "./assets/close.svg";
@@ -38,15 +38,8 @@ import ConfirmPopup from "./components/ConfirmPopup.tsx";
 
 function Auth()
 {
-
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
-/*
-return (<div className="MainContent Auth">
-	{code}<br />
-	{`http://${location.host}/auth`}
-</div>)
-*/
 
 	const api = new Api(`http://${location.hostname}:3450`);
 
@@ -155,13 +148,7 @@ function App()
 
 	const [lastChan, setLastChan] = useState("");
 
-	const context = useContext(MyContext);
-
-	const getUser = useQuery({
-		queryKey: ["me"],
-		queryFn: () => context.api.get("/me"),
-		retry: useStopOnHttp(),
-	});
+	const getUser = useGet(["me"], logInfo.logged);
 
 	useEffect(() => {
 		if (getUser.isSuccess) {
@@ -178,7 +165,7 @@ function App()
 			});
 			socket.on('invitedToPrivate', (user: string, lobby: string) => {
 				console.log("invitation de : " + user);
-				context.addInvite({from: user, lobby: lobby});
+				addInvite({from: user, lobby: lobby});
 			});
 		}
 		return () => {
