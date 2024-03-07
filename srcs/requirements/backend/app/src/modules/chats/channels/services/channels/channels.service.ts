@@ -90,10 +90,6 @@ export class ChannelsService {
         });
 
         channel.validateEditOrUpdate(user);
-        if (
-            channel.mode === ChannelMode.PASSWORD_PROTECTED
-            && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         this.channelRepository.merge(channel, {
             ...channelDetails
@@ -115,10 +111,6 @@ export class ChannelsService {
         });
 
         channel.validateEditOrUpdate(user);
-        if (
-            channel.mode === ChannelMode.PASSWORD_PROTECTED
-            && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         this.channelRepository.merge(channel, {
             ...channelDetails
