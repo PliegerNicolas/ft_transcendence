@@ -17,6 +17,7 @@ import "../../styles/chat.css";
 import ChatHeader from "./ChatHeader.tsx";
 import Msg from "./Msg.tsx";
 import ChanEdit from "./ChanEdit.tsx";
+import ConfirmPopup from "../ConfirmPopup.tsx";
 
 // <ChatContentRouter /> =======================================================
 
@@ -55,6 +56,12 @@ function ChatContent()
 		mutationFn: (content: string) =>
 			api.post("/channels/" + id + "/messages", { content }),
 		onSettled: () => invalidate(["channels", id, "messages"]),
+		onError: mutateError,
+	});
+
+	const join = useMutation({
+		mutationFn: () => api.patch("/channels/" + id + "/join", {password: ""}),
+		onSettled: () => invalidate(["channels", id]),
 		onError: mutateError,
 	});
 
@@ -99,6 +106,16 @@ function ChatContent()
 		setInputValue("");
 	}
 
+	const [popup, setPopup] =
+		useState<{text: JSX.Element, action: Function} | null>(null);
+
+	function popupFn(text: JSX.Element, action: Function) {
+		setPopup({
+			text,
+			action: () => {action(); setPopup(null)},
+		});
+	}
+
 	if (getChan.isPending) return (
 		<div className="ChatContent spinner">
 			<Spinner />
@@ -111,15 +128,12 @@ function ChatContent()
 		</div>
 	);
 
-	const imOwner = getMe.isSuccess && getChanRole(getChan.data, getMe.data.id);
-
-	if (getMe.isSuccess)
-		console.log(getChanRole(getChan.data, getMe.data.id));
+	const role = getMe.isSuccess ? getChanRole(getChan.data, getMe.data.id) : "";
 
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
-				<ChatHeader name={getChan.data.name} edit={!imOwner} />
+				<ChatHeader name={getChan.data.name} edit={role !== "owner"} />
 				<Spinner />
 			</div>
 		);
@@ -133,7 +147,7 @@ function ChatContent()
 
 	return (
 		<div className="ChatContent">
-			<ChatHeader name={getChan.data.name} edit={!imOwner} />
+			<ChatHeader name={getChan.data.name} edit={role !== "owner"} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
 					{
@@ -151,19 +165,41 @@ function ChatContent()
 							prev={index ? getMsgs.data[index - 1] : null}
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
 							size={getChan.data.membersCount}
+							role={role}
+							me={getMe.data}
+							popupFn={popupFn}
 						/>
 					)
 				}
 				<div ref={anchorRef} />
 			</div>
-			<div className="Chat__Input">
-				<textarea
-					id="SendMessage"
-					placeholder={`Send a message to « ${getChan.data.name} »`}
-					value={inputValue}
-					onChange={handleInputChange}
+			{
+				role &&
+				<div className="Chat__Input">
+					<textarea
+						id="SendMessage"
+						placeholder={`Send a message to « ${getChan.data.name} »`}
+						value={inputValue}
+						onChange={handleInputChange}
+					/>
+				</div> ||
+				<div className="Chat__Input join">
+					Join this channel to interact with it.
+					<button onClick={() => join.mutate()}>
+						Join
+					</button>
+				</div>
+			}
+			{
+				popup &&
+				<ConfirmPopup
+					title="Confirmation"
+					text={popup.text}
+					action="Confirm"
+					actionFt={popup.action}
+					cancelFt={() => setPopup(null)}
 				/>
-			</div>
+			}
 		</div>
 	);
 }
