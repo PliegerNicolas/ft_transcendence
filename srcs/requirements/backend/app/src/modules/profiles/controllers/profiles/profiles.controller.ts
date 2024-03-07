@@ -25,8 +25,8 @@ export class ProfilesController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
-	@UseGuards(AuthGuard('jwtTwoFactor'))
-    @Put('me/profile')
+    @UseGuards(AuthGuard('jwtTwoFactor'))
+    @Put('profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyProfile(
         @Body(new ValidationPipe) replaceProfileDto: ReplaceProfileDto,
@@ -36,8 +36,9 @@ export class ProfilesController {
         return (await this.profileService.replaceProfile(username, replaceProfileDto));
     }
 
-	@UseGuards(AuthGuard('jwtTwoFactor'))
-    @Patch('me/profile')
+
+    @UseGuards(AuthGuard('jwtTwoFactor'))
+    @Patch('profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyProfile(
         @Body(new ValidationPipe) updateProfileDto: UpdateProfileDto,
@@ -47,8 +48,8 @@ export class ProfilesController {
         return (await this.profileService.updateProfile(username, updateProfileDto));
     }
 
-	@UseGuards(AuthGuard('jwtTwoFactor'))
-    @Delete('me/profile')
+    @UseGuards(AuthGuard('jwtTwoFactor'))
+    @Delete('profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async clearMyprofile(
         @Request() req: any,

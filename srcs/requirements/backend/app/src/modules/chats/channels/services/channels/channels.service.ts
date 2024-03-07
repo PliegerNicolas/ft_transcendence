@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Channel } from "../../entities/Channel.entity";
 import { Equal, Repository } from "typeorm";
@@ -60,10 +60,6 @@ export class ChannelsService {
         });
 
         channel.validateAccess(user);
-        if (
-            channel.mode === ChannelMode.PASSWORD_PROTECTED
-            && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         return (channel);
     }
@@ -98,10 +94,6 @@ export class ChannelsService {
         });
 
         channel.validateEditOrUpdate(user);
-        if (
-            channel.mode === ChannelMode.PASSWORD_PROTECTED
-            && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         this.channelRepository.merge(channel, {
             ...channelDetails
@@ -123,10 +115,6 @@ export class ChannelsService {
         });
 
         channel.validateEditOrUpdate(user);
-        if (
-            channel.mode === ChannelMode.PASSWORD_PROTECTED
-            && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         this.channelRepository.merge(channel, {
             ...channelDetails
@@ -171,7 +159,7 @@ export class ChannelsService {
         if (
             channel.mode === ChannelMode.PASSWORD_PROTECTED
             && !await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)
-        ) throw new UnauthorizedException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
+        ) throw new ForbiddenException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
 
         this.channelRepository.merge(channel, {
             members: [...channel.members, { user, role: ChannelRole.MEMBER }],
