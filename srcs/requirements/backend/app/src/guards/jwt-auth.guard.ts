@@ -7,3 +7,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 	
 }
 
+@Injectable()
+export class JwtTwoFactorAuthGuard extends AuthGuard('jwtTwoFactor') {
+	
+}

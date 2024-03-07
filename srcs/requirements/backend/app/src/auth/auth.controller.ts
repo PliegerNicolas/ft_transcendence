@@ -19,7 +19,7 @@ export class AuthController {
 		return {access_token : ret.access_token, isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled};
 	  }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
 	@Post('logout')
 	addBlacklist(@Request() req){
 		return this.authService.blacklist("add", req.headers.authorization)
