@@ -140,7 +140,7 @@ export default function Sandbox()
 
 function Setup2fa()
 {
-	const {api} = useContext(MyContext);
+	const {api, addNotif} = useContext(MyContext);
 
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
@@ -180,12 +180,12 @@ function Setup2fa()
 		<section>
 			<h3>Setup 2FA</h3>
 			{
-				getMe.data.isTwoFactorAuthEnabled && false ?
+				getMe.data.isTwoFactorAuthEnabled ?
 				<>
 					<div className="Setup2fa__Status">
-						2FA is enabled for your account <img src={check} />
+						<>2FA is enabled for your account</> <img src={check} />
 					</div>
-					<button>
+					<button onClick={() => addNotif({type: 1, content: "This does nothing yet."})}>
 						Disable 2FA?
 					</button>
 				</> :
@@ -219,10 +219,6 @@ function Setup2fa()
 									onChange={(ev) => {setCode(ev.currentTarget.value)}}
 								/>
 								</form>
-							</div>
-							||
-							<div style={{margin: "0", padding: "0"}}>
-								<Spinner />
 							</div>
 						}
 					</div>

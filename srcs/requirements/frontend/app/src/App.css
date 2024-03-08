@@ -355,10 +355,11 @@
 .Setup2fa__Status {
 	display: flex;
 	gap: 5px;
-	margin-bottom: 5px;
+	margin-bottom: 15px;
 }
 
 .Setup2fa__Status img {
+	animation: fadein .5s ease-in-out forwards;
 	filter:
 		brightness(0) saturate(100%) invert(65%) sepia(38%) saturate(1474%)
 		hue-rotate(106deg) brightness(94%) contrast(101%);
