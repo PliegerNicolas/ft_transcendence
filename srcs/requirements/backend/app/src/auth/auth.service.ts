@@ -7,6 +7,7 @@ import { Equal, Repository } from 'typeorm';
 import { UsersService } from 'src/modules/users/services/users/users.service';
 import { CreateUserDto } from 'src/modules/users/dtos/CreateUser.dto';
 import { CreateProfileDto } from 'src/modules/profiles/dtos/CreateProfile.dto';
+import { request } from 'express';
 
 
 @Injectable()
@@ -83,7 +84,6 @@ export class AuthService
 
 		const payload = ({ user_id: user.id, oauth_id: user.oauthId, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled });
 		const access_token = await this.createJwt(payload)
-
 		return ({
 			access_token,
 			isTwoFactorAuthEnabled : payload.isTwoFactorAuthEnabled
@@ -103,9 +103,18 @@ export class AuthService
 		{
 			throw new UnauthorizedException();
 		}
-		const payload = {user_id : member.id, oauth_id : member.oauthId, isTwoFactorAuthLogged: true}
+		const payload = {user_id : member.id, oauth_id : member.oauthId, isTwoFactorAuthEnabled : true, isTwoFactorAuthLogged: true}
 		const access_token = await this.jwtService.signAsync(payload)
 		return ({ access_token });
+	}
+
+	async refresh_token(jwt : string){
+		const payload = this.jwtService.decode(jwt);
+		console.log('refresh')
+		console.log(jwt)
+		console.log(payload)
+		const access_token = (await this.createJwt({user_id : payload.user_id, oauth_id: payload.oauth_id, isTwoFactorEnabled: payload.isTwoFactorAuthEnabled}, payload.isTwoFactorAuthLogged))
+		return {access_token : access_token}
 	}
 
 	/* Helper Functions */

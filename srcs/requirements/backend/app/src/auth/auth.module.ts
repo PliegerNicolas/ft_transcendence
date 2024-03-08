@@ -9,6 +9,7 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { JwtStrategy } from "./jwt.strategy";
 import { JwtTwoFactorStrategy } from "./jwt-two-factor.strategy";
+import { JwtRefreshStrategy } from "./jwt-refresh.strategy";
 
 @Module({
 	imports: [
@@ -21,7 +22,7 @@ import { JwtTwoFactorStrategy } from "./jwt-two-factor.strategy";
 		forwardRef(() => UsersModule),
 	],
 	controllers: [AuthController],
-	providers: [AuthService, JwtStrategy, JwtTwoFactorStrategy],
+	providers: [AuthService, JwtStrategy, JwtTwoFactorStrategy, JwtRefreshStrategy],
 	exports: [AuthService],
 })
 export class AuthModule {}
