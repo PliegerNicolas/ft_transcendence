@@ -87,8 +87,8 @@ export class ProfilePicturesController {
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
 
-	//@GlobalRole(['operator'])
-	//@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Post('users/:username/profile/picture')
     @UseInterceptors(FileInterceptor('picture'))
     async createProfilePicture(
@@ -100,8 +100,8 @@ export class ProfilePicturesController {
         this.sendResponse(res, picture);
     }
 
-	//@GlobalRole(['operator'])
-	//@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Put('users/:username/profile/picture')
     @UseInterceptors(FileInterceptor('picture'))
     async replaceProfilePicture(
@@ -113,8 +113,8 @@ export class ProfilePicturesController {
         this.sendResponse(res, picture);
     }
 
-	//@GlobalRole(['operator'])
-	//@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
     @Delete('users/:username/profile/picture')
     async deleteProfilePicture(
         @Param('username', ParseUsernamePipe) username: string,
