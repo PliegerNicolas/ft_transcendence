@@ -244,7 +244,7 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 			<ConfirmPopup
 				title="Confirmation"
 				text={<>Are you sure you want to enable 2FA on your account?<br /><br />
-					You will need your authenticator application to be available whenever
+					You will need your authentication application to be available whenever
 					you'll want to log in.
 				</>}
 				cancelFt={() => setPopup(false)}
