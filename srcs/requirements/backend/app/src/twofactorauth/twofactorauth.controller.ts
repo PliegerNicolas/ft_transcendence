@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, HttpCode, Post, Request, Res, UnauthorizedException, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, ForbiddenException, HttpCode, Post, Request, Res, UnauthorizedException, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TwoFactorAuthService } from './twofactorauth.service';
 import { Response } from 'express';
@@ -14,9 +14,9 @@ export class TwofactorauthController {
 				private usersService: UsersService,
 				private authService : AuthService){}
 
+	@UseGuards(AuthGuard('jwt'))
 	@Post('generate')
 	@HttpCode(200)
-	@UseGuards(AuthGuard('jwt'))
 	async register(
 		@Request() req : any,
 		@Res() res : Response
@@ -26,36 +26,43 @@ export class TwofactorauthController {
 		return this.twoFactorAuthService.pipeQrCodeSteam(res, otpauthUrl)
 	}
 
+	@UseGuards(AuthGuard('jwt'))
 	@Post('turn-on')
 	@HttpCode(200)
-	@UseGuards(AuthGuard('jwt'))
 	async activateTwoFactorAuth(
 		@Request() req : any,
 		@Body() {twoFactorAuthCode} : TwoFactorAuthCodeDto
 	){
-		const isCodeValid = this.twoFactorAuthService.isTwoFactorAuthSecretValid(
-			twoFactorAuthCode, req.user.user_id
-		  );
+		const user = req.user
+		console.log(user.id)
+
+		const isCodeValid = await this.twoFactorAuthService.isTwoFactorAuthSecretValid(
+			twoFactorAuthCode, user.id
+		  ).then((data) => data);
+		  console.log(isCodeValid)
 		  if (!isCodeValid) {
-			throw new UnauthorizedException('Wrong authentication code');
+			throw new ForbiddenException('Wrong authentication code');
 		  }
-		  await this.usersService.turnOnTwoFactorAuthentication(req.user.user_id);
+		  console.log(user.id)
+		  await this.usersService.turnOnTwoFactorAuthentication(user.id);
+		  return {access_token: await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)};
 	}
 
+	@UseGuards(AuthGuard('jwt'))
 	@Post('authenticate')
 	@HttpCode(200)
-	@UseGuards(AuthGuard('jwt'))
 	async authenticate(
 		@Request() req : any,
 		@Body() {twoFactorAuthCode} : TwoFactorAuthCodeDto
 	){
+		const user = req.user;
 		const isCodeValid = this.twoFactorAuthService.isTwoFactorAuthSecretValid(
 			twoFactorAuthCode, req.user.user_id
 		  );
 		  if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
 		  }
-		return (await this.authService.createJwt({user_id : req.user_id, oauth_id : req.oauth_id}, true));
+		  return {access_token: await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)};
 	}
 
 }

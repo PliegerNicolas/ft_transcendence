@@ -5,12 +5,12 @@ import { AuthService } from './auth.service';
 import { Request } from 'express';
 
 @Injectable()
-export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'){
+export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFactor'){
 	constructor(private authService : AuthService) {
 		super({
 			jwtFromRequest : ExtractJwt.fromHeader("authorization"),
 			secretOrKey : process.env.API_SECRET ,
-			ignoreExpiration : true,
+			ignoreExpiration : false,
 			passReqToCallback: true
 		});
 	}

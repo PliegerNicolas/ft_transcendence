@@ -25,8 +25,8 @@ export class ProfilesController {
     /* Private PATHS: need to be connected and concerned to access. */
     /* */
 
-	@UseGuards(AuthGuard('jwt'))
-    @Put('me/profile')
+    @UseGuards(AuthGuard('jwtTwoFactor'))
+    @Put('profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async replaceMyProfile(
         @Body(new ValidationPipe) replaceProfileDto: ReplaceProfileDto,
@@ -36,8 +36,9 @@ export class ProfilesController {
         return (await this.profileService.replaceProfile(username, replaceProfileDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
-    @Patch('me/profile')
+
+    @UseGuards(AuthGuard('jwtTwoFactor'))
+    @Patch('profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async updateMyProfile(
         @Body(new ValidationPipe) updateProfileDto: UpdateProfileDto,
@@ -47,8 +48,8 @@ export class ProfilesController {
         return (await this.profileService.updateProfile(username, updateProfileDto));
     }
 
-	@UseGuards(AuthGuard('jwt'))
-    @Delete('me/profile')
+    @UseGuards(AuthGuard('jwtTwoFactor'))
+    @Delete('profile')
     // UseGuard => Verify if user connected and pass it's req.user
     async clearMyprofile(
         @Request() req: any,
@@ -62,7 +63,7 @@ export class ProfilesController {
     /* */
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Put('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async replaceProfile(
@@ -73,7 +74,7 @@ export class ProfilesController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Patch('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async updateProfile(
@@ -84,7 +85,7 @@ export class ProfilesController {
     }
 
 	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Delete('users/:username/profile')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async clearProfile(

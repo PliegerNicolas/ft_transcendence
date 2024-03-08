@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import { useMutateError, useInvalidate, useGet } from "../../utils/hooks.ts";
-import { httpStatus } from "../../utils/utils.ts";
+import { httpStatus, getChanRole } from "../../utils/utils.ts";
 import { ChanType, UserType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -47,6 +47,7 @@ export default function ChanEdit({id}: {id: number})
 	const [popup, setPopup] = useState(false);
 
 	const getChan = useGet(["channels", "" + id], !!id);
+	const getMe = useGet(["me"]);
 
 	useEffect(() => {
 		if (!getChan.isSuccess)
@@ -140,7 +141,7 @@ export default function ChanEdit({id}: {id: number})
 		</div>
 	);
 
-	if (getChan.isPending) return (
+	if (getChan.isPending || !getMe.isSuccess) return (
 		<div className="ChatContent spinner">
 			<Spinner />
 		</div>
@@ -149,6 +150,14 @@ export default function ChanEdit({id}: {id: number})
 	if (getChan.isError) return (
 		<div className="ChatContent error">
 			Failed to load this channel's data: {getChan.error.message}
+		</div>
+	);
+
+	const role = getChanRole(getChan.data, getMe.data.id);
+
+	if (role !== "owner" && role !== "operator") return (
+		<div className="ChatContent error">
+			You are not allowed to edit this channel!
 		</div>
 	);
 
@@ -223,11 +232,9 @@ interface actionType {
 
 function UserLists({chan}: {chan: ChanType})
 {
-	const {addNotif, api} = useContext(MyContext);
+	const {api} = useContext(MyContext);
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
-
-	//const getMe = useGet(["me"]);
 
 	const action = useMutation({
 		mutationFn: (action: actionType) =>
@@ -236,67 +243,68 @@ function UserLists({chan}: {chan: ChanType})
 		onSuccess: () => invalidate(["channels", chan.id]),
 	});
 
-	function isInList(name: string, user: UserType) {
-		name + user;
-		addNotif({type: 1, content: "SOON™"});
-		return (false);
-	}
-
-	function rmFromList(name: string, user: UserType) {
-		name + user;
-		addNotif({type: 1, content: "SOON™"});
-	}
-
 	return (
 		<div>
-			<section className="banned">
+			{
+				chan.mode !== "invite_only" &&
+				<section className="banned">
+					<UserList
+						title="Banned users"
+						list={chan.bannedUsers}
+						add={(value: UserType) => {
+							action.mutate({action: "ban", usernames: [value.username]});
+						}}
+						rm={(value: UserType) => {
+							action.mutate({action: "deban", usernames: [value.username]});
+						}}
+						owner={null}
+					/>
+				</section>
+			}
+			{
+				chan.mode === "invite_only" &&
+				<section className="allowed">
+					<UserList
+						title="Invited users"
+						list={chan.invitedUsers}
+						add={(value: UserType) =>
+							action.mutate({action: "invite", usernames: [value.username]})
+						}
+						rm={(value: UserType) =>
+							action.mutate({action: "uninvite", usernames: [value.username]})
+						}
+						owner={null}
+					/>
+				</section>
+			}
+			<section className="muted">
 				<UserList
-					title="Banned users"
-					list={chan.bannedUsers}
-					add={(value: UserType) => {
-						action.mutate({action: "ban", usernames: [value.username]});
-					}}
-					rm={(value: UserType) => {
-						action.mutate({action: "deban", usernames: [value.username]});
-					}}
+					title="Muted users"
+					list={chan.mutedUsers}
+					add={(value: UserType) =>
+						action.mutate({action: "mute", usernames: [value.username]})
+					}
+					rm={(value: UserType) =>
+						action.mutate({action: "unmute", usernames: [value.username]})
+					}
 					owner={null}
 				/>
 			</section>
-			<section className="allowed">
+			<section className="admins">
 				<UserList
-					title="Allowed users"
-					list={chan.invitedUsers}
-					add={(value: UserType) => {
-						action.mutate({action: "invite", usernames: [value.username]})
-					}}
-					rm={(value: UserType) => {
-						if (isInList("admins", value))
-							return addNotif({content: "This user is an admin, please"
-								+ " unadmin them before taking them access."});
-						rmFromList("admins", value);
-						rmFromList("allowed_users", value);
-					}}
-					owner={chan.invitedUsers[0]}
+					title="Admins"
+					list={
+						chan.members.filter(item => item.role === "operator").map(item => item.user)
+					}
+					add={(value: UserType) =>
+						action.mutate({action: "promote", usernames: [value.username]})
+					}
+					rm={(value: UserType) =>
+						action.mutate({action: "demote", usernames: [value.username]})
+					}
+					owner={null}
 				/>
 			</section>
-			{/*
-				<section className="admins">
-					<UserList
-						title="Admins"
-						list={chan.admins}
-						add={(value: UserType) => {
-							if (chan.visibility == "public" && isInList("banned_users", value))
-								return addNotif({content: "This user is banned, please unban"
-									+ " them before making them admin."});
-							rmFromList("banned_users", value);
-							addToList("allowed_users", value);
-							addToList("admins", value);
-						}}
-						rm={(value: UserType) => rmFromList("admins", value)}
-						owner={chan.admins[0]}
-					/>
-				</section>
-			*/}
 		</div>
 	);
 }

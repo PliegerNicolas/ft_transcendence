@@ -40,7 +40,7 @@ export default function Header()
 
 	const [ popup, setPopup ] = useState(false);
 
-	const getMe = useGet(["me"], api.auth);
+	const getMe = useGet(["me"], logged && api.auth);
 
 	const popupRef = useOutsideClick(() => {
 			setTimeout(() => setPopup(false), 0);
@@ -111,7 +111,7 @@ export default function Header()
 				<div className="Header__UserInfo">
 					<div className="Header__UserInfoContainer">
 						<img
-							src={getMe.isSuccess && getMe.data.image || defaultPicture}
+							src={getMe.isSuccess && getMe.data.picture || defaultPicture}
 						/>
 					</div>
 					{
@@ -121,7 +121,7 @@ export default function Header()
 							getMe.isSuccess &&
 							<>
 								<Link to="/user/me" className="Header__PopupLink logged">
-									<img src={getMe.data.image || defaultPicture}/>
+									<img src={getMe.data.picture || defaultPicture}/>
 									<div className="Header__PopupUsername">
 										{getMe.data.username}
 									</div>

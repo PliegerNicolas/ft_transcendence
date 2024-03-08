@@ -26,5 +26,5 @@ export class Profile {
 
     @OneToOne(() => File, { cascade: true })
     @JoinColumn()
-    image?: File;
+    picture?: File;
 }

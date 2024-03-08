@@ -23,7 +23,21 @@ class Api
 		}
 	}
 
+	#updateToken() {
+		if (this.headers.Authorization)
+			return ;
+		const raw_data = localStorage.getItem("my_info");
+		if (!raw_data)
+			return ;
+		const data = JSON.parse(raw_data);
+		if (!data || !data.token)
+			return ;
+		this.headers.Authorization = data.token;
+		this.auth = true;
+	}
+
 	async get(endpoint: string) {
+		this.#updateToken();
 		if (this.debug)
 			console.log("GET --> " + endpoint);
 		const response = await fetch(this.base_url + endpoint, {
@@ -35,6 +49,7 @@ class Api
 	};
 
 	async post(endpoint: string, body: any) {
+		this.#updateToken();
 		if (this.debug)
 			console.log("POST --> " + endpoint + " " + JSON.stringify(body));
 		const response = await fetch(this.base_url + endpoint, {
@@ -46,6 +61,7 @@ class Api
 	};
 
 	async delete(endpoint: string, body = {}) {
+		this.#updateToken();
 		if (this.debug)
 			console.log("DELETE --> " + endpoint + " " + JSON.stringify(body));
 		const response = await fetch(this.base_url + endpoint, {
@@ -57,6 +73,7 @@ class Api
 	};
 
 	async put(endpoint: string, body: any) {
+		this.#updateToken();
 		if (this.debug)
 			console.log("PUT --> " + endpoint + " " + JSON.stringify(body));
 		const response = await fetch(this.base_url + endpoint, {
@@ -68,6 +85,7 @@ class Api
 	};
 
 	async patch(endpoint: string, body: any) {
+		this.#updateToken();
 		if (this.debug)
 			console.log("PATCH --> " + endpoint + " " + JSON.stringify(body));
 		const response = await fetch(this.base_url + endpoint, {
@@ -78,7 +96,7 @@ class Api
 		return (this.#return_switch(response));
 	};
 
-	constructor(base_url = "http://localhost", token = "") {
+	constructor(base_url = "http://localhost:3450", token = "") {
 		this.base_url = base_url;
 		this.headers["Authorization"] = token;
 		this.debug = true;

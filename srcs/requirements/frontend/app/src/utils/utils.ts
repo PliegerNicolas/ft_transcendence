@@ -27,3 +27,15 @@ export function getChanRole(chan: ChanType, id: string)
 		return ("");
 	return (member.role);
 }
+
+export async function dynaGet(uri: string, token: string)
+{
+	console.log("GET --> " + uri);
+	const response = await fetch(uri, {headers: {
+		"Content-Type": "application/json",
+		"Authorization": token
+	}});
+	if (!response.ok)
+		return (Promise.reject(new Error(response.status + " " + response.statusText)));
+	return (response.json());
+}

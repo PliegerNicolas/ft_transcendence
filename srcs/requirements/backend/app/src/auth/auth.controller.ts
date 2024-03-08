@@ -1,4 +1,4 @@
-import { Controller, HttpCode, HttpStatus, Post, Body, UseGuards, Request, Param } from '@nestjs/common';
+import { Controller, HttpCode, HttpStatus, Post, Body, UseGuards, Request, Param, Req, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
@@ -14,14 +14,12 @@ export class AuthController {
 		const ret = await (this.authService.signIn(oauthToken)).then(
 			(data) => data
 		);
-		// console.log(ret)
-		if (ret.isTwoFactorAuthEnabled == true)
-			return {access_token : "2fa"};
+		console.log(ret)
 		// console.log(ret.access_token);
-		return {access_token : ret.access_token};
+		return {access_token : ret.access_token, isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled};
 	  }
 
-	@UseGuards(AuthGuard('jwt'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
 	@Post('logout')
 	addBlacklist(@Request() req){
 		return this.authService.blacklist("add", req.headers.authorization)
@@ -30,5 +28,12 @@ export class AuthController {
 	@Post('log_as/:username')
 	logAs(@Param('username', ParseUsernamePipe) username: string){
 		return this.authService.log_as(username)
+	}
+
+
+	@UseGuards(AuthGuard('jwt-refresh'))
+	@Get('refresh')
+	refreshToken(@Request() req : any){
+		return (this.authService.refresh_token(req.headers.authorization));
 	}
 }

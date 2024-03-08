@@ -26,7 +26,7 @@ import Invites from "./components/Game/Invitations.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
-import { randomString } from "./utils/utils.ts";
+import { dynaGet, randomString } from "./utils/utils.ts";
 import { useStopOnHttp } from "./utils/hooks.ts";
 import { PopupType } from "./utils/types.ts";
 
@@ -38,15 +38,8 @@ import ConfirmPopup from "./components/ConfirmPopup.tsx";
 
 function Auth()
 {
-
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
-/*
-return (<div className="MainContent Auth">
-	{code}<br />
-	{`http://${location.host}/auth`}
-</div>)
-*/
 
 	const api = new Api(`http://${location.hostname}:3450`);
 
@@ -58,22 +51,53 @@ return (<div className="MainContent Auth">
 	const guard = useRef(false);
 
 	const [status, setStatus] = useState("pending");
+	const [tfaPopup, setTfaPopup] = useState(false);
+	const [tfaCode, setTfaCode] = useState("");
 
 	const postAuth = useMutation({
 		mutationFn: ((code: string) =>
 			api.post("/auth", {code, redirect_uri: `http://${location.host}/auth`})) as
-			MutationFunction<{access_token: string}>,
+			MutationFunction<{access_token: string, isTwoFactorAuthEnabled: boolean}>,
 
-		onSuccess: (data: {access_token: string}) => {
-			setStatus("success");
+		onSuccess: (data: {access_token: string, isTwoFactorAuthEnabled: boolean}) => {
+			console.log(data);
 			localStorage.setItem(
 				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
-			setLogInfo({logged: true, token: data.access_token});
-			setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
+			setLogInfo({logged: false, token: data.access_token});
+			if (data.isTwoFactorAuthEnabled)
+				setTfaPopup(true);
+			else {
+				setStatus("success");
+				setLogInfo({logged: true, token: data.access_token});
+				setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
+			}
 		},
 
 		onError: () => {
 			setStatus("error");
+			setLogInfo({logged: false, token: ""});
+			localStorage.removeItem("my_info");
+		},
+	});
+
+	const tfaAuth = useMutation({
+		mutationFn: ((tfaCode: string) =>
+			api.post("/2fa/authenticate", {twoFactorAuthCode : tfaCode})) as
+			MutationFunction<{access_token: string}>,
+
+		onSuccess: (data: {access_token: string}) => {
+			localStorage.setItem(
+				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
+			setLogInfo({logged: true, token: data.access_token});
+			console.log(data);
+			setStatus("success");
+			setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
+		},
+
+		onError: (error) => {
+			console.log(error.message);
+			setStatus("error");
+			setLogInfo({logged: false, token: ""});
 			localStorage.removeItem("my_info");
 		},
 	});
@@ -106,6 +130,29 @@ return (<div className="MainContent Auth">
 					Go back
 				</button>
 			</div>
+		}
+		{
+			tfaPopup &&
+			<ConfirmPopup
+				title="Two Factor Authentication"
+				text={<>
+					2FA is enabled for this account. To log in, you need to open your third
+					party authenticator app, and provide the code corresponding to Ft_pong.
+					<br /><br />
+					<div style={{textAlign: "center"}}>
+						<input type="text" placeholder="2FA code" value={tfaCode}
+							onChange={(ev) => setTfaCode(ev.currentTarget.value)}
+						/>
+					</div>
+				</>}
+				cancelFt={() => {
+					setLogInfo({logged: false, token: ""});
+					localStorage.removeItem("my_info");
+					navigate(redirectPath ? redirectPath : "/");
+				}}
+				action="Done."
+				actionFt={() => {tfaAuth.mutate(tfaCode); setTfaPopup(false)}}
+			/>
 		}
 		</div>
 	);
@@ -155,13 +202,14 @@ function App()
 
 	const [lastChan, setLastChan] = useState("");
 
-	const context = useContext(MyContext);
-
 	const getUser = useQuery({
-		queryKey: ["me"],
-		queryFn: () => context.api.get("/me"),
+		queryKey: ["me", logInfo.token],
+		queryFn: () => dynaGet(`http://${location.hostname}:3450/me`, logInfo.token),
 		retry: useStopOnHttp(),
+		enabled: logInfo.logged,
 	});
+
+//	const getUser = useGet(["me"], logInfo.logged);
 
 	useEffect(() => {
 		if (getUser.isSuccess) {
@@ -178,7 +226,7 @@ function App()
 			});
 			socket.on('invitedToPrivate', (user: string, lobby: string) => {
 				console.log("invitation de : " + user);
-				context.addInvite({from: user, lobby: lobby});
+				addInvite({from: user, lobby: lobby});
 			});
 		}
 		return () => {

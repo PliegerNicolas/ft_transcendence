@@ -2,10 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import { AuthService } from './auth.service';
-import { ContextCreator } from '@nestjs/core/helpers/context-creator';
 import { Request } from 'express';
-// import { JwtService } from '@nestjs/jwt';
-// import { Auth } from 'typeorm';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy){
@@ -23,23 +20,23 @@ export class JwtStrategy extends PassportStrategy(Strategy){
 		// console.log((await this.authService.checkUser(payload.oauth_id)).users.id)
 		
 		// console.log(req.headers)
-		if (await this.authService.blacklist("check", req.headers.authorization) == false)
+		if (await this.authService.blacklist("check", req.headers.authorization) === false) throw new UnauthorizedException();
+
+		const user = await this.authService.checkUser(payload.oauth_id);
+		if (!user) throw new UnauthorizedException();
+		if (user.id != payload.user_id)
 		{
 			throw new UnauthorizedException();
 		}
-		const users = (await this.authService.checkUser(payload.oauth_id)).users
-		if (users == null)
-		{
-			throw new UnauthorizedException();
-		}
-		if (users.id != payload.user_id)
-		{
-			throw new UnauthorizedException();
-		}
-		if (users.isTwoFactorAuthEnabled && !payload.isTwoFactorAuthLogged)
-		{
-			throw new UnauthorizedException();
-		}
-		return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
+		// if (!users.isTwoFactorAuthEnabled)
+		// {
+		// 	return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
+		// }
+		// if (payload.isTwoFactorAuthLogged)
+		// {
+		// 	return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
+		// }
+		return {id: payload.user_id, oauth_id: payload.oauth_id, username: user.username};
 	}
 }
+

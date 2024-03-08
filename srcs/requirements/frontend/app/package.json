@@ -11,13 +11,9 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.17.15",
-    "@tanstack/react-query-devtools": "^5.17.18",
-    "date-fns": "^3.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.1",
-    "react-tabs": "^6.0.2",
-    "react-uuid": "^2.0.0",
     "socket.io-client": "^4.7.4",
     "uuid": "^9.0.1"
   },
