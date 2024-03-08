@@ -45,7 +45,7 @@ export class TwofactorauthController {
 		  }
 		  console.log(user.id)
 		  await this.usersService.turnOnTwoFactorAuthentication(user.id);
-		  return {access_token: await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id}, true)};
+		  return {access_token: await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)};
 	}
 
 	@UseGuards(AuthGuard('jwt'))
@@ -62,7 +62,7 @@ export class TwofactorauthController {
 		  if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
 		  }
-		return {access_token: await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id}, true)};
+		  return {access_token: await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)};
 	}
 
 }
