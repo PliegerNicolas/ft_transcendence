@@ -10,7 +10,9 @@ export const multerConfigFactory = (options: FileUploadsOptionsInterface): Multe
     storage: diskStorage({
         destination: options.dest,
         filename: (req, file, cb) => {
-            const uniqueFileName = `${uuidv4()}-${file.originalname}`;
+            const originalFileName = file.originalname;
+            const sanitizedFileName = originalFileName.replace(/[^a-zA-Z0-9_.-]/g, '_');
+            const uniqueFileName = `${uuidv4()}-${sanitizedFileName}`;
             cb(null, uniqueFileName);
         },
     }),

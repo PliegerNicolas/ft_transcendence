@@ -53,11 +53,45 @@ export class ProfilePicturesService {
 
     async replaceProfilePicture(username: string = undefined, file: Express.Multer.File): Promise<File> {
         if (!file) throw new BadRequestException('No file passed');
-        return (null);
+
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+            relations: ['profile.picture'],
+        });
+
+        if (!user) throw new NotFoundException(`User ${username ? username : '{undefined}'} not found`);
+        
+        const picture = user.profile.picture;
+
+        if (!picture) throw new BadRequestException(`User ${username ? username : '{undefined}'} has no profile picture`);
+
+        user.profile.picture = this.fileRepository.create({
+            ...file,
+        });
+        await this.userRepository.save(user);
+
+        await this.fileRepository.remove(picture);
+        return (user.profile.picture);
     }
 
-    async deleteProfilePicture(username: string = undefined): Promise<File> {
-        return (null);
+    async deleteProfilePicture(username: string = undefined): Promise<string> {
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+            relations: ['profile.picture'],
+        });
+
+        if (!user) throw new NotFoundException(`User ${username ? username : '{undefined}'} not found`);
+        
+        const picture = user.profile.picture;
+
+        if (!picture) throw new BadRequestException(`User ${username ? username : '{undefined}'} has no profile picture`);
+        
+        user.profile.picture = null;
+        await this.userRepository.save(user);
+
+        await this.fileRepository.remove(picture);
+
+        return (`User '${username}'s profile picture successfully deleted`);
     }
 
 }
