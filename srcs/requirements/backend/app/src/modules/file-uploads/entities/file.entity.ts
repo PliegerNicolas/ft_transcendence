@@ -1,5 +1,7 @@
-import { Profile } from "src/modules/profiles/entities/Profile.entity";
-import { Column, CreateDateColumn, Entity, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BeforeRemove, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { promisify } from "util";
+import * as fs from 'fs';
+import { UnprocessableEntityException } from "@nestjs/common";
 
 @Entity({ name: 'files' })
 export class File {
@@ -8,24 +10,42 @@ export class File {
     id: bigint;
   
     @Column()
-    filename: string;
+    fieldname: string;
   
     @Column()
     originalname: string;
   
     @Column()
+    encoding: string;
+
+    @Column()
     mimetype: string;
   
     @Column()
-    size: number; // In bits ?
+    size: number;
   
     @Column()
-    filePath: string;
+    path: string;
 
     @CreateDateColumn()
     createdAt: Date;
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    /* Helper Methods */
+
+    @BeforeRemove()
+    private async unlink(): Promise<void> {
+        const unlinkAsync = promisify(fs.unlink);
+
+        console.log("ouistiti");
+
+        try {
+            await unlinkAsync(this.path);
+        } catch(error) {
+            throw new UnprocessableEntityException(`File '${this.path}' couldn't be removed from system's disk`);
+        }
+    }
 
 }

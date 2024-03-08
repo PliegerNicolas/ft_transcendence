@@ -24,7 +24,7 @@ export class Profile {
     @JoinColumn()
     user?: User
 
-    @OneToOne(() => File, { cascade: true })
+    @OneToOne(() => File, { cascade: true, nullable: true })
     @JoinColumn()
     picture?: File;
 }
