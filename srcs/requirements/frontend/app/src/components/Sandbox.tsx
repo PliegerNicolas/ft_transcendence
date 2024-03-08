@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { UseQueryResult, useMutation } from "@tanstack/react-query";
 import { MyContext } from "../utils/contexts.ts";
@@ -10,6 +10,7 @@ import { randomString } from "../utils/utils.ts";
 import { useInvalidate, useMutateError, useGet } from "../utils/hooks.ts";
 
 import close from "../assets/close.svg";
+import check from "../assets/check.svg";
 
 import "../styles/sandbox.css";
 
@@ -50,11 +51,6 @@ export default function Sandbox()
 		onError: mutateError,
 	});
 
-	const post2fa = useMutation({
-		mutationFn: () => api.post("/2fa/generate", {}),
-		onError: mutateError,
-	});
-
 	function genUser() {
 		const uid = "u_" + randomString(6);
 
@@ -72,18 +68,7 @@ export default function Sandbox()
 	return (
 		<main className="MainContent">
 			<h2>Sandbox</h2>
-			<section>
-				<h3>2FA Stuff:</h3>
-				<button onClick={() => post2fa.mutate()}>
-					Get QR code
-				</button>
-				{
-					post2fa.isSuccess &&
-					<div style={{textAlign: "center"}}>
-						<img src={post2fa.data} />
-					</div>
-				}
-			</section>
+			<Setup2fa />
 			<section>
 				<h3>Global context:</h3>
 				<div className="genericList Sandbox__ContextList">
@@ -148,6 +133,102 @@ export default function Sandbox()
 				<UserListRender query={getUsers} del={delUser.mutate} />
 			</section>
 		</main>
+	);
+}
+
+// <Setup2fa /> ================================================================
+
+function Setup2fa()
+{
+	const {api} = useContext(MyContext);
+
+	const mutateError = useMutateError();
+	const invalidate = useInvalidate();
+
+	const getMe = useGet(["me"]);
+
+	const generate2fa = useMutation({
+		mutationFn: () => api.post("/2fa/generate", {}),
+		onError: mutateError,
+	});
+
+	const turnOn2fa = useMutation({
+		mutationFn: (code: string) =>
+			api.post("/2fa/turn-on", {twoFactorAuthCode : code}),
+		onError: mutateError,
+		onSuccess: () => invalidate(["me"]),
+	});
+
+	const [code, setCode] = useState("");
+
+	if (getMe.isPending) return (
+		<section>
+			<h3>Setup 2fa</h3>
+			<div className="p-style"><Spinner /></div>
+		</section>
+	);
+
+	if (getMe.isError) return (
+		<section>
+			<span className="error-msg">
+				Failed to load your personnal informations: {getMe.error.message}
+			</span>
+		</section>
+	);
+
+	return (
+		<section>
+			<h3>Setup 2FA</h3>
+			{
+				getMe.data.isTwoFactorAuthEnabled && false ?
+				<>
+					<div className="Setup2fa__Status">
+						2FA is enabled for your account <img src={check} />
+					</div>
+					<button>
+						Disable 2FA?
+					</button>
+				</> :
+				<>
+					<div className="Setup2fa__Info notice-msg">
+						Two-factor authentication (2FA) allows you to enforce a double layer
+						of protection when logging in to this website. When connecting, a
+						code will be requested from a third-party app to confirm your
+						identity.<br /><br />
+						To setup 2FA, you will need to flash a QR code using an
+						authentication app such as Google Authenticator or Authy. You will
+						then have to input the provided code to confirm your anthenticator
+						app.
+					</div>
+					<div style={{textAlign: "center"}}>
+						<button onClick={() => generate2fa.mutate()}>
+							Generate QR code
+						</button>
+						{
+							generate2fa.isSuccess &&
+							<div>
+								<div style={{textAlign: "center", marginTop: "10px"}}>
+									<img style={{borderRadius: "18px"}} src={generate2fa.data} />
+								</div>
+								<form onSubmit={e => {e.preventDefault(); turnOn2fa.mutate(code)}}>
+								<input
+									type="text"
+									placeholder="xxx xxx"
+									value={code}
+									style={{textAlign: "center", width: "6em"}}
+									onChange={(ev) => {setCode(ev.currentTarget.value)}}
+								/>
+								</form>
+							</div>
+							||
+							<div style={{margin: "0", padding: "0"}}>
+								<Spinner />
+							</div>
+						}
+					</div>
+				</>
+			}
+		</section>
 	);
 }
 

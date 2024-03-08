@@ -33,6 +33,7 @@ class Api
 		if (!data || !data.token)
 			return ;
 		this.headers.Authorization = data.token;
+		this.auth = true;
 	}
 
 	async get(endpoint: string) {
