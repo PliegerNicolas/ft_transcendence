@@ -1,0 +1,1 @@
+export const MB_MULTIPLICATOR = 1024 * 1024;

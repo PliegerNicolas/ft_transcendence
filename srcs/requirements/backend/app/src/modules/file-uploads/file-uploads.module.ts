@@ -1,26 +1,26 @@
 import { DynamicModule, Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
 import { MulterModule } from "@nestjs/platform-express";
-import fileUploadsConfig, { FileUploadsConfig } from "./configs/file-uploads.config";
-import { multerModuleAsyncOptions } from "./configs/multer-module-async.options";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { File } from "./entities/file.entity";
+import { FileUploadsOptionsInterface } from "./types/file-upload-options.type";
+import { multerConfigFactory } from "./configs/file-uploads-multer-factory.config";
 
 @Module({})
 export class FileUploadsModule {
-    static register(config: FileUploadsConfig): DynamicModule {
+
+    static register(options: FileUploadsOptionsInterface): DynamicModule {
         return ({
             module: FileUploadsModule,
             imports: [
                 TypeOrmModule.forFeature([File]),
-                MulterModule.registerAsync(multerModuleAsyncOptions),
-                ConfigModule.forRoot({
-                    load: [fileUploadsConfig],
-                    isGlobal: true,
+                MulterModule.registerAsync({
+                    useFactory: () => multerConfigFactory(options),
                 }),
             ],
             controllers: [],
             providers: [],
-            exports: [],
+            exports: [MulterModule, TypeOrmModule],
         });
     }
+
 }
