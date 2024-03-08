@@ -28,28 +28,24 @@ export class AuthService
 		return (true);
 	}
 
-	async checkUser(oauthId : string) {
-
-		const users = await this.userRepository.findOne({
+	async checkUser(oauthId : string | bigint): Promise<User> {
+		const user = await this.userRepository.findOne({
 			where: { oauthId: Equal(BigInt(oauthId)) },
 			relations: ['profile'],
 		});
 
-		return ({ users });
+		return (user);
 	}
 
 	async createJwt(payload : any, isTwoFactorAuthLogged : boolean = false){
 		payload.isTwoFactorAuthLogged = isTwoFactorAuthLogged;
-		console.log("payload")
-		console.log(payload)
+		//console.log("payload")
+		//console.log(payload)
 		return (await this.jwtService.signAsync(payload))
 	}
 
 	async signIn(oauthToken : JSON ): Promise<{access_token : any, isTwoFactorAuthEnabled : any}> {
-		const token = Object.values(oauthToken);
-		let payload;
-
-		console.log(token)
+		const [code, redirect_uri] = Object.values(oauthToken);
 
 		let ft_payload = await fetch(
 			"https://api.intra.42.fr/oauth/token",
@@ -60,18 +56,19 @@ export class AuthService
 					"grant_type": "authorization_code",
 					"client_id": process.env.API_CLIENT_ID,
 					"client_secret": process.env.API_SECRET,
-					"code": token[0],
-					"redirect_uri": token[1]
+					"code": code,
+					"redirect_uri": redirect_uri,
 				}),
 			}
 		).then(
 			(data) => data.json()
 		);
-	
+
 		// console.log(payload);
-		if(Object.keys(ft_payload)[0] != "access_token") throw new UnauthorizedException()
-		const access = (Object.values(ft_payload)[0]).toString();
-		const refresh = (Object.values(ft_payload)[1]).toString();
+		if(Object.keys(ft_payload)[0] !== "access_token") throw new UnauthorizedException()
+		const access = ft_payload.access_token;
+		const refresh = ft_payload.token_type;
+
 		const info = await fetch(
 			"https://api.intra.42.fr/v2/me",
 			{
@@ -81,24 +78,11 @@ export class AuthService
 			(data) => data.json()
 		);
 
-		// console.log(info)
-		const user = (await this.checkUser(Object.values(info)[0].toString())).users;
+		let user = await this.checkUser(info.id);
+		if (!user) user = await this.userService.createUser(this.transformInfoToCreateUserDto(info));
 
-		console.log(user);
-
-		if (user === null) {
-			const createUserDto = this.transformInfoToCreateUserDto(info);
-			const users = await this.userService.createUser(createUserDto);
-
-			payload = { user_id :  users.id, isTwoFactorAuthEnabled: false}
-		} else {
-			payload = { user_id : Object.values(user)[0], isTwoFactorAuthEnabled : user.isTwoFactorAuthEnabled }
-		}
-		payload.oauth_id = Object.values(info)[0].toString()
-		// console.log(JSON.stringify(payload))
-		// console.log(Object.values(Object.values(info)[11])[0].toString())
+		const payload = ({ user_id: user.id, oauth_id: user.oauthId, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled });
 		const access_token = await this.createJwt(payload)
-		// console.log(access_token)
 
 		return ({
 			access_token,
@@ -128,8 +112,6 @@ export class AuthService
 
 	private transformInfoToCreateUserDto(info: any): CreateUserDto {
 		const createUserDto = new CreateUserDto();
-
-		console.log(info);
 
 		createUserDto.oauthId = info.id;
 		createUserDto.email = info.email;

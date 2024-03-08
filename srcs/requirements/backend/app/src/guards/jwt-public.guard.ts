@@ -20,10 +20,8 @@ import { AuthService } from 'src/auth/auth.service';
 		return (true);
 	  }
 	  try {
-		if (await this.authService.blacklist("check", token) == false)
-		{
-			throw new UnauthorizedException();
-		}
+		if (await this.authService.blacklist("check", token) === false) throw new UnauthorizedException();
+
 		const payload = await this.jwtService.verifyAsync(
 		  token,
 		  {
@@ -31,16 +29,13 @@ import { AuthService } from 'src/auth/auth.service';
 			ignoreExpiration: false
 		  }
 		);
-		const users = (await this.authService.checkUser(payload.oauth_id)).users
-		if (users == null)
+		const user = await this.authService.checkUser(payload.oauth_id);
+		if (!user) throw new UnauthorizedException();
+		if (user.id != payload.user_id)
 		{
 			throw new UnauthorizedException();
 		}
-		if (users.id != payload.user_id)
-		{
-			throw new UnauthorizedException();
-		}
-		request['user'] = {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
+		request['user'] = {id: payload.user_id, oauth_id: payload.oauth_id, username: user.username};
 	  } catch {
 		throw new UnauthorizedException();
 	  }
