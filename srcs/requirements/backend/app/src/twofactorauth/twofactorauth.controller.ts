@@ -31,6 +31,7 @@ export class TwofactorauthController {
 	@HttpCode(200)
 	async activateTwoFactorAuth(
 		@Request() req : any,
+		@Res() res : Response,
 		@Body() {twoFactorAuthCode} : TwoFactorAuthCodeDto
 	){
 		const user = req.user
@@ -45,7 +46,10 @@ export class TwofactorauthController {
 		  }
 		  console.log(user.id)
 		  await this.usersService.turnOnTwoFactorAuthentication(user.id);
-		  return {access_token: await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)};
+		  const access_token = await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)
+		  console.log(access_token)
+		  res.cookie("access_token", access_token,{ httpOnly: true}).send();
+		  return ({access_token: access_token});
 	}
 
 	@UseGuards(AuthGuard('jwt'))
@@ -53,16 +57,19 @@ export class TwofactorauthController {
 	@HttpCode(200)
 	async authenticate(
 		@Request() req : any,
+		@Res() res : Response,
 		@Body() {twoFactorAuthCode} : TwoFactorAuthCodeDto
 	){
 		const user = req.user;
-		const isCodeValid = this.twoFactorAuthService.isTwoFactorAuthSecretValid(
-			twoFactorAuthCode, req.user.user_id
+		const isCodeValid = await this.twoFactorAuthService.isTwoFactorAuthSecretValid(
+			twoFactorAuthCode, user.id
 		  );
 		  if (!isCodeValid) {
 			throw new UnauthorizedException('Wrong authentication code');
 		  }
-		  return {access_token: await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)};
+		  const access_token = await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)
+		   res.cookie("access_token", access_token,{ httpOnly: true});
+		  return ({access_token: access_token});
 	}
 
 }
