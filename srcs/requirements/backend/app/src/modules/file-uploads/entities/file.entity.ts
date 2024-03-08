@@ -8,19 +8,22 @@ export class File {
     id: bigint;
   
     @Column()
-    filename: string;
+    fieldname: string;
   
     @Column()
     originalname: string;
   
     @Column()
+    encoding: string;
+
+    @Column()
     mimetype: string;
   
     @Column()
-    size: number; // In bits ?
+    size: number;
   
     @Column()
-    filePath: string;
+    path: string;
 
     @CreateDateColumn()
     createdAt: Date;
