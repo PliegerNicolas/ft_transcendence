@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Post, Put, Request, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Put, Request, Res, UnprocessableEntityException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { PicturesService } from '../../services/pictures/pictures.service';
 import { ParseUsernamePipe } from '../../../../common/pipes/parse-username/parse-username.pipe';
 import { AuthGuard } from '@nestjs/passport';
@@ -6,6 +6,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { GlobalRole } from '../../../../guards/role.decorator';
 import { UsersGuard } from '../../../../guards/users.guard';
 import { RoleGlobalGuard } from '../../../../guards/role.guard';
+import { File } from 'src/modules/file-uploads/entities/file.entity';
+import { Response } from 'express';
 
 @Controller()
 export class PicturesController {
@@ -21,8 +23,10 @@ export class PicturesController {
     @Get('users/:username/picture')
     async getPicture(
         @Param('username', ParseUsernamePipe) username: string,
+        @Res() res: Response,
     ) {
-        return ((await this.pictureService.getPicture(username)).path);
+        const picture = await this.pictureService.getPicture(username);
+        this.sendResponse(res, picture);
     }
 
     /* */
@@ -110,17 +114,15 @@ export class PicturesController {
 
     /* Helper Functions */
 
-    /*
-    private sendResponse(res: Response, file: File) {
+    private sendResponse(res: Response, picture: File) {
         try {
-            res.set('Content-Type', file.mimetype);
-            res.set('Content-Length', file.size.toString());
-            res.set('Content-Disposition', `inline; filename="${file.originalname}"`);
+            res.set('Content-Type', picture.mimetype);
+            res.set('Content-Length', picture.size.toString());
+            res.set('Content-Disposition', `inline; filename="${picture.originalname}"`);
     
-            res.sendFile(file.path, { root: '.' });
+            res.sendFile(picture.path, { root: '.' });
         } catch(error) {
-            throw new UnprocessableEntityException('Error while handling user's picture');
+            throw new UnprocessableEntityException(`Error while handling user's picture`);
         }
     }
-    */
 }
