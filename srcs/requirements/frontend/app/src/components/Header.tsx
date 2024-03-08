@@ -40,7 +40,7 @@ export default function Header()
 
 	const [ popup, setPopup ] = useState(false);
 
-	const getMe = useGet(["me"], api.auth);
+	const getMe = useGet(["me"], logged && api.auth);
 
 	const popupRef = useOutsideClick(() => {
 			setTimeout(() => setPopup(false), 0);
