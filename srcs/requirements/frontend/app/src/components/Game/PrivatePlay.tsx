@@ -1,20 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useGet } from '../../utils/hooks.ts';
-import { redirect } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { socket } from "../../App.tsx"
 import OnlineGame  from './OnlinePlay'
 
 import "../../styles/play.css";
-
+import { MyContext } from '../../utils/contexts.ts';
 
 // <PrivatePlay /> ====================================================================
 
-const PrivatePlay = (props: any) => {
+const PrivatePlay = () => {
+	const location = useLocation();
+  	const data = location.state;
 	const [gameReady, setGameReady] = useState(false);
 	const [playerReady, setPlayerReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
+	const [inviteState, setInviteState] = useState(false);
 
-	const [lobby, setLobby] = useState<string>(props.lobby);
+	const [lobby, setLobby] = useState<string>(data.lobby);
 	const [oppId, setOppId] = useState('');
 
 	const [oppName, setOppName] = useState('');
@@ -23,6 +26,8 @@ const PrivatePlay = (props: any) => {
 	const [paddlesColor, setPaddlesColor] = useState('#fff');
 	const [ballColor, setBallColor] = useState('#fff');
 
+	const { addNotif } = useContext(MyContext);
+	const navigate = useNavigate();
 
 	const destroySocketListeners = () => {
 		socket.off('userJoinedSocket');
@@ -30,6 +35,8 @@ const PrivatePlay = (props: any) => {
 		socket.off('leaveLobby');
 		socket.off('gameFound');
 		socket.off('gameReady');
+		socket.off('inviteRejected');
+		socket.off('inviteAccepted');
 	}
 
 	const handlegameOverChange = (data: boolean) => {
@@ -58,16 +65,25 @@ const PrivatePlay = (props: any) => {
 				setLobby('');
 			});
 			socket.on('gameReady', (player1Name: string, player2Name: string, player1ID: string, player2ID: string) => {
-				if (props.playerNumber === 1) {
+				if (data.playerNumber === 1) {
 					setOppName(player2Name);
 					setOppId(player2ID);
 				}
-				if (props.playerNumber === 2) {
+				if (data.playerNumber === 2) {
 					setOppName(player1Name);
 					setOppId(player1ID)
 				}
 				console.log(oppName);
 				setGameReady(true);
+			});
+			socket.on('inviteRejected', () => {
+				addNotif({content: "Invitation rejected"});
+				setInviteState(true);
+				setGameOver(true);
+			});
+			socket.on('inviteAccepted', () => {
+				addNotif({content: "Invitation accepted"});
+				setInviteState(true);
 			});
 		}
 		return () => {
@@ -77,21 +93,19 @@ const PrivatePlay = (props: any) => {
 	}, [[]]);
 
 	const readyCheckHandler = () => {
-		if (props.playerNumber === 1)
-			socket.emit('ready', {lobby: lobby, playerNumber: props.playerNumber, playerName: getUser.data.username});
-		else if (props.playerNumber === 2)
-			socket.emit('ready', {lobby: lobby, playerNumber: props.playerNumber, playerName: 'Maëvo'});
+		socket.emit('ready', {lobby: lobby, playerNumber: data.playerNumber, playerName: getUser.data.username});
+		console.log('lobby : ' + lobby + ', playerNumber : ' + data.playerNumber);
 		setPlayerReady(true);
 	}
 
 	const notReadyCheckHandler = () => {
-		socket.emit('notReady', { lobby: lobby, playerNumber: props.playerNumber});
+		socket.emit('notReady', { lobby: lobby, playerNumber: data.playerNumber});
 		setPlayerReady(false);
 	}
 
 	const backToMenuHandler = () => {
 		socket.emit('leaveLobby', lobby);
-		redirect("/play");
+		navigate('/home');
 	}
 
 	// Backend http requests ==============================================================================================================
@@ -140,7 +154,7 @@ const PrivatePlay = (props: any) => {
 						gameOver={gameOver}
 						oppId={oppId}
 						oppName={oppName}
-						playerNumber={props.playerNumber}
+						playerNumber={data.playerNumber}
 						backgroundColor={backgroundColor}
 						paddlesColor={paddlesColor}
 						ballColor={ballColor}
@@ -151,6 +165,12 @@ const PrivatePlay = (props: any) => {
 						<button className="Play__BackToMenu" onClick={backToMenuHandler}>Back to Menu</button>
 					</div> : <div></div>}
 				</div> : <div>
+					{inviteState === false && data.playerNumber === 1 ? <div>
+						<div className="Play__ReadyCheckText">
+							<span>Invitation pending</span>
+						</div>
+					</div> : <div>
+					</div>}
 					{playerReady === true ? <div>
 						<button className="Play__NotReadyButton Play__ButtonAnimation" onClick={notReadyCheckHandler}>Not Ready</button>
 					</div> : <div>

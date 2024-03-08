@@ -233,6 +233,9 @@ function App()
 			if (socket) {
 				socket.off('getUserInfos');
 				socket.off('invitedToPrivate');
+				socket.off('inviteSuccess');
+				socket.off('inviteRejected');
+				socket.off('inviteAccepted');
 			}
 		};
 	}, [[]]);

@@ -100,14 +100,19 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('acceptInvite')
 	handleAcceptInvite(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
+		console.log("USER : " + data.user + " INVITATION HAS BEEN ACCEPTED BY : " + userById[client.id]);
 		if (userByName[data.user]) {
-			this.server.to(userByName[data.user]).emit('acceptedInvite', userById[client.id], data.lobby);
+			console.log("caca");
+			this.server.to(userByName[data.user]).emit('inviteAccepted', userById[client.id], data.lobby);
 		}
 	}
+
 	@SubscribeMessage('rejectInvite')
 	handleRejectInvite(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
+		console.log("USER : " + data.user + " INVITATION HAS BEEN REFUSED BY : " + userById[client.id]);
 		if (userByName[data.user]) {
-			this.server.to(userByName[data.user]).emit('rejectedInvite', userById[client.id], data.lobby);
+			console.log("caca");
+			this.server.to(userByName[data.user]).emit('inviteRejected', userById[client.id], data.lobby);
 		}
 	}
 
