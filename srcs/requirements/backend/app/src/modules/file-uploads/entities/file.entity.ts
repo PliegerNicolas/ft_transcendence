@@ -39,8 +39,6 @@ export class File {
     private async unlink(): Promise<void> {
         const unlinkAsync = promisify(fs.unlink);
 
-        console.log("ouistiti");
-
         try {
             await unlinkAsync(this.path);
         } catch(error) {

@@ -18,7 +18,7 @@ export class ProfilesService {
     async getProfile(username: string = undefined): Promise<Profile> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile', 'profile.picture'],
+            relations: ['profile'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}' }' not found`);
@@ -29,7 +29,7 @@ export class ProfilesService {
     async getMyProfile(username: string = undefined): Promise<Profile> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile', 'profile.picture'],
+            relations: ['profile'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}' }' not found`);
@@ -40,7 +40,7 @@ export class ProfilesService {
     async createProfile(username: string = undefined, profileDetails: CreateProfileParams): Promise<Profile> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile', 'profile.picture'],
+            relations: ['profile'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}' }' not found`);
@@ -98,7 +98,6 @@ export class ProfilesService {
             user: profile.user,
             created_at: profile.created_at,
             updated_at: profile.updated_at,
-            picture: null,
         };
 
         return (await this.profileRepository.save(emptyProfile));

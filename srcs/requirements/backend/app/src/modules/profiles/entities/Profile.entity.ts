@@ -23,8 +23,4 @@ export class Profile {
     @OneToOne(() => User, (user) => user.profile, { onDelete: 'CASCADE' })
     @JoinColumn()
     user?: User
-
-    @OneToOne(() => File, { cascade: true, nullable: true })
-    @JoinColumn()
-    picture?: File;
 }

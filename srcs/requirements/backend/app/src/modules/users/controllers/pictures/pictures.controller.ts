@@ -1,32 +1,28 @@
-import { Controller, Delete, Get, Param, Post, Put, Request, Res, UnprocessableEntityException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ProfilePicturesService } from '../../services/profile-pictures/profile-pictures.service';
+import { Controller, Delete, Get, Param, Post, Put, Request, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { PicturesService } from '../../services/pictures/pictures.service';
 import { ParseUsernamePipe } from '../../../../common/pipes/parse-username/parse-username.pipe';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { GlobalRole } from '../../../../guards/role.decorator';
 import { UsersGuard } from '../../../../guards/users.guard';
 import { RoleGlobalGuard } from '../../../../guards/role.guard';
-import { Response } from 'express';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { File } from 'src/modules/file-uploads/entities/file.entity';
 
 @Controller()
-export class ProfilePicturesController {
+export class PicturesController {
 
     constructor(
-        private readonly profilePictureService: ProfilePicturesService,
+        private readonly pictureService: PicturesService,
     ) {}
 
     /* */
     /* Public PATHS: anyone can access. */
     /* */
 
-    @Get('users/:username/profile/picture')
-    async getProfilePicture(
+    @Get('users/:username/picture')
+    async getPicture(
         @Param('username', ParseUsernamePipe) username: string,
-        @Res() res: Response,
     ) {
-        const picture = await this.profilePictureService.getProfilePicture(username);
-        this.sendResponse(res, picture);
+        return ((await this.pictureService.getPicture(username)).path);
     }
 
     /* */
@@ -38,49 +34,43 @@ export class ProfilePicturesController {
     /* */
 
 	@UseGuards(AuthGuard('jwt'))
-    @Get('profile/picture')
-    async getMyProfilePicture(
+    @Get('/picture')
+    async getMyPicture(
         @Request() req: any,
-        @Res() res: Response,
     ) {
         const username = req.user ? req.user.username : undefined;
-        const picture = await this.profilePictureService.getProfilePicture(username);
-        this.sendResponse(res, picture);
+        return ((await this.pictureService.getPicture(username)).path);
     }
 
 	@UseGuards(AuthGuard('jwt'))
-    @Post('profile/picture')
+    @Post('picture')
     @UseInterceptors(FileInterceptor('picture'))
-    async createMyProfilePicture(
+    async createMyPicture(
         @UploadedFile() file: Express.Multer.File,
         @Request() req: any,
-        @Res() res: Response,
     ) {
         const username = req.user ? req.user.username : undefined;
-        const picture = await this.profilePictureService.createProfilePicture(username, file);
-        this.sendResponse(res, picture);
+        return ((await this.pictureService.createPicture(username, file)).path);
     }
 
 	@UseGuards(AuthGuard('jwt'))
-    @Put('profile/picture')
+    @Put('picture')
     @UseInterceptors(FileInterceptor('picture'))
-    async replaceMyProfilePicture(
+    async replaceMyPicture(
         @UploadedFile() file: Express.Multer.File,
         @Request() req: any,
-        @Res() res: Response,
     ) {
         const username = req.user ? req.user.username : undefined;
-        const picture = await this.profilePictureService.replaceProfilePicture(username, file);
-        this.sendResponse(res, picture);
+        return ((await this.pictureService.replacePicture(username, file)).path);
     }
 
 	@UseGuards(AuthGuard('jwt'))
-    @Delete('profile/picture')
-    async deleteMyProfilePicture(
+    @Delete('picture')
+    async deleteMyPicture(
         @Request() req: any,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return (await this.profilePictureService.deleteProfilePicture(username));
+        return (await this.pictureService.deletePicture(username));
     }
 
     /* */
@@ -89,41 +79,38 @@ export class ProfilePicturesController {
 
 	@GlobalRole(['operator'])
 	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
-    @Post('users/:username/profile/picture')
+    @Post('users/:username/picture')
     @UseInterceptors(FileInterceptor('picture'))
-    async createProfilePicture(
+    async createPicture(
         @UploadedFile() file: Express.Multer.File,
         @Param('username', ParseUsernamePipe) username: string,
-        @Res() res: Response,
     ) {
-        const picture = await this.profilePictureService.createProfilePicture(username, file);
-        this.sendResponse(res, picture);
+        return ((await this.pictureService.createPicture(username, file)).path);
     }
 
 	@GlobalRole(['operator'])
 	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
-    @Put('users/:username/profile/picture')
+    @Put('users/:username/picture')
     @UseInterceptors(FileInterceptor('picture'))
-    async replaceProfilePicture(
+    async replacePicture(
         @UploadedFile() file: Express.Multer.File,
         @Param('username', ParseUsernamePipe) username: string,
-        @Res() res: Response,
     ) {
-        const picture = await this.profilePictureService.replaceProfilePicture(username, file);
-        this.sendResponse(res, picture);
+        return ((await this.pictureService.replacePicture(username, file)).path);
     }
 
 	@GlobalRole(['operator'])
 	@UseGuards(AuthGuard('jwt'), UsersGuard || RoleGlobalGuard)
-    @Delete('users/:username/profile/picture')
-    async deleteProfilePicture(
+    @Delete('users/:username/picture')
+    async deletePicture(
         @Param('username', ParseUsernamePipe) username: string,
     ) {
-        return (await this.profilePictureService.deleteProfilePicture(username));
+        return (await this.pictureService.deletePicture(username));
     }
 
     /* Helper Functions */
 
+    /*
     private sendResponse(res: Response, file: File) {
         try {
             res.set('Content-Type', file.mimetype);
@@ -132,8 +119,8 @@ export class ProfilePicturesController {
     
             res.sendFile(file.path, { root: '.' });
         } catch(error) {
-            throw new UnprocessableEntityException('Error while handling profile picture');
+            throw new UnprocessableEntityException('Error while handling user's picture');
         }
     }
-
+    */
 }

@@ -1,12 +1,13 @@
 import { Exclude } from "class-transformer";
 import { IsEnum } from "class-validator";
-import { Column, CreateDateColumn, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 import { GlobalServerPrivileges, compareGlobalServerPrivileges } from "../enums/global-server-privileges.enum";
 import { Profile } from "../../profiles/entities/Profile.entity";
 import { Relationship } from "../../relationships/entities/Relationship.entity";
 import { GamelogToUser } from "../../gamelogs/entities/GamelogToUser.entity";
 import { ChannelMember } from "../../chats/channels/entities/ChannelMember.entity";
 import { Channel } from "../../chats/channels/entities/Channel.entity";
+import { File } from "../../file-uploads/entities/file.entity";
 
 @Entity({ name: 'users' })
 @Unique(['email', 'username'])
@@ -41,6 +42,10 @@ export class User {
 
     @OneToOne(() => Profile, (profile) => profile.user, { cascade: true })
     profile: Profile
+
+    @OneToOne(() => File, { cascade: true, nullable: true })
+    @JoinColumn()
+    picture?: File;
 
     /* Relationships */
 
