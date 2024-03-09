@@ -9,7 +9,6 @@ import defaultPicture from "../assets/default_profile.png";
 import logoutIcon from "../assets/logout.svg";
 
 import Login from "./Login.tsx";
-import Spinner from "./Spinner.tsx";
 
 import { MyContext } from "../utils/contexts.ts";
 import { useGet } from "../utils/hooks.ts";
@@ -36,11 +35,10 @@ function useOutsideClick(callback: (event: MouseEvent) => void) {
 
 export default function Header()
 {
-	const { logged, api, setGlobalPopup, addNotif } = useContext(MyContext);
+	const { logged, api, setGlobalPopup, addNotif, me } = useContext(MyContext);
 
 	const [ popup, setPopup ] = useState(false);
 
-	const getMe = useGet(["me"], logged && api.auth);
 	const getPic = useGet(["picture"], logged && api.auth);
 
 	const popupRef = useOutsideClick(() => {
@@ -105,10 +103,10 @@ export default function Header()
 				onClick={() => setPopup(prev => !prev)}
 			>
 			<div className="Header__Username">
-				{logged && getMe.isSuccess ? getMe.data.username : "Guest"}
+				{me ? me.username : "Guest"}
 			</div>
 			{
-				logged ?
+				me ?
 				<div className="Header__UserInfo">
 					<div className="Header__UserInfoContainer">
 						<img
@@ -118,34 +116,23 @@ export default function Header()
 					{
 						popup &&
 						<div className="Header__Popup">
-						{
-							getMe.isSuccess &&
-							<>
-								<Link to="/user/me" className="Header__PopupLink logged">
-									<img src={getPic.data || defaultPicture}/>
-									<div className="Header__PopupUsername">
-										{getMe.data.username}
-									</div>
-								</Link>
-								<hr />
-								<Link to="/user/me" className="Header__PopupLink logged">
-									My profile
-								</Link>
-								<Logout />
-								<div
-									className="Login Logout Header__LogAs"
-									onClick={() => setLogAsPopup("")}
-								>
-									Log as
+							<Link to="/user/me" className="Header__PopupLink logged">
+								<img src={getPic.data || defaultPicture}/>
+								<div className="Header__PopupUsername">
+									{me.username}
 								</div>
-							</>
-							|| getMe.isPending &&
-							<Spinner />
-							|| getMe.isError &&
-							<span className="error-msg">
-								Failed to get user info: {getMe.error.message}
-							</span>
-						}
+							</Link>
+							<hr />
+							<Link to="/user/me" className="Header__PopupLink logged">
+								My profile
+							</Link>
+							<Logout />
+							<div
+								className="Login Logout Header__LogAs"
+								onClick={() => setLogAsPopup("")}
+							>
+								Log as
+							</div>
 						</div>
 					}
 				</div> :
