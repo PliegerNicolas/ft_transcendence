@@ -41,9 +41,11 @@ export class PicturesController {
     @Get('/picture')
     async getMyPicture(
         @Request() req: any,
+        @Res() res: Response,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return ((await this.pictureService.getPicture(username)).path);
+        const picture = await this.pictureService.getPicture(username);
+        this.sendResponse(res, picture);
     }
 
 	@UseGuards(AuthGuard('jwt'))
@@ -52,9 +54,11 @@ export class PicturesController {
     async createMyPicture(
         @UploadedFile() file: Express.Multer.File,
         @Request() req: any,
+        @Res() res: Response,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return ((await this.pictureService.createPicture(username, file)).path);
+        const picture = await this.pictureService.createPicture(username, file);
+        this.sendResponse(res, picture);
     }
 
 	@UseGuards(AuthGuard('jwt'))
@@ -63,9 +67,11 @@ export class PicturesController {
     async replaceMyPicture(
         @UploadedFile() file: Express.Multer.File,
         @Request() req: any,
+        @Res() res: Response,
     ) {
         const username = req.user ? req.user.username : undefined;
-        return ((await this.pictureService.replacePicture(username, file)).path);
+        const picture = await this.pictureService.replacePicture(username, file);
+        this.sendResponse(res, picture);
     }
 
 	@UseGuards(AuthGuard('jwt'))
@@ -88,8 +94,10 @@ export class PicturesController {
     async createPicture(
         @UploadedFile() file: Express.Multer.File,
         @Param('username', ParseUsernamePipe) username: string,
+        @Res() res: Response,
     ) {
-        return ((await this.pictureService.createPicture(username, file)).path);
+        const picture = await this.pictureService.createPicture(username, file);
+        this.sendResponse(res, picture);
     }
 
 	@GlobalRole(['operator'])
@@ -99,8 +107,10 @@ export class PicturesController {
     async replacePicture(
         @UploadedFile() file: Express.Multer.File,
         @Param('username', ParseUsernamePipe) username: string,
+        @Res() res: Response,
     ) {
-        return ((await this.pictureService.replacePicture(username, file)).path);
+        const picture = await this.pictureService.replacePicture(username, file);
+        this.sendResponse(res, picture);
     }
 
 	@GlobalRole(['operator'])
