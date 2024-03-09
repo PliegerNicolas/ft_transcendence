@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, OnModuleInit } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { dbConfig } from "./database-config";
@@ -15,6 +15,7 @@ import { AuthModule } from "./auth/auth.module";
 import { TwofactorauthModule } from './twofactorauth/twofactorauth.module';
 import { SocketModule } from './modules/socket/socket.module';
 import { GameModule } from "./modules/game/game.module";
+import { PicturesService } from "./modules/users/services/pictures/pictures.service";
 
 @Module({
 	imports: [
@@ -45,4 +46,14 @@ import { GameModule } from "./modules/game/game.module";
 		},
 	],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+
+	constructor(
+		private readonly pictureService: PicturesService,
+	) {}
+
+	async onModuleInit() {
+		await this.pictureService.createDefaultUserPicture();
+	}
+
+}
