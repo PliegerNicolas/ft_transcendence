@@ -2,33 +2,45 @@ import { MyContext } from "../../utils/contexts";
 import { useContext } from "react";
 
 import { UserType } from "../../utils/types";
-import { useGet } from "../../utils/hooks";
+import { useGet, useInvalidate } from "../../utils/hooks";
 
 import defaultPicture from "../../assets/default_profile.png";
 import camera from "../../assets/camera.svg";
 
 export default function UserInfos({user, me}: {user: UserType, me: boolean})
 {
-	const { token } = useContext(MyContext);
+	const { token, addNotif } = useContext(MyContext);
+	const invalidate = useInvalidate();
 
 	const getPic = useGet(["users", user.username, "picture"]);
 
-	function postPic(file: File) {
-		console.log(file);
-		fetch(`http://${location.hostname}:3450/picture`, {
-				method: "POST",
-				headers: {
-					"Authorization": token,
-					"Content-Type": file.type,
-				},
-				body: file
-		});
+	function humanFileSize(size: number) {
+    var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+    return +(size / Math.pow(1024, i)).toFixed(2) * 1 + ' '
+			+ ['', '', 'MB', 'GB', 'TB'][i];
 	}
 
-	<input
-		type="file"
-		onChange={ev => postPic(ev.currentTarget.files![0])}
-	/>
+	function postPic(file: File) {
+		if (file.size >= 5000000) {
+			addNotif({
+				type: 1,
+				content: `This file is too big (${humanFileSize(file.size)}),
+				the limit is 5MB.`});
+			return ;
+		}
+
+		const data = new FormData()
+		data.append('picture', file);
+
+		fetch(`http://${location.hostname}:3450/picture`, {
+				method: "POST",
+				headers: { "Authorization": token },
+				body: data
+		}).then(() => {
+			invalidate(["users", user.username, "picture"]);
+			invalidate(["picture"]);
+		}).catch((error: Error) => console.log(error.message));
+	}
 
 	return (
 		<>
