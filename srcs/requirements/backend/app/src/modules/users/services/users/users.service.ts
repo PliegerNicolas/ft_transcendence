@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserParams, ReplaceUserParams, UpdateUserParams } from '../../types/user.type';
 import { Equal, In, Repository } from 'typeorm';
 import { User } from '../../entities/User.entity';
+import { PicturesService } from '../pictures/pictures.service';
 
 @Injectable()
 export class UsersService {
@@ -10,6 +11,8 @@ export class UsersService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+
+        private readonly pictureService: PicturesService,
     ) {}
 
     async getUsers(): Promise<User[]> {
