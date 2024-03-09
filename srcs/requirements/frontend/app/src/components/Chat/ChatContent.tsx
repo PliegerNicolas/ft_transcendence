@@ -41,7 +41,7 @@ export default function ChatContentRouter()
 
 function ChatContent()
 {
-	const { api, setLastChan } = useContext(MyContext);
+	const { api, setLastChan, me } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 
@@ -50,7 +50,6 @@ function ChatContent()
 
 	const getChan = useGet(["channels", id]);
 	const getMsgs = useGet(["channels", id, "messages"]);
-	const getMe = useGet(["me"]);
 
 	const postMsg = useMutation({
 		mutationFn: (content: string) =>
@@ -126,7 +125,7 @@ function ChatContent()
 		</div>
 	);
 
-	const role = getMe.isSuccess ? getChanRole(getChan.data, getMe.data.id) : "";
+	const role = me ? getChanRole(getChan.data, me.id) : "";
 
 	if (getMsgs.isPending) {
 		return (
@@ -160,7 +159,6 @@ function ChatContent()
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
 							size={getChan.data.membersCount}
 							role={role}
-							me={getMe.data}
 							popupFn={popupFn}
 						/>
 					)

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MsgType, UserType } from "../../utils/types.ts";
+import { MsgType } from "../../utils/types.ts";
 
 import "../../styles/chat.css";
 import defaultPicture from "../../assets/default_profile.png"
@@ -11,18 +11,19 @@ import { MyContext } from "../../utils/contexts.ts";
 // <Msg /> =====================================================================
 
 export default function Msg(
-	{data, prev, next, size, role, me, popupFn}:
+	{data, prev, next, size, role, popupFn}:
 	{
 		data: MsgType,
 		prev: MsgType | null,
 		next: MsgType | null,
 		size: number,
 		role: string,
-		me: UserType | undefined
 		popupFn: Function
 	}
 )
 {
+	const { me } = useContext(MyContext)
+
 	const date = fmtDate(data.createdAt);
 	const member = data.channelMember;
 

@@ -18,14 +18,13 @@ import "../../styles/user.css";
 
 export default function Me()
 {
-	const { api } = useContext(MyContext);
+	const { api, me } = useContext(MyContext);
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 
 	const [popup, setPopup] = useState(false);
 
-	const getMe = useGet(["me"]);
 	const getRelations = useGet(["relationships"]);
 
 	const delMe = useMutation({
@@ -46,7 +45,7 @@ export default function Me()
 		onError: mutateError,
 	});
 
-	if (getMe.isPending) return (
+	if (!me) return (
 		<main className="MainContent">
 			<div className="p-style">
 				<Spinner />
@@ -54,18 +53,8 @@ export default function Me()
 		</main>
 	);
 
-	if (getMe.isError) return (
-		<main className="MainContent">
-			<div className="p-style error-msg">
-				Failed to load your profile: {getMe.error.message}
-			</div>
-		</main>
-	);
-
-	const me = getMe.data;
-	
 	function friendshipAction(action: string, ship: FriendshipType) {
-		const other = ship.user1.username == me.username ?
+		const other = ship.user1.username == me?.username ?
 			ship.user2.username : ship.user1.username;
 
 		switch (action) {

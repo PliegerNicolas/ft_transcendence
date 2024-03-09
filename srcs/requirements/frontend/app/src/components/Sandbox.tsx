@@ -147,12 +147,10 @@ export default function Sandbox()
 
 function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 {
-	const {api, addNotif} = useContext(MyContext);
+	const { api, addNotif, me } = useContext(MyContext);
 
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
-
-	const getMe = useGet(["me"]);
 
 	const generate2fa = useMutation({
 		mutationFn: () => api.post("/2fa/generate", {}),
@@ -174,18 +172,11 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 	const [code, setCode] = useState("");
 	const [popup, setPopup] = useState(false);
 
-	if (getMe.isPending) return (
+	if (!me) return (
 		<section>
 			<h3>Setup 2fa</h3>
-			<div className="p-style"><Spinner /></div>
-		</section>
-	);
-
-	if (getMe.isError) return (
-		<section>
-			<span className="error-msg">
-				Failed to load your personnal informations: {getMe.error.message}
-			</span>
+			<div className="notice-msg">Waiting for your user data...</div>
+			<Spinner />
 		</section>
 	);
 
@@ -194,7 +185,7 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 		<section>
 			<h3>Setup 2FA</h3>
 			{
-				getMe.data.isTwoFactorAuthEnabled ?
+				me.isTwoFactorAuthEnabled ?
 				<>
 					<div className="Setup2fa__Status">
 						<>2FA is enabled for your account</> <img src={check} />

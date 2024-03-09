@@ -122,7 +122,7 @@ export default function Header()
 							getMe.isSuccess &&
 							<>
 								<Link to="/user/me" className="Header__PopupLink logged">
-									<img src={getMe.data.picture || defaultPicture}/>
+									<img src={getPic.data || defaultPicture}/>
 									<div className="Header__PopupUsername">
 										{getMe.data.username}
 									</div>
@@ -181,6 +181,7 @@ function Logout()
 
 	const backendLogout = useMutation({
 		mutationFn: () => api.post("/auth/logout", {}),
+		onSuccess: () => window.location.reload(),
 	});
 
 	function logoutNow() {

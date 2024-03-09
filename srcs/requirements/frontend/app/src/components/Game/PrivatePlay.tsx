@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useGet } from '../../utils/hooks.ts';
+import { useContext, useEffect, useState } from 'react';
 import { redirect } from 'react-router-dom';
 import { socket } from "../../App.tsx"
+
+import { MyContext } from '../../utils/contexts.ts';
+
 import OnlineGame  from './OnlinePlay'
 
 import "../../styles/play.css";
@@ -10,6 +12,9 @@ import "../../styles/play.css";
 // <PrivatePlay /> ====================================================================
 
 const PrivatePlay = (props: any) => {
+	const { me } = useContext(MyContext);
+	if (!me) return (<></>);
+
 	const [gameReady, setGameReady] = useState(false);
 	const [playerReady, setPlayerReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
@@ -78,7 +83,7 @@ const PrivatePlay = (props: any) => {
 
 	const readyCheckHandler = () => {
 		if (props.playerNumber === 1)
-			socket.emit('ready', {lobby: lobby, playerNumber: props.playerNumber, playerName: getUser.data.username});
+			socket.emit('ready', {lobby: lobby, playerNumber: props.playerNumber, playerName: me.username});
 		else if (props.playerNumber === 2)
 			socket.emit('ready', {lobby: lobby, playerNumber: props.playerNumber, playerName: 'Maëvo'});
 		setPlayerReady(true);
@@ -95,8 +100,6 @@ const PrivatePlay = (props: any) => {
 	}
 
 	// Backend http requests ==============================================================================================================
-
-	const getUser = useGet(["me"]);
 
 	return (
 		<main className="MainContent">

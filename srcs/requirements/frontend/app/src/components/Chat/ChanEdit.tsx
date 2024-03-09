@@ -23,7 +23,7 @@ import ConfirmPopup from "../ConfirmPopup.tsx";
 
 export default function ChanEdit({id}: {id: number})
 {
-	const {api, addNotif} = useContext(MyContext);
+	const {api, addNotif, me} = useContext(MyContext);
 
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
@@ -50,7 +50,6 @@ export default function ChanEdit({id}: {id: number})
 	const [dmUsername, setDmUsername] = useState("");
 
 	const getChan = useGet(["channels", "" + id], !!id);
-	const getMe = useGet(["me"]);
 
 	useEffect(() => {
 		if (!getChan.isSuccess)
@@ -204,7 +203,7 @@ export default function ChanEdit({id}: {id: number})
 		</div>
 	);
 
-	if (getChan.isPending || !getMe.isSuccess) return (
+	if (getChan.isPending || !me) return (
 		<div className="ChatContent spinner">
 			<Spinner />
 		</div>
@@ -216,7 +215,7 @@ export default function ChanEdit({id}: {id: number})
 		</div>
 	);
 
-	const role = getChanRole(getChan.data, getMe.data.id);
+	const role = getChanRole(getChan.data, me.id);
 
 	if (role !== "owner" && role !== "operator") return (
 		<div className="ChatContent error">
