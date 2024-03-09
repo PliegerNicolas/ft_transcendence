@@ -110,7 +110,7 @@ function Auth()
 	}, []);
 
 	return (
-		<div className="Auth">
+		<div className="MainContent Auth">
 		{
 			status === "success" &&
 			<h3 className="Auth__Done">

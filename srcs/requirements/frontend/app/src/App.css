@@ -72,15 +72,15 @@
 	transition: .1s;
 }
 
-@media (min-width: 1100px) { .MainContent__Content { padding: 15px 50px 80px; }}
+@media (min-width: 1100px) { .MainContent{ padding: 15px 50px 80px; }}
 
-@media (min-width: 1400px) { .MainContent__Content { padding: 15px 100px 80px; }}
+@media (min-width: 1400px) { .MainContent { padding: 15px 100px 80px; }}
 
-@media (min-width: 1700px) { .MainContent__Content { padding: 15px 150px 80px; }}
+@media (min-width: 1700px) { .MainContent { padding: 15px 150px 80px; }}
 
-@media (min-width: 2000px) { .MainContent__Content { padding: 15px 200px 80px; }}
+@media (min-width: 2000px) { .MainContent { padding: 15px 200px 80px; }}
 
-@media (max-width: 900px) { .MainContent__Content { left: 66px; }}
+@media (max-width: 900px) { .MainContent { left: 66px; }}
 
 @media (max-width: 600px)
 {
