@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Channel } from "../../entities/Channel.entity";
-import { Equal, Repository } from "typeorm";
+import { Equal, Not, Repository } from "typeorm";
 import { User } from "../../../../users/entities/User.entity";
 import { UsersService } from "src/modules/users/services/users/users.service";
 import { ChannelAccessParams, CreateChannelParams, GetChannelParams, GetChannelsQueryParam, JoinChannelParams, LeaveChannelParams, ReplaceChannelParams, UpdateChannelParams } from "../../types/channel.type";
@@ -28,6 +28,7 @@ export class ChannelsService {
         const channels = await this.channelRepository.find({
             where: [
                 { members: { user: { username: Equal(username) } } },
+                { invitedUsers: { username: Equal(username) } },
                 { visibility: Equal(ChannelVisibility.PUBLIC) },
             ],
         });
