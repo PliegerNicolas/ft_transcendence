@@ -15,7 +15,6 @@ import { AuthModule } from "./auth/auth.module";
 import { TwofactorauthModule } from './twofactorauth/twofactorauth.module';
 import { SocketModule } from './modules/socket/socket.module';
 import { GameModule } from "./modules/game/game.module";
-import { PicturesService } from "./modules/users/services/pictures/pictures.service";
 
 @Module({
 	imports: [
@@ -46,14 +45,4 @@ import { PicturesService } from "./modules/users/services/pictures/pictures.serv
 		},
 	],
 })
-export class AppModule implements OnModuleInit {
-
-	constructor(
-		private readonly pictureService: PicturesService,
-	) {}
-
-	async onModuleInit() {
-		await this.pictureService.createDefaultUserPicture();
-	}
-
-}
+export class AppModule {}

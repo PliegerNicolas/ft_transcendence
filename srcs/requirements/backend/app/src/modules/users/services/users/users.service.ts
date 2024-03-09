@@ -58,7 +58,7 @@ export class UsersService {
 
         user = this.userRepository.create({
             ...userDetails,
-            picture: await this.pictureService.getDefaultUserPicture(),
+            picture: null,
         });
 
         return (await this.userRepository.save(user));

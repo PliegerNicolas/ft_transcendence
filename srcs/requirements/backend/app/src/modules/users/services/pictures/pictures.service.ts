@@ -3,12 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../entities/User.entity';
 import { Equal, Repository } from 'typeorm';
 import { File } from '../../../file-uploads/entities/file.entity';
-import { DEFAULT_USER_PICTURE_PATH } from 'src/modules/file-uploads/configs/file-uploads.constants';
-import * as fs from 'fs';
-import * as chardet from 'chardet';
+
+import { DEFAULT_USER_PICTURE_PATH } from '../../../file-uploads/configs/file-uploads.constants';
+import { MimeTypes } from '../../../file-uploads/enums/mime-types.enum';
+import * as fileSystem from 'fs';
 import * as path from 'path';
 import * as mimeTypes from 'mime-types';
-import { MimeTypes } from 'src/modules/file-uploads/enums/mime-types.enum';
+import * as chardet from 'chardet';
 
 @Injectable()
 export class PicturesService {
@@ -30,7 +31,9 @@ export class PicturesService {
 
         const picture = user.picture;
 
-        if (!picture) throw new NotFoundException(`User ${username ? username : '{undefined}'}'s picture not found`);
+        if (!picture) {
+            return (this.getDefaultUserPicture());
+        }
 
         return (picture);
     }
@@ -91,70 +94,46 @@ export class PicturesService {
         const picture = user.picture;
 
         if (!picture) throw new BadRequestException(`User ${username ? username : '{undefined}'} has no picture`);
-        
-        const defaultPicture = await this.getDefaultUserPicture();
 
-        if (picture.id === defaultPicture.id) throw new BadRequestException(`Default user picture already set`);
-
-        user.picture = defaultPicture;
+        user.picture = null;
         await this.userRepository.save(user);
         await this.fileRepository.remove(picture);
 
         return (`User '${username}'s picture successfully deleted`);
     }
 
-    /* Default user picture */
+    /* Helper Functions */
 
-    async getDefaultUserPicture(): Promise<File> {
-        const picture = await this.fileRepository.findOne({
-            where: { fieldname: Equal('default_user_picture') },
-        });
+    public async getDefaultUserPicture(): Promise<File> {
+        const defaultUserPicturePath: string = DEFAULT_USER_PICTURE_PATH;
 
-        if (!picture) throw new NotFoundException(`User default picture not found`);
+        if (!fileSystem.existsSync(defaultUserPicturePath)) throw new UnprocessableEntityException(`Default User picture not stored locally`);
 
-        return (picture);
-    }
+        const size: number = fileSystem.statSync(defaultUserPicturePath).size;
+        const originalname: string = path.basename(defaultUserPicturePath);
 
-    async createDefaultUserPicture(): Promise<void> {
-        let picture = await this.fileRepository.findOne({
-            where: { fieldname: Equal('default_user_picture') },
-        });
-
-        if (picture) throw new BadRequestException(`Default user picture already exists as File with ID ${picture.id}`);
-
-        const defaultUserPicturePath = DEFAULT_USER_PICTURE_PATH;
-        let size: number;
-
-        try {
-            size = fs.statSync(defaultUserPicturePath).size;
-        } catch(error) {
-            throw new UnprocessableEntityException(`Couldn't read ${defaultUserPicturePath}. Verify if file exists`);
-        }
-
-        const filename = path.basename(defaultUserPicturePath);
-        const encoding = this.detectEncoding(defaultUserPicturePath);
-        const mimetype = this.detectMimetype(defaultUserPicturePath);
-
-        picture = this.fileRepository.create({
+        const defaultPicture = this.fileRepository.create({
             fieldname: 'default_user_picture',
-            originalname: filename,
-            encoding: encoding,
-            mimetype: mimetype,
+            originalname: originalname,
+            encoding: this.detectEncoding(defaultUserPicturePath),
+            mimetype: this.detectMimeType(defaultUserPicturePath),
             size: size,
             path: defaultUserPicturePath,
         });
 
-        await this.fileRepository.save(picture);
+        return (defaultPicture);
     }
 
     private detectEncoding(filePath: string): string {
-        const fileData = fs.readFileSync(filePath);
-        return (chardet.detect(fileData));
-    }
+        const fileData = fileSystem.readFileSync(filePath);
+        const encoding = chardet.detect(fileData);
+        if (!encoding) throw new UnprocessableEntityException(`Encoding type of '${filePath}' not recognized`);
+        return (encoding);
+      }
 
-    private detectMimetype(filePath: string): MimeTypes {
+    private detectMimeType(filePath: string): MimeTypes {
         const mimeType = mimeTypes.lookup(filePath);
-        if (!mimeType || !Object.values(MimeTypes).includes(mimeType as MimeTypes)) throw new UnprocessableEntityException(`MimeType ${mimeType} not recognized`);
+        if (!(mimeType && Object.values(MimeTypes).includes(mimeType as MimeTypes))) throw new UnprocessableEntityException(`MimeType of '${filePath}' not recognized`);
         return (mimeType as MimeTypes);
     }
 
