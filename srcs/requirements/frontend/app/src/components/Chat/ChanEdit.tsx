@@ -23,8 +23,8 @@ import ConfirmPopup from "../ConfirmPopup.tsx";
 
 export default function ChanEdit({id}: {id: number})
 {
-	const {api} = useContext(MyContext);
-	const [globOrLists, setGlobOrLists] = useState("global");
+	const {api, addNotif} = useContext(MyContext);
+
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
@@ -45,6 +45,9 @@ export default function ChanEdit({id}: {id: number})
 
 	const [setPasswd, setSetPasswd] = useState(!id);
 	const [popup, setPopup] = useState(false);
+	const [globOrLists, setGlobOrLists] = useState("global");
+	const [dmOrChan, setDmOrChan] = useState("dm");
+	const [dmUsername, setDmUsername] = useState("");
 
 	const getChan = useGet(["channels", "" + id], !!id);
 	const getMe = useGet(["me"]);
@@ -125,18 +128,78 @@ export default function ChanEdit({id}: {id: number})
 		socket.emit('joinChannel', chan.name);
 	}
 
+	async function newDm() {
+		try {
+			const them = await api.get("/users/" + dmUsername);
+			const me = await api.get("/me");
+
+			const dmChan = await api.post("/channels", {
+				name: me.username + " & " + them.username,
+				visibility: "hidden",
+				mode: "invite_only"
+			});
+
+			api.patch("/channels/" + dmChan.id + "/manage_access", {
+				action: "invite",
+				usernames: [them.username],
+			})
+
+			console.log(dmChan);
+			invalidate(["channels"]);
+		}
+		catch (error) {
+			if (!(error instanceof Error))
+				return ;
+			if (httpStatus(error) === 404)
+				addNotif({content: "No such user!"});
+			else
+				addNotif({content: error.message});
+		}
+	}
+
 	if (!id) return (
 		<div className="ChanEdit ChatContent MainContent">
 			<ChatHeader name={chan.name} edit={true} />
 			<div className="ChanEdit__Scrollable">
-				<GeneralInfos
-					id={id}
-					chan={chan}
-					change={handleChange}
-					submit={handleSubmit}
-					setPasswd={setPasswd}
-					setSetPasswd={setSetPasswd}
-				/>
+				<div className="ChanEdit__GlobOrLists">
+					<div
+						className={"ChanEdit__GlobOrListsItem " + (dmOrChan === "dm")}
+						onClick={() => setDmOrChan("dm")}
+					>
+						Direct Message
+					</div>
+					<div
+						className={"ChanEdit__GlobOrListsItem " + (dmOrChan === "chan")}
+						onClick={() => setDmOrChan("chan")}
+					>
+						New Channel
+					</div>
+				</div>
+				{
+					dmOrChan === "chan" ?
+					<GeneralInfos
+						id={id}
+						chan={chan}
+						change={handleChange}
+						submit={handleSubmit}
+						setPasswd={setPasswd}
+						setSetPasswd={setSetPasswd}
+					/> :
+					<section>
+						<label className="ChanEdit__NameLabel" htmlFor="channelName">
+							Username
+						</label>
+						<input
+							type="text"
+							placeholder="Username"
+							value={dmUsername}
+							onChange={(ev) => setDmUsername(ev.currentTarget.value)}
+						/>
+						<button onClick={() => newDm()} style={{marginLeft: "10px"}}>
+							Done
+						</button>
+					</section>
+				}
 			</div>
 		</div>
 	);
