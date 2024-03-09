@@ -190,7 +190,7 @@ export class Channel {
                 throw new ForbiddenException(`User '${user.username}' is neither member or invited to Channel with ID ${this.id}`);
             case (ChannelMode.PASSWORD_PROTECTED):
                 if (isMember) return ;
-                throw new ForbiddenException(`User '${user.username}' is neither member of Channel with ID ${this.id}`);
+                throw new ForbiddenException(`User '${user.username}' is not member of Channel with ID ${this.id}`);
             default:
                 throw new ForbiddenException(`Channel with ID ${this.id}'s mode not recognized`);
         }
