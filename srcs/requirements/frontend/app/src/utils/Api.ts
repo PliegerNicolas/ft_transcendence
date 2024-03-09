@@ -48,7 +48,7 @@ class Api
 		return (response.json());
 	};
 
-	async post(endpoint: string, body: any) {
+	async post(endpoint: string, body: unknown) {
 		this.#updateToken();
 		if (this.debug)
 			console.log("POST --> " + endpoint + " " + JSON.stringify(body));

@@ -148,7 +148,7 @@ function ChatContent()
 			<ChatHeader name={getChan.data.name} edit={role !== "owner"} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
-						Start of channel « ${getChan.data.name} »
+						Start of channel « {getChan.data.name} »
 					<hr />
 				</div>
 				{

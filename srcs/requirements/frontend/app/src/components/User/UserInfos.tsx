@@ -1,10 +1,35 @@
+import { MyContext } from "../../utils/contexts";
+import { useContext } from "react";
+
 import { UserType } from "../../utils/types";
+import { useGet } from "../../utils/hooks";
 
 import defaultPicture from "../../assets/default_profile.png";
 import camera from "../../assets/camera.svg";
 
 export default function UserInfos({user, me}: {user: UserType, me: boolean})
 {
+	const { token } = useContext(MyContext);
+
+	const getPic = useGet(["users", user.username, "picture"]);
+
+	function postPic(file: File) {
+		console.log(file);
+		fetch(`http://${location.hostname}:3450/picture`, {
+				method: "POST",
+				headers: {
+					"Authorization": token,
+					"Content-Type": file.type,
+				},
+				body: file
+		});
+	}
+
+	<input
+		type="file"
+		onChange={ev => postPic(ev.currentTarget.files![0])}
+	/>
+
 	return (
 		<>
 			<h2>
@@ -17,7 +42,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 			<div className="User__Infos">
 				<div className="User__PictureContainer">
 					<label className="User__Picture" htmlFor={me ? "userPicture" : "machin"}>
-						<img className="User__Picture" src={user.profile.picture || defaultPicture}/>
+						<img className="User__Picture" src={getPic.data || defaultPicture}/>
 						{
 							me &&
 							<div className="User__Camera">
@@ -25,7 +50,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 							</div>
 						}
 					</label>
-					<img className="User__PictureBg" src={user.profile.picture || defaultPicture}/>
+					<img className="User__PictureBg" src={getPic.data || defaultPicture}/>
 				</div>
 				<div className="genericList User__InfoItems">
 					<div><div>Id</div> <div>{"#" + user.id}</div></div>
@@ -37,7 +62,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 			<input
 				type="file" id="userPicture" name="userPicture"
 				style={{display: "none"}}
-				onChange={e => {console.log(e.currentTarget.files![0]);}}
+				onChange={e => postPic(e.currentTarget.files![0])}
 			/>
 		</>
 	);
