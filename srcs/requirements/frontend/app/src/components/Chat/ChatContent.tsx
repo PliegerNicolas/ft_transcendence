@@ -104,6 +104,11 @@ function ChatContent()
 		setInputValue("");
 	}
 
+	function handleJoinChannel() {
+		join.mutate();
+		socket.emit('joinChannel', getChan.data.name);
+	}
+
 	const [popup, setPopup] =
 		useState<{text: JSX.Element, action: Function} | null>(null);
 
@@ -179,7 +184,7 @@ function ChatContent()
 				</div> ||
 				<div className="Chat__Input join">
 					Join this channel to interact with it.
-					<button onClick={() => join.mutate()}>
+					<button onClick={() => handleJoinChannel()}>
 						Join
 					</button>
 				</div>

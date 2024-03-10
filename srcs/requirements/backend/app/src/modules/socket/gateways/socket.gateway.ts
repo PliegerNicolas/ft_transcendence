@@ -31,16 +31,6 @@ export class SocketGateway implements OnModuleInit {
 		this.server.on('connection', (socket) => {
 			console.log('new socket connection : ' + socket.id);
 			this.server.to(socket.id).emit('getUserInfos');
-			setTimeout(() => {
-				if (userById[socket.id]) {
-					this.channelService.getAllChannels(userById[socket.id]).then((chan) => {
-						for (let i = 0; chan[i]; i++) {
-							console.log("CLIENT JOINED CHANNEL : " + chan[i].name);
-							socket.join(chan[i].name);
-						}
-					});
-				}
-			}, 100);
 			socket.on('disconnect', () => {
 				console.log(socket.id + ' left socket');
 				this.server.emit('userLeftSocket', socket.id);
@@ -56,10 +46,17 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('userInfos')
 	handleGetUsername(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
+		console.log("----- USER INFOS -----");
 		if (!userById[client.id]) {
 			userByName[username] = client.id;
 			userById[client.id] = username;
 			console.log("USER : " + userById[client.id] + " with id : " + client.id + " has joined the socket !");
+			this.channelService.getAllChannels(userById[client.id]).then((chan) => {
+				for (let i = 0; chan[i]; i++) {
+						console.log("CLIENT JOINED CHANNEL : " + chan[i].name);
+						client.join(chan[i].name);
+					}
+				});
 		}
 	}
 
