@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserParams, ReplaceUserParams, UpdateUserParams } from '../../types/user.type';
 import { Equal, In, Repository } from 'typeorm';
 import { User } from '../../entities/User.entity';
+import { PicturesService } from '../pictures/pictures.service';
 
 @Injectable()
 export class UsersService {
@@ -10,6 +11,8 @@ export class UsersService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+
+        private readonly pictureService: PicturesService,
     ) {}
 
     async getUsers(): Promise<User[]> {
@@ -19,7 +22,7 @@ export class UsersService {
     async getUser(username: string = undefined): Promise<User> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile.picture'],
+            relations: ['profile', 'picture'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
@@ -30,7 +33,7 @@ export class UsersService {
     async getMyUser(username: string = undefined): Promise<User> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile.picture'],
+            relations: ['profile', 'picture'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
@@ -55,6 +58,7 @@ export class UsersService {
 
         user = this.userRepository.create({
             ...userDetails,
+            picture: null,
         });
 
         return (await this.userRepository.save(user));
@@ -77,7 +81,7 @@ export class UsersService {
     
         user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile.picture'],
+            relations: ['profile', 'picture'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
@@ -106,7 +110,7 @@ export class UsersService {
     
         user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile.picture'],
+            relations: ['profile', 'picture'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
@@ -142,7 +146,7 @@ export class UsersService {
     }
 
 	async turnOnTwoFactorAuthentication(userId: number) {
-		console.log(userId)
+		//console.log(userId)
 		return this.userRepository.update(userId, {isTwoFactorAuthEnabled: true});
 	}
 

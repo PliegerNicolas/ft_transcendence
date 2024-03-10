@@ -61,19 +61,18 @@
 
 .MainContent {
 	background: var(--bg-color-1);
-	padding: 15px 25px 80px;
 	position: fixed;
 	z-index: 1;
 	top: 56px;
 	left: 200px;
 	right: 0;
 	bottom: 0;
-
+	padding: 15px 25px 80px;
 	overflow-y: auto;
 	transition: .1s;
 }
 
-@media (min-width: 1100px) { .MainContent { padding: 15px 50px 80px; }}
+@media (min-width: 1100px) { .MainContent{ padding: 15px 50px 80px; }}
 
 @media (min-width: 1400px) { .MainContent { padding: 15px 100px 80px; }}
 
@@ -355,10 +354,11 @@
 .Setup2fa__Status {
 	display: flex;
 	gap: 5px;
-	margin-bottom: 5px;
+	margin-bottom: 15px;
 }
 
 .Setup2fa__Status img {
+	animation: fadein .5s ease-in-out forwards;
 	filter:
 		brightness(0) saturate(100%) invert(65%) sepia(38%) saturate(1474%)
 		hue-rotate(106deg) brightness(94%) contrast(101%);

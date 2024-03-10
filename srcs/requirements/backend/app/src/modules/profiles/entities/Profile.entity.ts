@@ -14,6 +14,9 @@ export class Profile {
     @Column({ nullable: true })
     lastName: string;
 
+    @Column({ default: 400 })
+    elo: number;
+
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
 
@@ -23,8 +26,4 @@ export class Profile {
     @OneToOne(() => User, (user) => user.profile, { onDelete: 'CASCADE' })
     @JoinColumn()
     user?: User
-
-    @OneToOne(() => File, { cascade: true })
-    @JoinColumn()
-    picture?: File;
 }

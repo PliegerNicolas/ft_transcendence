@@ -71,14 +71,12 @@ function ChatContent()
 		socket.on('onMessage', (content: string) => {
 			setTimeout(() => {
 				invalidate(["channels", id, "messages"]);
-				getMsgs.refetch();
+				invalidate(["channels", id]);
 			}, 100);
 			console.log('onMessage caught', content);
 		});
 		socket.emit('rejoinChannels');
-		return () => {
-			socket.off('onMessage');
-		};
+		return (() => {socket.off('onMessage')});
 	}, []);
 
 	/*
@@ -150,11 +148,7 @@ function ChatContent()
 			<ChatHeader name={getChan.data.name} edit={role !== "owner"} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
-					{
-						getChan.data.membersCount === 2 ?
-							`Start of your conversation with ${getChan.data.name}` :
-							`Start of channel « ${getChan.data.name} »`
-					}
+						Start of channel « {getChan.data.name} »
 					<hr />
 				</div>
 				{

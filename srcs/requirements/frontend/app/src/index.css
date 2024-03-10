@@ -52,7 +52,7 @@
 body {
 	background: var(--bg-color-1);
 	color: var(--text-normal);
-	font-family: sans-serif;
+	font-family: "Bitstream Vera Sans", sans-serif;
 	margin: 0;
 }
 
@@ -71,6 +71,10 @@ p, .p-style, section {
 	p, .p-style {
 		margin: 5px 0px 15px;
 	}
+}
+
+* {
+	scrollbar-color: var(--bg-color-5) var(--bg-color-1);
 }
 
 a {

@@ -4,7 +4,7 @@ import { MsgType, UserType } from "../../utils/types.ts";
 import "../../styles/chat.css";
 import defaultPicture from "../../assets/default_profile.png"
 import { useMutation } from "@tanstack/react-query";
-import { useInvalidate, useMutateError } from "../../utils/hooks.ts";
+import { useGet, useInvalidate, useMutateError } from "../../utils/hooks.ts";
 import { useContext } from "react";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -25,6 +25,8 @@ export default function Msg(
 {
 	const date = fmtDate(data.createdAt);
 	const member = data.channelMember;
+
+	const getPic = useGet(["users", member.user.username ,"picture"]);
 
 	const connectPrev =
 		prev
@@ -71,7 +73,7 @@ export default function Msg(
 		}>
 			<div className="Msg__PictureDiv">
 				<Link to={"/user/" + member.user.username}>
-					<img src={member.user.picture || defaultPicture} />
+					<img src={getPic.data || defaultPicture} />
 				</Link>
 			</div>
 			<div>

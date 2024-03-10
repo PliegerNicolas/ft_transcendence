@@ -68,6 +68,8 @@
 
 .Header__UserInfo>div>img {
 	height: 42px;
+	width: 42px;
+	object-fit: cover;
 	border-radius: 9px;
 }
 .Header__UserInfo>div>img:hover {

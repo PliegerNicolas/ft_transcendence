@@ -11,8 +11,8 @@ class Api
 	async #return_switch(response: Response) {
 		if (!response.ok)
 			return (Promise.reject(new Error(response.status + " " + response.statusText)));
-		const content_type = response.headers.get("content-type");
-		if (content_type && content_type.toLowerCase().includes("application/json"))
+		const contentType = response.headers.get("Content-Type");
+		if (contentType && contentType.toLowerCase().includes("application/json"))
 			return (response.json());
 		else try {
 			const blob = await response.blob();
@@ -43,12 +43,10 @@ class Api
 		const response = await fetch(this.base_url + endpoint, {
 			headers: this.headers
 		});
-		if (!response.ok)
-			return (Promise.reject(new Error(response.status + " " + response.statusText)));
-		return (response.json());
+		return (this.#return_switch(response));
 	};
 
-	async post(endpoint: string, body: any) {
+	async post(endpoint: string, body: unknown) {
 		this.#updateToken();
 		if (this.debug)
 			console.log("POST --> " + endpoint + " " + JSON.stringify(body));
