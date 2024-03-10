@@ -1,13 +1,10 @@
 import {Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Profile } from '../modules/profiles/entities/Profile.entity';
 import { User } from '../modules/users/entities/User.entity';
 import { Equal, Repository } from 'typeorm';
 import { UsersService } from 'src/modules/users/services/users/users.service';
 import { CreateUserDto } from 'src/modules/users/dtos/CreateUser.dto';
-import { CreateProfileDto } from 'src/modules/profiles/dtos/CreateProfile.dto';
-import { request } from 'express';
 
 
 @Injectable()

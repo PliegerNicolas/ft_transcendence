@@ -1,9 +1,16 @@
+import { useEffect } from "react";
 import { PopupType } from "../utils/types";
 
 export default function ConfirmPopup(
 	{title, text, action, cancelFt, actionFt}: PopupType
 )
 {
+	const noScroll = (e: MouseEvent) => e.preventDefault();
+	useEffect(() => {
+		document.addEventListener("wheel", noScroll, { passive: false })
+			return (() => document.removeEventListener("wheel", noScroll));
+	}, [])
+
 	return (
 		<div className="Popup__Bg">
 			<div className="Popup">

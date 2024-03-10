@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { UseQueryResult, useMutation } from "@tanstack/react-query";
 import { MyContext } from "../utils/contexts.ts";
@@ -6,13 +6,14 @@ import { UserType, UserPostType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
 
-import { randomString } from "../utils/utils.ts";
+import { httpStatus, randomString } from "../utils/utils.ts";
 import { useInvalidate, useMutateError, useGet } from "../utils/hooks.ts";
 
 import close from "../assets/close.svg";
 import check from "../assets/check.svg";
 
 import "../styles/sandbox.css";
+import ConfirmPopup from "./ConfirmPopup.tsx";
 
 // <Sandbox /> =================================================================
 
@@ -65,10 +66,16 @@ export default function Sandbox()
 		};
 	}
 
+	const ref = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		ref.current?.scrollTo(0, 0);
+	}, []);
+
 	return (
-		<main className="MainContent">
+		<main className="MainContent" ref={ref}>
 			<h2>Sandbox</h2>
-			<Setup2fa />
+			<Setup2fa reference={ref} />
 			<section>
 				<h3>Global context:</h3>
 				<div className="genericList Sandbox__ContextList">
@@ -138,7 +145,7 @@ export default function Sandbox()
 
 // <Setup2fa /> ================================================================
 
-function Setup2fa()
+function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 {
 	const {api, addNotif} = useContext(MyContext);
 
@@ -155,11 +162,17 @@ function Setup2fa()
 	const turnOn2fa = useMutation({
 		mutationFn: (code: string) =>
 			api.post("/2fa/turn-on", {twoFactorAuthCode : code}),
-		onError: mutateError,
+		onError: (error) => {
+			if (httpStatus(error) === 403)
+				addNotif({type: 1, content: "Failed to enable 2FA, is the code correct?"});
+			else
+				mutateError(error);
+		},
 		onSuccess: () => invalidate(["me"]),
 	});
 
 	const [code, setCode] = useState("");
+	const [popup, setPopup] = useState(false);
 
 	if (getMe.isPending) return (
 		<section>
@@ -177,6 +190,7 @@ function Setup2fa()
 	);
 
 	return (
+		<>
 		<section>
 			<h3>Setup 2FA</h3>
 			{
@@ -210,7 +224,7 @@ function Setup2fa()
 								<div style={{textAlign: "center", marginTop: "10px"}}>
 									<img style={{borderRadius: "18px"}} src={generate2fa.data} />
 								</div>
-								<form onSubmit={e => {e.preventDefault(); turnOn2fa.mutate(code)}}>
+								<form onSubmit={e => {e.preventDefault(); reference.current?.scrollTo(0, 0); setPopup(true)}}>
 								<input
 									type="text"
 									placeholder="xxx xxx"
@@ -225,6 +239,20 @@ function Setup2fa()
 				</>
 			}
 		</section>
+		{
+			popup &&
+			<ConfirmPopup
+				title="Confirmation"
+				text={<>Are you sure you want to enable 2FA on your account?<br /><br />
+					You will need your authentication application to be available whenever
+					you'll want to log in.
+				</>}
+				cancelFt={() => setPopup(false)}
+				action="Enable"
+				actionFt={() => turnOn2fa.mutate(code)}
+			/>
+		}
+		</>
 	);
 }
 

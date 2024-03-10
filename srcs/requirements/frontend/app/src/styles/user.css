@@ -37,12 +37,16 @@
 	align-items: center;
 	background-color: #0006;
 	opacity: 0;
-	transition: .15s;
 }
 .User__Camera:hover {
 	backdrop-filter: blur(4px);
-	opacity: 1;
 	cursor: pointer;
+	animation: camera-fade .8s forwards ease-out;
+}
+
+@keyframes camera-fade {
+	0% { opacity: 1; }
+	100% { opacity: .7; }
 }
 
 .User__Camera>img {

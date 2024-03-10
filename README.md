@@ -45,19 +45,44 @@ Example general purpose body:
 }
 ```
 
+__USER PICTURES__
+
+૰ **@Get** `/users/:username/picture`
+
+૰ **@Get** `/picture`
+
+૰ **@Post** `/users/:username/picture`
+
+૰ **@Post** `/picture`
+
+૰ **@Put** `/users/:username/picture`
+
+૰ **@Put** `/picture`
+
+૰ **@Delte** `/users/:username/picture`
+
+૰ **@Delete** `/picture`
+
+Example general purpose body:
+```
+form-data {
+    "picture": File > 'Screenshot from ...'
+}
+```
+
 __PROFILES__
 
 ૰ **@Put** `/users/:username/profile`
 
-૰ **@Put** `/me/profile`
+૰ **@Put** `/profile`
 
 ૰ **@Patch** `/users/:username/profile`
 
-૰ **@Patch** `/me/profile`
+૰ **@Patch** `/profile`
 
 ૰ **@Delete** `/users/:username/profile`
 
-૰ **@Delete** `/me/profile`
+૰ **@Delete** `/profile`
 
 Example general purpose body:
 ```

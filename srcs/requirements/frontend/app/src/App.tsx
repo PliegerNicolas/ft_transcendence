@@ -209,13 +209,11 @@ function App()
 		enabled: logInfo.logged,
 	});
 
-//	const getUser = useGet(["me"], logInfo.logged);
-
 	useEffect(() => {
 		if (getUser.isSuccess) {
 			socket.emit('userInfos', getUser.data.username);
 		}
-	}, [[logInfo]]);
+	}, [logInfo]);
 
 	useEffect(() => {
 		if (socket) {
@@ -238,7 +236,7 @@ function App()
 				socket.off('inviteAccepted');
 			}
 		};
-	}, [[]]);
+	}, []);
 
 	return (
 		<MyContext.Provider value={{
