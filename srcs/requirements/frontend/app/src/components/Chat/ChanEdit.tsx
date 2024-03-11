@@ -111,19 +111,29 @@ export default function ChanEdit({id}: {id: number})
 				mode: chan.mode,
 				password: chan.password,
 			});
-		else if (setPasswd)
+		else if (
+			setPasswd
+			|| (chan.mode == "password_protected"
+				&& getChan.data.mode != "password_protected")
+		)
 			patchFn.mutate({
 				name: chan.name,
 				visibility: chan.visibility,
 				mode: chan.mode,
 				password: chan.password,
 			});
-		else
+		else if (chan.mode !== "password_protected")
 			patchFn.mutate({
 				name: chan.name,
 				visibility: chan.visibility,
 				mode: chan.mode,
 		});
+		else {
+			patchFn.mutate({
+				name: chan.name,
+				visibility: chan.visibility,
+		});
+		}
 		socket.emit('joinChannel', chan.name);
 	}
 
@@ -258,7 +268,7 @@ export default function ChanEdit({id}: {id: number})
 					chan={chan}
 					change={handleChange}
 					submit={handleSubmit}
-					setPasswd={setPasswd}
+					setPasswd={setPasswd || getChan.data.mode != "password_protected"}
 					setSetPasswd={setSetPasswd}
 				/> :
 				<UserLists chan={getChan.data} />

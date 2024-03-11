@@ -173,6 +173,7 @@ export default function GeneralInfos(
 					onClick={() => submit()}
 					disabled={
 						chan.mode === "password_protected"
+						&& setPasswd
 						&& (chan.password !== chan.passwordRepeat
 							|| (chan.password!.length < 8))
 					}
