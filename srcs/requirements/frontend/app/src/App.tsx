@@ -244,6 +244,7 @@ function App()
 			lastChan,
 			setLastChan,
 			setGlobalPopup,
+			me: getUser.data,
 		}}>
 			<Router>
 				<Header/>
