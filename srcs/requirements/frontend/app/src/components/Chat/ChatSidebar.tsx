@@ -32,6 +32,33 @@ export default function ChatSidebar() {
 					<img src={add} />
 				</Link>
 			</h3>
+			{/*
+				getChans.isSuccess && me &&
+				<div className="Chat__Chanlist">
+					{
+						getChans.data
+							.map((chan: ChanType) =>
+							<Link
+								to={"" + chan.id}
+								className={`Chat__ChanListItem ${id == chan.id && "curr"}`}
+								key={chan.id}
+							>
+								<div className="Chat__ChanListItemName">
+									{chan.name}
+								</div>
+								<div className="Chat__ChanListItemSize">
+									{chan.membersCount} members
+								</div>
+							</Link>)
+					}
+				</div>
+				|| (getChans.isPending || !me) &&
+				<Spinner />
+				|| getChans.isError &&
+				<div className="error-msg" style={{ marginLeft: "25px" }}>
+					{getChans.error.message}
+				</div>*/
+			}
 			<hr />
 			<h4 className="ChatSidebar__Title">
 				All channels:

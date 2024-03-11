@@ -6,7 +6,7 @@ import { Routes, Route } from "react-router-dom";
 import Spinner from "../Spinner.tsx";
 
 import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
-import { getChanRole } from "../../utils/utils.ts";
+import { getChanRole, httpStatus } from "../../utils/utils.ts";
 
 import { MyContext } from "../../utils/contexts";
 
@@ -59,7 +59,8 @@ function ChatContent()
 	});
 
 	const join = useMutation({
-		mutationFn: () => api.patch("/channels/" + id + "/join", {password: ""}),
+		mutationFn: (password: string) =>
+			api.patch("/channels/" + id + "/join", {password}),
 		onSettled: () => invalidate(["channels", id]),
 		onError: mutateError,
 	});
@@ -86,6 +87,8 @@ function ChatContent()
 		if (anchorRef.current)
 			anchorRef.current.scrollIntoView()
 	}, [getMsgs]);
+
+	const [password, setPasswd] = useState("");
 
 	const [inputValue, setInputValue] = useState("");
 	function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -119,9 +122,26 @@ function ChatContent()
 		</div>
 	);
 
-	if (getChan.isError) return (
+	if (getChan.isError && httpStatus(getChan.error) !== 403) return (
 		<div className="ChatContent error">
 			Failed to load this channel: {getChan.error.message}
+		</div>
+	);
+
+	if (getChan.isError) return (
+		<div className="ChatContent ChatContent__Mdp">
+			<div className="notice-msg">
+				A password is required to join this channel:
+			</div>
+			<div className="ChatContent__MdpInput">
+				<input
+					type="password"
+					value={password}
+					onChange={(ev) => setPasswd(ev.currentTarget.value)}
+					placeholder="Password"
+				/>
+				<button onClick={() => join.mutate(password)}>Join</button>
+			</div>
 		</div>
 	);
 
@@ -177,7 +197,7 @@ function ChatContent()
 				</div> ||
 				<div className="Chat__Input join">
 					Join this channel to interact with it.
-					<button onClick={() => join.mutate()}>
+					<button onClick={() => join.mutate("")}>
 						Join
 					</button>
 				</div>

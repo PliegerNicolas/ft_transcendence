@@ -25,7 +25,6 @@ export class PicturesController {
         @Param('username', ParseUsernamePipe) username: string,
         @Res() res: Response,
     ) {
-        console.log("Trying to get " + username + "'s profile picture.")
         const picture = await this.pictureService.getPicture(username);
         this.sendResponse(res, picture);
     }

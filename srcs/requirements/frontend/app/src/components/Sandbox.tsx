@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { UseQueryResult, useMutation } from "@tanstack/react-query";
+import { MutationFunction, useMutation } from "@tanstack/react-query";
 import { MyContext } from "../utils/contexts.ts";
 import { UserType, UserPostType } from "../utils/types.ts"
 
@@ -19,13 +19,12 @@ import ConfirmPopup from "./ConfirmPopup.tsx";
 
 export default function Sandbox()
 {
-	const {api, logged, token} = useContext(MyContext);
+	const {api, logged, token, me} = useContext(MyContext);
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 
 	const getChans = useGet(["channels"]);
-	const getUsers = useGet(["users"]);
 
 	const postUser = useMutation({
 		mutationFn: (user: UserPostType) => api.post("/users", user),
@@ -43,12 +42,6 @@ export default function Sandbox()
 	const delChan = useMutation({
 		mutationFn: (id: number) => api.delete("/channels/" + id),
 		onSettled: () => invalidate(["channels"]),
-		onError: mutateError,
-	});
-
-	const delUser = useMutation({
-		mutationFn: (id: string) => api.delete("/users/" + id),
-		onSettled: () => invalidate(["users"]),
 		onError: mutateError,
 	});
 
@@ -75,7 +68,6 @@ export default function Sandbox()
 	return (
 		<main className="MainContent" ref={ref}>
 			<h2>Sandbox</h2>
-			<Setup2fa reference={ref} />
 			<section>
 				<h3>Global context:</h3>
 				<div className="genericList Sandbox__ContextList">
@@ -127,7 +119,7 @@ export default function Sandbox()
 				<h3>User list:</h3>
 				<div>
 					<button
-						disabled={!getUsers.isSuccess}
+						disabled={!me}
 						onClick={() => postUser.mutate(genUser())}
 					>
 						Add a user
@@ -137,8 +129,9 @@ export default function Sandbox()
 					</button>
 				</div>
 				<hr />
-				<UserListRender query={getUsers} del={delUser.mutate} />
+				<UserListRender />
 			</section>
+			<Setup2fa reference={ref} />
 		</main>
 	);
 }
@@ -249,11 +242,27 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 
 // <UserListRender /> ==========================================================
 
-function UserListRender(
-	{query, del}: {query: UseQueryResult<any, Error>, del: Function}
-)
+function UserListRender()
 {
-	if (query.isPending) return (
+	const { me, api } = useContext(MyContext);
+
+	const mutateError = useMutateError();
+
+	const query = useGet(["users"]);
+
+	const setMe = useMutation({
+		mutationFn: ((name: string) =>
+			api.post("/auth/log_as/" + name, {})) as unknown as
+			MutationFunction<{ access_token: string; }, unknown>,
+		onSuccess: (data: {access_token: string}) => {
+			localStorage.setItem(
+				"my_info", JSON.stringify({logged: true, token: data.access_token}));
+			window.location.reload();
+		},
+		onError: mutateError,
+	});
+
+	if (query.isPending || !me) return (
 		query.isPending &&
 		<div className="genericList">
 			<div><Spinner /></div>
@@ -287,9 +296,12 @@ function UserListRender(
 							</Link>
 						</div>
 						<div>
-							<button className="deleteChan" onClick={() => del(user.username)}>
-								<img src={close} alt="delete"/>
+						{
+							me.id !== user.id &&
+							<button className="logAs" onClick={() => setMe.mutate(user.username)}>
+								Log as
 							</button>
+						}
 						</div>
 					</div>
 				)

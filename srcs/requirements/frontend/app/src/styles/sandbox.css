@@ -41,6 +41,20 @@
 	filter: none;
 }
 
+.Sandbox__Item button.logAs {
+	height: 28px;
+	padding: 0 6px;
+	color: var(--text-normal);
+	background-color: var(--bg-color-2);
+	border: 1px solid var(--bg-color-5);
+}
+.Sandbox__Item button:hover {
+	filter: brightness(1.4);
+}
+.Sandbox__Item button:active {
+	filter: none;
+}
+
 .Sandbox__Scrollable {
 	max-height: 400px;
 	overflow-y: auto;
