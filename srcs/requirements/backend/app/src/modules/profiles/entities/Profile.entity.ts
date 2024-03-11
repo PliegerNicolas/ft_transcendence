@@ -14,6 +14,9 @@ export class Profile {
     @Column({ nullable: true })
     lastName: string;
 
+    @Column({ default: 400 })
+    elo: number;
+
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at: Date;
 

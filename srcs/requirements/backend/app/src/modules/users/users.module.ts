@@ -20,7 +20,7 @@ import { PicturesService } from './services/pictures/pictures.service';
 	imports: [
 		TypeOrmModule.forFeature([User, Profile, Relationship, GamelogToUser, Channel, ChannelMember]),
 		FileUploadsModule.register({
-			dest: './assets/uploads/profile-pictures',
+			dest: './assets/uploads/user-pictures',
 			allowedMimetypes: [MimeTypes.PNG, MimeTypes.JPEG, MimeTypes.GIF],
 			maxSize: 5 * MB_MULTIPLICATOR,
 		}),
@@ -29,6 +29,6 @@ import { PicturesService } from './services/pictures/pictures.service';
 	],
 	controllers: [UsersController, PicturesController],
 	providers: [UsersService, PicturesService],
-	exports: [UsersService],
+	exports: [UsersService, PicturesService],
 })
 export class UsersModule {}
