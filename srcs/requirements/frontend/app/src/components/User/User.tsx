@@ -38,12 +38,11 @@ function User()
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 
-	const { api, addNotif } = useContext(MyContext);
+	const { api, addNotif, me } = useContext(MyContext);
 
 	const [popup, setPopup] = useState(false);
 
 	const getUser = useGet(["users", id]);
-	const getMe = useGet(["me"]);
 	const getRelations = useGet(["relationships"], getUser.isSuccess);
 
 	const patchRelation = useMutation({
@@ -79,18 +78,10 @@ function User()
 			+ getUser.data.username + ", " + e.message}),
 	});
 
-	if (getUser.isPending || getMe.isPending) return (
+	if (getUser.isPending || !me) return (
 		<main className="MainContent">
 			<div className="p-style">
 				<Spinner />
-			</div>
-		</main>
-	);
-
-	if (getMe.isError) return (
-		<main className="MainContent">
-			<div className="p-style error-msg">
-				Failed to load user {id}: {getMe.error.message}
 			</div>
 		</main>
 	);
@@ -104,7 +95,6 @@ function User()
 	);
 
 	const user = getUser.data;
-	const me = getMe.data;
 
 	if (me.id == user.id)
 		return (<Me />);
@@ -122,8 +112,8 @@ function User()
 		if (match.status1 == "accepted" && match.status2 == "accepted")
 			return ("accepted");
 
-		const myStatus = match.user1.id == me.id ? match.status1 : match.status2;
-		const theirStatus = match.user1.id == me.id ? match.status2 : match.status1;
+		const myStatus = match.user1.id == me?.id ? match.status1 : match.status2;
+		const theirStatus = match.user1.id == me?.id ? match.status2 : match.status1;
 
 		if (theirStatus == "blocked")
 			return ("imblocked");

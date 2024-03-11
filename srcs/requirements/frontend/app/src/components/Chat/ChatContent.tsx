@@ -6,7 +6,7 @@ import { Routes, Route } from "react-router-dom";
 import Spinner from "../Spinner.tsx";
 
 import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
-import { getChanRole } from "../../utils/utils.ts";
+import { getChanRole, httpStatus } from "../../utils/utils.ts";
 
 import { MyContext } from "../../utils/contexts";
 
@@ -41,7 +41,7 @@ export default function ChatContentRouter()
 
 function ChatContent()
 {
-	const { api, setLastChan } = useContext(MyContext);
+	const { api, setLastChan, me } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 
@@ -50,7 +50,6 @@ function ChatContent()
 
 	const getChan = useGet(["channels", id]);
 	const getMsgs = useGet(["channels", id, "messages"]);
-	const getMe = useGet(["me"]);
 
 	const postMsg = useMutation({
 		mutationFn: (content: string) =>
@@ -60,7 +59,8 @@ function ChatContent()
 	});
 
 	const join = useMutation({
-		mutationFn: () => api.patch("/channels/" + id + "/join", {password: ""}),
+		mutationFn: (password: string) =>
+			api.patch("/channels/" + id + "/join", {password}),
 		onSettled: () => invalidate(["channels", id]),
 		onError: mutateError,
 	});
@@ -87,6 +87,8 @@ function ChatContent()
 		if (anchorRef.current)
 			anchorRef.current.scrollIntoView()
 	}, [getMsgs]);
+
+	const [password, setPasswd] = useState("");
 
 	const [inputValue, setInputValue] = useState("");
 	function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -120,13 +122,30 @@ function ChatContent()
 		</div>
 	);
 
-	if (getChan.isError) return (
+	if (getChan.isError && httpStatus(getChan.error) !== 403) return (
 		<div className="ChatContent error">
 			Failed to load this channel: {getChan.error.message}
 		</div>
 	);
 
-	const role = getMe.isSuccess ? getChanRole(getChan.data, getMe.data.id) : "";
+	if (getChan.isError) return (
+		<div className="ChatContent ChatContent__Mdp">
+			<div className="notice-msg">
+				A password is required to join this channel:
+			</div>
+			<div className="ChatContent__MdpInput">
+				<input
+					type="password"
+					value={password}
+					onChange={(ev) => setPasswd(ev.currentTarget.value)}
+					placeholder="Password"
+				/>
+				<button onClick={() => join.mutate(password)}>Join</button>
+			</div>
+		</div>
+	);
+
+	const role = me ? getChanRole(getChan.data, me.id) : "";
 
 	if (getMsgs.isPending) {
 		return (
@@ -160,7 +179,6 @@ function ChatContent()
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
 							size={getChan.data.membersCount}
 							role={role}
-							me={getMe.data}
 							popupFn={popupFn}
 						/>
 					)
@@ -179,7 +197,7 @@ function ChatContent()
 				</div> ||
 				<div className="Chat__Input join">
 					Join this channel to interact with it.
-					<button onClick={() => join.mutate()}>
+					<button onClick={() => join.mutate("")}>
 						Join
 					</button>
 				</div>

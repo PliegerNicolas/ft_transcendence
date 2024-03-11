@@ -1,7 +1,7 @@
 import { createContext, Dispatch, SetStateAction } from "react";
 
 import Api from "./Api";
-import { FriendshipType } from "./types";
+import { FriendshipType, UserType } from "./types";
 
 export const FriendshipContext = createContext({
 	id: "0",
@@ -19,6 +19,7 @@ export const MyContext = createContext({
 	lastChan: "",
 	setLastChan: (() => {}) as Function,
 	setGlobalPopup: (() => {}) as Function,
+	me: undefined as UserType | undefined,
 });
 
 export const ChatContext = createContext({

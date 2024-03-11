@@ -23,7 +23,7 @@ import ConfirmPopup from "../ConfirmPopup.tsx";
 
 export default function ChanEdit({id}: {id: number})
 {
-	const {api, addNotif} = useContext(MyContext);
+	const {api, addNotif, me} = useContext(MyContext);
 
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
@@ -50,7 +50,6 @@ export default function ChanEdit({id}: {id: number})
 	const [dmUsername, setDmUsername] = useState("");
 
 	const getChan = useGet(["channels", "" + id], !!id);
-	const getMe = useGet(["me"]);
 
 	useEffect(() => {
 		if (!getChan.isSuccess)
@@ -112,19 +111,29 @@ export default function ChanEdit({id}: {id: number})
 				mode: chan.mode,
 				password: chan.password,
 			});
-		else if (setPasswd)
+		else if (
+			setPasswd
+			|| (chan.mode == "password_protected"
+				&& getChan.data.mode != "password_protected")
+		)
 			patchFn.mutate({
 				name: chan.name,
 				visibility: chan.visibility,
 				mode: chan.mode,
 				password: chan.password,
 			});
-		else
+		else if (chan.mode !== "password_protected")
 			patchFn.mutate({
 				name: chan.name,
 				visibility: chan.visibility,
 				mode: chan.mode,
 		});
+		else {
+			patchFn.mutate({
+				name: chan.name,
+				visibility: chan.visibility,
+		});
+		}
 		socket.emit('joinChannel', chan.name);
 	}
 
@@ -204,7 +213,7 @@ export default function ChanEdit({id}: {id: number})
 		</div>
 	);
 
-	if (getChan.isPending || !getMe.isSuccess) return (
+	if (getChan.isPending || !me) return (
 		<div className="ChatContent spinner">
 			<Spinner />
 		</div>
@@ -216,7 +225,7 @@ export default function ChanEdit({id}: {id: number})
 		</div>
 	);
 
-	const role = getChanRole(getChan.data, getMe.data.id);
+	const role = getChanRole(getChan.data, me.id);
 
 	if (role !== "owner" && role !== "operator") return (
 		<div className="ChatContent error">
@@ -259,7 +268,7 @@ export default function ChanEdit({id}: {id: number})
 					chan={chan}
 					change={handleChange}
 					submit={handleSubmit}
-					setPasswd={setPasswd}
+					setPasswd={setPasswd || getChan.data.mode != "password_protected"}
 					setSetPasswd={setSetPasswd}
 				/> :
 				<UserLists chan={getChan.data} />

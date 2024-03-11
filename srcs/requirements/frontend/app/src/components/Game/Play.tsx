@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { socket } from "../../App.tsx"
-import { useGet } from '../../utils/hooks.ts';
 
 import OnlineGame  from './OnlinePlay'
 
 import "../../styles/play.css";
+import { MyContext } from '../../utils/contexts.ts';
 
 // <Play /> ====================================================================
 
-function Play() {
+function Play()
+{
+	const { me } = useContext(MyContext);
+	if (!me) return (<></>);
+
 	const [inQueue, setInQueue] = useState(false);
 	const [gameReady, setGameReady] = useState(false);
 	const [playerReady, setPlayerReady] = useState(false);
@@ -88,7 +92,7 @@ function Play() {
 	}, [[]]);
 
 	const readyCheckHandler = () => {
-		socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: getUser.data.username});
+		socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: me.username});
 		setPlayerReady(true);
 	}
 
@@ -118,8 +122,6 @@ function Play() {
 	}
 
 	// Backend http requests ==============================================================================================================
-
-	const getUser = useGet(["me"]);
 
 	return (
 		<main className="MainContent">

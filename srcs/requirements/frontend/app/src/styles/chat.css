@@ -36,6 +36,10 @@
 	100% { width: 220px; }
 }
 
+.ChatSidebar > hr {
+	margin-bottom: 0;
+}
+
 .ChatSidebar__Title {
 	height: 54px;
 	margin: 0;
@@ -160,6 +164,45 @@
 
 .ChatContent.spinner {
 	justify-content: center;
+}
+
+.ChatContent__Mdp {
+	background: var(--bg-color-1);
+	position: relative;
+	flex: 1;
+	padding-top: 54px;
+	padding-bottom: 100px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+	box-shadow: inset 0 0 48px #0004;
+}
+
+.ChatContent__Mdp > .notice-msg {
+	font-size: 1rem;
+	margin-bottom: 12px;
+}
+
+.ChatContent__MdpInput {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.ChatContent__MdpInput input {
+	font-size: 1.2rem;
+	max-width: 220px;
+	padding: 0 8px;
+	height: 32px;
+}
+.ChatContent__MdpInput input::placeholder {
+	font-size: .92rem;
+}
+
+.ChatContent__MdpInput button {
+	height: 34px;
 }
 
 .Chat__Convo {

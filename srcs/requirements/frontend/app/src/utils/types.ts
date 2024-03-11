@@ -12,7 +12,8 @@ export interface UserType {
 	updated_at: string,
 	created_at: string,
 	picture: string,
-	profile: ProfileType
+	profile: ProfileType,
+	isTwoFactorAuthEnabled: boolean,
 }
 
 export interface UserPostType {
