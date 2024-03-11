@@ -8,10 +8,11 @@ import { GamelogToUser } from 'src/modules/gamelogs/entities/GamelogToUser.entit
 import { Gamelog } from 'src/modules/gamelogs/entities/Gamelog.entity';
 import { User } from 'src/modules/users/entities/User.entity';
 import { UsersModule } from 'src/modules/users/users.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 
 
 @Module({
-  imports: [GamelogsModule, UsersModule, TypeOrmModule.forFeature([Gamelog, GamelogToUser, User])],
+  imports: [GamelogsModule, UsersModule, ProfilesModule, TypeOrmModule.forFeature([Gamelog, GamelogToUser, User])],
   providers: [GameService, GamelogsService, GameServer],
   exports: [GameService, GameServer]
 })

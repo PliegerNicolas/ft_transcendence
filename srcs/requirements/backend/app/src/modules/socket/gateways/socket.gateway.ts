@@ -6,7 +6,6 @@ import { GameServer } from '../../game/server/game.server'
 import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../../game/server/game.constants'
 import { MessagePayloads } from '../../chats/types/messagePayloads.type';
 import { ChannelsService } from 'src/modules/chats/channels/services/channels/channels.service';
-import { async } from 'rxjs';
 
 let state: gameState[] = [];
 let player1ID: string[] = [];
@@ -121,19 +120,13 @@ export class SocketGateway implements OnModuleInit {
 			if (state[data.lobby]) {
 				state[data.lobby].score.player2 = 5;
 			}
-			const index = player1ID.indexOf(data.lobby, 0);
-			if (index > -1) {
-   				player1ID.splice(index, 1);
-			}
+			player1ID = player1ID.filter((id) => id != data.userId);
 		}
 		else if (player2ID[data.lobby] === data.userId) {
 			if (state[data.lobby]) {
 				state[data.lobby].score.player1 = 5;
 			}
-			const index = player2ID.indexOf(data.lobby, 0);
-			if (index > -1) {
-   				player2ID.splice(index, 1);
-			}
+			player2ID = player2ID.filter((id) => id != data.userId);
 		}
 		if (!state[data.lobby])
 			this.server.to(data.lobby).emit('leaveLobby');
@@ -187,25 +180,17 @@ export class SocketGateway implements OnModuleInit {
 		}
 	}
 
-	//to fix
 	@SubscribeMessage('notReady')
 	handleNotReady(@MessageBody() data: {lobby: string, playerNumber: number}, @ConnectedSocket() client: Socket) {
-		console.log('NOT READY : ' + client.id);
 		if (player1ID[data.lobby] && data.playerNumber === 1) {
-			const index = player1ID.indexOf(data.lobby, 0);
-			console.log('index = ' + index);
-			if (index > -1) {
-   				player1ID.splice(index, 1);
-			}
+			console.log('NOT READY : ' + client.id);
+   			player1ID = player1ID.filter((id) => id != client.id);
 			console.log('player1ID should be null/undefined : ' + player1ID[data.lobby]);
 			client.leave(data.lobby);
 		}
 		else if (player2ID[data.lobby]  && data.playerNumber === 2) {
-			const index = player2ID.indexOf(data.lobby, 0);
-			console.log('index = ' + index);
-			if (index > -1) {
-   				player2ID.splice(index, 1);
-			}
+			console.log('NOT READY : ' + client.id);
+			player2ID = player2ID.filter((id) => id != client.id);
 			console.log('player2ID should be null/undefined : ' + player2ID[data.lobby]);
 			client.leave(data.lobby);
 		}
