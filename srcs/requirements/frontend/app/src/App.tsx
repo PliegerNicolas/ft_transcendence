@@ -60,7 +60,6 @@ function Auth()
 			MutationFunction<{access_token: string, isTwoFactorAuthEnabled: boolean}>,
 
 		onSuccess: (data: {access_token: string, isTwoFactorAuthEnabled: boolean}) => {
-			console.log(data);
 			localStorage.setItem(
 				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
 			setLogInfo({logged: false, token: data.access_token});

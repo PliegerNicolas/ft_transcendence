@@ -33,7 +33,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 		data.append('picture', file);
 
 		fetch(`http://${location.hostname}:3450/picture`, {
-				method: "POST",
+				method: "PUT",
 				headers: { "Authorization": token },
 				body: data
 		}).then(() => {

@@ -69,6 +69,12 @@ export interface ChanType {
 	mutedUsers: Array<UserType>,
 }
 
+export interface ChanSpecsType {
+	isMember: boolean,
+	role: string,
+	channel: ChanType,
+}
+
 export interface ChanFormType {
 	name: string,
 	visibility: string,

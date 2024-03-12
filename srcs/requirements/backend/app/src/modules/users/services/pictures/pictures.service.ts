@@ -71,14 +71,15 @@ export class PicturesService {
         
         const picture = user.picture;
 
-        if (!picture) throw new BadRequestException(`User ${username ? username : '{undefined}'} has no picture`);
+        //if (!picture) throw new BadRequestException(`User ${username ? username : '{undefined}'} has no picture`);
 
         user.picture = this.fileRepository.create({
             ...file,
         });
 
         await this.userRepository.save(user);
-        await this.fileRepository.remove(picture);
+        if (picture)
+            await this.fileRepository.remove(picture);
 
         return (user.picture);
     }
