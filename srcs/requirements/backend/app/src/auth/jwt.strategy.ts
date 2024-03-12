@@ -7,8 +7,16 @@ import { Request } from 'express';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy){
 	constructor(private authService : AuthService) {
+		var cookieExtractor = function(req) {
+			var token = null;
+			if (req && req.cookies) {
+				token = req.cookies['access_token'];
+			}
+			return token;
+		};
 		super({
-			jwtFromRequest : ExtractJwt.fromHeader("authorization"),
+			// jwtFromRequest : ExtractJwt.fromExtractors([cookieExtractor]),
+			jwtFromRequest : ExtractJwt.fromHeader('authorization'),
 			secretOrKey : process.env.API_SECRET ,
 			ignoreExpiration : false,
 			passReqToCallback: true

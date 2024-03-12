@@ -8,11 +8,11 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule, { cors: true });
 
+	//Setting up middleware for cookies
+	app.use(cookieParser());
 	// Apply a global TypeORM exception filter
 	app.useGlobalFilters(new TypeormExceptionFilter());
 
-	//Setting up middleware for cookies
-	app.use(cookieParser());
 
 	app.useGlobalPipes(
 		new ValidationPipe({
