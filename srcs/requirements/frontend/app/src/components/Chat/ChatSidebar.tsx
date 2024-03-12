@@ -9,7 +9,7 @@ import { ChatContext } from "../../utils/contexts.ts";
 import add from "../../assets/add.svg";
 
 import "../../styles/chat.css";
-import { ChanType } from "../../utils/types.ts";
+import { ChanSpecsType } from "../../utils/types.ts";
 
 // <ChatSidebar /> =============================================================
 
@@ -32,32 +32,33 @@ export default function ChatSidebar() {
 					<img src={add} />
 				</Link>
 			</h3>
-			{/*
-				getChans.isSuccess && me &&
+			{
+				getChans.isSuccess &&
 				<div className="Chat__Chanlist">
 					{
 						getChans.data
-							.map((chan: ChanType) =>
+							.filter((chan: ChanSpecsType) => chan.isMember)
+							.map((chan: ChanSpecsType) =>
 							<Link
-								to={"" + chan.id}
-								className={`Chat__ChanListItem ${id == chan.id && "curr"}`}
-								key={chan.id}
+								to={"" + chan.channel.id}
+								className={`Chat__ChanListItem ${id == chan.channel.id && "curr"}`}
+								key={chan.channel.id}
 							>
 								<div className="Chat__ChanListItemName">
-									{chan.name}
+									{chan.channel.name}
 								</div>
 								<div className="Chat__ChanListItemSize">
-									{chan.membersCount} members
+									{chan.channel.membersCount} members
 								</div>
 							</Link>)
 					}
 				</div>
-				|| (getChans.isPending || !me) &&
+				|| (getChans.isPending) &&
 				<Spinner />
 				|| getChans.isError &&
 				<div className="error-msg" style={{ marginLeft: "25px" }}>
 					{getChans.error.message}
-				</div>*/
+				</div>
 			}
 			<hr />
 			<h4 className="ChatSidebar__Title">
@@ -67,17 +68,19 @@ export default function ChatSidebar() {
 				getChans.isSuccess &&
 				<div className="Chat__Chanlist">
 					{
-						getChans.data.map((chan: ChanType) =>
+						getChans.data
+							.filter((chan: ChanSpecsType) => !chan.isMember)
+							.map((chan: ChanSpecsType) =>
 							<Link
-								to={"" + chan.id}
-								className={`Chat__ChanListItem ${id == chan.id && "curr"}`}
-								key={chan.id}
+								to={"" + chan.channel.id}
+								className={`Chat__ChanListItem ${id == chan.channel.id && "curr"}`}
+								key={chan.channel.id}
 							>
 								<div className="Chat__ChanListItemName">
-									{chan.name}
+									{chan.channel.name}
 								</div>
 								<div className="Chat__ChanListItemSize">
-									{chan.membersCount} members
+									{chan.channel.membersCount} members
 								</div>
 							</Link>)
 					}

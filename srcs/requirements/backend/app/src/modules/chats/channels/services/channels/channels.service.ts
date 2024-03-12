@@ -31,6 +31,7 @@ export class ChannelsService {
                 { invitedUsers: { username: Equal(username) } },
                 { visibility: Equal(ChannelVisibility.PUBLIC) },
             ],
+            relations:  ['members.user'],
         });
 
         channels = channels.filter(channel => Object.entries(queryParams).every(([key, value]) =>

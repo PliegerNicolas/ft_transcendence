@@ -60,10 +60,12 @@ function ChatContent()
 		if (!getChan.isSuccess)
 			return ({});
 
-		chan.members.forEach((member: MemberType, index: number) =>
+		chan.members
+			.sort((a: MemberType, b: MemberType) => +a.id - +b.id)
+			.forEach((member: MemberType, index: number) =>
 			ret[member.id] = index
 		);
-
+		console.log(ret);
 		return (ret);
 	}, [getChan.data])
 
@@ -77,7 +79,7 @@ function ChatContent()
 	const join = useMutation({
 		mutationFn: (password: string) =>
 			api.patch("/channels/" + id + "/join", {password}),
-		onSettled: () => invalidate(["channels", id]),
+		onSettled: () => invalidate(["channels"]),
 		onError: mutateError,
 	});
 

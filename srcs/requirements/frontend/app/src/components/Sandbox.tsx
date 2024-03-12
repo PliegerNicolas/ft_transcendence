@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { MutationFunction, useMutation } from "@tanstack/react-query";
 import { MyContext } from "../utils/contexts.ts";
-import { UserType, UserPostType } from "../utils/types.ts"
+import { UserType, UserPostType, ChanSpecsType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
 
@@ -40,7 +40,7 @@ export default function Sandbox()
 	});
 
 	const delChan = useMutation({
-		mutationFn: (id: number) => api.delete("/channels/" + id),
+		mutationFn: (id: string) => api.delete("/channels/" + id),
 		onSettled: () => invalidate(["channels"]),
 		onError: mutateError,
 	});
@@ -96,16 +96,19 @@ export default function Sandbox()
 						<div>NAME</div>
 					</div>
 					{
-						getChans.data.map((chan: {id: number, name: string}) =>
-							<div key={chan.id} className="Sandbox__Item">
-								<div>{chan.id}</div>
+						getChans.data.map((chan: ChanSpecsType) =>
+							<div key={chan.channel.id} className="Sandbox__Item">
+								<div>{chan.channel.id}</div>
 								<div>
-									<Link to={"/chat/" + chan.id}>
-										<span>{chan.name}</span>
+									<Link to={"/chat/" + chan.channel.id}>
+										<span>{chan.channel.name}</span>
 									</Link>
 								</div>
 								<div>
-									<button className="deleteChan" onClick={() => delChan.mutate(chan.id)}>
+									<button
+										className="deleteChan"
+										onClick={() => delChan.mutate(chan.channel.id)}
+									>
 										<img src={close} alt="delete"/>
 									</button>
 								</div>
