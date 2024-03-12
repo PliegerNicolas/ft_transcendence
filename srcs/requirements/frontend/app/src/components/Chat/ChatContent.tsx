@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useContext } from "react";
+import { useState, useRef, useEffect, useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
@@ -18,6 +18,7 @@ import ChatHeader from "./ChatHeader.tsx";
 import Msg from "./Msg.tsx";
 import ChanEdit from "./ChanEdit.tsx";
 import ConfirmPopup from "../ConfirmPopup.tsx";
+import { MemberType } from "../../utils/types.ts";
 
 // <ChatContentRouter /> =======================================================
 
@@ -50,6 +51,19 @@ function ChatContent()
 
 	const getChan = useGet(["channels", id]);
 	const getMsgs = useGet(["channels", id, "messages"]);
+
+	const idMap = useMemo(() => {
+		let ret: {[memberId: string]: number} = {};
+
+		if (!getChan.isSuccess)
+			return ({});
+
+		getChan.data.members.forEach((member: MemberType, index: number) =>
+			ret[member.id] = index
+		);
+
+		return (ret);
+	}, [getChan.data])
 
 	const postMsg = useMutation({
 		mutationFn: (content: string) =>
@@ -179,6 +193,7 @@ function ChatContent()
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
 							size={getChan.data.membersCount}
 							role={role}
+							idMap={idMap}
 							popupFn={popupFn}
 						/>
 					)

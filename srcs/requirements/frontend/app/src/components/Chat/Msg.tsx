@@ -11,13 +11,14 @@ import { MyContext } from "../../utils/contexts.ts";
 // <Msg /> =====================================================================
 
 export default function Msg(
-	{data, prev, next, size, role, popupFn}:
+	{data, prev, next, size, role, idMap, popupFn}:
 	{
 		data: MsgType,
 		prev: MsgType | null,
 		next: MsgType | null,
 		size: number,
 		role: string,
+		idMap: {[memberId: string]: number},
 		popupFn: Function
 	}
 )
@@ -83,7 +84,7 @@ export default function Msg(
 					<Link
 						to={"/user/" + member.user.username}
 						className="Msg__Sender"
-						style={{color: `hsl(${(360 / size) * (+member.id - 1)} 80% 80%)`}}
+						style={{color: `hsl(${(360 / size) * (idMap[member.id])} 80% 80%)`}}
 					>
 						{member.user.username}
 					</Link>
