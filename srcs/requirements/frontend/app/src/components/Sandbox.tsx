@@ -143,7 +143,6 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 	const { api, addNotif, me } = useContext(MyContext);
 
 	const mutateError = useMutateError();
-	const invalidate = useInvalidate();
 
 	const generate2fa = useMutation({
 		mutationFn: () => api.post("/2fa/generate", {}),
@@ -159,7 +158,12 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 			else
 				mutateError(error);
 		},
-		onSuccess: () => invalidate(["me"]),
+		onSuccess: (data: {access_token: string}) => {
+			setPopup(false);
+			localStorage.setItem(
+				"my_info", JSON.stringify({logged: true, token: data.access_token}));
+			window.location.reload();
+		},
 	});
 
 	const [code, setCode] = useState("");
@@ -183,7 +187,7 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 					<div className="Setup2fa__Status">
 						<>2FA is enabled for your account</> <img src={check} />
 					</div>
-					<button onClick={() => addNotif({type: 1, content: "This does nothing yet."})}>
+					<button onClick={() => addNotif({type: 1, content: "This does nothing (yet)."})}>
 						Disable 2FA?
 					</button>
 				</> :
@@ -297,10 +301,11 @@ function UserListRender()
 						</div>
 						<div>
 						{
-							me.id !== user.id &&
+							me.id !== user.id ?
 							<button className="logAs" onClick={() => setMe.mutate(user.username)}>
 								Log as
-							</button>
+							</button>:
+							<div className="notice-msg" style={{marginRight: "12px"}}>(You)</div>
 						}
 						</div>
 					</div>
