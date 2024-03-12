@@ -37,7 +37,9 @@ export async function dynaGet(uri: string, token: string)
 			"Authorization": token},
 		credentials: "include",
 		});
-	if (!response.ok)
-		return (Promise.reject(new Error(response.status + " " + response.statusText)));
+	if (!response.ok) {
+		const error = await response.json();
+		return (Promise.reject(error));
+	}
 	return (response.json());
 }

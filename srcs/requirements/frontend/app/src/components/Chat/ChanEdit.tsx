@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import { useMutateError, useInvalidate, useGet } from "../../utils/hooks.ts";
-import { httpStatus, getChanRole } from "../../utils/utils.ts";
+import { getChanRole, httpStatus } from "../../utils/utils.ts";
 import { ChanType, UserType } from "../../utils/types.ts";
 import { MyContext } from "../../utils/contexts.ts";
 
@@ -156,19 +156,19 @@ export default function ChanEdit({id}: {id: number})
 			console.log(dmChan);
 			invalidate(["channels"]);
 		}
-		catch (error) {
-			if (!(error instanceof Error))
+		catch (e) {
+			if (!(e instanceof Error))
 				return ;
-			if (httpStatus(error) === 404)
+			if (httpStatus(e) == 404)
 				addNotif({content: "No such user!"});
 			else
-				addNotif({content: error.message});
+				addNotif({content: e.message});
 		}
 	}
 
 	if (!id) return (
 		<div className="ChanEdit ChatContent MainContent">
-			<ChatHeader name={chan.name} edit={true} />
+			<ChatHeader name={chan.name} edit={true} leave={null} />
 			<div className="ChanEdit__Scrollable">
 				<div className="ChanEdit__GlobOrLists">
 					<div
@@ -235,7 +235,7 @@ export default function ChanEdit({id}: {id: number})
 
 	return (
 		<div className="ChanEdit ChatContent MainContent">
-			<ChatHeader name={chan.name} edit={true} />
+			<ChatHeader name={chan.name} edit={true} leave={null} />
 			<div className="ChanEdit__Scrollable">
 				<div className="ChanEdit__GlobOrLists">
 					<div
@@ -425,13 +425,13 @@ function UserList(
 				1
 			);
 		}
-		catch (error) {
-			if (!(error instanceof Error))
+		catch (e) {
+			if (!(e instanceof Error))
 				return ;
-			if (httpStatus(error) == 404)
+			if (httpStatus(e) == 404)
 				addNotif({content: "No such user: '" + newUser + "'"})
 			else
-				addNotif({content: error.message})
+				addNotif({content: e.message})
 		}
 	}
 

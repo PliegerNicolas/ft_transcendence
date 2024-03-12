@@ -11,7 +11,9 @@ import "../../styles/chat.css";
 
 // <ChatHeader /> ==============================================================
 
-export default function ChatHeader({name, edit}: {name: string, edit: boolean})
+export default function ChatHeader(
+	{name, edit, leave}:
+	{name: string, edit: boolean, leave: Function | null})
 {
 	const {showSidebar, setShowSidebar} = useContext(ChatContext);
 
@@ -27,12 +29,20 @@ export default function ChatHeader({name, edit}: {name: string, edit: boolean})
 				<div className="ChatHeader__Title">
 					{name}
 				</div>
-				{
-					!edit &&
-					<Link to="edit" className="ChatHeader__Edit">
-						<img src={editIcon} />
-					</Link>
-				}
+				<div className="ChatHeader__Right">
+					{
+						leave &&
+						<button onClick={() => leave()}>
+							Leave
+						</button>
+					}
+					{
+						!edit &&
+						<Link to="edit" className="ChatHeader__Edit">
+							<img src={editIcon} />
+						</Link>
+					}
+				</div>
 			</div>
 		</div>
 	);
