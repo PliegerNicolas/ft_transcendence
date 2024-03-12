@@ -83,27 +83,28 @@ export class Channel {
     /* Check channel accessibility */
 
     public getMember(username: string): ChannelMember {
-        return (this.members.find((member) => member.user.username === username));
+        if (!username) return (null);
+        return (this.members.find((member) => member.user.username === username) || null);
     }
 
     public isMember(username: string): boolean {
         if (!this.members) return (false);
-        return (this.members.some((member) => member.user.username === username));
+        return (this.members.some((member) => member.user.username === username) || null);
     }
 
     public isInvited(username: string): boolean {
         if (!this.invitedUsers) return (false);
-        return (this.invitedUsers.some((user) => user.username === username));
+        return (this.invitedUsers.some((user) => user.username === username) || null);
     }
 
     public isBanned(username: string): boolean {
         if (!this.bannedUsers) return (false);
-        return (this.bannedUsers.some((user) => user.username === username));
+        return (this.bannedUsers.some((user) => user.username === username) || null);
     }
 
     public isMuted(username: string): boolean {
         if (!this.mutedUsers) return (false);
-        return (this.mutedUsers.some((user) => user.username === username)); 
+        return (this.mutedUsers.some((user) => user.username === username) || null); 
     }
 
     public isRankedEqualOrAbove(username: string, role: ChannelRole): boolean {
@@ -189,8 +190,7 @@ export class Channel {
                 if (isInvited || isMember) return ;
                 throw new ForbiddenException(`User '${user.username}' is neither member or invited to Channel with ID ${this.id}`);
             case (ChannelMode.PASSWORD_PROTECTED):
-                if (isMember) return ;
-                throw new ForbiddenException(`User '${user.username}' is not member of Channel with ID ${this.id}`);
+                return ;
             default:
                 throw new ForbiddenException(`Channel with ID ${this.id}'s mode not recognized`);
         }

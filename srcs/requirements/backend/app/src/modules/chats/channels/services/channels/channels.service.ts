@@ -80,7 +80,7 @@ export class ChannelsService {
         });
 
         channel.validateAccess(user);
-        if (channel.mode === ChannelMode.PASSWORD_PROTECTED) {
+        if (channel.mode === ChannelMode.PASSWORD_PROTECTED && !(channel.isMember(username) || user.hasGlobalServerPrivileges())) {
             if (!channelDetails.password) throw new ForbiddenException(`A password is expected on Channel with ID ${channelId}`);
             else if (!await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)) throw new ForbiddenException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
         }
@@ -192,7 +192,7 @@ export class ChannelsService {
         });
 
         channel.validateJoin(user);
-        if (channel.mode === ChannelMode.PASSWORD_PROTECTED) {
+        if (channel.mode === ChannelMode.PASSWORD_PROTECTED && !(channel.isMember(username) || user.hasGlobalServerPrivileges())) {
             if (!channelDetails.password) throw new ForbiddenException(`A password is expected on Channel with ID ${channelId}`);
             else if (!await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)) throw new ForbiddenException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
         }
