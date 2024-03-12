@@ -41,7 +41,8 @@ class Api
 		if (this.debug)
 			console.log("GET --> " + endpoint);
 		const response = await fetch(this.base_url + endpoint, {
-			headers: this.headers
+			headers: this.headers,
+			credentials: "include",
 		});
 		return (this.#return_switch(response));
 	};
@@ -53,7 +54,8 @@ class Api
 		const response = await fetch(this.base_url + endpoint, {
 			method: "POST",
 			headers: this.headers,
-			body: JSON.stringify(body)
+			body: JSON.stringify(body),
+			credentials: "include",
 		});
 		return (this.#return_switch(response));
 	};
@@ -65,7 +67,8 @@ class Api
 		const response = await fetch(this.base_url + endpoint, {
 			method: "DELETE",
 			headers: this.headers,
-			body: JSON.stringify(body)
+			body: JSON.stringify(body),
+			credentials: "include",
 		});
 		return (this.#return_switch(response));
 	};
@@ -77,7 +80,8 @@ class Api
 		const response = await fetch(this.base_url + endpoint, {
 			method: "PUT",
 			headers: this.headers,
-			body: JSON.stringify(body)
+			body: JSON.stringify(body),
+			credentials: "include",
 		});
 		return (this.#return_switch(response));
 	};
@@ -89,7 +93,8 @@ class Api
 		const response = await fetch(this.base_url + endpoint, {
 			method: "PATCH",
 			headers: this.headers,
-			body: JSON.stringify(body)
+			body: JSON.stringify(body),
+			credentials: "include",
 		});
 		return (this.#return_switch(response));
 	};
