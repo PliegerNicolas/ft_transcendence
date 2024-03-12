@@ -52,13 +52,15 @@ function ChatContent()
 	const getChan = useGet(["channels", id]);
 	const getMsgs = useGet(["channels", id, "messages"]);
 
+	const chan = getChan.isSuccess ? getChan.data.channel : undefined;
+
 	const idMap = useMemo(() => {
 		let ret: {[memberId: string]: number} = {};
 
 		if (!getChan.isSuccess)
 			return ({});
 
-		getChan.data.members.forEach((member: MemberType, index: number) =>
+		chan.members.forEach((member: MemberType, index: number) =>
 			ret[member.id] = index
 		);
 
@@ -116,7 +118,7 @@ function ChatContent()
 			return;
 
 		postMsg.mutate(inputValue);
-		socket.emit('newMessage', { content: inputValue, channel: getChan.data.name });
+		socket.emit('newMessage', { content: inputValue, channel: chan.name });
 		setInputValue("");
 	}
 
@@ -159,12 +161,12 @@ function ChatContent()
 		</div>
 	);
 
-	const role = me ? getChanRole(getChan.data, me.id) : "";
+	const role = me ? getChanRole(chan, me.id) : "";
 
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
-				<ChatHeader name={getChan.data.name} edit={role !== "owner"} />
+				<ChatHeader name={chan.name} edit={role !== "owner"} />
 				<Spinner />
 			</div>
 		);
@@ -178,10 +180,10 @@ function ChatContent()
 
 	return (
 		<div className="ChatContent">
-			<ChatHeader name={getChan.data.name} edit={role !== "owner"} />
+			<ChatHeader name={chan.name} edit={role !== "owner"} />
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
-						Start of channel « {getChan.data.name} »
+						Start of channel « {chan.name} »
 					<hr />
 				</div>
 				{
@@ -191,7 +193,7 @@ function ChatContent()
 							data={item}
 							prev={index ? getMsgs.data[index - 1] : null}
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
-							size={getChan.data.membersCount}
+							size={chan.membersCount}
 							role={role}
 							idMap={idMap}
 							popupFn={popupFn}
@@ -205,7 +207,7 @@ function ChatContent()
 				<div className="Chat__Input">
 					<textarea
 						id="SendMessage"
-						placeholder={`Send a message to « ${getChan.data.name} »`}
+						placeholder={`Send a message to « ${chan.name} »`}
 						value={inputValue}
 						onChange={handleInputChange}
 					/>
