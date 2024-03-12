@@ -48,7 +48,7 @@ export class TwofactorauthController {
 		  await this.usersService.turnOnTwoFactorAuthentication(user.id);
 		  const access_token = await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)
 		  console.log(access_token)
-		  res.cookie("access_token", access_token,{ httpOnly: true});
+		  res.cookie("access_token", access_token,{ httpOnly: true, sameSite: 'strict'});
 		  res.json({access_token : access_token})
 		  res.send();
 		//   return ({access_token: access_token});
@@ -70,7 +70,7 @@ export class TwofactorauthController {
 			throw new UnauthorizedException('Wrong authentication code');
 		  }
 		  const access_token = await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)
-		  res.cookie("access_token", access_token,{ httpOnly: true});
+		  res.cookie("access_token", access_token,{ httpOnly: true, sameSite: 'strict'});
 		  res.json({access_token : access_token})
 		  res.send();
 		//   return ({access_token: access_token});

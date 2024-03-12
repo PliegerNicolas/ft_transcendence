@@ -9,15 +9,15 @@ export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFact
 	constructor(private authService : AuthService) {
 		var cookieExtractor = function(req) {
 			var token = null;
-			console.log(req.headers)
+			console.log(req.cookies)
 			if (req && req.cookies) {
-				token = req.cookies['authorization'];
+				token = req.cookies['access_token'];
 			}
 			return token;
 		};
 		super({
-			// jwtFromRequest : ExtractJwt.fromExtractors([cookieExtractor]),
-			jwtFromRequest : ExtractJwt.fromHeader('authorization'),
+			jwtFromRequest : ExtractJwt.fromExtractors([cookieExtractor]),
+			// jwtFromRequest : ExtractJwt.fromHeader('authorization'),
 			secretOrKey : process.env.API_SECRET ,
 			ignoreExpiration : false,
 			passReqToCallback: true

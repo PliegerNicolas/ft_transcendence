@@ -15,8 +15,8 @@ import { AuthService } from 'src/auth/auth.service';
   
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 	  const request = context.switchToHttp().getRequest();
-	  const token = request.headers.authorization;
-	//   const token = request.cookies(['access_token']);
+	//   const token = request.headers.authorization;
+	  const token = request.cookies(['access_token']);
 	  if (!token) {
 		return (true);
 	  }
