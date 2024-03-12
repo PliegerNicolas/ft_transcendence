@@ -54,8 +54,8 @@ export default function ChanEdit({id}: {id: number})
 	useEffect(() => {
 		if (!getChan.isSuccess)
 			return ;
-		setChan({...getChan.data, password: "", passwordRepeat: "",})
-		console.log(getChan.data);
+		setChan({...getChan.data.channel, password: "", passwordRepeat: "",})
+		console.log(getChan.data.channel);
 	}, [getChan.isSuccess]);
 
 	function updateField(field: string, value: unknown) {
@@ -114,7 +114,7 @@ export default function ChanEdit({id}: {id: number})
 		else if (
 			setPasswd
 			|| (chan.mode == "password_protected"
-				&& getChan.data.mode != "password_protected")
+				&& getChan.data.channel.mode != "password_protected")
 		)
 			patchFn.mutate({
 				name: chan.name,
@@ -225,7 +225,7 @@ export default function ChanEdit({id}: {id: number})
 		</div>
 	);
 
-	const role = getChanRole(getChan.data, me.id);
+	const role = getChanRole(getChan.data.channel, me.id);
 
 	if (role !== "owner" && role !== "operator") return (
 		<div className="ChatContent error">
@@ -242,7 +242,7 @@ export default function ChanEdit({id}: {id: number})
 						className={"ChanEdit__GlobOrListsItem " + (globOrLists === "global")}
 						onClick={() => {
 							setGlobOrLists("global");
-							console.log(getChan.data.mode + " vs. " + chan.mode);
+							console.log(getChan.data.channel.mode + " vs. " + chan.mode);
 						}}
 					>
 						General Infos
@@ -250,11 +250,10 @@ export default function ChanEdit({id}: {id: number})
 					<div
 						className={"ChanEdit__GlobOrListsItem " + (globOrLists === "lists")}
 						onClick={() => {
-							if (getChan.data.mode !== chan.mode)
+							if (getChan.data.channel.mode !== chan.mode)
 								setPopup(true);
 							else
 								setGlobOrLists("lists");
-							console.log("coucou");
 						}}
 					>
 						User lists
@@ -268,10 +267,10 @@ export default function ChanEdit({id}: {id: number})
 					chan={chan}
 					change={handleChange}
 					submit={handleSubmit}
-					setPasswd={setPasswd || getChan.data.mode != "password_protected"}
+					setPasswd={setPasswd || getChan.data.channel.mode != "password_protected"}
 					setSetPasswd={setSetPasswd}
 				/> :
-				<UserLists chan={getChan.data} />
+				<UserLists chan={getChan.data.channel} />
 			}
 			</div>
 			{

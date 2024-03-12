@@ -35,6 +35,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 		fetch(`http://${location.hostname}:3450/picture`, {
 				method: "PUT",
 				headers: { "Authorization": token },
+				credentials: "include",
 				body: data
 		}).then(() => {
 			invalidate(["users", user.username, "picture"]);
