@@ -7,8 +7,17 @@ import { Request } from 'express';
 @Injectable()
 export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFactor'){
 	constructor(private authService : AuthService) {
+		var cookieExtractor = function(req) {
+			var token = null;
+			console.log(req.headers)
+			if (req && req.cookies) {
+				token = req.cookies['authorization'];
+			}
+			return token;
+		};
 		super({
-			jwtFromRequest : ExtractJwt.fromHeader("authorization"),
+			// jwtFromRequest : ExtractJwt.fromExtractors([cookieExtractor]),
+			jwtFromRequest : ExtractJwt.fromHeader('authorization'),
 			secretOrKey : process.env.API_SECRET ,
 			ignoreExpiration : false,
 			passReqToCallback: true
@@ -34,4 +43,7 @@ export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFact
 		}
 		return {id: payload.user_id, oauth_id: payload.oauth_id, username: user.username};
 	}
+
+	
+
 }

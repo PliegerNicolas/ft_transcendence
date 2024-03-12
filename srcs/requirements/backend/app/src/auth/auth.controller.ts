@@ -1,7 +1,8 @@
-import { Controller, HttpCode, HttpStatus, Post, Body, UseGuards, Request, Param, Req, Get } from '@nestjs/common';
+import { Controller, HttpCode, HttpStatus, Post, Body, UseGuards, Request, Param, Req, Get, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -9,14 +10,20 @@ export class AuthController {
 	
 	@HttpCode(HttpStatus.OK)
 	@Post()
-	async signIn(@Body() oauthToken:JSON) {
+	async signIn(@Body() oauthToken:JSON,
+				@Res({passthrough : true}) res : Response
+				) {
 		console.log("controller")
 		const ret = await (this.authService.signIn(oauthToken)).then(
 			(data) => data
 		);
 		console.log(ret)
 		// console.log(ret.access_token);
-		return {access_token : ret.access_token, isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled};
+		res.cookie("authorization", ret.access_token,{ httpOnly: true});
+		res.json({access_token : ret.access_token, isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled});
+		res.send();
+		return ;
+		// return {access_token : ret.access_token, isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled};
 	  }
 
 	@UseGuards(AuthGuard('jwtTwoFactor'))
@@ -33,7 +40,12 @@ export class AuthController {
 
 	@UseGuards(AuthGuard('jwt-refresh'))
 	@Get('refresh')
-	refreshToken(@Request() req : any){
-		return (this.authService.refresh_token(req.headers.authorization));
+	refreshToken(@Request() req : any,
+				@Res() res : Response){
+		const access_token = this.authService.refresh_token(req.headers.authorization);
+		res.cookie("access_token", access_token,{ httpOnly: true});
+		res.json({access_token : access_token});
+		res.send();
+		// return (access_token);
 	}
 }
