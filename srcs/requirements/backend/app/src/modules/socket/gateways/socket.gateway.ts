@@ -33,10 +33,10 @@ export class SocketGateway implements OnModuleInit {
 			this.server.to(socket.id).emit('getUserInfos');
 			setTimeout(() => {
 				if (userById[socket.id]) {
-					this.channelService.getAllChannels(userById[socket.id]).then((chan) => {
-						for (let i = 0; chan[i]; i++) {
-							console.log("CLIENT JOINED CHANNEL : " + chan[i].name);
-							socket.join(chan[i].name);
+					this.channelService.getAllChannels(userById[socket.id]).then((channelSpec) => {
+						for (let i = 0; channelSpec[i]; i++) {
+							console.log("CLIENT JOINED CHANNEL : " + channelSpec[i].channel.name);
+							socket.join(channelSpec[i].channel.name);
 						}
 					});
 				}
@@ -65,10 +65,10 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('rejoinChannels')
 	handleRejoinChannels(@ConnectedSocket() client: Socket) {
-		this.channelService.getAllChannels(userById[client.id]).then((chan) => {
-			for (let i = 0; chan[i]; i++) {
-				console.log("CLIENT JOINED CHANNEL : " + chan[i].name);
-				client.join(chan[i].name);
+		this.channelService.getAllChannels(userById[client.id]).then((channelSpec) => {
+			for (let i = 0; channelSpec[i]; i++) {
+				console.log("CLIENT JOINED CHANNEL : " + channelSpec[i].channel.name);
+				client.join(channelSpec[i].channel.name);
 			}
 		});
 	}
