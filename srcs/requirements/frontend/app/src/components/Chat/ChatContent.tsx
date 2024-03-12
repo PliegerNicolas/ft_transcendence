@@ -65,7 +65,6 @@ function ChatContent()
 			.forEach((member: MemberType, index: number) =>
 			ret[member.id] = index
 		);
-		console.log(ret);
 		return (ret);
 	}, [getChan.data])
 
@@ -79,6 +78,13 @@ function ChatContent()
 	const join = useMutation({
 		mutationFn: (password: string) =>
 			api.patch("/channels/" + id + "/join", {password}),
+		onSettled: () => invalidate(["channels"]),
+		onError: mutateError,
+	});
+
+	const leave = useMutation({
+		mutationFn: () =>
+			api.patch("/channels/" + id + "/leave", {}),
 		onSettled: () => invalidate(["channels"]),
 		onError: mutateError,
 	});
@@ -134,6 +140,8 @@ function ChatContent()
 		});
 	}
 
+	const [leavePopup, setLeavePopup] = useState(false);
+
 	if (getChan.isPending) return (
 		<div className="ChatContent spinner">
 			<Spinner />
@@ -146,7 +154,9 @@ function ChatContent()
 		</div>
 	);
 
-	if (getChan.isError) return (
+	if (getChan.isError) console.log(getChan.error.message);
+
+	if (getChan.isError && getChan.error.message.includes("password")) return (
 		<div className="ChatContent ChatContent__Mdp">
 			<div className="notice-msg">
 				A password is required to join this channel:
@@ -163,12 +173,21 @@ function ChatContent()
 		</div>
 	);
 
+	if (getChan.isError) return (
+		<div className="ChatContent ChatContent__Mdp">
+			<div style={{fontSize: "2rem", marginBottom: "12px"}}>💀</div>
+			<div className="error-msg">
+				This channel requires an invitation to join.
+			</div>
+		</div>
+	);
+
 	const role = me ? getChanRole(chan, me.id) : "";
 
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
-				<ChatHeader name={chan.name} edit={role !== "owner"} />
+				<ChatHeader name={chan.name} edit={role !== "owner"} leave={null} />
 				<Spinner />
 			</div>
 		);
@@ -182,7 +201,11 @@ function ChatContent()
 
 	return (
 		<div className="ChatContent">
-			<ChatHeader name={chan.name} edit={role !== "owner"} />
+			<ChatHeader
+				name={chan.name}
+				edit={role !== "owner"}
+				leave={role ? () => setLeavePopup(true) : null}
+			/>
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
 						Start of channel « {chan.name} »
@@ -229,6 +252,16 @@ function ChatContent()
 					action="Confirm"
 					actionFt={popup.action}
 					cancelFt={() => setPopup(null)}
+				/>
+			}
+			{
+				leavePopup &&
+				<ConfirmPopup
+					title={"Leaving" + chan.name}
+					text={<>Are you sure you want to leave {chan.name}?</>}
+					action="Leave"
+					actionFt={() => {leave.mutate(); setLeavePopup(false)}}
+					cancelFt={() => setLeavePopup(false)}
 				/>
 			}
 		</div>

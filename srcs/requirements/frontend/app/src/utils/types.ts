@@ -126,3 +126,9 @@ export interface MessagePayloads {
 	content: string,
 	channel: string,
 }
+
+export interface HttpErrorType {
+	message: string,
+	error: string,
+	statusCode: number,
+}

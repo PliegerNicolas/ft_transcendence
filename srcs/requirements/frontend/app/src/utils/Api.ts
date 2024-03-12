@@ -8,14 +8,20 @@ class Api
 	debug: boolean;
 	auth: boolean;
 
-	async #return_switch(response: Response) {
-		if (!response.ok)
-			return (Promise.reject(new Error(response.status + " " + response.statusText)));
-		const contentType = response.headers.get("Content-Type");
+	async #return_switch(res: Response) {
+		if (!res.ok) {
+			const err = await res.json();
+
+			if (!err.statusCode || !err.message)
+				return (Promise.reject(new Error(res.status + " " + res.statusText)));
+
+			return (Promise.reject(new Error(err.statusCode + " " + err.message)));
+		}
+		const contentType = res.headers.get("Content-Type");
 		if (contentType && contentType.toLowerCase().includes("application/json"))
-			return (response.json());
+			return (res.json());
 		else try {
-			const blob = await response.blob();
+			const blob = await res.blob();
 			return (URL.createObjectURL(blob));
 		}
 		catch {
