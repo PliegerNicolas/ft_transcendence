@@ -244,6 +244,8 @@ export class ChannelsService {
 
         const users = await this.userService.findStrictlyUsersByUsername(usernames);
 
+        channel.validatePermissionOnUsers(user, users);
+
         switch (channelAccessDetails.action) {
             case (ChannelAccessAction.BAN):
                 channel.ban(users);
