@@ -53,7 +53,7 @@ export function useGet(key: QueryKey, enabled = true)
 		queryKey: key,
 		queryFn: () => api.get(path),
 		retry: stopOnHttp,
-		staleTime: 5000,
+//		staleTime: 5000,
 		enabled,
 	}));
 }

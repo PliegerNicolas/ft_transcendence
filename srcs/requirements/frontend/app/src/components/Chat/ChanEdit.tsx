@@ -134,6 +134,7 @@ export default function ChanEdit({id}: {id: number})
 				visibility: chan.visibility,
 		});
 		}
+		console.log("SOCKET EMIT JOIN CHANNEL.");
 		socket.emit('joinChannel', chan.name);
 	}
 
@@ -238,17 +239,19 @@ export default function ChanEdit({id}: {id: number})
 			<ChatHeader name={chan.name} edit={true} leave={null} />
 			<div className="ChanEdit__Scrollable">
 				<div className="ChanEdit__GlobOrLists">
+				{
+					role === "owner" &&
 					<div
 						className={"ChanEdit__GlobOrListsItem " + (globOrLists === "global")}
-						onClick={() => {
-							setGlobOrLists("global");
-							console.log(getChan.data.channel.mode + " vs. " + chan.mode);
-						}}
+						onClick={() => setGlobOrLists("global")}
 					>
 						General Infos
 					</div>
+				}
 					<div
-						className={"ChanEdit__GlobOrListsItem " + (globOrLists === "lists")}
+						className={
+							"ChanEdit__GlobOrListsItem " + (globOrLists === "lists") + " " + role
+						}
 						onClick={() => {
 							if (getChan.data.channel.mode !== chan.mode)
 								setPopup(true);
@@ -261,7 +264,7 @@ export default function ChanEdit({id}: {id: number})
 				</div>
 			{
 				(getChan.isSuccess) &&
-				globOrLists === "global" ?
+				globOrLists === "global" && role !== "operator" ?
 				<GeneralInfos
 					id={id}
 					chan={chan}
@@ -270,7 +273,7 @@ export default function ChanEdit({id}: {id: number})
 					setPasswd={setPasswd || getChan.data.channel.mode != "password_protected"}
 					setSetPasswd={setSetPasswd}
 				/> :
-				<UserLists chan={getChan.data.channel} />
+				<UserLists chan={getChan.data.channel} role={role} />
 			}
 			</div>
 			{
@@ -301,9 +304,9 @@ interface actionType {
 	usernames: Array<string>,
 }
 
-function UserLists({chan}: {chan: ChanType})
+function UserLists({chan, role}: {chan: ChanType, role: string})
 {
-	const {api} = useContext(MyContext);
+	const { api } = useContext(MyContext);
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
 
@@ -316,38 +319,19 @@ function UserLists({chan}: {chan: ChanType})
 
 	return (
 		<div>
-			{
-				chan.mode !== "invite_only" &&
-				<section className="banned">
-					<UserList
-						title="Banned users"
-						list={chan.bannedUsers}
-						add={(value: UserType) => {
-							action.mutate({action: "ban", usernames: [value.username]});
-						}}
-						rm={(value: UserType) => {
-							action.mutate({action: "deban", usernames: [value.username]});
-						}}
-						owner={null}
-					/>
-				</section>
-			}
-			{
-				chan.mode === "invite_only" &&
-				<section className="allowed">
-					<UserList
-						title="Invited users"
-						list={chan.invitedUsers}
-						add={(value: UserType) =>
-							action.mutate({action: "invite", usernames: [value.username]})
-						}
-						rm={(value: UserType) =>
-							action.mutate({action: "uninvite", usernames: [value.username]})
-						}
-						owner={null}
-					/>
-				</section>
-			}
+			<section className="allowed">
+				<UserList
+					title="Invited users"
+					list={chan.invitedUsers}
+					add={(value: UserType) =>
+						action.mutate({action: "invite", usernames: [value.username]})
+					}
+					rm={(value: UserType) =>
+						action.mutate({action: "uninvite", usernames: [value.username]})
+					}
+					owner={null}
+				/>
+			</section>
 			<section className="muted">
 				<UserList
 					title="Muted users"
@@ -361,6 +345,21 @@ function UserLists({chan}: {chan: ChanType})
 					owner={null}
 				/>
 			</section>
+			<section className="banned">
+				<UserList
+					title="Banned users"
+					list={chan.bannedUsers}
+					add={(value: UserType) => {
+						action.mutate({action: "ban", usernames: [value.username]});
+					}}
+					rm={(value: UserType) => {
+						action.mutate({action: "deban", usernames: [value.username]});
+					}}
+					owner={null}
+				/>
+			</section>
+			{
+			role === "owner" &&
 			<section className="admins">
 				<UserList
 					title="Admins"
@@ -376,6 +375,7 @@ function UserLists({chan}: {chan: ChanType})
 					owner={null}
 				/>
 			</section>
+			}
 		</div>
 	);
 }

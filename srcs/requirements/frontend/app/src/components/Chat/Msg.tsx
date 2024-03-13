@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MsgType } from "../../utils/types.ts";
+import { ChanType, MsgType } from "../../utils/types.ts";
 
 import "../../styles/chat.css";
 import defaultPicture from "../../assets/default_profile.png"
@@ -7,17 +7,19 @@ import { useMutation } from "@tanstack/react-query";
 import { useGet, useInvalidate, useMutateError } from "../../utils/hooks.ts";
 import { useContext } from "react";
 import { MyContext } from "../../utils/contexts.ts";
+import { getChanRole, isAdmin, isBanned, isMuted } from "../../utils/utils.ts";
 
 // <Msg /> =====================================================================
 
 export default function Msg(
-	{data, prev, next, size, role, idMap, popupFn}:
+	{data, prev, next, size, role, chan, idMap, popupFn}:
 	{
 		data: MsgType,
 		prev: MsgType | null,
 		next: MsgType | null,
 		size: number,
 		role: string,
+		chan: ChanType,
 		idMap: {[memberId: string]: number},
 		popupFn: Function
 	}
@@ -26,17 +28,17 @@ export default function Msg(
 	const { me } = useContext(MyContext)
 
 	const date = fmtDate(data.createdAt);
-	const member = data.channelMember;
+	const user = data.channelMember.user;
 
-	const getPic = useGet(["users", member.user.username ,"picture"]);
+	const getPic = useGet(["users", user.username ,"picture"]);
 
 	const connectPrev =
 		prev
-		&& prev.channelMember.id === member.id
+		&& prev.channelMember.id === data.channelMember.id
 		&& fmtDate(prev.createdAt) === date;
 	const connectNext =
 		next
-		&& next.channelMember.id === member.id
+		&& next.channelMember.id === data.channelMember.id
 		&& fmtDate(next.createdAt) === date;
 
 	function sameDate(a: Date, b: Date) {
@@ -69,12 +71,12 @@ export default function Msg(
 	return (
 		<div className={
 			`Msg
-			${me && member.user.id == me.id && "me"}
+			${me && user.id == me.id && "me"}
 			${connectPrev && "connectPrev"}
 			${connectNext && "connectNext"}`
 		}>
 			<div className="Msg__PictureDiv">
-				<Link to={"/user/" + member.user.username}>
+				<Link to={"/user/" + user.username}>
 					<img src={getPic.data || defaultPicture} />
 				</Link>
 			</div>
@@ -82,11 +84,19 @@ export default function Msg(
 			{
 				<div className="Msg__Info">
 					<Link
-						to={"/user/" + member.user.username}
-						className="Msg__Sender"
-						style={{color: `hsl(${(360 / size) * (idMap[member.id])} 80% 80%)`}}
+						to={"/user/" + user.username}
 					>
-						{member.user.username}
+						<span
+							className="Msg__Sender"
+							style={
+								idMap[user.id] !== undefined ?
+								{color: `hsl(${(360 / size) * (idMap[user.id])} 80% 80%)`} :
+								{color: "#aac"}
+							}
+						>
+							{user.username}
+							{idMap[user.id] === undefined ? " [left]" : ""}
+						</span>
 					</Link>
 					•
 					<span className="Msg__Date">
@@ -94,8 +104,9 @@ export default function Msg(
 					</span>
 					{
 						(role === "operator" || role === "owner") &&
-						me && me.id !== member.user.id &&
-						<ModActions msg={data} role={role} popupFn={popupFn}/>
+						me && me.id !== user.id &&
+						getChanRole(chan, user.id) != "owner" &&
+						<ModActions msg={data} role={role} chan={chan} popupFn={popupFn}/>
 					}
 				</div>
 			}
@@ -108,12 +119,12 @@ export default function Msg(
 // <ModActions /> ==============================================================
 
 function ModActions(
-	{msg, role, popupFn}:
-	{msg: MsgType, role: string, popupFn: Function}
+	{msg, role, chan, popupFn}:
+	{msg: MsgType, role: string, chan: ChanType, popupFn: Function}
 )
 {
-	const member = msg.channelMember;
-	const username = member.user.username;
+	const user = msg.channelMember.user;
+	const username = user.username;
 
 	const { api } = useContext(MyContext);
 	const mutateError = useMutateError();
@@ -131,45 +142,63 @@ function ModActions(
 
 	return (
 		<div className="Msg__ModActions">
-			<button
-				className="ban"
-				onClick={() => popupFn(
-					<>Are you sure you want to ban {username} from this channel?</>,
-					() => {action.mutate("ban")}
-				)}
-			>
-				Ban
-			</button>
-			<button
-				className="kick"
-				onClick={() => popupFn(
-					<>Are you sure you want to kick {username} from this channel?</>,
-					() => {action.mutate("kick")}
-				)}
-			>
-				Kick
-			</button>
-			<button
-				className="mute"
-				onClick={() => popupFn(
-					<>Are you sure you want to mute {username} on this channel?</>,
-					() => {action.mutate("mute")}
-				)}
-			>
-				Mute
-			</button>
 			{
-				role === "owner" && (
-					member.role !== "operator" ?
-					<button
-						className="admin"
-						onClick={() => popupFn(
-							<>Are you sure you want to make {username} an admin on this channel?</>,
-							() => {action.mutate("promote")}
-						)}
-					>
-						Admin
-					</button> :
+				isBanned(chan, user.id) ?
+				<button
+					className="ban"
+					onClick={() => popupFn(
+						<>Are you sure you want to unban {username} from this channel?</>,
+						() => {action.mutate("deban")}
+					)}
+				>
+					Unban
+				</button> :
+				<button
+					className="ban"
+					onClick={() => popupFn(
+						<>Are you sure you want to ban {username} from this channel?</>,
+						() => {action.mutate("ban")}
+					)}
+				>
+					Ban
+				</button>
+			}
+			{
+				getChanRole(chan, user.id) &&
+				<button
+					className="kick"
+					onClick={() => popupFn(
+						<>Are you sure you want to kick {username} from this channel?</>,
+						() => {action.mutate("kick")}
+					)}
+				>
+					Kick
+				</button>
+			}
+			{
+				isMuted(chan, user.id) ?
+				<button
+					className="mute"
+					onClick={() => popupFn(
+						<>Are you sure you want to unmute {username} on this channel?</>,
+						() => {action.mutate("unmute")}
+					)}
+				>
+					Unmute
+				</button> :
+				<button
+					className="mute"
+					onClick={() => popupFn(
+						<>Are you sure you want to mute {username} on this channel?</>,
+						() => {action.mutate("mute")}
+					)}
+				>
+					Mute
+				</button>
+			}
+			{
+				role === "owner" && getChanRole(chan, user.id) && (
+					isAdmin(chan, user.id) ?
 					<button
 						className="unadmin"
 						onClick={() => popupFn(
@@ -179,6 +208,15 @@ function ModActions(
 						)}
 					>
 						Unadmin
+					</button> :
+					<button
+						className="admin"
+						onClick={() => popupFn(
+							<>Are you sure you want to make {username} an admin on this channel?</>,
+							() => {action.mutate("promote")}
+						)}
+					>
+						Admin
 					</button>
 				)
 			}
