@@ -84,6 +84,8 @@ export class Channel {
 
     public getMember(username: string): ChannelMember {
         if (!username) return (null);
+        if (!this.members)
+            return (null);
         return (this.members.find((member) => member.user.username === username) || null);
     }
 
