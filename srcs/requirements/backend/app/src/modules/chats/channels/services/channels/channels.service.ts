@@ -204,7 +204,7 @@ export class ChannelsService {
             else if (!await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)) throw new ForbiddenException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
         }
 
-        const member = channel.getMember(user.username);
+        const member = channel.members?.find((member) => member.user.username === username);
         if (!member) {
             this.channelRepository.merge(channel, {
                 members: [...channel.members, { user, role: ChannelRole.MEMBER }],

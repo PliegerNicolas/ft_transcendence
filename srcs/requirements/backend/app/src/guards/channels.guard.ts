@@ -79,7 +79,7 @@ export class ChannelsNotGuard implements CanActivate {
 			}).then(
 				(data) => data
 			)
-			if (member == null)
+			if (member == null || member.hasLeft)
 			{
 				return (true);
 			}

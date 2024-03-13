@@ -86,12 +86,12 @@ export class Channel {
         if (!username) return (null);
         if (!this.members)
             return (null);
-        return (this.members.find((member) => member.user.username === username) || null);
+        return (this.members.find((member) => member.user.username === username && !member.hasLeft) || null);
     }
 
     public isMember(username: string): boolean {
         if (!this.members) return (false);
-        return (this.members.some((member) => member.user.username === username) || null);
+        return (this.members.some((member) => member.user.username === username && !member.hasLeft) || null);
     }
 
     public isInvited(username: string): boolean {
