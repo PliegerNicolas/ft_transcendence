@@ -44,14 +44,34 @@ export class TwofactorauthController {
 		  if (!isCodeValid) {
 			throw new ForbiddenException('Wrong authentication code');
 		  }
-		  console.log(user.id)
 		  await this.usersService.turnOnTwoFactorAuthentication(user.id);
 		  const access_token = await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)
-		  console.log(access_token)
+		  const refresh_token = await this.authService.createRefreshToken({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)
 		  res.cookie("access_token", access_token,{maxAge: 1600000, httpOnly: true, sameSite: 'none', secure:true });
-		  res.json({username: req.user.username})
+		  res.cookie("refresh_token", refresh_token, {maxAge: 86400000, httpOnly: true, sameSite: 'none', secure:true})
+		  res.json({username: user.username})
 		  res.send();
 		  return ;
+	}
+
+	@UseGuards(AuthGuard('jwtTwoFactor'))
+	@Post('turn-off')
+	@HttpCode(200)
+	async desactivateTwoFactorAuth(
+		@Request() req : any,
+		@Res() res : Response,
+		){
+			const user = req.user;
+			await(this.usersService.turnOffTwoFactorAuthentication(user.id));
+			const access_token = await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: false}, false)
+			const refresh_token = await this.authService.createRefreshToken({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)
+			//   console.log(access_token)
+			  res.cookie("access_token", access_token,{maxAge: 1600000, httpOnly: true, sameSite: 'none', secure:true });
+			  res.cookie("refresh_token", refresh_token, {maxAge: 86400000, httpOnly: true, sameSite: 'none', secure:true})
+			  res.json({username: user.username})
+			  res.send();
+			  return ;
+
 	}
 
 	@UseGuards(AuthGuard('jwt'))

@@ -37,12 +37,18 @@ export class AuthService
 
 	async createJwt(payload : any, isTwoFactorAuthLogged : boolean = false){
 		payload.isTwoFactorAuthLogged = isTwoFactorAuthLogged;
-		//console.log("payload")
-		//console.log(payload)
 		return (await this.jwtService.signAsync(payload))
 	}
 
-	async signIn(oauthToken : JSON ): Promise<{access_token : any, isTwoFactorAuthEnabled : any}> {
+	async createRefreshToken(payload : any, isTwoFactorAuthLogged : boolean = false){
+		payload.isTwoFactorAuthLogged = isTwoFactorAuthLogged;
+		return (await this.jwtService.signAsync(payload,{
+			secret : process.env.API_SECRET,
+			expiresIn : '1d'
+		}))
+	}
+
+	async signIn(oauthToken : JSON ): Promise<{access_token : any, refresh_token : any, isTwoFactorAuthEnabled : any}> {
 		const [code, redirect_uri] = Object.values(oauthToken);
 
 		let ft_payload = await fetch(
@@ -62,10 +68,8 @@ export class AuthService
 			(data) => data.json()
 		);
 
-		// console.log(payload);
 		if(Object.keys(ft_payload)[0] !== "access_token") throw new UnauthorizedException()
 		const access = ft_payload.access_token;
-		const refresh = ft_payload.token_type;
 
 		const info = await fetch(
 			"https://api.intra.42.fr/v2/me",
@@ -81,8 +85,10 @@ export class AuthService
 
 		const payload = ({ user_id: user.id, oauth_id: user.oauthId, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled });
 		const access_token = await this.createJwt(payload)
+		const refresh_token = await this.createRefreshToken(payload)
 		return ({
 			access_token,
+			refresh_token,
 			isTwoFactorAuthEnabled : payload.isTwoFactorAuthEnabled
 		});
 	}
@@ -107,9 +113,6 @@ export class AuthService
 
 	async refresh_token(jwt : string){
 		const payload = this.jwtService.decode(jwt);
-		console.log('refresh')
-		console.log(jwt)
-		console.log(payload)
 		const access_token = (await this.createJwt({user_id : payload.user_id, oauth_id: payload.oauth_id, isTwoFactorEnabled: payload.isTwoFactorAuthEnabled}, payload.isTwoFactorAuthLogged))
 		return {access_token : access_token}
 	}

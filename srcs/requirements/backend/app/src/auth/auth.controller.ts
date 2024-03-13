@@ -17,14 +17,11 @@ export class AuthController {
 		const ret = await (this.authService.signIn(oauthToken)).then(
 			(data) => data
 		);
-		// console.log(ret.access_token);
 		res.cookie("access_token", ret.access_token,{maxAge: 1600000, httpOnly: true, sameSite: 'none', secure:true });
-		// res.header({"Access-Control-Allow-Credentials" : true})
-		// console.log(res)
+		res.cookie("refresh_token", ret.refresh_token, {maxAge: 86400000, httpOnly: true, sameSite: 'none', secure:true})
 		res.json({isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled});
 		res.send();
 		return ;
-		// return {access_token : ret.access_token, isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled};
 	  }
 
 	@UseGuards(AuthGuard('jwtTwoFactor'))
@@ -45,8 +42,6 @@ export class AuthController {
 				@Res() res : Response){
 		const access_token = this.authService.refresh_token(req.headers.authorization);
 		res.cookie("access_token", access_token,{maxAge: 1600000, httpOnly: true, sameSite: 'none', secure:true });
-		// res.json({access_token : access_token});
 		res.send();
-		// return (access_token);
 	}
 }
