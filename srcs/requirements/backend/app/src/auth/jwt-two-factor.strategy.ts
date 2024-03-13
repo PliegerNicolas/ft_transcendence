@@ -17,7 +17,6 @@ export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFact
 		};
 		super({
 			jwtFromRequest : ExtractJwt.fromExtractors([cookieExtractor]),
-			// jwtFromRequest : ExtractJwt.fromHeader('authorization'),
 			secretOrKey : process.env.API_SECRET ,
 			ignoreExpiration : false,
 			passReqToCallback: true

@@ -16,7 +16,6 @@ export class JwtStrategy extends PassportStrategy(Strategy){
 		};
 		super({
 			jwtFromRequest : ExtractJwt.fromExtractors([cookieExtractor]),
-			// jwtFromRequest : ExtractJwt.fromHeader('authorization'),
 			secretOrKey : process.env.API_SECRET ,
 			ignoreExpiration : false,
 			passReqToCallback: true
@@ -36,14 +35,6 @@ export class JwtStrategy extends PassportStrategy(Strategy){
 		{
 			throw new UnauthorizedException();
 		}
-		// if (!users.isTwoFactorAuthEnabled)
-		// {
-		// 	return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
-		// }
-		// if (payload.isTwoFactorAuthLogged)
-		// {
-		// 	return {id: payload.user_id, oauth_id: payload.oauth_id, username: users.username};
-		// }
 		return {id: payload.user_id, oauth_id: payload.oauth_id, username: user.username};
 	}
 }
