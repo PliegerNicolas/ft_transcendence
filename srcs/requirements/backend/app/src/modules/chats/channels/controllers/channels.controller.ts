@@ -241,9 +241,9 @@ export class ChannelsController {
         return (await this.channelService.leaveChannel(channelId, username, leaveChannelDto));
     }
 
-	//@GlobalRole(['operator'])
-	//@Role(['owner', 'operator'])
-	//@UseGuards(AuthGuard('jwtTwoFactor'), RoleGlobalGuard || RoleGuard)
+	@GlobalRole(['operator'])
+	@Role(['owner', 'operator'])
+	@UseGuards(AuthGuard('jwtTwoFactor'), RoleGlobalGuard || RoleGuard)
     @Patch('users/:username/channels/:channelId/manage_access')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     // Validate role in Channel if user hasn't got special global server permissions (OPERATOR, USER ...) ?
