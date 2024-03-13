@@ -35,8 +35,10 @@ export default function GeneralInfos(
 
 	const delChan = useMutation({
 		mutationFn: () => api.delete("/channels/" + id),
-		onSettled: () => invalidate(["channels"]),
-		onSuccess: () => navigate("/chat"),
+		onSuccess: () => {
+			navigate("/chat");
+			setTimeout(() => invalidate(["channels"]), 100);
+		},
 		onError: mutateError,
 	});
 

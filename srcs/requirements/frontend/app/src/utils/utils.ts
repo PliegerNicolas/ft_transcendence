@@ -28,6 +28,27 @@ export function getChanRole(chan: ChanType, id: string)
 	return (member.role);
 }
 
+export function isMuted(chan: ChanType, id: string)
+{
+	return (chan.mutedUsers.find(item => item.id === id));
+}
+
+export function isBanned(chan: ChanType, id: string)
+{
+	return (chan.bannedUsers.find(item => item.id === id));
+}
+
+export function isInvited(chan: ChanType, id: string)
+{
+	return (chan.invitedUsers.find(item => item.id === id));
+}
+
+export function isAdmin(chan: ChanType, id: string)
+{
+	return (chan.members.find(item =>
+		item.user.id === id && item.role === "operator"));
+}
+
 export async function dynaGet(uri: string, token: string)
 {
 	console.log("GET --> " + uri);

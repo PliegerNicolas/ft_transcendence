@@ -256,6 +256,7 @@
 	border-top: 1px solid var(--bg-color-5);
 	flex-direction: column;
 	gap: 10px;
+	text-align: center;
 }
 
 /*
@@ -418,6 +419,10 @@
 	margin-right: 4px;
 }
 
+.Msg__Sender:link, .Msg__Sender:visited {
+	text-decoration: none;
+}
+
 .Msg__Date {
 	margin-left: 4px;
 	font-size: .75rem;
@@ -429,8 +434,8 @@
 	gap: 4px;
 	align-items: center;
 	margin-left: 15px;
-	opacity: .5;
-	transition: 1.5s ease-in;
+	opacity: .3;
+	transition: 1.8s ease-in;
 }
 .Msg__ModActions:hover {
 	opacity: 1;
@@ -516,9 +521,13 @@
 	background-color: var(--bg-color-4);
 }
 
-.ChanEdit__GlobOrListsItem.true {
+.ChanEdit__GlobOrListsItem.true, .ChanEdit__GlobOrListsItem.operator {
 	color: var(--text-accent);
 	background-color: var(--bg-color-4);
+}
+
+.ChanEdit__GlobOrListsItem.operator:hover {
+	cursor: default;
 }
 
 .ChanEdit__NameSection {

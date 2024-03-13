@@ -6,7 +6,7 @@ import { Routes, Route } from "react-router-dom";
 import Spinner from "../Spinner.tsx";
 
 import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
-import { getChanRole, httpStatus } from "../../utils/utils.ts";
+import { getChanRole, httpStatus, isMuted } from "../../utils/utils.ts";
 
 import { MyContext } from "../../utils/contexts";
 
@@ -50,7 +50,7 @@ function ChatContent()
 	const id = params.id!;
 
 	const getChan = useGet(["channels", id]);
-	const getMsgs = useGet(["channels", id, "messages"]);
+	const getMsgs = useGet(["channels", id, "messages"], getChan.isSuccess);
 
 	const chan = getChan.isSuccess ? getChan.data.channel : undefined;
 
@@ -61,10 +61,11 @@ function ChatContent()
 			return ({});
 
 		chan.members
-			.sort((a: MemberType, b: MemberType) => +a.id - +b.id)
+			.sort((a: MemberType, b: MemberType) => +a.user.id - +b.user.id)
 			.forEach((member: MemberType, index: number) =>
-			ret[member.id] = index
+			ret[member.user.id] = index
 		);
+		console.log(ret);
 		return (ret);
 	}, [getChan.data])
 
@@ -154,8 +155,6 @@ function ChatContent()
 		</div>
 	);
 
-	if (getChan.isError) console.log(getChan.error.message);
-
 	if (getChan.isError && getChan.error.message.includes("password")) return (
 		<div className="ChatContent ChatContent__Mdp">
 			<div className="notice-msg">
@@ -168,7 +167,9 @@ function ChatContent()
 					onChange={(ev) => setPasswd(ev.currentTarget.value)}
 					placeholder="Password"
 				/>
-				<button onClick={() => join.mutate(password)}>Join</button>
+				<button onClick={() => {join.mutate(password); setPasswd("")}}>
+					Join
+				</button>
 			</div>
 		</div>
 	);
@@ -177,12 +178,16 @@ function ChatContent()
 		<div className="ChatContent ChatContent__Mdp">
 			<div style={{fontSize: "2rem", marginBottom: "12px"}}>💀</div>
 			<div className="error-msg">
-				This channel requires an invitation to join.
+				{
+					getChan.error.message.includes("permitted") ?
+					"You've been banned from this channel" :
+					"This channel requires an invitation to join."
+				}
 			</div>
 		</div>
 	);
 
-	const role = me ? getChanRole(chan, me.id) : "";
+	const role = getChanRole(chan, me!.id);
 
 	if (getMsgs.isPending) {
 		return (
@@ -199,11 +204,13 @@ function ChatContent()
 		</div>
 	);
 
+	console.log(chan.members);
+
 	return (
 		<div className="ChatContent">
 			<ChatHeader
 				name={chan.name}
-				edit={role !== "owner"}
+				edit={role !== "owner" && role != "operator"}
 				leave={role ? () => setLeavePopup(true) : null}
 			/>
 			<div className="Chat__Convo">
@@ -220,6 +227,7 @@ function ChatContent()
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
 							size={chan.membersCount}
 							role={role}
+							chan={chan}
 							idMap={idMap}
 							popupFn={popupFn}
 						/>
@@ -228,6 +236,10 @@ function ChatContent()
 				<div ref={anchorRef} />
 			</div>
 			{
+				role && isMuted(chan, me!.id) &&
+				<div className="Chat__Input join">
+					You are muted on this channel,<br />and thus cannot send messages to it.
+				</div> ||
 				role &&
 				<div className="Chat__Input">
 					<textarea
@@ -257,11 +269,11 @@ function ChatContent()
 			{
 				leavePopup &&
 				<ConfirmPopup
-					title={"Leaving" + chan.name}
+					title={"Leaving " + chan.name}
 					text={<>Are you sure you want to leave {chan.name}?</>}
 					action="Leave"
 					actionFt={() => {leave.mutate(); setLeavePopup(false)}}
-					cancelFt={() => setLeavePopup(false)}
+					cancelFt={() => {setLeavePopup(false)}}
 				/>
 			}
 		</div>
