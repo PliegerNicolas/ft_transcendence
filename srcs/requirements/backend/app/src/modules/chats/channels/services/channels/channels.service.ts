@@ -27,7 +27,10 @@ export class ChannelsService {
     async getChannels(username: string = undefined, queryParams: GetChannelsQueryParam): Promise<ChannelWithSpecs[]> {
         let channels = await this.channelRepository.find({
             where: [
-                { members: { user: { username: Equal(username) } } },
+                { members: {
+                    user: { username: Equal(username) },
+                    hasLeft: false,
+                } },
                 { invitedUsers: { username: Equal(username) } },
                 { visibility: Equal(ChannelVisibility.PUBLIC) },
             ],
@@ -46,14 +49,16 @@ export class ChannelsService {
                 role: member?.role,
             } as ChannelWithSpecs);
         })));
-
-        //return (channels);
     }
 
     async getAllChannels(username: string = undefined): Promise<ChannelWithSpecs[]> {
         const channels = await this.channelRepository.find({
             where: [
-                { members: { user: { username: Equal(username) } } },
+                { members: {
+                    user: { username: Equal(username) },
+                    hasLeft: false,
+                },
+            },
             ],
         });
 
@@ -74,6 +79,8 @@ export class ChannelsService {
         });
         
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+
+        channel.members = channel.members?.filter((member) => !member.hasLeft);
 
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
@@ -197,10 +204,16 @@ export class ChannelsService {
             else if (!await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)) throw new ForbiddenException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
         }
 
-        this.channelRepository.merge(channel, {
-            members: [...channel.members, { user, role: ChannelRole.MEMBER }],
-        });
-
+        const member = channel.getMember(user.username);
+        if (!member) {
+            this.channelRepository.merge(channel, {
+                members: [...channel.members, { user, role: ChannelRole.MEMBER }],
+            });
+        } else {
+            member.role = ChannelRole.MEMBER;
+            member.hasLeft = false;
+        }
+    
         channel.setupChannel();
 
         return (await this.channelRepository.save(channel));
@@ -219,7 +232,11 @@ export class ChannelsService {
         });
 
         channel.validateLeave(user);
-        channel.members = channel.members.filter((member) => member.user.username !== username);
+        
+        const member = channel.getMember(user.username);
+        member.role = ChannelRole.MEMBER;
+        member.hasLeft = true;
+
         channel.setupChannel();
 
         return (await this.channelRepository.save(channel));
