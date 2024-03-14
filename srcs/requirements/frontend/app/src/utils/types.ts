@@ -45,6 +45,7 @@ export interface MemberType {
 	mute: boolean,
 	role: "owner" | "operator" | "member",
 	user: UserType,
+	hasLeft: boolean,
 }
 
 export interface MsgType {

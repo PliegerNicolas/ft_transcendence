@@ -61,9 +61,9 @@ function ChatContent()
 			return ({});
 
 		chan.members
-			.sort((a: MemberType, b: MemberType) => +a.user.id - +b.user.id)
+			.sort((a: MemberType, b: MemberType) => +a.id - +b.id)
 			.forEach((member: MemberType, index: number) =>
-			ret[member.user.id] = index
+			ret[member.id] = index
 		);
 		console.log(ret);
 		return (ret);
