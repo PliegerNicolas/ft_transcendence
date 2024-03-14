@@ -263,6 +263,8 @@ export class ChannelsService {
 
         channel.validatePermissionOnUsers(user, users);
 
+        console.log(users);
+
         switch (channelAccessDetails.action) {
             case (ChannelAccessAction.BAN):
                 channel.ban(users);
