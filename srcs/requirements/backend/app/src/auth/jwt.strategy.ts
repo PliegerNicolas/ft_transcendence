@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
 
 	async validate(req: Request, payload : any) : Promise<any>{
 
-		if (await this.authService.blacklist("check", req.headers.authorization) === false) throw new UnauthorizedException();
+		if (await this.authService.blacklist("check", req.cookies['access_token']) === false) throw new UnauthorizedException();
 
 		const user = await this.authService.checkUser(payload.oauth_id);
 		if (!user) throw new UnauthorizedException();
