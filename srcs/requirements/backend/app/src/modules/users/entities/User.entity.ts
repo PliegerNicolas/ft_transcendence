@@ -67,14 +67,9 @@ export class User {
     @OneToMany(() => ChannelMember, (member) => member.user)
     channelMembers?: ChannelMember[];
 
-    @ManyToMany(() => Channel, (channel) => channel.invitedUsers, { onDelete: 'CASCADE' })
-    channelsInvitedTo?: Channel[];
-
-    @ManyToMany(() => Channel, (channel) => channel.bannedUsers, { onDelete: 'CASCADE' })
-    channelsBannedFrom?: Channel[];
-
-    @ManyToMany(() => Channel, (channel) => channel.mutedUsers, { onDelete: 'CASCADE' })
-    channelsMutedFrom?: Channel[];
+    // Add back channelsInvitedTo
+    // Add back ChannelBannedFrom
+    // Add back ChannelMutedFrom
 	
 	/* Two Factor Authentification */
 

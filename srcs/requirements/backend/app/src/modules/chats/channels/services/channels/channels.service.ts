@@ -10,6 +10,8 @@ import { ChannelMode } from "../../enums/channel-mode.enum";
 import { ChannelRole } from "../../enums/channel-role.enum";
 import { ChannelAccessAction } from "../../enums/channel-access-action.enum";
 import { PasswordHashingService } from "../../../../password-hashing/services/password-hashing/password-hashing.service";
+import { ChannelMembersService } from "../channel-members/channel-members.service";
+import { ChannelMember } from "../../entities/ChannelMember.entity";
 
 @Injectable()
 export class ChannelsService {
@@ -20,87 +22,61 @@ export class ChannelsService {
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
 
+        private readonly channelMemberService: ChannelMembersService,
         private readonly userService: UsersService,
         private readonly passwordHashingService: PasswordHashingService,
     ) {}
 
     async getChannels(username: string = undefined, queryParams: GetChannelsQueryParam): Promise<ChannelWithSpecs[]> {
-        let channels = await this.channelRepository.find({
-            where: [
-                { members: {
-                    user: { username: Equal(username) },
-                    hasLeft: false,
-                } },
-                { invitedUsers: { username: Equal(username) } },
-                { visibility: Equal(ChannelVisibility.PUBLIC) },
-            ],
-            relations:  ['members.user'],
-        });
-
-        channels = channels.filter(channel => Object.entries(queryParams).every(([key, value]) =>
-            value === undefined || channel[key] === value
-        ));
-
-        return (Promise.all(channels.map(async channel => {
-            const member = channel.getMember(username);
-            return ({
-                channel: channel,
-                isMember: !!member,
-                role: member?.role,
-            } as ChannelWithSpecs);
-        })));
-    }
-
-    async getAllChannels(username: string = undefined): Promise<ChannelWithSpecs[]> {
         const channels = await this.channelRepository.find({
             where: [
-                { members: {
-                    user: { username: Equal(username) },
-                    hasLeft: false,
-                },
-            },
+                queryParams.name ? { name: Equal(queryParams.name) } : {},
+                queryParams.visibility ? { visibility: Equal(queryParams.visibility) } : { visibility: Equal(ChannelVisibility.PUBLIC) },
+                queryParams.mode ? { mode: Equal(queryParams.mode) } : {},
+                { members: { user: { username: Equal(username) }, active: true } }
             ],
         });
-
-        return (Promise.all(channels.map(async channel => {
-            const member = channel.getMember(username);
-            return ({
-                channel: channel,
-                isMember: !!member,
-                role: member?.role,
-            } as ChannelWithSpecs);
-        })));
-    }
-
-    async getChannel(channelId: bigint, username: string = undefined, channelDetails: GetChannelParams): Promise<ChannelWithSpecs> {
-        const channel = await this.channelRepository.findOne({
-            where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
-        });
-        
-        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
-
-        channel.members = channel.members?.filter((member) => !member.hasLeft);
 
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
         });
 
-        channel.validateAccess(user);
-        if (channel.mode === ChannelMode.PASSWORD_PROTECTED && !(channel.isMember(username) || user.hasGlobalServerPrivileges())) {
-            if (!channelDetails.password) throw new ForbiddenException(`A password is expected on Channel with ID ${channelId}`);
-            else if (!await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)) throw new ForbiddenException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
-        }
+        return (channels?.map((channel) => {
+            const member = user ? this.channelMemberService.getMember(channel, user.id) : null;
+            return (this.channelToChannelWithSpecs(channel, member));
+        }));
+    }
 
-        const member = channel.getMember(username);
+    async getAllChannels(username: string = undefined): Promise<ChannelWithSpecs[]> {
+        const channels = await this.channelRepository.find({
+            where: { members: { user: { username: Equal(username) }, active: true } },
+        });
 
-        return ({
-            channel: channel,
-            isMember: !!member,
-            role: member?.role,
-        } as ChannelWithSpecs);
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+        });
 
-        //return (channel);
+        return (channels?.map((channel) => {
+            const member = user ? this.channelMemberService.getMember(channel, user.id) : null;
+            return (this.channelToChannelWithSpecs(channel, member));
+        }));
+    }
+
+    async getChannel(channelId: bigint, username: string = undefined, channelDetails: GetChannelParams): Promise<ChannelWithSpecs> {
+        const channel = await this.channelRepository.findOne({
+            where: { id: Equal(channelId) },
+            relations: ['messages.channelMember.user'],
+        });
+        
+        if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
+
+        const user = await this.userRepository.findOne({
+            where: { username: Equal(username) },
+        });
+        
+        await this.channelMemberService.canViewChannel(channel, user, channelDetails.password);
+
+        return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getMember(channel, user.id)));
     }
 
     async createChannel(username: string = undefined, channelDetails: CreateChannelParams): Promise<Channel> {
@@ -132,7 +108,7 @@ export class ChannelsService {
             where: { username: Equal(username) },
         });
 
-        channel.validateEditOrUpdate(user);
+        await this.channelMemberService.canEditChannel(channel, user);
 
         if (channelDetails.password) channelDetails.password = await this.passwordHashingService.hashPassword(channelDetails.password);
 
@@ -155,7 +131,7 @@ export class ChannelsService {
             where: { username: Equal(username) },
         });
 
-        channel.validateEditOrUpdate(user);
+        await this.channelMemberService.canEditChannel(channel, user);
 
         if (channelDetails.password) channelDetails.password = await this.passwordHashingService.hashPassword(channelDetails.password);
 
@@ -178,7 +154,7 @@ export class ChannelsService {
             where: { username: Equal(username) },
         });
 
-        channel.validateDelete(user);
+        await this.channelMemberService.canDeleteChannel(channel, user);
 
         await this.channelRepository.remove(channel);
         return (`Channel with ID ${channelId} successfully deleted`);
@@ -198,11 +174,7 @@ export class ChannelsService {
             where: { username: Equal(username) },
         });
 
-        channel.validateJoin(user);
-        if (channel.mode === ChannelMode.PASSWORD_PROTECTED && !(channel.isMember(username) || user.hasGlobalServerPrivileges())) {
-            if (!channelDetails.password) throw new ForbiddenException(`A password is expected on Channel with ID ${channelId}`);
-            else if (!await this.passwordHashingService.comparePasswords(channel.password, channelDetails.password)) throw new ForbiddenException(`Invalid password for Channel with ID ${channelId} and mode ${channel.mode}`);
-        }
+        await this.channelMemberService.canJoinChannel(channel, user, channelDetails.password);
 
         const member = channel.members?.find((member) => member.user.username === username);
         if (!member) {
@@ -211,7 +183,7 @@ export class ChannelsService {
             });
         } else {
             member.role = ChannelRole.MEMBER;
-            member.hasLeft = false;
+            member.active = true;
         }
     
         channel.setupChannel();
@@ -231,11 +203,11 @@ export class ChannelsService {
             where: { username: Equal(username) },
         });
 
-        channel.validateLeave(user);
+        await this.channelMemberService.canLeaveChannel(channel, user);
         
-        const member = channel.getMember(user.username);
+        const member = this.channelMemberService.getMember(channel, user.id);
         member.role = ChannelRole.MEMBER;
-        member.hasLeft = true;
+        member.active = false;
 
         channel.setupChannel();
 
@@ -254,50 +226,57 @@ export class ChannelsService {
             where: { username: Equal(username) },
         });
 
-        channel.validateEditOrUpdate(user);
+        this.channelMemberService.canEditChannel(channel, user);
 
         const usernames = channelAccessDetails.usernames;
         delete channelAccessDetails.usernames;
 
         const users = await this.userService.findStrictlyUsersByUsername(usernames);
-
-        channel.validatePermissionOnUsers(user, users);
-
-        console.log(users);
+        await this.channelMemberService.canUpdateUserPermissionsInChannel(channel, user, users);
 
         switch (channelAccessDetails.action) {
             case (ChannelAccessAction.BAN):
-                channel.ban(users);
+                this.channelMemberService.ban(channel, users);
                 break;
             case (ChannelAccessAction.DEBAN):
-                channel.deban(users);
+                this.channelMemberService.deban(channel, users);
                 break;
             case (ChannelAccessAction.INVITE):
-                channel.invite(users);
+                this.channelMemberService.invite(channel, users);
                 break;
             case (ChannelAccessAction.UNINVITE):
-                channel.uninvite(users);
+                this.channelMemberService.uninvite(channel, users);
                 break;
             case (ChannelAccessAction.MUTE):
-                channel.mute(users);
+                this.channelMemberService.mute(channel, users);
                 break;
             case (ChannelAccessAction.UNMUTE):
-                channel.unmute(users);
+                this.channelMemberService.unmute(channel, users);
                 break;
             case (ChannelAccessAction.KICK):
-                channel.kick(users);
+                this.channelMemberService.kick(channel, users);
                 break;
             case (ChannelAccessAction.PROMOTE):
-                channel.promote(user, users);
+                this.channelMemberService.promote(channel, user, users);
                 break;
             case (ChannelAccessAction.DEMOTE):
-                channel.demote(user, users);
+                this.channelMemberService.demote(channel, user, users);
                 break;
             default:
                 throw new BadRequestException(`Action not recognized`);
         }
 
         return (await this.channelRepository.save(channel));
+    }
+
+    /* Helper functions */
+
+    private channelToChannelWithSpecs(channel: Channel, member: ChannelMember): ChannelWithSpecs {
+        return ({
+            channel: channel,
+            isMember: !!member,
+            role: member?.role,
+        } as ChannelWithSpecs);
     }
 
 }

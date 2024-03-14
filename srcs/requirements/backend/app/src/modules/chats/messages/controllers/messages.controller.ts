@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Request, UseGuards, ValidationPipe } from "@nestjs/common";
-import { MessagesService } from "../services/messages.service";
 import { AuthGuard } from "@nestjs/passport";
 import { CreateMessageDto } from "../dtos/CreateMessage.dto";
 import { ParseIdPipe } from "../../../../common/pipes/parse-id/parse-id.pipe";
@@ -9,6 +8,7 @@ import { ParseUsernamePipe } from "../../../../common/pipes/parse-username/parse
 import { GlobalRole } from "../../../../guards/role.decorator";
 import { UsersGuard } from "../../../../guards/users.guard";
 import { RoleGlobalGuard } from "../../../../guards/role.guard";
+import { MessagesService } from "../services/messages/messages.service";
 
 @Controller()
 export class MessagesController {

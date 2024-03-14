@@ -155,8 +155,8 @@ export class ChannelsController {
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
 
-	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
+	//@GlobalRole(['operator'])
+	//@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Get('users/:username/channels')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getChannels(
@@ -166,8 +166,8 @@ export class ChannelsController {
         return (await this.channelService.getChannels(username, queryDto));
     }
 
-	@GlobalRole(['operator'])
-	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
+	//@GlobalRole(['operator'])
+	//@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
     @Get('users/:username/channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getChannel(

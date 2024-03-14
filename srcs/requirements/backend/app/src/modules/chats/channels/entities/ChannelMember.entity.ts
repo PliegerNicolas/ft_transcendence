@@ -15,8 +15,20 @@ export class ChannelMember {
     @Column({ type: 'enum', enum: ChannelRole, default: ChannelRole.MEMBER })
     role: ChannelRole;
 
-    @Column({ default: false }) // Soft deletion column. Represents if the user left the channel.
-    hasLeft: boolean;
+    @Column({ default: false })
+    banned: boolean;
+
+    @Column({ default: false })
+    invited: boolean;
+
+    @Column({ default: false })
+    muted: boolean;
+
+    //@Column({ default: () => Date.now() - (24 * 60 * 60 * 1000) })
+    //mutedUntil: Date;
+
+    @Column({ default: true })
+    active: boolean;
 
     @ManyToOne(() => Channel, (channel) => channel.members, { onDelete: 'CASCADE' })
     channel: Channel;
