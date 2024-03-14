@@ -130,7 +130,12 @@ export class Channel {
 
     public kick(users: User[]): void {
         this.uninvite(users);
-        this.members = this.members?.filter((member) => !users.some((user) => user.username === member.user.username));
+        for (const member of this.members || []) {
+            if (users.some((user) => user.username === member.user.username)) {
+                member.hasLeft = true;
+                member.role = ChannelRole.MEMBER;
+            }
+        }
     }
 
     public mute(users: User[]): void {
@@ -253,7 +258,7 @@ export class Channel {
         
         users.forEach(user => {
             const targetMember = this.getMember(user.username);
-            if (compareChannelRoles(actingMember.role, targetMember.role) <= 0) invalidUsernames.push(user.username);
+            if (targetMember && compareChannelRoles(actingMember.role, targetMember.role) <= 0) invalidUsernames.push(user.username);
         });
 
         if (invalidUsernames.length > 0) {
