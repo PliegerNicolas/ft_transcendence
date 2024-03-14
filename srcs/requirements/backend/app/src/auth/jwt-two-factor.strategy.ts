@@ -9,15 +9,14 @@ export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFact
 	constructor(private authService : AuthService) {
 		var cookieExtractor = function(req) {
 			var token = null;
-			console.log(req.headers)
+			console.log(req.cookies)
 			if (req && req.cookies) {
-				token = req.cookies['authorization'];
+				token = req.cookies['access_token'];
 			}
 			return token;
 		};
 		super({
-			// jwtFromRequest : ExtractJwt.fromExtractors([cookieExtractor]),
-			jwtFromRequest : ExtractJwt.fromHeader('authorization'),
+			jwtFromRequest : ExtractJwt.fromExtractors([cookieExtractor]),
 			secretOrKey : process.env.API_SECRET ,
 			ignoreExpiration : false,
 			passReqToCallback: true
@@ -25,10 +24,7 @@ export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFact
 	}
 
 	async validate(req: Request, payload : any) : Promise<any>{
-		// console.log('test')
-		// console.log((await this.authService.checkUser(payload.oauth_id)).users.id)
-		
-		// console.log(req.headers)
+
 		if (await this.authService.blacklist("check", req.headers.authorization) === false) throw new UnauthorizedException();
 
 		const user = await this.authService.checkUser(payload.oauth_id);

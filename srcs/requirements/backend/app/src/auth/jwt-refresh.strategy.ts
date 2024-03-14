@@ -9,26 +9,21 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
 	constructor(private authService : AuthService) {
 		var cookieExtractor = function(req) {
 			var token = null;
-			// console.log(req.headers)
 			if (req && req.cookies) {
-				token = req.cookies['access_token'];
+				token = req.cookies['refresh_token'];
 			}
 			return token;
 		};
 		super({
-			// jwtFromRequest : ExtractJwt.fromExtractors([cookieExtractor]),
-			jwtFromRequest : ExtractJwt.fromHeader('authorization'),
+			jwtFromRequest : ExtractJwt.fromExtractors([cookieExtractor]),
 			secretOrKey : process.env.API_SECRET ,
-			ignoreExpiration : true,
+			ignoreExpiration : false,
 			passReqToCallback: true
 		});
 	}
 
 	async validate(req: Request, payload : any) : Promise<any>{
-		// console.log('test')
-		// console.log((await this.authService.checkUser(payload.oauth_id)).users.id)
-		
-		// console.log(req.headers)
+
 		if (await this.authService.blacklist("check", req.headers.authorization) === false) throw new UnauthorizedException();
 
 		const user = await this.authService.checkUser(payload.oauth_id);

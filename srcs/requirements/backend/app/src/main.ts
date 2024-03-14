@@ -6,15 +6,16 @@ import * as cookieParser from 'cookie-parser';
 
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule,);
+	const app = await NestFactory.create(AppModule);
+
+	//Setting up middleware for cookies
+	app.use(cookieParser(process.env.API_SECRET));
 
 	app.enableCors({
 		origin: true,
 		credentials: true
 	})
 
-	//Setting up middleware for cookies
-	app.use(cookieParser());
 	// Apply a global TypeORM exception filter
 	app.useGlobalFilters(new TypeormExceptionFilter());
 

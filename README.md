@@ -10,6 +10,37 @@ We use NestJs and React there for.
 
 ## API Paths
 
+__AUTH__
+
+૰ **@Post** `/auth`
+{
+	'code' : <code from 42 API>
+	'redirect_uri' : <url that called the /auth>
+}
+
+૰ **@Post** `/auth/logout`
+
+૰ **@Post** `/auth/log_as`
+Only use for debug purposes
+
+૰ **@Get** `/auth/refresh`
+
+__2FA__
+૰ **@Post** `/2fa/generate`
+
+
+૰ **@Post** `/2fa/turn-on`
+{
+	'twoFactorAuthCode': <code from user's 2fa app>
+}
+
+૰ **@Post** `/2fa/turn-off`
+
+૰ **@Post** `/2fa/authenticate`
+{
+	'twoFactorAuthCode': <code from user's 2fa app>
+}
+
 __USERS__
 
 ૰ **@Get** `/users`
