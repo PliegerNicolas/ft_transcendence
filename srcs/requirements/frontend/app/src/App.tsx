@@ -2,7 +2,7 @@ import "./App.css";
 
 import { useState, useEffect, useContext, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate} from "react-router-dom";
-import { useMutation, MutationFunction, useQuery } from "@tanstack/react-query";
+import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
 import { InviteType, NotifType } from "./utils/types.ts";
@@ -26,8 +26,8 @@ import Invites from "./components/Game/Invitations.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
-import { dynaGet, randomString } from "./utils/utils.ts";
-import { useStopOnHttp } from "./utils/hooks.ts";
+import { randomString } from "./utils/utils.ts";
+import { useGet } from "./utils/hooks.ts";
 import { PopupType } from "./utils/types.ts";
 
 import closeIcon from "./assets/close.svg";
@@ -57,37 +57,36 @@ function Auth()
 	const postAuth = useMutation({
 		mutationFn: ((code: string) =>
 			api.post("/auth", {code, redirect_uri: `http://${location.host}/auth`})) as
-			MutationFunction<{access_token: string, isTwoFactorAuthEnabled: boolean}>,
+			MutationFunction<{isTwoFactorAuthEnabled: boolean}>,
 
-		onSuccess: (data: {access_token: string, isTwoFactorAuthEnabled: boolean}) => {
+		onSuccess: (data: {isTwoFactorAuthEnabled: boolean}) => {
 			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
-			setLogInfo({logged: false, token: data.access_token});
+				"my_info", JSON.stringify({logged: true}));
+			setLogInfo({logged: false});
 			if (data.isTwoFactorAuthEnabled)
 				setTfaPopup(true);
 			else {
 				setStatus("success");
-				setLogInfo({logged: true, token: data.access_token});
+				setLogInfo({logged: true});
 				setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
 			}
 		},
 
 		onError: () => {
 			setStatus("error");
-			setLogInfo({logged: false, token: ""});
+			setLogInfo({logged: false});
 			localStorage.removeItem("my_info");
 		},
 	});
 
 	const tfaAuth = useMutation({
 		mutationFn: ((tfaCode: string) =>
-			api.post("/2fa/authenticate", {twoFactorAuthCode : tfaCode})) as
-			MutationFunction<{access_token: string}>,
+			api.post("/2fa/authenticate", {twoFactorAuthCode : tfaCode})),
 
-		onSuccess: (data: {access_token: string}) => {
+		onSuccess: (data: unknown) => {
 			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
-			setLogInfo({logged: true, token: data.access_token});
+				"my_info", JSON.stringify({logged: true}));
+			setLogInfo({logged: true});
 			console.log(data);
 			setStatus("success");
 			setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
@@ -96,7 +95,7 @@ function Auth()
 		onError: (error) => {
 			console.log(error.message);
 			setStatus("error");
-			setLogInfo({logged: false, token: ""});
+			setLogInfo({logged: false});
 			localStorage.removeItem("my_info");
 		},
 	});
@@ -145,7 +144,7 @@ function Auth()
 					</div>
 				</>}
 				cancelFt={() => {
-					setLogInfo({logged: false, token: ""});
+					setLogInfo({logged: false});
 					localStorage.removeItem("my_info");
 					navigate(redirectPath ? redirectPath : "/");
 				}}
@@ -174,7 +173,7 @@ function App()
 	const [logInfo, setLogInfo] = useState(() => {
 		if (data)
 			return (JSON.parse(data))
-		return { logged: false, token: "" };
+		return { logged: false};
 	});
 
 	const [notifs, setNotifs] = useState<NotifType[]>([]);
@@ -201,12 +200,7 @@ function App()
 
 	const [lastChan, setLastChan] = useState("");
 
-	const getUser = useQuery({
-		queryKey: ["me", logInfo.token],
-		queryFn: () => dynaGet(`http://${location.hostname}:3450/me`, logInfo.token),
-		retry: useStopOnHttp(),
-		enabled: logInfo.logged,
-	});
+	const getUser = useGet(["me"], logInfo.logged);
 
 	useEffect(() => {
 		if (getUser.isSuccess) {
@@ -240,7 +234,7 @@ function App()
 			setLogInfo,
 			addNotif,
 			addInvite,
-			api: new Api(`http://${location.hostname}:3450`, logInfo.token),
+			api: new Api(`http://${location.hostname}:3450`),
 			lastChan,
 			setLastChan,
 			setGlobalPopup,

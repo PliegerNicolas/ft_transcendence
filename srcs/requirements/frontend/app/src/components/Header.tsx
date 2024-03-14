@@ -35,11 +35,11 @@ function useOutsideClick(callback: (event: MouseEvent) => void) {
 
 export default function Header()
 {
-	const { logged, api, setGlobalPopup, me } = useContext(MyContext);
+	const { logged, setGlobalPopup, me } = useContext(MyContext);
 
 	const [ popup, setPopup ] = useState(false);
 
-	const getPic = useGet(["picture"], logged && api.auth);
+	const getPic = useGet(["picture"], logged);
 
 	const popupRef = useOutsideClick(() => {
 			setTimeout(() => setPopup(false), 0);
@@ -162,7 +162,7 @@ function Logout()
 
 	function logoutNow() {
 		localStorage.removeItem("my_info");
-		setLogInfo({logged: false, token: ""});
+		setLogInfo({logged: false});
 		backendLogout.mutate();
 	}
 

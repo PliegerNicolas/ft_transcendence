@@ -9,7 +9,7 @@ import camera from "../../assets/camera.svg";
 
 export default function UserInfos({user, me}: {user: UserType, me: boolean})
 {
-	const { token, addNotif } = useContext(MyContext);
+	const { addNotif } = useContext(MyContext);
 	const invalidate = useInvalidate();
 
 	const getPic = useGet(["users", user.username, "picture"]);
@@ -34,7 +34,6 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 
 		const res = await fetch(`http://${location.hostname}:3450/picture`, {
 				method: "PUT",
-				headers: { "Authorization": token },
 				credentials: "include",
 				body: data
 		});

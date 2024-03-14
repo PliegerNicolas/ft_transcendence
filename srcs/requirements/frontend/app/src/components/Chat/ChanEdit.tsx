@@ -334,7 +334,7 @@ function MemberList()
 				<hr />
 			</>
 		}
-			{
+		{
 			chan.members.filter(member => member.user.id !== me!.id).map(member =>
 				<MemberListItem key={member.id} member={member} />
 			)

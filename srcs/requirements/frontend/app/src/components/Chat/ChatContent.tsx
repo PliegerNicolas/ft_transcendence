@@ -54,7 +54,6 @@ export default function ChatContentRouter()
 			.forEach((member: MemberType, index: number) =>
 			ret[member.id] = index
 		);
-		console.log(ret);
 		return (ret);
 	}, [getChan.data]);
 
@@ -221,8 +220,6 @@ function ChatContent()
 			Failed to load this channel's messages: {getMsgs.error.message}
 		</div>
 	);
-
-	console.log(getMsgs.data);
 
 	return (
 		<div className="ChatContent">
