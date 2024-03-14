@@ -121,7 +121,7 @@
 }
 
 .genericList > * {
-	margin: 0px;
+	margin: 0;
 	border: 1px solid #0000;
 	animation: fadein .15s ease-in-out;
 	background: var(--bg-color-4);

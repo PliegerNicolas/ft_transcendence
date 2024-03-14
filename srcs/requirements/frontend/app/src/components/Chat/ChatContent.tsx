@@ -8,7 +8,7 @@ import Spinner from "../Spinner.tsx";
 import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
 import { getChanRole, httpStatus, isMuted } from "../../utils/utils.ts";
 
-import { MyContext } from "../../utils/contexts";
+import { ChatContentContext, MyContext } from "../../utils/contexts";
 
 import { socket } from "../../App.tsx"
 
@@ -18,31 +18,14 @@ import ChatHeader from "./ChatHeader.tsx";
 import Msg from "./Msg.tsx";
 import ChanEdit from "./ChanEdit.tsx";
 import ConfirmPopup from "../ConfirmPopup.tsx";
-import { MemberType } from "../../utils/types.ts";
+import { MemberType, MsgType } from "../../utils/types.ts";
 
 // <ChatContentRouter /> =======================================================
 
 export default function ChatContentRouter()
 {
-	const params = useParams();
-	const id = params.id!;
+	const { api, me } = useContext(MyContext);
 
-	return (
-		<Routes>
-			<Route path="/" element={<ChatContent />} />
-			<Route path="/edit" element={<ChanEdit id={+id}/>} />
-			<Route path="/*" element={
-				<div className="ChatContent error">No such channel!</div>
-			}/>
-		</Routes>
-	);
-}
-
-// <ChatContent /> =============================================================
-
-function ChatContent()
-{
-	const { api, setLastChan, me } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 
@@ -50,31 +33,6 @@ function ChatContent()
 	const id = params.id!;
 
 	const getChan = useGet(["channels", id]);
-	const getMsgs = useGet(["channels", id, "messages"], getChan.isSuccess);
-
-	const chan = getChan.isSuccess ? getChan.data.channel : undefined;
-
-	const idMap = useMemo(() => {
-		let ret: {[memberId: string]: number} = {};
-
-		if (!getChan.isSuccess)
-			return ({});
-
-		chan.members
-			.sort((a: MemberType, b: MemberType) => +a.id - +b.id)
-			.forEach((member: MemberType, index: number) =>
-			ret[member.id] = index
-		);
-		console.log(ret);
-		return (ret);
-	}, [getChan.data])
-
-	const postMsg = useMutation({
-		mutationFn: (content: string) =>
-			api.post("/channels/" + id + "/messages", { content }),
-		onSettled: () => invalidate(["channels", id, "messages"]),
-		onError: mutateError,
-	});
 
 	const join = useMutation({
 		mutationFn: (password: string) =>
@@ -83,65 +41,22 @@ function ChatContent()
 		onError: mutateError,
 	});
 
-	const leave = useMutation({
-		mutationFn: () =>
-			api.patch("/channels/" + id + "/leave", {}),
-		onSettled: () => invalidate(["channels"]),
-		onError: mutateError,
-	});
-
-	useEffect(() => setLastChan(id), [id]);
-
-	useEffect(() => {
-		socket.on('onMessage', (content: string) => {
-			setTimeout(() => {
-				invalidate(["channels", id, "messages"]);
-				invalidate(["channels", id]);
-			}, 100);
-			console.log('onMessage caught', content);
-		});
-		socket.emit('rejoinChannels');
-		return (() => {socket.off('onMessage')});
-	}, []);
-
-	/*
-	** These lines are desirable to auto-scroll at bottom of chat.
-	*/
-	const anchorRef = useRef<HTMLDivElement>(null);
-	useEffect(() => {
-		if (anchorRef.current)
-			anchorRef.current.scrollIntoView()
-	}, [getMsgs]);
-
 	const [password, setPasswd] = useState("");
 
-	const [inputValue, setInputValue] = useState("");
-	function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+	const idMap = useMemo(() => {
+		let ret: {[memberId: string]: number} = {};
 
-		if (e.currentTarget.value.slice(-1) !== "\n") {
-			setInputValue(e.currentTarget.value);
-			return;
-		}
+		if (!getChan.isSuccess)
+			return (ret);
 
-		if (!inputValue)
-			return;
-
-		postMsg.mutate(inputValue);
-		socket.emit('newMessage', { content: inputValue, channel: chan.name });
-		setInputValue("");
-	}
-
-	const [popup, setPopup] =
-		useState<{text: JSX.Element, action: Function} | null>(null);
-
-	function popupFn(text: JSX.Element, action: Function) {
-		setPopup({
-			text,
-			action: () => {action(); setPopup(null)},
-		});
-	}
-
-	const [leavePopup, setLeavePopup] = useState(false);
+		getChan.data.channel.members
+			.sort((a: MemberType, b: MemberType) => +a.id - +b.id)
+			.forEach((member: MemberType, index: number) =>
+			ret[member.id] = index
+		);
+		console.log(ret);
+		return (ret);
+	}, [getChan.data]);
 
 	if (getChan.isPending) return (
 		<div className="ChatContent spinner">
@@ -187,7 +102,110 @@ function ChatContent()
 		</div>
 	);
 
-	const role = getChanRole(chan, me!.id);
+
+	return (
+		<ChatContentContext.Provider value={{
+			chan: getChan.data.channel,
+			role: getChanRole(getChan.data.channel, me!.id),
+			idMap
+		}}>
+			<Routes>
+				<Route path="/" element={<ChatContent />} />
+				<Route path="/edit" element={<ChanEdit id={+id}/>} />
+				<Route path="/*" element={
+					<div className="ChatContent error">No such page...</div>
+				}/>
+			</Routes>
+		</ChatContentContext.Provider>
+	);
+}
+
+// <ChatContent /> =============================================================
+
+function ChatContent()
+{
+	const { api, setLastChan, me } = useContext(MyContext);
+	const { chan, role } = useContext(ChatContentContext);
+
+	const invalidate = useInvalidate();
+	const mutateError = useMutateError();
+
+	const params = useParams();
+	const id = params.id!;
+
+	const getMsgs = useGet(["channels", id, "messages"]);
+
+	const postMsg = useMutation({
+		mutationFn: (content: string) =>
+			api.post("/channels/" + id + "/messages", { content }),
+		onSettled: () => invalidate(["channels", id, "messages"]),
+		onError: mutateError,
+	});
+
+	const join = useMutation({
+		mutationFn: (password: string) =>
+			api.patch("/channels/" + id + "/join", {password}),
+		onSettled: () => invalidate(["channels"]),
+		onError: mutateError,
+	});
+
+	const leave = useMutation({
+		mutationFn: () =>
+			api.patch("/channels/" + id + "/leave", {}),
+		onSettled: () => invalidate(["channels"]),
+		onError: mutateError,
+	});
+
+	useEffect(() => setLastChan(id), [id]);
+
+	useEffect(() => {
+		socket.on('onMessage', (content: string) => {
+			setTimeout(() => {
+				invalidate(["channels", id, "messages"]);
+				invalidate(["channels", id]);
+			}, 100);
+			console.log('onMessage caught', content);
+		});
+		socket.emit('rejoinChannels');
+		return (() => {socket.off('onMessage')});
+	}, []);
+
+	/*
+	** These lines are desirable to auto-scroll at bottom of chat.
+	*/
+	const anchorRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		if (anchorRef.current)
+			anchorRef.current.scrollIntoView()
+	}, [getMsgs]);
+
+	const [inputValue, setInputValue] = useState("");
+	function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+
+		if (e.currentTarget.value.slice(-1) !== "\n") {
+			setInputValue(e.currentTarget.value);
+			return;
+		}
+
+		if (!inputValue)
+			return;
+
+		postMsg.mutate(inputValue);
+		socket.emit('newMessage', { content: inputValue, channel: chan.name });
+		setInputValue("");
+	}
+
+	const [popup, setPopup] =
+		useState<{text: JSX.Element, action: Function} | null>(null);
+
+	function popupFn(text: JSX.Element, action: Function) {
+		setPopup({
+			text,
+			action: () => {action(); setPopup(null)},
+		});
+	}
+
+	const [leavePopup, setLeavePopup] = useState(false);
 
 	if (getMsgs.isPending) {
 		return (
@@ -204,7 +222,7 @@ function ChatContent()
 		</div>
 	);
 
-	console.log(chan.members);
+	console.log(getMsgs.data);
 
 	return (
 		<div className="ChatContent">
@@ -219,16 +237,14 @@ function ChatContent()
 					<hr />
 				</div>
 				{
-					getMsgs.data.map((item: any, index: number) =>
+					getMsgs.data
+						.sort((a: MsgType, b: MsgType) => a.createdAt > b.createdAt)
+						.map((item: MsgType, index: number) =>
 						<Msg
 							key={index}
 							data={item}
 							prev={index ? getMsgs.data[index - 1] : null}
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
-							size={chan.membersCount}
-							role={role}
-							chan={chan}
-							idMap={idMap}
 							popupFn={popupFn}
 						/>
 					)

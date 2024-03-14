@@ -20,7 +20,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 			+ ['', '', 'MB', 'GB', 'TB'][i];
 	}
 
-	function postPic(file: File) {
+	async function postPic(file: File) {
 		if (file.size >= 5000000) {
 			addNotif({
 				type: 1,
@@ -32,15 +32,26 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 		const data = new FormData()
 		data.append('picture', file);
 
-		fetch(`http://${location.hostname}:3450/picture`, {
+		const res = await fetch(`http://${location.hostname}:3450/picture`, {
 				method: "PUT",
 				headers: { "Authorization": token },
 				credentials: "include",
 				body: data
-		}).then(() => {
+		});
+
+		if (res.ok) {
 			invalidate(["users", user.username, "picture"]);
 			invalidate(["picture"]);
-		}).catch((error: Error) => console.log(error.message));
+		}
+		else try {
+			const err = await res.json();
+
+			if (!err.statusCode || !err.message)
+				addNotif({content: res.status + " " + res.statusText});
+			else
+				addNotif({content: err.statusCode + " " + err.message});
+		}
+		catch (err) {}
 	}
 
 	return (

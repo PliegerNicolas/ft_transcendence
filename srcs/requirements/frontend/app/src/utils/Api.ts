@@ -108,7 +108,7 @@ class Api
 	constructor(base_url = "http://localhost:3450", token = "") {
 		this.base_url = base_url;
 		this.headers["Authorization"] = token;
-		this.debug = false;
+		this.debug = true;
 		this.auth = token !== "";
 	}
 }

@@ -1,7 +1,7 @@
 import { createContext, Dispatch, SetStateAction } from "react";
 
 import Api from "./Api";
-import { FriendshipType, UserType } from "./types";
+import { ChanType, FriendshipType, UserType } from "./types";
 
 export const FriendshipContext = createContext({
 	id: "0",
@@ -25,4 +25,10 @@ export const MyContext = createContext({
 export const ChatContext = createContext({
 	showSidebar: 1,
 	setShowSidebar: (() => {}) as Dispatch<SetStateAction<number>>,
+});
+
+export const ChatContentContext = createContext({
+	chan: {} as ChanType,
+	role: "member",
+	idMap: {} as {[memberId: string]: number},
 });

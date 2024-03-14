@@ -281,7 +281,9 @@ function UserListRender()
 			{
 				!getUsers.data?.length ?
 				<div><div>No user...</div></div> :
-				getUsers.data?.map((user: UserType) =>
+				getUsers.data
+					?.sort((a: UserType, b: UserType) => +a.id - +b.id)
+					.map((user: UserType) =>
 					<div key={user.id} className="Sandbox__Item">
 						<div>{user.id}</div>
 						<div>
