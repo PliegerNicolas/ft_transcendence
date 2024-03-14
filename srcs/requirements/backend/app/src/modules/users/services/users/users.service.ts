@@ -58,6 +58,7 @@ export class UsersService {
 
         user = this.userRepository.create({
             ...userDetails,
+			accountname : userDetails.username,
             picture: null,
         });
 
