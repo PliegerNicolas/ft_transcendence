@@ -1,13 +1,13 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { MutationFunction, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { MyContext } from "../utils/contexts.ts";
 import { UserType, UserPostType, ChanSpecsType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
 
 import { httpStatus, randomString } from "../utils/utils.ts";
-import { useInvalidate, useMutateError, useGet } from "../utils/hooks.ts";
+import { useInvalidate, useMutateError, useGet, useSetMe } from "../utils/hooks.ts";
 
 import close from "../assets/close.svg";
 import check from "../assets/check.svg";
@@ -251,35 +251,22 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 
 function UserListRender()
 {
-	const { me, api } = useContext(MyContext);
+	const { me } = useContext(MyContext);
 
-	const mutateError = useMutateError();
+	const getUsers = useGet(["users"]);
+	const setMe = useSetMe();
 
-	const query = useGet(["users"]);
-
-	const setMe = useMutation({
-		mutationFn: ((name: string) =>
-			api.post("/auth/log_as/" + name, {})) as unknown as
-			MutationFunction<{ access_token: string; }, unknown>,
-		onSuccess: (data: {access_token: string}) => {
-			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true, token: data.access_token}));
-			window.location.reload();
-		},
-		onError: mutateError,
-	});
-
-	if (query.isPending || !me) return (
-		query.isPending &&
+	if (getUsers.isPending || !me) return (
+		getUsers.isPending &&
 		<div className="genericList">
 			<div><Spinner /></div>
 		</div>
 	);
 
-	if (query.isError) return (
+	if (getUsers.isError) return (
 		<div>
 			<span className="error-msg">
-				Failed to load user list: {query.error?.message}
+				Failed to load user list: {getUsers.error?.message}
 			</span><br />
 		</div>
 	);
@@ -292,9 +279,11 @@ function UserListRender()
 				<div>USERNAME</div>
 			</div>
 			{
-				!query.data?.length ?
+				!getUsers.data?.length ?
 				<div><div>No user...</div></div> :
-				query.data?.map((user: UserType) =>
+				getUsers.data
+					?.sort((a: UserType, b: UserType) => +a.id - +b.id)
+					.map((user: UserType) =>
 					<div key={user.id} className="Sandbox__Item">
 						<div>{user.id}</div>
 						<div>
@@ -305,7 +294,7 @@ function UserListRender()
 						<div>
 						{
 							me.id !== user.id ?
-							<button className="logAs" onClick={() => setMe.mutate(user.username)}>
+							<button className="logAs" onClick={() => setMe(user.username)}>
 								Log as
 							</button>:
 							<div className="notice-msg" style={{marginRight: "12px"}}>(You)</div>

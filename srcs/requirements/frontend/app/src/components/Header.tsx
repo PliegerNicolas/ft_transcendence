@@ -1,6 +1,6 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useMutation, MutationFunction } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import "../styles/header.css";
 
@@ -11,7 +11,7 @@ import logoutIcon from "../assets/logout.svg";
 import Login from "./Login.tsx";
 
 import { MyContext } from "../utils/contexts.ts";
-import { useGet } from "../utils/hooks.ts";
+import { useGet, useSetMe } from "../utils/hooks.ts";
 
 function useOutsideClick(callback: (event: MouseEvent) => void) {
   const ref = useRef<HTMLDivElement>(null);
@@ -35,7 +35,7 @@ function useOutsideClick(callback: (event: MouseEvent) => void) {
 
 export default function Header()
 {
-	const { logged, api, setGlobalPopup, addNotif, me } = useContext(MyContext);
+	const { logged, api, setGlobalPopup, me } = useContext(MyContext);
 
 	const [ popup, setPopup ] = useState(false);
 
@@ -47,18 +47,7 @@ export default function Header()
 
 	const [logAsUsername, setLogAsUsername] = useState("");
 
-	const setMe = useMutation({
-		mutationFn: (() =>
-			api.post("/auth/log_as/" + logAsUsername, {})) as unknown as
-			MutationFunction<{ access_token: string; }, unknown>,
-		onSuccess: (data: {access_token: string}) => {
-			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true, token: data.access_token}));
-			window.location.reload();
-		},
-		onError: e => addNotif({content: "Failed to log as: " + logAsUsername +
-		", " + e.message}),
-	});
+	const setMe = useSetMe();
 
 	function setLogAsPopup(value: string) {
 		setGlobalPopup({
@@ -78,7 +67,7 @@ export default function Header()
 			action: "Done",
 			cancelFt: () => {},
 			actionFt: () => {
-				setMe.mutate(logAsUsername);
+				setMe(logAsUsername);
 				setGlobalPopup(null);
 			}
 		});

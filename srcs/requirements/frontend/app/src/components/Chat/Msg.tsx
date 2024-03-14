@@ -1,34 +1,27 @@
 import { Link } from "react-router-dom";
-import { ChanType, MsgType } from "../../utils/types.ts";
+import { MsgType } from "../../utils/types.ts";
 
 import "../../styles/chat.css";
 import defaultPicture from "../../assets/default_profile.png"
-import { useMutation } from "@tanstack/react-query";
-import { useGet, useInvalidate, useMutateError } from "../../utils/hooks.ts";
+import { useGet, useSetMe } from "../../utils/hooks.ts";
 import { useContext } from "react";
 import { MyContext } from "../../utils/contexts.ts";
-import { getChanRole, isAdmin, isBanned, isMuted } from "../../utils/utils.ts";
+import ChanUsername from "./ChanUsername.tsx";
+import ModActions from "./ModActions.tsx";
 
 // <Msg /> =====================================================================
 
 export default function Msg(
-	{data, prev, next, size, role, chan, idMap, popupFn}:
-	{
-		data: MsgType,
-		prev: MsgType | null,
-		next: MsgType | null,
-		size: number,
-		role: string,
-		chan: ChanType,
-		idMap: {[memberId: string]: number},
-		popupFn: Function
-	}
+	{data, prev, next, popupFn}:
+	{data: MsgType, prev: MsgType | null, next: MsgType | null, popupFn: Function}
 )
 {
 	const { me } = useContext(MyContext)
+	const setMe = useSetMe();
 
 	const date = fmtDate(data.createdAt);
-	const user = data.channelMember.user;
+	const member = data.channelMember;
+	const user = member.user;
 
 	const getPic = useGet(["users", user.username ,"picture"]);
 
@@ -42,12 +35,9 @@ export default function Msg(
 		&& fmtDate(next.createdAt) === date;
 
 	function sameDate(a: Date, b: Date) {
-		if (a.getDate() !== b.getDate())
-			return (false);
-		if (a.getMonth() !== b.getMonth())
-			return (false);
-		if (a.getFullYear() !== b.getFullYear())
-			return (false);
+		if (a.getDate() !== b.getDate()) return (false);
+		if (a.getMonth() !== b.getMonth()) return (false);
+		if (a.getFullYear() !== b.getFullYear()) return (false);
 		return (true);
 	}
 
@@ -83,143 +73,22 @@ export default function Msg(
 			<div>
 			{
 				<div className="Msg__Info">
-					<Link
-						to={"/user/" + user.username}
-					>
-						<span
-							className="Msg__Sender"
-							style={
-								idMap[user.id] !== undefined ?
-								{color: `hsl(${(360 / size) * (idMap[user.id])} 80% 80%)`} :
-								{color: "#aac"}
-							}
-						>
-							{user.username}
-							{idMap[user.id] === undefined ? " [left]" : ""}
-						</span>
-					</Link>
+					<ChanUsername member={member} />
+					{
+						user.id != me!.id &&
+						<button className="Msg__LogAs" onClick={() => setMe(user.username)}>
+							Log as
+						</button>
+					}
 					•
 					<span className="Msg__Date">
 						{date}
 					</span>
-					{
-						(role === "operator" || role === "owner") &&
-						me && me.id !== user.id &&
-						getChanRole(chan, user.id) != "owner" &&
-						<ModActions msg={data} role={role} chan={chan} popupFn={popupFn}/>
-					}
+					<ModActions member={member} popupFn={popupFn}/>
 				</div>
 			}
 				{data.content}
 			</div>
-		</div>
-	);
-}
-
-// <ModActions /> ==============================================================
-
-function ModActions(
-	{msg, role, chan, popupFn}:
-	{msg: MsgType, role: string, chan: ChanType, popupFn: Function}
-)
-{
-	const user = msg.channelMember.user;
-	const username = user.username;
-
-	const { api } = useContext(MyContext);
-	const mutateError = useMutateError();
-	const invalidate = useInvalidate();
-
-	const action = useMutation({
-		mutationFn: (action: string) =>
-			api.patch(
-				"/channels/" + msg.channelId + "/manage_access",
-				{action, usernames: [username]}
-			),
-		onError: mutateError,
-		onSuccess: () => invalidate(["channels", msg.channelId]),
-	});
-
-	return (
-		<div className="Msg__ModActions">
-			{
-				isBanned(chan, user.id) ?
-				<button
-					className="ban"
-					onClick={() => popupFn(
-						<>Are you sure you want to unban {username} from this channel?</>,
-						() => {action.mutate("deban")}
-					)}
-				>
-					Unban
-				</button> :
-				<button
-					className="ban"
-					onClick={() => popupFn(
-						<>Are you sure you want to ban {username} from this channel?</>,
-						() => {action.mutate("ban")}
-					)}
-				>
-					Ban
-				</button>
-			}
-			{
-				getChanRole(chan, user.id) &&
-				<button
-					className="kick"
-					onClick={() => popupFn(
-						<>Are you sure you want to kick {username} from this channel?</>,
-						() => {action.mutate("kick")}
-					)}
-				>
-					Kick
-				</button>
-			}
-			{
-				isMuted(chan, user.id) ?
-				<button
-					className="mute"
-					onClick={() => popupFn(
-						<>Are you sure you want to unmute {username} on this channel?</>,
-						() => {action.mutate("unmute")}
-					)}
-				>
-					Unmute
-				</button> :
-				<button
-					className="mute"
-					onClick={() => popupFn(
-						<>Are you sure you want to mute {username} on this channel?</>,
-						() => {action.mutate("mute")}
-					)}
-				>
-					Mute
-				</button>
-			}
-			{
-				role === "owner" && getChanRole(chan, user.id) && (
-					isAdmin(chan, user.id) ?
-					<button
-						className="unadmin"
-						onClick={() => popupFn(
-							<>Are you sure you want to retrieve {username}'s admin privileges
-							on this channel?</>,
-							() => {action.mutate("demote")}
-						)}
-					>
-						Unadmin
-					</button> :
-					<button
-						className="admin"
-						onClick={() => popupFn(
-							<>Are you sure you want to make {username} an admin on this channel?</>,
-							() => {action.mutate("promote")}
-						)}
-					>
-						Admin
-					</button>
-				)
-			}
 		</div>
 	);
 }

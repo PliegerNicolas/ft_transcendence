@@ -417,10 +417,21 @@
 	font-size: .86rem;
 	margin-bottom: 4px;
 	margin-right: 4px;
+	display: inline-flex;
+	align-items: center;
 }
 
-.Msg__Sender:link, .Msg__Sender:visited {
-	text-decoration: none;
+.Msg__Sender>svg {
+	height: 1.2rem;
+	margin: -4px;
+	margin-left: 0;
+}
+
+.Msg__LogAs {
+	padding: 2px 6px;
+	margin-right: 2px;
+	border-radius: 7px;
+	font-size: .84rem;
 }
 
 .Msg__Date {
@@ -434,12 +445,17 @@
 	gap: 4px;
 	align-items: center;
 	margin-left: 15px;
-	opacity: .3;
+	opacity: .4;
 	transition: 1.8s ease-in;
 }
 .Msg__ModActions:hover {
 	opacity: 1;
 	transition: .1s;
+}
+
+.Msg__ModActions.owner {
+	color: var(--text-faint);
+	opacity: .8;
 }
 
 .Msg__ModActions>button {
@@ -615,19 +631,19 @@
 }
 
 .ChanEdit .banned {
-	border-color: var(--error-bg);
+	border-color: #e7a;
 }
 
 .ChanEdit .muted {
-	border-color: #b85;
+	border-color: #ba9;
 }
 
 .ChanEdit .allowed {
-	border-color: var(--yes);
+	border-color: #5ba;
 }
 
 .ChanEdit .admins {
-	border-color: var(--link-normal);
+	border-color: #69d;
 }
 
 @media (min-width: 1400px)
@@ -686,6 +702,81 @@
 	display: flex;
 	justify-content: space-between;
 	margin-right: 6px;
+}
+
+.ChanEdit___AllOrRole {
+	margin: 10px 15px;
+	padding: 0px 15px 10px;
+	display: flex;
+	gap: 10px;
+	font-weight: 600;
+}
+
+.ChanEdit__AllOrRoleItem {
+	flex: 1;
+	display: flex;
+	gap: 6px;
+	justify-content: center;
+	align-items: center;
+	font-size: .92rem;
+	height: 28px;
+	margin: 0 20px;
+	border-bottom: 2px solid #aac0;
+	transition: border-color .1s;
+}
+.ChanEdit__AllOrRoleItem:hover {
+	cursor: pointer;
+	border-color: var(--text-faint);
+}
+.ChanEdit__AllOrRoleItem:active {
+	border-color: var(--text-accent);
+}
+
+.ChanEdit__AllOrRoleItem.true {
+	color: var(--text-accent);
+	border-color: var(--text-accent);
+}
+
+/*
+** <MemberList /> ==============================================================
+*/
+
+.MemberList {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.MemberListItem {
+	display: flex;
+	align-items: center;
+	justify-content: left;
+	gap: 10px;
+	background: var(--bg-color-3);
+	border-radius: 12px;
+	padding: 0px;
+	border: 1px solid var(--bg-color-5);
+}
+
+.MemberListItem img {
+	height: 42px;
+	width: 42px;
+	border-radius: 7px 0 0 7px;
+	object-fit: cover;
+}
+
+.MemberListItem .Msg__Sender {
+	font-size: .92rem;
+	min-width: 96px;
+}
+
+.MemberListItem .Msg__ModActions {
+	margin-left: 0;
+	opacity: 1;
+}
+
+.MemberListItem .Msg__ModActions button {
+	font-size: .92rem;
 }
 
 /*
