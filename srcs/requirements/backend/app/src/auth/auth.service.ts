@@ -108,7 +108,8 @@ export class AuthService
 		}
 		const payload = {user_id : member.id, oauth_id : member.oauthId, isTwoFactorAuthEnabled : true, isTwoFactorAuthLogged: true}
 		const access_token = await this.jwtService.signAsync(payload)
-		return ({ access_token });
+		const refresh_token = await this.createRefreshToken(payload, true)
+		return ({ access_token, refresh_token });
 	}
 
 	async refresh_token(jwt : string){

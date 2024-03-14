@@ -31,8 +31,14 @@ export class AuthController {
 	}
 
 	@Post('log_as/:username')
-	logAs(@Param('username', ParseUsernamePipe) username: string){
-		return this.authService.log_as(username)
+	async logAs(@Param('username', ParseUsernamePipe) username: string,
+				@Res({passthrough : true}) res : Response){
+		const ret = await this.authService.log_as(username)
+		res.cookie("access_token", ret.access_token,{maxAge: 1600000, httpOnly: true, sameSite: 'none', secure:true });
+		res.cookie("refresh_token", ret.refresh_token, {maxAge: 86400000, httpOnly: true, sameSite: 'none', secure:true})
+		res.json({isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled});
+		res.send();
+		return ;
 	}
 
 
