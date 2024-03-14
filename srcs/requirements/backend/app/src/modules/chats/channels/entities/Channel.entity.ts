@@ -53,7 +53,7 @@ export class Channel {
     @OneToMany(() => ChannelMember, (member) => member.channel, { cascade: true })
     members?: ChannelMember[];
 
-    @OneToMany(() => Message, (messages) => messages.channel) // soft deletion ?
+    @OneToMany(() => Message, (messages) => messages.channel)
     messages?: Message[];
 
     /* Helper Functions */
@@ -74,7 +74,7 @@ export class Channel {
         else if (this.members.some((member) => member.role === ChannelRole.OWNER)) return ;
 
         const nextOwner = this.members?.reduce((prevMember, currentMember) => {
-            return (prevMember.role < currentMember.role ? prevMember : currentMember);
+            return (compareChannelRoles(currentMember.role, prevMember.role) > 0 ? currentMember : prevMember);
         }, this.members[0]);
 
         nextOwner.role = ChannelRole.OWNER;
@@ -86,12 +86,12 @@ export class Channel {
         if (!username) return (null);
         if (!this.members)
             return (null);
-        return (this.members.find((member) => member.user.username === username) || null);
+        return (this.members.find((member) => member.user.username === username && !member.hasLeft) || null);
     }
 
     public isMember(username: string): boolean {
         if (!this.members) return (false);
-        return (this.members.some((member) => member.user.username === username) || null);
+        return (this.members.some((member) => member.user.username === username && !member.hasLeft) || null);
     }
 
     public isInvited(username: string): boolean {
@@ -130,7 +130,12 @@ export class Channel {
 
     public kick(users: User[]): void {
         this.uninvite(users);
-        this.members = this.members?.filter((member) => !users.some((user) => user.username === member.user.username));
+        for (const member of this.members || []) {
+            if (users.some((user) => user.username === member.user.username)) {
+                member.hasLeft = true;
+                member.role = ChannelRole.MEMBER;
+            }
+        }
     }
 
     public mute(users: User[]): void {
@@ -240,6 +245,25 @@ export class Channel {
         if (!isMember) throw new ForbiddenException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot alter it`);
 
         if (!this.isRankedEqualOrAbove(user.username, ChannelRole.OPERATOR)) throw new ForbiddenException(`User '${user.username}' hasn't got enough permissions to alter Channel with ID ${this.id}`);
+    }
+
+    public validatePermissionOnUsers(user: User, users: User[]): void {
+        if (!user) throw new ForbiddenException(`User '{undefined}' isn't identified thus cannot alter User permissions in Channel with ID ${this.id}`);
+        if (user.hasGlobalServerPrivileges()) return ;
+
+        const actingMember = this.getMember(user.username);
+        if (!actingMember) throw new ForbiddenException(`User '${user.username}' isn't member of Channel with ID ${this.id} thus cannot alter User permissions`);
+
+        const invalidUsernames: string[] = [];
+        
+        users.forEach(user => {
+            const targetMember = this.getMember(user.username);
+            if (targetMember && compareChannelRoles(actingMember.role, targetMember.role) <= 0) invalidUsernames.push(user.username);
+        });
+
+        if (invalidUsernames.length > 0) {
+            throw new ForbiddenException(`User ${user.username} hasn't got enough permissions to alter permissions of the following users: ${invalidUsernames.join(', ')}`);
+        }
     }
 
     public validateDelete(user: User): void {
