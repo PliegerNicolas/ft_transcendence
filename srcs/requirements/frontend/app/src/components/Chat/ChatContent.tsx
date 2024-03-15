@@ -41,6 +41,11 @@ export default function ChatContentRouter()
 		onError: mutateError,
 	});
 
+	function handleJoinChannel(password: string) {
+		join.mutate(password);
+		socket.emit('joinChannel', getChan.data.channel.name);
+	}
+
 	const [password, setPasswd] = useState("");
 
 	const idMap = useMemo(() => {
@@ -81,7 +86,7 @@ export default function ChatContentRouter()
 					onChange={(ev) => setPasswd(ev.currentTarget.value)}
 					placeholder="Password"
 				/>
-				<button onClick={() => {join.mutate(password); setPasswd("")}}>
+				<button onClick={() => {handleJoinChannel(password); setPasswd("")}}>
 					Join
 				</button>
 			</div>
@@ -196,7 +201,7 @@ function ChatContent()
 
 	function handleJoinChannel(password: string) {
 		join.mutate(password);
-		socket.emit('joinChannel', getChan.data.name);
+		socket.emit('joinChannel', chan.name);
 	}
 
 	const [popup, setPopup] =
@@ -209,40 +214,7 @@ function ChatContent()
 		});
 	}
 
-<<<<<<< HEAD
-	if (getChan.isPending) return (
-		<div className="ChatContent spinner">
-			<Spinner />
-		</div>
-	);
-
-	if (getChan.isError && httpStatus(getChan.error) !== 403) return (
-		<div className="ChatContent error">
-			Failed to load this channel: {getChan.error.message}
-		</div>
-	);
-
-	if (getChan.isError) return (
-		<div className="ChatContent ChatContent__Mdp">
-			<div className="notice-msg">
-				A password is required to join this channel:
-			</div>
-			<div className="ChatContent__MdpInput">
-				<input
-					type="password"
-					value={password}
-					onChange={(ev) => setPasswd(ev.currentTarget.value)}
-					placeholder="Password"
-				/>
-				<button onClick={() => handleJoinChannel(password)}>Join</button>
-			</div>
-		</div>
-	);
-
-	const role = me ? getChanRole(getChan.data, me.id) : "";
-=======
 	const [leavePopup, setLeavePopup] = useState(false);
->>>>>>> 339aac7862e842b1e25224129a4b6cf4fcfcda6d
 
 	if (getMsgs.isPending) {
 		return (

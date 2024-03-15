@@ -2,7 +2,7 @@ import "./App.css";
 
 import { useState, useEffect, useContext, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate} from "react-router-dom";
-import { useMutation, MutationFunction} from "@tanstack/react-query";
+import { useMutation, MutationFunction, useQuery} from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
 import { InviteType, NotifType } from "./utils/types.ts";
@@ -26,11 +26,7 @@ import Invites from "./components/Game/Invitations.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
-<<<<<<< HEAD
-import { randomString } from "./utils/utils.ts";
-=======
 import { httpStatus, randomString } from "./utils/utils.ts";
->>>>>>> 339aac7862e842b1e25224129a4b6cf4fcfcda6d
 import { useGet } from "./utils/hooks.ts";
 import { PopupType } from "./utils/types.ts";
 
@@ -197,11 +193,7 @@ function App()
 
 	const [lastChan, setLastChan] = useState("");
 
-<<<<<<< HEAD
-	const getUser = useGet(["me"]);
-=======
 	const getUser = useGet(["me"], logged);
->>>>>>> 339aac7862e842b1e25224129a4b6cf4fcfcda6d
 
 	useEffect(() => {
 		if (getUser.isSuccess) {

@@ -66,7 +66,7 @@ function Notif(
 				</div>
 				<button><img src={closeIcon} /></button>
 			</div>
-			<div className="Notif__Content">
+			<div>
 				{notif.content}
 			</div>
 		</div>

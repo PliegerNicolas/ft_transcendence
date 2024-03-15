@@ -73,9 +73,9 @@ function Invite(
 	}
 
 	return (
-		<div className={`Invites__Invite`}>
-			<div>
-				<div>{invite.from} invited you.</div>
+		<div className="Invite">
+			<div>{invite.from} invited you.</div>
+			<div className="Invite__Buttons">
 				<button onClick={() => acceptHandler()}>Accept</button>
 				<button onClick={() => rejectHandler()}>Reject</button>
 			</div>

@@ -11,11 +11,11 @@ import "../../styles/play.css";
 // <PrivatePlay /> ====================================================================
 
 const PrivatePlay = () => {
-	const { me } = useContext(MyContext);
-	if (!me) return (<></>);
-
 	const location = useLocation();
   	const data = location.state;
+	const { me } = useContext(MyContext);
+	if (!me || !data) return (<></>);
+
 	const [gameReady, setGameReady] = useState(false);
 	const [playerReady, setPlayerReady] = useState(false);
 	const [gameOver, setGameOver] = useState(false);
@@ -23,7 +23,6 @@ const PrivatePlay = () => {
 
 	const [lobby, setLobby] = useState<string>(data.lobby);
 	const [oppId, setOppId] = useState('');
-
 	const [oppName, setOppName] = useState('');
 
 	const [backgroundColor, setBackgroundColor] = useState('#000');
@@ -109,7 +108,7 @@ const PrivatePlay = () => {
 
 	const backToMenuHandler = () => {
 		socket.emit('leaveLobby', lobby);
-		navigate('/home');
+		navigate('/');
 	}
 
 	// Backend http requests ==============================================================================================================

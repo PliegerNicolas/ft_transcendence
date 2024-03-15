@@ -29,7 +29,7 @@ export class SocketGateway implements OnModuleInit {
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
 			console.log('new socket connection : ' + socket.id);
-			this.server.to(socket.id).emit('getUserInfos');
+			setTimeout(() => {this.server.to(socket.id).emit('getUserInfos');}, 100);
 			socket.on('disconnect', () => {
 				console.log(socket.id + ' left socket');
 				this.server.emit('userLeftSocket', socket.id);
