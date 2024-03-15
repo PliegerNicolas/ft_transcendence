@@ -19,7 +19,7 @@ import ConfirmPopup from "./ConfirmPopup.tsx";
 
 export default function Sandbox()
 {
-	const {api, logged, token, me} = useContext(MyContext);
+	const {api, me} = useContext(MyContext);
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
@@ -69,17 +69,6 @@ export default function Sandbox()
 		<main className="MainContent" ref={ref}>
 			<h2>Sandbox</h2>
 			<section>
-				<h3>Global context:</h3>
-				<div className="genericList Sandbox__ContextList">
-					<div className="Sandbox__Item">
-						<div>Logged</div>
-						<div>{logged ? "Yes" : "No"}</div>
-					</div>
-					<div className="Sandbox__Item">
-						<div>Token</div>
-						<div>{token}</div>
-					</div>
-				</div>
 				<h4>All channels:</h4>
 				<button onClick={() => postChan.mutate("c_" + randomString(6))}>
 					Add a chan
@@ -161,10 +150,8 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 			else
 				mutateError(error);
 		},
-		onSuccess: (data: {access_token: string}) => {
+		onSuccess: () => {
 			setPopup(false);
-			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true, token: data.access_token}));
 			window.location.reload();
 		},
 	});

@@ -20,12 +20,13 @@ import GeneralInfos from "./EditGeneralInfos.tsx";
 import ConfirmPopup from "../ConfirmPopup.tsx";
 import ChanUsername from "./ChanUsername.tsx";
 import ModActions from "./ModActions.tsx";
+import UserSuggestions from "../UserSuggestions.tsx";
 
 // <ChanEdit /> ================================================================
 
 export default function ChanEdit({id}: {id: number})
 {
-	const { api, addNotif } = useContext(MyContext);
+	const { api, addNotif, me } = useContext(MyContext);
 	const { chan, role } = useContext(ChatContentContext);
 
 	const mutateError = useMutateError();
@@ -53,8 +54,8 @@ export default function ChanEdit({id}: {id: number})
 	const [dmUsername, setDmUsername] = useState("");
 
 	useEffect(() => {
-		if (!id)
-		setChanForm({...chan, password: "", passwordRepeat: "",})
+		if (id)
+			setChanForm({...chan, password: "", passwordRepeat: "",})
 		console.log(chan);
 	}, [chan]);
 
@@ -141,10 +142,9 @@ export default function ChanEdit({id}: {id: number})
 	async function newDm() {
 		try {
 			const them = await api.get("/users/" + dmUsername);
-			const me = await api.get("/me");
 
 			const dmChan = await api.post("/channels", {
-				name: me.username + " & " + them.username,
+				name: "__DM__," + me?.username + "," + them.username,
 				visibility: "hidden",
 				mode: "invite_only"
 			});
@@ -201,10 +201,12 @@ export default function ChanEdit({id}: {id: number})
 						</label>
 						<input
 							type="text"
+							list="UserSuggestions"
 							placeholder="Username"
 							value={dmUsername}
 							onChange={(ev) => setDmUsername(ev.currentTarget.value)}
 						/>
+						<UserSuggestions />
 						<button onClick={() => newDm()} style={{marginLeft: "10px"}}>
 							Done
 						</button>
@@ -334,7 +336,7 @@ function MemberList()
 				<hr />
 			</>
 		}
-			{
+		{
 			chan.members.filter(member => member.user.id !== me!.id).map(member =>
 				<MemberListItem key={member.id} member={member} />
 			)
@@ -502,6 +504,7 @@ function UserList(
 					<div className="UserList__InputContainer">
 						<input
 							type="text"
+							list="UserSuggestions"
 							value={newUser}
 							onChange={e => setNewUser(e.target.value)}
 							onKeyDown={e => {
@@ -512,6 +515,7 @@ function UserList(
 							}}
 							placeholder="Add a user"
 						/>
+						<UserSuggestions />
 					</div>
 					<button
 						type="button" className="add"

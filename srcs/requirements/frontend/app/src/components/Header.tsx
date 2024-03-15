@@ -8,6 +8,7 @@ import ft_logo from "../assets/42.svg";
 import defaultPicture from "../assets/default_profile.png";
 import logoutIcon from "../assets/logout.svg";
 
+import UserSuggestions from "./UserSuggestions.tsx";
 import Login from "./Login.tsx";
 
 import { MyContext } from "../utils/contexts.ts";
@@ -35,11 +36,11 @@ function useOutsideClick(callback: (event: MouseEvent) => void) {
 
 export default function Header()
 {
-	const { logged, api, setGlobalPopup, me } = useContext(MyContext);
+	const { logged, setGlobalPopup, me } = useContext(MyContext);
 
 	const [ popup, setPopup ] = useState(false);
 
-	const getPic = useGet(["picture"], logged && api.auth);
+	const getPic = useGet(["picture"], logged);
 
 	const popupRef = useOutsideClick(() => {
 			setTimeout(() => setPopup(false), 0);
@@ -59,9 +60,11 @@ export default function Header()
 					<div style={{textAlign: "center"}}>
 						<input
 							type="text"
+							list="UserSuggestions"
 							value={value}
 							onChange={handleUsernameChange}
 						/>
+						<UserSuggestions />
 					</div>
 				</>,
 			action: "Done",
@@ -153,7 +156,7 @@ export default function Header()
 
 function Logout()
 {
-	const { setLogInfo, api } = useContext(MyContext);
+	const { setLogged, api } = useContext(MyContext);
 
 	const backendLogout = useMutation({
 		mutationFn: () => api.post("/auth/logout", {}),
@@ -161,8 +164,7 @@ function Logout()
 	});
 
 	function logoutNow() {
-		localStorage.removeItem("my_info");
-		setLogInfo({logged: false, token: ""});
+		setLogged(false);
 		backendLogout.mutate();
 	}
 

@@ -1,4 +1,4 @@
-import { useQueryClient, QueryKey, useQuery, useMutation, MutationFunction } from "@tanstack/react-query";
+import { useQueryClient, QueryKey, useQuery, useMutation } from "@tanstack/react-query";
 import { useContext } from "react";
 import { MyContext } from "./contexts";
 import { httpStatus } from "./utils";
@@ -12,34 +12,40 @@ export function useInvalidate()
 
 export function useStopOnHttp()
 {
-	const {setLogInfo} = useContext(MyContext);
+	const { setLogged, api } = useContext(MyContext);
+
+	const refresh = useMutation({
+		mutationFn: () => api.get("/auth/refresh"),
+		onError: () => setLogged(false)
+	});
 
 	return ((count: number, error: Error) => {
 		const status = httpStatus(error);
 
 		if (status === 401) {
-			localStorage.removeItem("my_info");
-			setLogInfo({logged: false, token: ""});
+			refresh.mutate();
+			return (count < 3);
 		}
-
-		return (!status && count < 3)
+		else
+			return (!status && count < 3)
 	});
 }
 
 export function useMutateError()
 {
-	const { addNotif } = useContext(MyContext);
+	const { setLogged, api, addNotif } = useContext(MyContext);
+
+	const refresh = useMutation({
+		mutationFn: () => api.get("/auth/refresh"),
+		onError: () => setLogged(false)
+	});
 
 	return ((error: Error) => {
 		const status = httpStatus(error);
 
 		addNotif({content: error.message});
-		if (status === 401) {
-			addNotif({content: `401 == USER NOT LOGGED,
-				SHOULD A 401 TRULY BE RETURNED IN THIS CASE?`});
-			addNotif({content: `403 is the prefered way of signaling an
-				authenticated user isn't allowed to access a resource.`});
-		}
+
+		if (status === 401) refresh.mutate();
 	})
 }
 
@@ -64,14 +70,8 @@ export function useSetMe()
 	const mutateError = useMutateError();
 
 	const mutation = useMutation({
-		mutationFn: ((name: string) =>
-			api.post("/auth/log_as/" + name, {})) as unknown as
-			MutationFunction<{ access_token: string; }, unknown>,
-		onSuccess: (data: {access_token: string}) => {
-			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true, token: data.access_token}));
-			window.location.reload();
-		},
+		mutationFn: ((name: string) => api.post("/auth/log_as/" + name, {})),
+		onSuccess: () => window.location.reload(),
 		onError: mutateError,
 	});
 

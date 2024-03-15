@@ -37,7 +37,6 @@ export interface FriendshipType {
 
 export interface MyInfoType {
 	logged: boolean,
-	token: string
 }
 
 export interface MemberType {
