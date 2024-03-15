@@ -3,33 +3,37 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import { useMutateError, useInvalidate, useGet } from "../../utils/hooks.ts";
-import { httpStatus, getChanRole } from "../../utils/utils.ts";
-import { ChanType, UserType } from "../../utils/types.ts";
-import { MyContext } from "../../utils/contexts.ts";
+import { httpStatus } from "../../utils/utils.ts";
+import { ChanType, MemberType, UserType } from "../../utils/types.ts";
+import { ChatContentContext, MyContext } from "../../utils/contexts.ts";
 
 import { socket } from "../../App.tsx"
 
 import closeIcon from "../../assets/close.svg";
 import addIcon from "../../assets/add.svg";
+import defaultPicture from "../../assets/default_profile.png";
 
 import "../../styles/chat.css";
 
-import Spinner from "../Spinner.tsx";
 import ChatHeader from "./ChatHeader.tsx";
 import GeneralInfos from "./EditGeneralInfos.tsx";
 import ConfirmPopup from "../ConfirmPopup.tsx";
+import ChanUsername from "./ChanUsername.tsx";
+import ModActions from "./ModActions.tsx";
+import UserSuggestions from "../UserSuggestions.tsx";
 
 // <ChanEdit /> ================================================================
 
 export default function ChanEdit({id}: {id: number})
 {
-	const {api, addNotif, me} = useContext(MyContext);
+	const { api, addNotif, me } = useContext(MyContext);
+	const { chan, role } = useContext(ChatContentContext);
 
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
 
-	const [chan, setChan] = useState<ChanType>({
+	const [chanForm, setChanForm] = useState<ChanType>({
 		name: "New Channel",
 		visibility: "public",
 		mode: "open",
@@ -49,17 +53,14 @@ export default function ChanEdit({id}: {id: number})
 	const [dmOrChan, setDmOrChan] = useState("dm");
 	const [dmUsername, setDmUsername] = useState("");
 
-	const getChan = useGet(["channels", "" + id], !!id);
-
 	useEffect(() => {
-		if (!getChan.isSuccess)
-			return ;
-		setChan({...getChan.data, password: "", passwordRepeat: "",})
-		console.log(getChan.data);
-	}, [getChan.isSuccess]);
+		if (id)
+			setChanForm({...chan, password: "", passwordRepeat: "",})
+		console.log(chan);
+	}, [chan]);
 
 	function updateField(field: string, value: unknown) {
-		setChan((prev: ChanType) => {
+		setChanForm((prev: ChanType) => {
 			return {...prev, [field]: value };
 		});
 	}
@@ -92,8 +93,8 @@ export default function ChanEdit({id}: {id: number})
 
 	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
 		if (e.target.name === "password" && e.target.value === "") {
-			setChan({
-				...chan,
+			setChanForm({
+				...chanForm,
 				password: "",
 				passwordRepeat: "",
 			});
@@ -106,44 +107,44 @@ export default function ChanEdit({id}: {id: number})
 
 		if (!id)
 			postChan.mutate({
-				name: chan.name,
-				visibility: chan.visibility,
-				mode: chan.mode,
-				password: chan.password,
+				name: chanForm.name,
+				visibility: chanForm.visibility,
+				mode: chanForm.mode,
+				password: chanForm.password,
 			});
 		else if (
 			setPasswd
-			|| (chan.mode == "password_protected"
-				&& getChan.data.mode != "password_protected")
+			|| (chanForm.mode == "password_protected"
+				&& chan.mode != "password_protected")
 		)
 			patchFn.mutate({
-				name: chan.name,
-				visibility: chan.visibility,
-				mode: chan.mode,
-				password: chan.password,
+				name: chanForm.name,
+				visibility: chanForm.visibility,
+				mode: chanForm.mode,
+				password: chanForm.password,
 			});
-		else if (chan.mode !== "password_protected")
+		else if (chanForm.mode !== "password_protected")
 			patchFn.mutate({
-				name: chan.name,
-				visibility: chan.visibility,
-				mode: chan.mode,
+				name: chanForm.name,
+				visibility: chanForm.visibility,
+				mode: chanForm.mode,
 		});
 		else {
 			patchFn.mutate({
-				name: chan.name,
-				visibility: chan.visibility,
+				name: chanForm.name,
+				visibility: chanForm.visibility,
 		});
 		}
-		socket.emit('joinChannel', chan.name);
+		console.log("SOCKET EMIT JOIN CHANNEL.");
+		socket.emit('joinChannel', chanForm.name);
 	}
 
 	async function newDm() {
 		try {
 			const them = await api.get("/users/" + dmUsername);
-			const me = await api.get("/me");
 
 			const dmChan = await api.post("/channels", {
-				name: me.username + " & " + them.username,
+				name: "__DM__," + me?.username + "," + them.username,
 				visibility: "hidden",
 				mode: "invite_only"
 			});
@@ -156,19 +157,19 @@ export default function ChanEdit({id}: {id: number})
 			console.log(dmChan);
 			invalidate(["channels"]);
 		}
-		catch (error) {
-			if (!(error instanceof Error))
+		catch (e) {
+			if (!(e instanceof Error))
 				return ;
-			if (httpStatus(error) === 404)
+			if (httpStatus(e) == 404)
 				addNotif({content: "No such user!"});
 			else
-				addNotif({content: error.message});
+				addNotif({content: e.message});
 		}
 	}
 
 	if (!id) return (
 		<div className="ChanEdit ChatContent MainContent">
-			<ChatHeader name={chan.name} edit={true} />
+			<ChatHeader name={chanForm.name} edit={true} leave={null} />
 			<div className="ChanEdit__Scrollable">
 				<div className="ChanEdit__GlobOrLists">
 					<div
@@ -188,7 +189,7 @@ export default function ChanEdit({id}: {id: number})
 					dmOrChan === "chan" ?
 					<GeneralInfos
 						id={id}
-						chan={chan}
+						chan={chanForm}
 						change={handleChange}
 						submit={handleSubmit}
 						setPasswd={setPasswd}
@@ -200,10 +201,12 @@ export default function ChanEdit({id}: {id: number})
 						</label>
 						<input
 							type="text"
+							list="UserSuggestions"
 							placeholder="Username"
 							value={dmUsername}
 							onChange={(ev) => setDmUsername(ev.currentTarget.value)}
 						/>
+						<UserSuggestions />
 						<button onClick={() => newDm()} style={{marginLeft: "10px"}}>
 							Done
 						</button>
@@ -213,20 +216,6 @@ export default function ChanEdit({id}: {id: number})
 		</div>
 	);
 
-	if (getChan.isPending || !me) return (
-		<div className="ChatContent spinner">
-			<Spinner />
-		</div>
-	);
-
-	if (getChan.isError) return (
-		<div className="ChatContent error">
-			Failed to load this channel's data: {getChan.error.message}
-		</div>
-	);
-
-	const role = getChanRole(getChan.data, me.id);
-
 	if (role !== "owner" && role !== "operator") return (
 		<div className="ChatContent error">
 			You are not allowed to edit this channel!
@@ -235,43 +224,43 @@ export default function ChanEdit({id}: {id: number})
 
 	return (
 		<div className="ChanEdit ChatContent MainContent">
-			<ChatHeader name={chan.name} edit={true} />
+			<ChatHeader name={chanForm.name} edit={true} leave={null} />
 			<div className="ChanEdit__Scrollable">
 				<div className="ChanEdit__GlobOrLists">
+				{
+					role === "owner" &&
 					<div
 						className={"ChanEdit__GlobOrListsItem " + (globOrLists === "global")}
-						onClick={() => {
-							setGlobOrLists("global");
-							console.log(getChan.data.mode + " vs. " + chan.mode);
-						}}
+						onClick={() => setGlobOrLists("global")}
 					>
 						General Infos
 					</div>
+				}
 					<div
-						className={"ChanEdit__GlobOrListsItem " + (globOrLists === "lists")}
+						className={
+							"ChanEdit__GlobOrListsItem " + (globOrLists === "lists") + " " + role
+						}
 						onClick={() => {
-							if (getChan.data.mode !== chan.mode)
+							if (chan.mode !== chanForm.mode)
 								setPopup(true);
 							else
 								setGlobOrLists("lists");
-							console.log("coucou");
 						}}
 					>
 						User lists
 					</div>
 				</div>
 			{
-				(getChan.isSuccess) &&
-				globOrLists === "global" ?
+				globOrLists === "global" && role !== "operator" ?
 				<GeneralInfos
 					id={id}
-					chan={chan}
+					chan={chanForm}
 					change={handleChange}
 					submit={handleSubmit}
-					setPasswd={setPasswd || getChan.data.mode != "password_protected"}
+					setPasswd={setPasswd || chan.mode != "password_protected"}
 					setSetPasswd={setSetPasswd}
 				/> :
-				<UserLists chan={getChan.data} />
+				<UserLists />
 			}
 			</div>
 			{
@@ -302,9 +291,81 @@ interface actionType {
 	usernames: Array<string>,
 }
 
-function UserLists({chan}: {chan: ChanType})
+function UserLists()
 {
-	const {api} = useContext(MyContext);
+	const [allOrRole, setAllOrRole] = useState("all");
+
+	return (
+		<div>
+			<div className="ChanEdit___AllOrRole">
+				<div
+					className={"ChanEdit__AllOrRoleItem " + (allOrRole === "all")}
+					onClick={() => setAllOrRole("all")}
+				>
+					All members
+				</div>
+				<div
+					className={"ChanEdit__AllOrRoleItem " + (allOrRole === "role")}
+					onClick={() => setAllOrRole("role")}
+				>
+					By category
+				</div>
+			</div>
+			{
+				allOrRole === "role" ?
+				<RoleUserLists /> :
+				<MemberList />
+			}
+		</div>
+	);
+}
+
+function MemberList()
+{
+	const { me } = useContext(MyContext);
+	const { chan } = useContext(ChatContentContext);
+
+	const myMember = chan.members.find(member => member.user.id === me!.id);
+
+	return (
+		<div className="MemberList">
+		{
+			myMember &&
+			<>
+				<MemberListItem member={myMember} />
+				<hr />
+			</>
+		}
+		{
+			chan.members.filter(member => member.user.id !== me!.id).map(member =>
+				<MemberListItem key={member.id} member={member} />
+			)
+		}
+		</div>
+	);
+}
+
+function MemberListItem({member}: {member: MemberType})
+{
+	const getPic = useGet(["users", member.user.username, "picture"]);
+
+	return (
+		<div className="MemberListItem">
+			<img src={getPic.isSuccess ? getPic.data : defaultPicture}/>
+			<ChanUsername member={member} />
+			<ModActions
+				member={member}
+				popupFn={(_: any, action: Function) => action()}
+			/>
+		</div>
+	);
+}
+
+function RoleUserLists()
+{
+	const { chan, role } = useContext(ChatContentContext);
+	const { api } = useContext(MyContext);
+
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
 
@@ -316,87 +377,72 @@ function UserLists({chan}: {chan: ChanType})
 	});
 
 	return (
-		<div>
-			{
-				chan.mode !== "invite_only" &&
-				<section className="banned">
-					<UserList
-						title="Banned users"
-						list={chan.bannedUsers}
-						add={(value: UserType) => {
-							action.mutate({action: "ban", usernames: [value.username]});
-						}}
-						rm={(value: UserType) => {
-							action.mutate({action: "deban", usernames: [value.username]});
-						}}
-						owner={null}
-					/>
-				</section>
-			}
-			{
-				chan.mode === "invite_only" &&
-				<section className="allowed">
-					<UserList
-						title="Invited users"
-						list={chan.invitedUsers}
-						add={(value: UserType) =>
-							action.mutate({action: "invite", usernames: [value.username]})
-						}
-						rm={(value: UserType) =>
-							action.mutate({action: "uninvite", usernames: [value.username]})
-						}
-						owner={null}
-					/>
-				</section>
-			}
-			<section className="muted">
-				<UserList
-					title="Muted users"
-					list={chan.mutedUsers}
-					add={(value: UserType) =>
-						action.mutate({action: "mute", usernames: [value.username]})
-					}
-					rm={(value: UserType) =>
-						action.mutate({action: "unmute", usernames: [value.username]})
-					}
-					owner={null}
-				/>
-			</section>
-			<section className="admins">
-				<UserList
-					title="Admins"
-					list={
-						chan.members.filter(item => item.role === "operator").map(item => item.user)
-					}
-					add={(value: UserType) =>
-						action.mutate({action: "promote", usernames: [value.username]})
-					}
-					rm={(value: UserType) =>
-						action.mutate({action: "demote", usernames: [value.username]})
-					}
-					owner={null}
-				/>
-			</section>
-		</div>
+		<>
+		<section className="allowed">
+			<UserList
+				title="Invited users"
+				list={chan.invitedUsers}
+				add={(value: UserType) =>
+					action.mutate({action: "invite", usernames: [value.username]})
+				}
+				rm={(value: UserType) =>
+					action.mutate({action: "uninvite", usernames: [value.username]})
+				}
+			/>
+		</section>
+		<section className="muted">
+			<UserList
+				title="Muted users"
+				list={chan.mutedUsers}
+				add={(value: UserType) =>
+					action.mutate({action: "mute", usernames: [value.username]})
+				}
+				rm={(value: UserType) =>
+					action.mutate({action: "unmute", usernames: [value.username]})
+				}
+			/>
+		</section>
+		<section className="banned">
+			<UserList
+				title="Banned users"
+				list={chan.bannedUsers}
+				add={(value: UserType) => {
+					action.mutate({action: "ban", usernames: [value.username]});
+				}}
+				rm={(value: UserType) => {
+					action.mutate({action: "deban", usernames: [value.username]});
+				}}
+			/>
+		</section>
+		{
+		role === "owner" &&
+		<section className="admins">
+			<UserList
+				title="Admins"
+				list={
+					chan.members.filter(item => item.role === "operator").map(item => item.user)
+				}
+				add={(value: UserType) =>
+					action.mutate({action: "promote", usernames: [value.username]})
+				}
+				rm={(value: UserType) =>
+					action.mutate({action: "demote", usernames: [value.username]})
+				}
+			/>
+		</section>
+		}
+		</>
 	);
 }
 
 // <UserList /> ================================================================
 
 function UserList(
-	{title, list, add, rm, owner}:
-	{
-		title: string,
-		list: UserType[],
-		add: Function,
-		rm: Function,
-		owner: UserType | null
-	}
+	{title, list, add, rm}:
+	{title: string, list: UserType[], add: Function, rm: Function}
 )
 {
-	const listFilter = owner ? list.filter(user => user.id != owner.id) : list;
-
-	const listHTML = listFilter.map(user =>
+	const listHTML = list.map(user =>
 		<div className="UserList__Item" key={user.id}>
 			<div>{user.username}</div>
 			<button type="button" onClick={() => {
@@ -426,67 +472,60 @@ function UserList(
 				1
 			);
 		}
-		catch (error) {
-			if (!(error instanceof Error))
+		catch (e) {
+			if (!(e instanceof Error))
 				return ;
-			if (httpStatus(error) == 404)
+			if (httpStatus(e) == 404)
 				addNotif({content: "No such user: '" + newUser + "'"})
 			else
-				addNotif({content: error.message})
+				addNotif({content: e.message})
 		}
 	}
 
 	return (
 		<div>
-		<div className="ChanEdit__Title">
-			{title}
-			<span className="notice-msg" style={{marginLeft: "6px"}}>
-				({listFilter.length + (owner ? 1 : 0)})
-			</span>
-		</div>
-		<div className="UserList">
-		{
-			(!!owner || !!listFilter.length) &&
-			<div className="UserList__Box">
-				<div className="genericList">
-					{
-						owner &&
-						<div className="UserList__Item">
-							<div>{owner.username}</div>
-							<div className="notice-msg">
-								(You)
-							</div>
-						</div>
-					}
-					{listHTML}
-					<div ref={anchorRef} style={{height: "0", border: "none"}} />
+			<div className="ChanEdit__Title">
+				{title}
+				<span className="notice-msg" style={{marginLeft: "6px"}}>
+					({list.length})
+				</span>
+			</div>
+			<div className="UserList">
+			{
+				!!list.length &&
+				<div className="UserList__Box">
+					<div className="genericList">
+						{listHTML}
+						<div ref={anchorRef} style={{height: "0", border: "none"}} />
+					</div>
+				</div>
+			}
+				<div className="UserList__Add">
+					<div className="UserList__InputContainer">
+						<input
+							type="text"
+							list="UserSuggestions"
+							value={newUser}
+							onChange={e => setNewUser(e.target.value)}
+							onKeyDown={e => {
+								if (e.key !== 'Enter')
+									return;
+								if (newUser.length)
+									addUser();
+							}}
+							placeholder="Add a user"
+						/>
+						<UserSuggestions />
+					</div>
+					<button
+						type="button" className="add"
+						onClick={addUser}
+						disabled={!newUser.length}
+					>
+						<img src={addIcon}/>
+					</button>
 				</div>
 			</div>
-		}
-			<div className="UserList__Add">
-				<div className="UserList__InputContainer">
-					<input
-						type="text"
-						value={newUser}
-						onChange={e => setNewUser(e.target.value)}
-						onKeyDown={e => {
-							if (e.key !== 'Enter')
-								return;
-							if (newUser.length)
-								addUser();
-						}}
-						placeholder="Add a user"
-					/>
-				</div>
-				<button
-					type="button" className="add"
-					onClick={addUser}
-					disabled={!newUser.length}
-				>
-					<img src={addIcon}/>
-				</button>
-			</div>
-		</div>
 		</div>
 	);
 }

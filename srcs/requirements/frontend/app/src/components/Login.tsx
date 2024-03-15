@@ -17,14 +17,10 @@ export default function Login()
 		+ redirectLinkParams.toString();
 
 	if (logged) return (
-		<a
-			href={redirectLink}
-			onClick={() => localStorage.setItem("auth_redirect", location.pathname)}
-			className="Login"
-		>
+		<div className="Login">
 			Logged In
 			<img src={check} />
-		</a>
+		</div>
 	);
 
 	return (

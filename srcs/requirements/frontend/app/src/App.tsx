@@ -26,7 +26,11 @@ import Invites from "./components/Game/Invitations.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
+<<<<<<< HEAD
 import { randomString } from "./utils/utils.ts";
+=======
+import { httpStatus, randomString } from "./utils/utils.ts";
+>>>>>>> 339aac7862e842b1e25224129a4b6cf4fcfcda6d
 import { useGet } from "./utils/hooks.ts";
 import { PopupType } from "./utils/types.ts";
 
@@ -43,7 +47,7 @@ function Auth()
 
 	const api = new Api(`http://${location.hostname}:3450`);
 
-	const { setLogInfo } = useContext(MyContext);
+	const { setLogged } = useContext(MyContext);
 
 	const navigate = useNavigate();
 	const redirectPath = localStorage.getItem("auth_redirect");
@@ -57,48 +61,38 @@ function Auth()
 	const postAuth = useMutation({
 		mutationFn: ((code: string) =>
 			api.post("/auth", {code, redirect_uri: `http://${location.host}/auth`})) as
-			MutationFunction<{access_token: string, isTwoFactorAuthEnabled: boolean}>,
+			MutationFunction<{isTwoFactorAuthEnabled: boolean}>,
 
-		onSuccess: (data: {access_token: string, isTwoFactorAuthEnabled: boolean}) => {
-			console.log(data);
-			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
-			setLogInfo({logged: false, token: data.access_token});
+		onSuccess: (data: {isTwoFactorAuthEnabled: boolean}) => {
+			setLogged(false);
 			if (data.isTwoFactorAuthEnabled)
 				setTfaPopup(true);
 			else {
 				setStatus("success");
-				setLogInfo({logged: true, token: data.access_token});
+				setLogged(true);
 				setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
 			}
 		},
 
 		onError: () => {
 			setStatus("error");
-			setLogInfo({logged: false, token: ""});
-			localStorage.removeItem("my_info");
+			setLogged(false);
 		},
 	});
 
 	const tfaAuth = useMutation({
 		mutationFn: ((tfaCode: string) =>
-			api.post("/2fa/authenticate", {twoFactorAuthCode : tfaCode})) as
-			MutationFunction<{access_token: string}>,
+			api.post("/2fa/authenticate", {twoFactorAuthCode : tfaCode})),
 
-		onSuccess: (data: {access_token: string}) => {
-			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true, token: data?.access_token}));
-			setLogInfo({logged: true, token: data.access_token});
-			console.log(data);
+		onSuccess: () => {
+			setLogged(true);
 			setStatus("success");
 			setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
 		},
 
-		onError: (error) => {
-			console.log(error.message);
+		onError: () => {
 			setStatus("error");
-			setLogInfo({logged: false, token: ""});
-			localStorage.removeItem("my_info");
+			setLogged(false);
 		},
 	});
 
@@ -146,8 +140,7 @@ function Auth()
 					</div>
 				</>}
 				cancelFt={() => {
-					setLogInfo({logged: false, token: ""});
-					localStorage.removeItem("my_info");
+					setLogged(false);
 					navigate(redirectPath ? redirectPath : "/");
 				}}
 				action="Done."
@@ -170,13 +163,15 @@ function NotFound()
 
 function App()
 {
-	const data = localStorage.getItem("my_info");
-
-	const [logInfo, setLogInfo] = useState(() => {
-		if (data)
-			return (JSON.parse(data))
-		return { logged: false, token: "" };
+	const checkLog = useQuery({
+		queryKey: ["me"],
+		queryFn: () => new Api(`http://${location.hostname}:3450`).get("/me"),
+		retry: (count: number, error: Error) => httpStatus(error) !== 401 && count < 3,
+		staleTime: 5000
 	});
+
+	const [logged, setLogged] = useState(checkLog.isSuccess);
+	useEffect(() => {setLogged(checkLog.isSuccess)}, [checkLog.isSuccess]);
 
 	const [notifs, setNotifs] = useState<NotifType[]>([]);
 
@@ -202,13 +197,17 @@ function App()
 
 	const [lastChan, setLastChan] = useState("");
 
+<<<<<<< HEAD
 	const getUser = useGet(["me"]);
+=======
+	const getUser = useGet(["me"], logged);
+>>>>>>> 339aac7862e842b1e25224129a4b6cf4fcfcda6d
 
 	useEffect(() => {
 		if (getUser.isSuccess) {
 			socket.emit('userInfos', getUser.data.username);
 		}
-	}, [logInfo]);
+	}, [logged]);
 
 	useEffect(() => {
 		if (socket) {
@@ -236,11 +235,11 @@ function App()
 
 	return (
 		<MyContext.Provider value={{
-			...logInfo,
-			setLogInfo,
+			logged,
+			setLogged,
 			addNotif,
 			addInvite,
-			api: new Api(`http://${location.hostname}:3450`, logInfo.token),
+			api: new Api(`http://${location.hostname}:3450`),
 			lastChan,
 			setLastChan,
 			setGlobalPopup,

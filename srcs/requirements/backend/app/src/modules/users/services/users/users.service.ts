@@ -57,6 +57,7 @@ export class UsersService {
 
         user = this.userRepository.create({
             ...userDetails,
+			accountname : userDetails.username,
             picture: null,
         });
 
@@ -145,8 +146,11 @@ export class UsersService {
     }
 
 	async turnOnTwoFactorAuthentication(userId: number) {
-		//console.log(userId)
 		return this.userRepository.update(userId, {isTwoFactorAuthEnabled: true});
+	}
+
+	async turnOffTwoFactorAuthentication(userId: number) {
+		return this.userRepository.update(userId, {isTwoFactorAuthEnabled: false, twoFactorAuthSecret: null});
 	}
 
     /* Helper Functions */

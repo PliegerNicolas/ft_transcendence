@@ -52,8 +52,8 @@ export class SocketGateway implements OnModuleInit {
 			console.log("USER : " + userById[client.id] + " with id : " + client.id + " has joined the socket !");
 			this.channelService.getAllChannels(userById[client.id]).then((chan) => {
 				for (let i = 0; chan[i]; i++) {
-						console.log("CLIENT JOINED CHANNEL : " + chan[i].name);
-						client.join(chan[i].name);
+						console.log("CLIENT JOINED CHANNEL : " + chan[i].channel.name);
+						client.join(chan[i].channel.name);
 					}
 				});
 		}
@@ -61,10 +61,10 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('rejoinChannels')
 	handleRejoinChannels(@ConnectedSocket() client: Socket) {
-		this.channelService.getAllChannels(userById[client.id]).then((chan) => {
-			for (let i = 0; chan[i]; i++) {
-				console.log("CLIENT JOINED CHANNEL : " + chan[i].name);
-				client.join(chan[i].name);
+		this.channelService.getAllChannels(userById[client.id]).then((channelSpec) => {
+			for (let i = 0; channelSpec[i]; i++) {
+				console.log("CLIENT JOINED CHANNEL : " + channelSpec[i].channel.name);
+				client.join(channelSpec[i].channel.name);
 			}
 		});
 	}

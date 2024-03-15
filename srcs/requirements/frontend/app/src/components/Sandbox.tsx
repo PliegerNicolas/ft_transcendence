@@ -1,13 +1,13 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { MutationFunction, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { MyContext } from "../utils/contexts.ts";
-import { UserType, UserPostType } from "../utils/types.ts"
+import { UserType, UserPostType, ChanSpecsType } from "../utils/types.ts"
 
 import Spinner from "./Spinner.tsx";
 
 import { httpStatus, randomString } from "../utils/utils.ts";
-import { useInvalidate, useMutateError, useGet } from "../utils/hooks.ts";
+import { useInvalidate, useMutateError, useGet, useSetMe } from "../utils/hooks.ts";
 
 import close from "../assets/close.svg";
 import check from "../assets/check.svg";
@@ -19,7 +19,7 @@ import ConfirmPopup from "./ConfirmPopup.tsx";
 
 export default function Sandbox()
 {
-	const {api, logged, token, me} = useContext(MyContext);
+	const {api, me} = useContext(MyContext);
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
@@ -40,7 +40,7 @@ export default function Sandbox()
 	});
 
 	const delChan = useMutation({
-		mutationFn: (id: number) => api.delete("/channels/" + id),
+		mutationFn: (id: string) => api.delete("/channels/" + id),
 		onSettled: () => invalidate(["channels"]),
 		onError: mutateError,
 	});
@@ -69,17 +69,6 @@ export default function Sandbox()
 		<main className="MainContent" ref={ref}>
 			<h2>Sandbox</h2>
 			<section>
-				<h3>Global context:</h3>
-				<div className="genericList Sandbox__ContextList">
-					<div className="Sandbox__Item">
-						<div>Logged</div>
-						<div>{logged ? "Yes" : "No"}</div>
-					</div>
-					<div className="Sandbox__Item">
-						<div>Token</div>
-						<div>{token}</div>
-					</div>
-				</div>
 				<h4>All channels:</h4>
 				<button onClick={() => postChan.mutate("c_" + randomString(6))}>
 					Add a chan
@@ -96,16 +85,19 @@ export default function Sandbox()
 						<div>NAME</div>
 					</div>
 					{
-						getChans.data.map((chan: {id: number, name: string}) =>
-							<div key={chan.id} className="Sandbox__Item">
-								<div>{chan.id}</div>
+						getChans.data.map((chan: ChanSpecsType) =>
+							<div key={chan.channel.id} className="Sandbox__Item">
+								<div>{chan.channel.id}</div>
 								<div>
-									<Link to={"/chat/" + chan.id}>
-										<span>{chan.name}</span>
+									<Link to={"/chat/" + chan.channel.id}>
+										<span>{chan.channel.name}</span>
 									</Link>
 								</div>
 								<div>
-									<button className="deleteChan" onClick={() => delChan.mutate(chan.id)}>
+									<button
+										className="deleteChan"
+										onClick={() => delChan.mutate(chan.channel.id)}
+									>
 										<img src={close} alt="delete"/>
 									</button>
 								</div>
@@ -143,7 +135,6 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 	const { api, addNotif, me } = useContext(MyContext);
 
 	const mutateError = useMutateError();
-	const invalidate = useInvalidate();
 
 	const generate2fa = useMutation({
 		mutationFn: () => api.post("/2fa/generate", {}),
@@ -159,7 +150,10 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 			else
 				mutateError(error);
 		},
-		onSuccess: () => invalidate(["me"]),
+		onSuccess: () => {
+			setPopup(false);
+			window.location.reload();
+		},
 	});
 
 	const [code, setCode] = useState("");
@@ -183,7 +177,7 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 					<div className="Setup2fa__Status">
 						<>2FA is enabled for your account</> <img src={check} />
 					</div>
-					<button onClick={() => addNotif({type: 1, content: "This does nothing yet."})}>
+					<button onClick={() => addNotif({type: 1, content: "This does nothing (yet)."})}>
 						Disable 2FA?
 					</button>
 				</> :
@@ -244,35 +238,22 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 
 function UserListRender()
 {
-	const { me, api } = useContext(MyContext);
+	const { me } = useContext(MyContext);
 
-	const mutateError = useMutateError();
+	const getUsers = useGet(["users"]);
+	const setMe = useSetMe();
 
-	const query = useGet(["users"]);
-
-	const setMe = useMutation({
-		mutationFn: ((name: string) =>
-			api.post("/auth/log_as/" + name, {})) as unknown as
-			MutationFunction<{ access_token: string; }, unknown>,
-		onSuccess: (data: {access_token: string}) => {
-			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true, token: data.access_token}));
-			window.location.reload();
-		},
-		onError: mutateError,
-	});
-
-	if (query.isPending || !me) return (
-		query.isPending &&
+	if (getUsers.isPending || !me) return (
+		getUsers.isPending &&
 		<div className="genericList">
 			<div><Spinner /></div>
 		</div>
 	);
 
-	if (query.isError) return (
+	if (getUsers.isError) return (
 		<div>
 			<span className="error-msg">
-				Failed to load user list: {query.error?.message}
+				Failed to load user list: {getUsers.error?.message}
 			</span><br />
 		</div>
 	);
@@ -285,9 +266,11 @@ function UserListRender()
 				<div>USERNAME</div>
 			</div>
 			{
-				!query.data?.length ?
+				!getUsers.data?.length ?
 				<div><div>No user...</div></div> :
-				query.data?.map((user: UserType) =>
+				getUsers.data
+					?.sort((a: UserType, b: UserType) => +a.id - +b.id)
+					.map((user: UserType) =>
 					<div key={user.id} className="Sandbox__Item">
 						<div>{user.id}</div>
 						<div>
@@ -297,10 +280,11 @@ function UserListRender()
 						</div>
 						<div>
 						{
-							me.id !== user.id &&
-							<button className="logAs" onClick={() => setMe.mutate(user.username)}>
+							me.id !== user.id ?
+							<button className="logAs" onClick={() => setMe(user.username)}>
 								Log as
-							</button>
+							</button>:
+							<div className="notice-msg" style={{marginRight: "12px"}}>(You)</div>
 						}
 						</div>
 					</div>

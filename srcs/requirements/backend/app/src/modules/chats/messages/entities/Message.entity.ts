@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, Unique, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryColumn, Unique, UpdateDateColumn } from "typeorm";
 import { ChannelMember } from "../../channels/entities/ChannelMember.entity";
 import { User } from "../../../users/entities/User.entity";
 import { NotFoundException, UnauthorizedException } from "@nestjs/common";

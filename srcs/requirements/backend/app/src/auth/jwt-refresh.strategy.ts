@@ -3,26 +3,44 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import { AuthService } from './auth.service';
 import { Request } from 'express';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/modules/users/entities/User.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'){
-	constructor(private authService : AuthService) {
+	constructor(private authService : AuthService,
+				@InjectRepository(User)
+				private readonly userRepository : Repository<User>,
+				) {
+		var cookieExtractor = function(req) {
+			var token = null;
+			if (req && req.cookies) {
+				token = req.cookies['refresh_token'];
+			}
+			return token;
+		};
 		super({
-			jwtFromRequest : ExtractJwt.fromHeader("authorization"),
+			jwtFromRequest : ExtractJwt.fromExtractors([cookieExtractor]),
 			secretOrKey : process.env.API_SECRET ,
-			ignoreExpiration : true,
+			ignoreExpiration : false,
 			passReqToCallback: true
 		});
 	}
 
-	async validate(req: Request, payload : any) : Promise<any>{
-		// console.log('test')
-		// console.log((await this.authService.checkUser(payload.oauth_id)).users.id)
-		
-		// console.log(req.headers)
-		if (await this.authService.blacklist("check", req.headers.authorization) === false) throw new UnauthorizedException();
+	async checkUser(account_name : string): Promise<User> {
+		const user = await this.userRepository.findOne({
+			where: { accountname: (account_name) },
+			relations: ['profile'],
+		});
+		return(user);
+	}
 
-		const user = await this.authService.checkUser(payload.oauth_id);
+	async validate(req: Request, payload : any) : Promise<any>{
+
+		if (await this.authService.blacklist("check", req.cookies['access_token']) === false) throw new UnauthorizedException();
+
+		const user = await this.checkUser(payload.account_name);
 		if (!user) throw new UnauthorizedException();
 		if (user.id != payload.user_id)
 		{

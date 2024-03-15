@@ -37,7 +37,6 @@ export interface FriendshipType {
 
 export interface MyInfoType {
 	logged: boolean,
-	token: string
 }
 
 export interface MemberType {
@@ -45,6 +44,7 @@ export interface MemberType {
 	mute: boolean,
 	role: "owner" | "operator" | "member",
 	user: UserType,
+	hasLeft: boolean,
 }
 
 export interface MsgType {
@@ -67,6 +67,12 @@ export interface ChanType {
 	bannedUsers: Array<UserType>,
 	invitedUsers: Array<UserType>,
 	mutedUsers: Array<UserType>,
+}
+
+export interface ChanSpecsType {
+	isMember: boolean,
+	role: string,
+	channel: ChanType,
 }
 
 export interface ChanFormType {
@@ -119,4 +125,10 @@ export interface PopupType {
 export interface MessagePayloads {
 	content: string,
 	channel: string,
+}
+
+export interface HttpErrorType {
+	message: string,
+	error: string,
+	statusCode: number,
 }

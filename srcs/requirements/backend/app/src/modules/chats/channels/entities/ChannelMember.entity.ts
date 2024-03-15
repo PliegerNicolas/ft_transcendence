@@ -15,6 +15,9 @@ export class ChannelMember {
     @Column({ type: 'enum', enum: ChannelRole, default: ChannelRole.MEMBER })
     role: ChannelRole;
 
+    @Column({ default: false }) // Soft deletion column. Represents if the user left the channel.
+    hasLeft: boolean;
+
     @ManyToOne(() => Channel, (channel) => channel.members, { onDelete: 'CASCADE' })
     channel: Channel;
 

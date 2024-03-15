@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useContext } from "react";
+import { useState, useRef, useEffect, useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
@@ -6,9 +6,9 @@ import { Routes, Route } from "react-router-dom";
 import Spinner from "../Spinner.tsx";
 
 import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
-import { getChanRole, httpStatus } from "../../utils/utils.ts";
+import { getChanRole, httpStatus, isMuted } from "../../utils/utils.ts";
 
-import { MyContext } from "../../utils/contexts";
+import { ChatContentContext, MyContext } from "../../utils/contexts";
 
 import { socket } from "../../App.tsx"
 
@@ -18,22 +18,104 @@ import ChatHeader from "./ChatHeader.tsx";
 import Msg from "./Msg.tsx";
 import ChanEdit from "./ChanEdit.tsx";
 import ConfirmPopup from "../ConfirmPopup.tsx";
+import { MemberType, MsgType } from "../../utils/types.ts";
 
 // <ChatContentRouter /> =======================================================
 
 export default function ChatContentRouter()
 {
+	const { api, me } = useContext(MyContext);
+
+	const invalidate = useInvalidate();
+	const mutateError = useMutateError();
+
 	const params = useParams();
 	const id = params.id!;
 
+	const getChan = useGet(["channels", id]);
+
+	const join = useMutation({
+		mutationFn: (password: string) =>
+			api.patch("/channels/" + id + "/join", {password}),
+		onSettled: () => invalidate(["channels"]),
+		onError: mutateError,
+	});
+
+	const [password, setPasswd] = useState("");
+
+	const idMap = useMemo(() => {
+		let ret: {[memberId: string]: number} = {};
+
+		if (!getChan.isSuccess)
+			return (ret);
+
+		getChan.data.channel.members
+			.sort((a: MemberType, b: MemberType) => +a.id - +b.id)
+			.forEach((member: MemberType, index: number) =>
+			ret[member.id] = index
+		);
+		return (ret);
+	}, [getChan.data]);
+
+	if (getChan.isPending) return (
+		<div className="ChatContent spinner">
+			<Spinner />
+		</div>
+	);
+
+	if (getChan.isError && httpStatus(getChan.error) !== 403) return (
+		<div className="ChatContent error">
+			Failed to load this channel: {getChan.error.message}
+		</div>
+	);
+
+	if (getChan.isError && getChan.error.message.includes("password")) return (
+		<div className="ChatContent ChatContent__Mdp">
+			<div className="notice-msg">
+				A password is required to join this channel:
+			</div>
+			<div className="ChatContent__MdpInput">
+				<input
+					type="password"
+					value={password}
+					onChange={(ev) => setPasswd(ev.currentTarget.value)}
+					placeholder="Password"
+				/>
+				<button onClick={() => {join.mutate(password); setPasswd("")}}>
+					Join
+				</button>
+			</div>
+		</div>
+	);
+
+	if (getChan.isError) return (
+		<div className="ChatContent ChatContent__Mdp">
+			<div style={{fontSize: "2rem", marginBottom: "12px"}}>💀</div>
+			<div className="error-msg">
+				{
+					getChan.error.message.includes("permitted") ?
+					"You've been banned from this channel" :
+					"This channel requires an invitation to join."
+				}
+			</div>
+		</div>
+	);
+
+
 	return (
-		<Routes>
-			<Route path="/" element={<ChatContent />} />
-			<Route path="/edit" element={<ChanEdit id={+id}/>} />
-			<Route path="/*" element={
-				<div className="ChatContent error">No such channel!</div>
-			}/>
-		</Routes>
+		<ChatContentContext.Provider value={{
+			chan: getChan.data.channel,
+			role: getChanRole(getChan.data.channel, me!.id),
+			idMap
+		}}>
+			<Routes>
+				<Route path="/" element={<ChatContent />} />
+				<Route path="/edit" element={<ChanEdit id={+id}/>} />
+				<Route path="/*" element={
+					<div className="ChatContent error">No such page...</div>
+				}/>
+			</Routes>
+		</ChatContentContext.Provider>
 	);
 }
 
@@ -42,13 +124,14 @@ export default function ChatContentRouter()
 function ChatContent()
 {
 	const { api, setLastChan, me } = useContext(MyContext);
+	const { chan, role } = useContext(ChatContentContext);
+
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 
 	const params = useParams();
 	const id = params.id!;
 
-	const getChan = useGet(["channels", id]);
 	const getMsgs = useGet(["channels", id, "messages"]);
 
 	const postMsg = useMutation({
@@ -61,7 +144,14 @@ function ChatContent()
 	const join = useMutation({
 		mutationFn: (password: string) =>
 			api.patch("/channels/" + id + "/join", {password}),
-		onSettled: () => invalidate(["channels", id]),
+		onSettled: () => invalidate(["channels"]),
+		onError: mutateError,
+	});
+
+	const leave = useMutation({
+		mutationFn: () =>
+			api.patch("/channels/" + id + "/leave", {}),
+		onSettled: () => invalidate(["channels"]),
 		onError: mutateError,
 	});
 
@@ -88,8 +178,6 @@ function ChatContent()
 			anchorRef.current.scrollIntoView()
 	}, [getMsgs]);
 
-	const [password, setPasswd] = useState("");
-
 	const [inputValue, setInputValue] = useState("");
 	function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
 
@@ -102,7 +190,7 @@ function ChatContent()
 			return;
 
 		postMsg.mutate(inputValue);
-		socket.emit('newMessage', { content: inputValue, channel: getChan.data.name });
+		socket.emit('newMessage', { content: inputValue, channel: chan.name });
 		setInputValue("");
 	}
 
@@ -121,6 +209,7 @@ function ChatContent()
 		});
 	}
 
+<<<<<<< HEAD
 	if (getChan.isPending) return (
 		<div className="ChatContent spinner">
 			<Spinner />
@@ -151,11 +240,14 @@ function ChatContent()
 	);
 
 	const role = me ? getChanRole(getChan.data, me.id) : "";
+=======
+	const [leavePopup, setLeavePopup] = useState(false);
+>>>>>>> 339aac7862e842b1e25224129a4b6cf4fcfcda6d
 
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
-				<ChatHeader name={getChan.data.name} edit={role !== "owner"} />
+				<ChatHeader name={chan.name} edit={role !== "owner"} leave={null} />
 				<Spinner />
 			</div>
 		);
@@ -169,21 +261,25 @@ function ChatContent()
 
 	return (
 		<div className="ChatContent">
-			<ChatHeader name={getChan.data.name} edit={role !== "owner"} />
+			<ChatHeader
+				name={chan.name}
+				edit={role !== "owner" && role != "operator"}
+				leave={role ? () => setLeavePopup(true) : null}
+			/>
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
-						Start of channel « {getChan.data.name} »
+						Start of channel « {chan.name} »
 					<hr />
 				</div>
 				{
-					getMsgs.data.map((item: any, index: number) =>
+					getMsgs.data
+						.sort((a: MsgType, b: MsgType) => a.createdAt > b.createdAt)
+						.map((item: MsgType, index: number) =>
 						<Msg
 							key={index}
 							data={item}
 							prev={index ? getMsgs.data[index - 1] : null}
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
-							size={getChan.data.membersCount}
-							role={role}
 							popupFn={popupFn}
 						/>
 					)
@@ -191,11 +287,15 @@ function ChatContent()
 				<div ref={anchorRef} />
 			</div>
 			{
+				role && isMuted(chan, me!.id) &&
+				<div className="Chat__Input join">
+					You are muted on this channel,<br />and thus cannot send messages to it.
+				</div> ||
 				role &&
 				<div className="Chat__Input">
 					<textarea
 						id="SendMessage"
-						placeholder={`Send a message to « ${getChan.data.name} »`}
+						placeholder={`Send a message to « ${chan.name} »`}
 						value={inputValue}
 						onChange={handleInputChange}
 					/>
@@ -215,6 +315,16 @@ function ChatContent()
 					action="Confirm"
 					actionFt={popup.action}
 					cancelFt={() => setPopup(null)}
+				/>
+			}
+			{
+				leavePopup &&
+				<ConfirmPopup
+					title={"Leaving " + chan.name}
+					text={<>Are you sure you want to leave {chan.name}?</>}
+					action="Leave"
+					actionFt={() => {leave.mutate(); setLeavePopup(false)}}
+					cancelFt={() => {setLeavePopup(false)}}
 				/>
 			}
 		</div>

@@ -28,14 +28,37 @@ export function getChanRole(chan: ChanType, id: string)
 	return (member.role);
 }
 
-export async function dynaGet(uri: string, token: string)
+export function isMuted(chan: ChanType, id: string)
+{
+	return (chan.mutedUsers.find(item => item.id === id));
+}
+
+export function isBanned(chan: ChanType, id: string)
+{
+	return (chan.bannedUsers.find(item => item.id === id));
+}
+
+export function isInvited(chan: ChanType, id: string)
+{
+	return (chan.invitedUsers.find(item => item.id === id));
+}
+
+export function isAdmin(chan: ChanType, id: string)
+{
+	return (chan.members.find(item =>
+		item.user.id === id && item.role === "operator"));
+}
+
+export async function dynaGet(uri: string)
 {
 	console.log("GET --> " + uri);
-	const response = await fetch(uri, {headers: {
-		"Content-Type": "application/json",
-		"Authorization": token
-	}});
-	if (!response.ok)
-		return (Promise.reject(new Error(response.status + " " + response.statusText)));
+	const response = await fetch(uri, {
+		headers: { "Content-Type": "application/json" },
+		credentials: "include",
+		});
+	if (!response.ok) {
+		const error = await response.json();
+		return (Promise.reject(error));
+	}
 	return (response.json());
 }
