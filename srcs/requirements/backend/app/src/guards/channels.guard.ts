@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChannelMember } from '../modules/chats/channels/entities/ChannelMember.entity';
-import { Repository } from 'typeorm';
+import { Equal, Repository } from 'typeorm';
 
 @Injectable()
 export class ChannelsGuard implements CanActivate {
@@ -52,7 +52,6 @@ export class ChannelsNotGuard implements CanActivate {
 	constructor(private jwtService : JwtService,
 		@InjectRepository(ChannelMember)
 		private channelMemberRepository : Repository<ChannelMember>,
-		// private reflector : Reflector
 		) {}
 
 	async canActivate(
@@ -61,29 +60,18 @@ export class ChannelsNotGuard implements CanActivate {
 		const request = context.switchToHttp().getRequest();
 		const token = this.jwtService.decode(request.headers.authorization);
 		const params = request.params;
-	
+
 		const member = await this.channelMemberRepository.findOne({
-			relations : {
-					channel : true,
-					user : true
-				},
-				where : {
-					channel : {
-						id: params.channelId
-					},
-					user : {
-						id : token.user_id
-					}
-				}
-		
-			}).then(
-				(data) => data
-			)
-			if (member == null || !member.active)
-			{
-				return (true);
-			}
+			where : {
+				channel : { id: Equal(params.channelId) },
+				user : { id: Equal(token.user_id) },
+				active: true,
+			},
+			relations: ['channel', 'user'],
+		});
+
+		if (!member) return (true);
 	
-		return false;
-	  }
+		return (false);
+	}
 }

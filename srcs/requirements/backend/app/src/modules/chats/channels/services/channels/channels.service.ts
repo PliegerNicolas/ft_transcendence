@@ -79,13 +79,13 @@ export class ChannelsService {
         return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getMember(channel, user.id)));
     }
 
-    async createChannel(username: string = undefined, channelDetails: CreateChannelParams): Promise<Channel> {
+    async createChannel(username: string = undefined, channelDetails: CreateChannelParams): Promise <ChannelWithSpecs> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
-        
+
         if (channelDetails.password) channelDetails.password = await this.passwordHashingService.hashPassword(channelDetails.password);
 
         const channel = this.channelRepository.create({
@@ -93,13 +93,14 @@ export class ChannelsService {
             members: [{ user, role: ChannelRole.OWNER }],
         });
 
-        return (await this.channelRepository.save(channel));
+        await this.channelRepository.save(channel);
+        return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getActiveMember(channel, user.id)));
     }
 
-    async replaceChannel(channelId: bigint, username: string = undefined, channelDetails: ReplaceChannelParams): Promise<Channel> {
+    async replaceChannel(channelId: bigint, username: string = undefined, channelDetails: ReplaceChannelParams): Promise<ChannelWithSpecs> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -116,13 +117,14 @@ export class ChannelsService {
             ...channelDetails
         });
 
-        return (await this.channelRepository.save(channel));
+        await this.channelRepository.save(channel);
+        return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getActiveMember(channel, user.id)));
     }
 
-    async updateChannel(channelId: bigint, username: string = undefined, channelDetails: UpdateChannelParams): Promise<Channel> {
+    async updateChannel(channelId: bigint, username: string = undefined, channelDetails: UpdateChannelParams): Promise<ChannelWithSpecs> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -139,7 +141,8 @@ export class ChannelsService {
             ...channelDetails
         });
 
-        return (await this.channelRepository.save(channel));
+        await this.channelRepository.save(channel);
+        return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getActiveMember(channel, user.id)));
     }
 
     async deleteChannel(channelId: bigint, username: string = undefined): Promise<string> {
@@ -165,7 +168,7 @@ export class ChannelsService {
     async joinChannel(channelId: bigint, username: string = undefined, channelDetails: JoinChannelParams): Promise<Channel> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -194,7 +197,7 @@ export class ChannelsService {
     async leaveChannel(channelId: bigint, username: string = undefined, channelDetails: LeaveChannelParams): Promise<Channel> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -217,7 +220,7 @@ export class ChannelsService {
     async manageChannelAccess(channelId: bigint, username: string = undefined, channelAccessDetails: ChannelAccessParams) {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
