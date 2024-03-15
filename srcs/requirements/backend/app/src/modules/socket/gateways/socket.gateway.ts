@@ -6,7 +6,6 @@ import { GameServer } from '../../game/server/game.server'
 import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../../game/server/game.constants'
 import { MessagePayloads } from '../../chats/types/messagePayloads.type';
 import { ChannelsService } from 'src/modules/chats/channels/services/channels/channels.service';
-import { async } from 'rxjs';
 
 let state: gameState[] = [];
 let player1ID: string[] = [];
@@ -30,17 +29,7 @@ export class SocketGateway implements OnModuleInit {
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
 			console.log('new socket connection : ' + socket.id);
-			this.server.to(socket.id).emit('getUserInfos');
-			setTimeout(() => {
-				if (userById[socket.id]) {
-					this.channelService.getAllChannels(userById[socket.id]).then((channelSpec) => {
-						for (let i = 0; channelSpec[i]; i++) {
-							console.log("CLIENT JOINED CHANNEL : " + channelSpec[i].channel.name);
-							socket.join(channelSpec[i].channel.name);
-						}
-					});
-				}
-			}, 100);
+			setTimeout(() => {this.server.to(socket.id).emit('getUserInfos');}, 100);
 			socket.on('disconnect', () => {
 				console.log(socket.id + ' left socket');
 				this.server.emit('userLeftSocket', socket.id);
@@ -56,10 +45,17 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('userInfos')
 	handleGetUsername(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
+		console.log("----- USER INFOS -----");
 		if (!userById[client.id]) {
 			userByName[username] = client.id;
 			userById[client.id] = username;
 			console.log("USER : " + userById[client.id] + " with id : " + client.id + " has joined the socket !");
+			this.channelService.getAllChannels(userById[client.id]).then((chan) => {
+				for (let i = 0; chan[i]; i++) {
+						console.log("CLIENT JOINED CHANNEL : " + chan[i].channel.name);
+						client.join(chan[i].channel.name);
+					}
+				});
 		}
 	}
 
@@ -100,14 +96,19 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('acceptInvite')
 	handleAcceptInvite(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
+		console.log("USER : " + data.user + " INVITATION HAS BEEN ACCEPTED BY : " + userById[client.id]);
 		if (userByName[data.user]) {
-			this.server.to(userByName[data.user]).emit('acceptedInvite', userById[client.id], data.lobby);
+			console.log("caca");
+			this.server.to(userByName[data.user]).emit('inviteAccepted', userById[client.id], data.lobby);
 		}
 	}
+
 	@SubscribeMessage('rejectInvite')
 	handleRejectInvite(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
+		console.log("USER : " + data.user + " INVITATION HAS BEEN REFUSED BY : " + userById[client.id]);
 		if (userByName[data.user]) {
-			this.server.to(userByName[data.user]).emit('rejectedInvite', userById[client.id], data.lobby);
+			console.log("caca");
+			this.server.to(userByName[data.user]).emit('inviteRejected', userById[client.id], data.lobby);
 		}
 	}
 
@@ -119,19 +120,13 @@ export class SocketGateway implements OnModuleInit {
 			if (state[data.lobby]) {
 				state[data.lobby].score.player2 = 5;
 			}
-			const index = player1ID.indexOf(data.lobby, 0);
-			if (index > -1) {
-   				player1ID.splice(index, 1);
-			}
+			player1ID = player1ID.filter((id) => id != data.userId);
 		}
 		else if (player2ID[data.lobby] === data.userId) {
 			if (state[data.lobby]) {
 				state[data.lobby].score.player1 = 5;
 			}
-			const index = player2ID.indexOf(data.lobby, 0);
-			if (index > -1) {
-   				player2ID.splice(index, 1);
-			}
+			player2ID = player2ID.filter((id) => id != data.userId);
 		}
 		if (!state[data.lobby])
 			this.server.to(data.lobby).emit('leaveLobby');
@@ -185,25 +180,17 @@ export class SocketGateway implements OnModuleInit {
 		}
 	}
 
-	//to fix
 	@SubscribeMessage('notReady')
 	handleNotReady(@MessageBody() data: {lobby: string, playerNumber: number}, @ConnectedSocket() client: Socket) {
-		console.log('NOT READY : ' + client.id);
 		if (player1ID[data.lobby] && data.playerNumber === 1) {
-			const index = player1ID.indexOf(data.lobby, 0);
-			console.log('index = ' + index);
-			if (index > -1) {
-   				player1ID.splice(index, 1);
-			}
+			console.log('NOT READY : ' + client.id);
+   			player1ID = player1ID.filter((id) => id != client.id);
 			console.log('player1ID should be null/undefined : ' + player1ID[data.lobby]);
 			client.leave(data.lobby);
 		}
 		else if (player2ID[data.lobby]  && data.playerNumber === 2) {
-			const index = player2ID.indexOf(data.lobby, 0);
-			console.log('index = ' + index);
-			if (index > -1) {
-   				player2ID.splice(index, 1);
-			}
+			console.log('NOT READY : ' + client.id);
+			player2ID = player2ID.filter((id) => id != client.id);
 			console.log('player2ID should be null/undefined : ' + player2ID[data.lobby]);
 			client.leave(data.lobby);
 		}

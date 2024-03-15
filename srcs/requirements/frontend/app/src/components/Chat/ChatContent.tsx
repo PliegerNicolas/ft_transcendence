@@ -41,6 +41,11 @@ export default function ChatContentRouter()
 		onError: mutateError,
 	});
 
+	function handleJoinChannel(password: string) {
+		join.mutate(password);
+		socket.emit('joinChannel', getChan.data.channel.name);
+	}
+
 	const [password, setPasswd] = useState("");
 
 	const idMap = useMemo(() => {
@@ -81,7 +86,7 @@ export default function ChatContentRouter()
 					onChange={(ev) => setPasswd(ev.currentTarget.value)}
 					placeholder="Password"
 				/>
-				<button onClick={() => {join.mutate(password); setPasswd("")}}>
+				<button onClick={() => {handleJoinChannel(password); setPasswd("")}}>
 					Join
 				</button>
 			</div>
@@ -194,6 +199,11 @@ function ChatContent()
 		setInputValue("");
 	}
 
+	function handleJoinChannel(password: string) {
+		join.mutate(password);
+		socket.emit('joinChannel', chan.name);
+	}
+
 	const [popup, setPopup] =
 		useState<{text: JSX.Element, action: Function} | null>(null);
 
@@ -264,7 +274,7 @@ function ChatContent()
 				</div> ||
 				<div className="Chat__Input join">
 					Join this channel to interact with it.
-					<button onClick={() => join.mutate("")}>
+					<button onClick={() => handleJoinChannel("")}>
 						Join
 					</button>
 				</div>

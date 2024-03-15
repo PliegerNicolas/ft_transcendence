@@ -8,4 +8,7 @@ export class UpdateProfileDto {
     @IsOptional()
     lastName: string;
 
+    @IsOptional()
+    elo: number;
+
 }

@@ -166,7 +166,9 @@ function User()
 						name={user.username}
 					/>
 				}
-				<InvitePlayer user={user.username} />
+				<div className="User__InvitePlayer">
+					<InvitePlayer  user={user.username} />
+				</div>
 				<hr />
 				<div style={{textAlign: "center"}}>
 					<button onClick={() => setPopup(true)}>Log as {user.username}</button>

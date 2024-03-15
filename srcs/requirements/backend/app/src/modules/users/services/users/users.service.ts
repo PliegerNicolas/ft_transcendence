@@ -33,11 +33,10 @@ export class UsersService {
     async getMyUser(username: string = undefined): Promise<User> {
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
-            relations: ['profile', 'picture'],
+            relations: ['profile'],
         });
 
         if (!user) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
-
         return (user);
     }
 

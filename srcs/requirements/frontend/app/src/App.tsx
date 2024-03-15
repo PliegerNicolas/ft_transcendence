@@ -2,7 +2,7 @@ import "./App.css";
 
 import { useState, useEffect, useContext, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate} from "react-router-dom";
-import { useMutation, MutationFunction, useQuery } from "@tanstack/react-query";
+import { useMutation, MutationFunction, useQuery} from "@tanstack/react-query";
 
 import { MyContext } from "./utils/contexts.ts";
 import { InviteType, NotifType } from "./utils/types.ts";
@@ -205,6 +205,7 @@ function App()
 		if (socket) {
 			socket.on('getUserInfos', () => {
 				if (getUser.isSuccess) {
+					console.log("sent user infos to back");
 					socket.emit('userInfos', getUser.data.username);
 				}
 			});
@@ -217,6 +218,9 @@ function App()
 			if (socket) {
 				socket.off('getUserInfos');
 				socket.off('invitedToPrivate');
+				socket.off('inviteSuccess');
+				socket.off('inviteRejected');
+				socket.off('inviteAccepted');
 			}
 		};
 	}, []);
