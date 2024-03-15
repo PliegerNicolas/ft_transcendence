@@ -13,7 +13,7 @@ export class AuthController {
 	async signIn(@Body() oauthToken:JSON,
 				@Res({passthrough : true}) res : Response
 				) {
-		console.log("controller")
+		// console.log("controller")
 		const ret = await (this.authService.signIn(oauthToken)).then(
 			(data) => data
 		);
