@@ -11,7 +11,7 @@ export const FriendshipContext = createContext({
 
 export const MyContext = createContext({
 	logged: false,
-	setLogInfo: (() => {}) as Function,
+	setLogged: (() => {}) as Function,
 	api: new Api(`http://${location.hostname}:3450`),
 	addNotif: (() => {}) as Function,
 	addInvite: (() => {}) as Function,

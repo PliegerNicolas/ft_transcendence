@@ -12,34 +12,40 @@ export function useInvalidate()
 
 export function useStopOnHttp()
 {
-	const {setLogInfo} = useContext(MyContext);
+	const { setLogged, api } = useContext(MyContext);
+
+	const refresh = useMutation({
+		mutationFn: () => api.get("/auth/refresh"),
+		onError: () => setLogged(false)
+	});
 
 	return ((count: number, error: Error) => {
 		const status = httpStatus(error);
 
 		if (status === 401) {
-			localStorage.removeItem("my_info");
-			setLogInfo({logged: false});
+			refresh.mutate();
+			return (count < 3);
 		}
-
-		return (!status && count < 3)
+		else
+			return (!status && count < 3)
 	});
 }
 
 export function useMutateError()
 {
-	const { addNotif } = useContext(MyContext);
+	const { setLogged, api, addNotif } = useContext(MyContext);
+
+	const refresh = useMutation({
+		mutationFn: () => api.get("/auth/refresh"),
+		onError: () => setLogged(false)
+	});
 
 	return ((error: Error) => {
 		const status = httpStatus(error);
 
 		addNotif({content: error.message});
-		if (status === 401) {
-			addNotif({content: `401 == USER NOT LOGGED,
-				SHOULD A 401 TRULY BE RETURNED IN THIS CASE?`});
-			addNotif({content: `403 is the prefered way of signaling an
-				authenticated user isn't allowed to access a resource.`});
-		}
+
+		if (status === 401) refresh.mutate();
 	})
 }
 
@@ -65,11 +71,7 @@ export function useSetMe()
 
 	const mutation = useMutation({
 		mutationFn: ((name: string) => api.post("/auth/log_as/" + name, {})),
-		onSuccess: () => {
-			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true}));
-			window.location.reload();
-		},
+		onSuccess: () => window.location.reload(),
 		onError: mutateError,
 	});
 

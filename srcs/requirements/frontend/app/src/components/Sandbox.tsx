@@ -152,8 +152,6 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 		},
 		onSuccess: () => {
 			setPopup(false);
-			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true}));
 			window.location.reload();
 		},
 	});
