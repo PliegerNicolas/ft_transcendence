@@ -59,7 +59,7 @@ export class ChannelsNotGuard implements CanActivate {
 		context: ExecutionContext,
 	  ): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
-		const token = this.jwtService.decode(request.cookies['access_token']]);
+		const token = this.jwtService.decode(request.cookies['access_token']);
 		const params = request.params;
 	
 		const member = await this.channelMemberRepository.findOne({

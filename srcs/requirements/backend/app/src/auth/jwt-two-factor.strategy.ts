@@ -37,7 +37,7 @@ export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFact
 		{
 			throw new UnauthorizedException();
 		}
-		return {id: payload.user_id, oauth_id: payload.oauth_id, username: user.username};
+		return {id: payload.user_id, oauth_id: payload.oauth_id, username: user.username, account_name: user.accountname};
 	}
 
 	

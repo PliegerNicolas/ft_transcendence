@@ -85,7 +85,7 @@ export class AuthService
 
 		const payload = ({ user_id: user.id, oauth_id: user.oauthId, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled });
 		const access_token = await this.createJwt(payload)
-		const refresh_token = await this.createRefreshToken(payload)
+		const refresh_token = await this.createRefreshToken({user_id : user.id, account_name : user.accountname, isTwoFactorAuthEnabled : user.isTwoFactorAuthEnabled})
 		return ({
 			access_token,
 			refresh_token,
@@ -108,7 +108,7 @@ export class AuthService
 		}
 		const payload = {user_id : member.id, oauth_id : member.oauthId, isTwoFactorAuthEnabled : true, isTwoFactorAuthLogged: true}
 		const access_token = await this.jwtService.signAsync(payload)
-		const refresh_token = await this.createRefreshToken(payload, true)
+		const refresh_token = await this.createRefreshToken({user_id : member.id, account_name : member.accountname, isTwoFactorAuthEnabled : true, isTwoFactorAuthLogged: true}, true)
 		return ({ access_token, refresh_token });
 	}
 
