@@ -3,10 +3,16 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import { AuthService } from './auth.service';
 import { Request } from 'express';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/modules/users/entities/User.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'){
-	constructor(private authService : AuthService) {
+	constructor(private authService : AuthService,
+				@InjectRepository(User)
+				private readonly userRepository : Repository<User>,
+				) {
 		var cookieExtractor = function(req) {
 			var token = null;
 			if (req && req.cookies) {
@@ -22,11 +28,19 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
 		});
 	}
 
+	async checkUser(account_name : string): Promise<User> {
+		const user = await this.userRepository.findOne({
+			where: { accountname: (account_name) },
+			relations: ['profile'],
+		});
+		return(user);
+	}
+
 	async validate(req: Request, payload : any) : Promise<any>{
 
-		if (await this.authService.blacklist("check", req.headers.authorization) === false) throw new UnauthorizedException();
+		if (await this.authService.blacklist("check", req.cookies['access_token']) === false) throw new UnauthorizedException();
 
-		const user = await this.authService.checkUser(payload.oauth_id);
+		const user = await this.checkUser(payload.account_name);
 		if (!user) throw new UnauthorizedException();
 		if (user.id != payload.user_id)
 		{
