@@ -9,8 +9,10 @@ import { JwtPublicGuard } from "../../../../guards/jwt-public.guard";
 import { GlobalRole } from "../../../../guards/role.decorator";
 import { UsersGuard } from "../../../../guards/users.guard";
 import { RoleGlobalGuard } from "../../../../guards/role.guard";
+import { Serialize } from "src/common/serialization/decorators/serialization/serialization.decorator";
 
 @Controller()
+@Serialize()
 export class UsersController {
 
     constructor(private userService: UsersService) {}

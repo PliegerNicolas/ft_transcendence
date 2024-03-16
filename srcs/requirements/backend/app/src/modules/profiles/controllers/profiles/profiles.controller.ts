@@ -7,8 +7,10 @@ import { AuthGuard } from "@nestjs/passport";
 import { GlobalRole } from "../../../../guards/role.decorator";
 import { UsersGuard } from "../../../../guards/users.guard";
 import { RoleGlobalGuard } from "../../../../guards/role.guard";
+import { Serialize } from "src/common/serialization/decorators/serialization/serialization.decorator";
 
 @Controller()
+@Serialize()
 export class ProfilesController {
 
     constructor(private readonly profileService: ProfilesService) {}
