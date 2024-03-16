@@ -25,7 +25,7 @@ export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFact
 
 	async validate(req: Request, payload : any) : Promise<any>{
 
-		if (await this.authService.blacklist("check", req.headers.authorization) === false) throw new UnauthorizedException();
+		if (await this.authService.blacklist("check", req.cookies['access_token']) === false) throw new UnauthorizedException();
 
 		const user = await this.authService.checkUser(payload.oauth_id);
 		if (!user) throw new UnauthorizedException();
@@ -37,7 +37,7 @@ export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFact
 		{
 			throw new UnauthorizedException();
 		}
-		return {id: payload.user_id, oauth_id: payload.oauth_id, username: user.username};
+		return {id: payload.user_id, oauth_id: payload.oauth_id, username: user.username, account_name: user.accountname};
 	}
 
 	

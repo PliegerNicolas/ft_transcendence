@@ -49,13 +49,11 @@ export function isAdmin(chan: ChanType, id: string)
 		item.user.id === id && item.role === "operator"));
 }
 
-export async function dynaGet(uri: string, token: string)
+export async function dynaGet(uri: string)
 {
 	console.log("GET --> " + uri);
 	const response = await fetch(uri, {
-		headers: {
-			"Content-Type": "application/json",
-			"Authorization": token},
+		headers: { "Content-Type": "application/json" },
 		credentials: "include",
 		});
 	if (!response.ok) {

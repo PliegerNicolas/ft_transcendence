@@ -8,9 +8,11 @@ export type CreateProfileParams = {
 export type ReplaceProfileParams = {
     firstName: string;
     lastName: string;
+    elo?: number;
 }
 
 export type UpdateProfileParams = {
     firstName?: string;
     lastName?: string;
+    elo?: number;
 }

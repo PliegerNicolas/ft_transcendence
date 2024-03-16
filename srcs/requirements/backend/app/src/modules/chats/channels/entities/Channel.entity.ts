@@ -29,7 +29,7 @@ export class Channel {
     @Column({ default: 0 })
     membersCount: number;
 
-    //@Exclude()
+    @Exclude()
     @Column({ nullable: true })
     password: string;
 

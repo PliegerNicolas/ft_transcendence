@@ -1,7 +1,7 @@
 import { createContext, Dispatch, SetStateAction } from "react";
 
 import Api from "./Api";
-import { FriendshipType, UserType } from "./types";
+import { ChanType, FriendshipType, UserType } from "./types";
 
 export const FriendshipContext = createContext({
 	id: "0",
@@ -11,8 +11,7 @@ export const FriendshipContext = createContext({
 
 export const MyContext = createContext({
 	logged: false,
-	token: "",
-	setLogInfo: (() => {}) as Function,
+	setLogged: (() => {}) as Function,
 	api: new Api(`http://${location.hostname}:3450`),
 	addNotif: (() => {}) as Function,
 	addInvite: (() => {}) as Function,
@@ -25,4 +24,10 @@ export const MyContext = createContext({
 export const ChatContext = createContext({
 	showSidebar: 1,
 	setShowSidebar: (() => {}) as Dispatch<SetStateAction<number>>,
+});
+
+export const ChatContentContext = createContext({
+	chan: {} as ChanType,
+	role: "member",
+	idMap: {} as {[memberId: string]: number},
 });

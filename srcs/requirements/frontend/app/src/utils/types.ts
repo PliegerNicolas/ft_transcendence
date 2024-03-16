@@ -37,7 +37,6 @@ export interface FriendshipType {
 
 export interface MyInfoType {
 	logged: boolean,
-	token: string
 }
 
 export interface MemberType {
@@ -45,6 +44,7 @@ export interface MemberType {
 	mute: boolean,
 	role: "owner" | "operator" | "member",
 	user: UserType,
+	hasLeft: boolean,
 }
 
 export interface MsgType {

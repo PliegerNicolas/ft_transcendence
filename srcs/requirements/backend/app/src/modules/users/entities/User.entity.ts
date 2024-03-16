@@ -1,6 +1,6 @@
 import { Exclude } from "class-transformer";
 import { IsEnum } from "class-validator";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
+import { AfterLoad, Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 import { GlobalServerPrivileges, compareGlobalServerPrivileges } from "../enums/global-server-privileges.enum";
 import { Profile } from "../../profiles/entities/Profile.entity";
 import { Relationship } from "../../relationships/entities/Relationship.entity";
@@ -16,21 +16,24 @@ export class User {
     @PrimaryGeneratedColumn({ type: 'bigint' })
     id: bigint;
 
+    @Exclude()
     @Column({ type: 'bigint', unique: true })
     oauthId: bigint;
 
-    @Exclude() // Exclude ?
+    @Exclude()
     @Column()
     email: string;
 
     @Column({ unique: true, length: 25 })
     username: string;
 
-    //@Exclude() // Exclude ?
+    @Column({ unique: true, length: 25 })
+    accountname: string;
+
+    @Exclude()
     @IsEnum(GlobalServerPrivileges)
     @Column({ type: 'enum', enum: GlobalServerPrivileges, default: GlobalServerPrivileges.USER })
     globalServerPrivileges: GlobalServerPrivileges;
-
 
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
@@ -57,6 +60,8 @@ export class User {
     @OneToMany(() => Relationship, (relationship) => relationship.user2, { cascade: true })
     relationships2?: Relationship[];
 
+    relationships: Relationship[];
+
     /* Gamelogs */
 
     @OneToMany(() => GamelogToUser, (userToGamelogs) => userToGamelogs.user)
@@ -73,17 +78,21 @@ export class User {
 	
 	/* Two Factor Authentification */
 
+    @Exclude()
     @Column({nullable: true})
     twoFactorAuthSecret: string;
 
 	@Column({default: false})
 	isTwoFactorAuthEnabled: boolean;
 
-    /* Helper Function */
+    /* Life Cycles */
 
-    public getRelationships(): Relationship[] {
-        return ([...this.relationships1, ...this.relationships2]);
+    @AfterLoad()
+    private setRelationships(): void {
+        this.relationships = [...(this.relationships1 ?? []), ...(this.relationships1 ?? [])];
     }
+
+    /* Helper Function */
 
     public hasGlobalServerPrivileges(): boolean {
         return (compareGlobalServerPrivileges(this.globalServerPrivileges, GlobalServerPrivileges.OPERATOR) >= 0);

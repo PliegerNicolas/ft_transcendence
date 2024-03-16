@@ -16,7 +16,7 @@ export class UsersGuard implements CanActivate {
     context: ExecutionContext,
   ): Promise<boolean> {
 	const request = context.switchToHttp().getRequest();
-	const token = this.jwtService.decode(request.headers.authorization);
+	const token = this.jwtService.decode(request.request.cookie['access_token']);
 	const params = request.params;
 	
 	const usercheck = await this.userRepository.findOne({

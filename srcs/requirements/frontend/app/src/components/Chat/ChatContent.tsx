@@ -8,7 +8,7 @@ import Spinner from "../Spinner.tsx";
 import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
 import { getChanRole, httpStatus, isMuted } from "../../utils/utils.ts";
 
-import { MyContext } from "../../utils/contexts";
+import { ChatContentContext, MyContext } from "../../utils/contexts";
 
 import { socket } from "../../App.tsx"
 
@@ -18,23 +18,109 @@ import ChatHeader from "./ChatHeader.tsx";
 import Msg from "./Msg.tsx";
 import ChanEdit from "./ChanEdit.tsx";
 import ConfirmPopup from "../ConfirmPopup.tsx";
-import { MemberType } from "../../utils/types.ts";
+import { MemberType, MsgType } from "../../utils/types.ts";
 
 // <ChatContentRouter /> =======================================================
 
 export default function ChatContentRouter()
 {
+	const { api, me } = useContext(MyContext);
+
+	const invalidate = useInvalidate();
+	const mutateError = useMutateError();
+
 	const params = useParams();
 	const id = params.id!;
 
+	const getChan = useGet(["channels", id]);
+
+	const join = useMutation({
+		mutationFn: (password: string) =>
+			api.patch("/channels/" + id + "/join", {password}),
+		onSettled: () => invalidate(["channels"]),
+		onError: mutateError,
+	});
+
+	function handleJoinChannel(password: string) {
+		join.mutate(password);
+		socket.emit('joinChannel', getChan.data.channel.name);
+	}
+
+	const [password, setPasswd] = useState("");
+
+	const idMap = useMemo(() => {
+		let ret: {[memberId: string]: number} = {};
+
+		if (!getChan.isSuccess)
+			return (ret);
+
+		getChan.data.channel.members
+			.sort((a: MemberType, b: MemberType) => +a.id - +b.id)
+			.forEach((member: MemberType, index: number) =>
+			ret[member.id] = index
+		);
+		return (ret);
+	}, [getChan.data]);
+
+	if (getChan.isPending) return (
+		<div className="ChatContent spinner">
+			<Spinner />
+		</div>
+	);
+
+	if (getChan.isError && httpStatus(getChan.error) !== 403) return (
+		<div className="ChatContent error">
+			Failed to load this channel: {getChan.error.message}
+		</div>
+	);
+
+	if (getChan.isError && getChan.error.message.includes("password")) return (
+		<div className="ChatContent ChatContent__Mdp">
+			<div className="notice-msg">
+				A password is required to join this channel:
+			</div>
+			<div className="ChatContent__MdpInput">
+				<input
+					type="password"
+					value={password}
+					onChange={(ev) => setPasswd(ev.currentTarget.value)}
+					placeholder="Password"
+				/>
+				<button onClick={() => {handleJoinChannel(password); setPasswd("")}}>
+					Join
+				</button>
+			</div>
+		</div>
+	);
+
+	if (getChan.isError) return (
+		<div className="ChatContent ChatContent__Mdp">
+			<div style={{fontSize: "2rem", marginBottom: "12px"}}>💀</div>
+			<div className="error-msg">
+				{
+					getChan.error.message.includes("permitted") ?
+					"You've been banned from this channel" :
+					"This channel requires an invitation to join."
+				}
+			</div>
+		</div>
+	);
+
+
 	return (
-		<Routes>
-			<Route path="/" element={<ChatContent />} />
-			<Route path="/edit" element={<ChanEdit id={+id}/>} />
-			<Route path="/*" element={
-				<div className="ChatContent error">No such channel!</div>
-			}/>
-		</Routes>
+		<ChatContentContext.Provider value={{
+			chan: getChan.data.channel,
+			role: getChanRole(getChan.data.channel, me!.id),
+			idMap
+		}}>
+			<Routes>
+				<Route path="/" element={<ChatContent />} />
+				<Route path="/edit" element={<ChanEdit id={+id}/>} />
+				<Route path="/*" element={
+					<div className="ChatContent error">No such page...</div>
+				}/>
+			</Routes>
+		</ChatContentContext.Provider>
 	);
 }
 
@@ -43,31 +129,15 @@ export default function ChatContentRouter()
 function ChatContent()
 {
 	const { api, setLastChan, me } = useContext(MyContext);
+	const { chan, role } = useContext(ChatContentContext);
+
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 
 	const params = useParams();
 	const id = params.id!;
 
-	const getChan = useGet(["channels", id]);
-	const getMsgs = useGet(["channels", id, "messages"], getChan.isSuccess);
-
-	const chan = getChan.isSuccess ? getChan.data.channel : undefined;
-
-	const idMap = useMemo(() => {
-		let ret: {[memberId: string]: number} = {};
-
-		if (!getChan.isSuccess)
-			return ({});
-
-		chan.members
-			.sort((a: MemberType, b: MemberType) => +a.user.id - +b.user.id)
-			.forEach((member: MemberType, index: number) =>
-			ret[member.user.id] = index
-		);
-		console.log(ret);
-		return (ret);
-	}, [getChan.data])
+	const getMsgs = useGet(["channels", id, "messages"]);
 
 	const postMsg = useMutation({
 		mutationFn: (content: string) =>
@@ -113,8 +183,6 @@ function ChatContent()
 			anchorRef.current.scrollIntoView()
 	}, [getMsgs]);
 
-	const [password, setPasswd] = useState("");
-
 	const [inputValue, setInputValue] = useState("");
 	function handleInputChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
 
@@ -131,6 +199,11 @@ function ChatContent()
 		setInputValue("");
 	}
 
+	function handleJoinChannel(password: string) {
+		join.mutate(password);
+		socket.emit('joinChannel', chan.name);
+	}
+
 	const [popup, setPopup] =
 		useState<{text: JSX.Element, action: Function} | null>(null);
 
@@ -142,52 +215,6 @@ function ChatContent()
 	}
 
 	const [leavePopup, setLeavePopup] = useState(false);
-
-	if (getChan.isPending) return (
-		<div className="ChatContent spinner">
-			<Spinner />
-		</div>
-	);
-
-	if (getChan.isError && httpStatus(getChan.error) !== 403) return (
-		<div className="ChatContent error">
-			Failed to load this channel: {getChan.error.message}
-		</div>
-	);
-
-	if (getChan.isError && getChan.error.message.includes("password")) return (
-		<div className="ChatContent ChatContent__Mdp">
-			<div className="notice-msg">
-				A password is required to join this channel:
-			</div>
-			<div className="ChatContent__MdpInput">
-				<input
-					type="password"
-					value={password}
-					onChange={(ev) => setPasswd(ev.currentTarget.value)}
-					placeholder="Password"
-				/>
-				<button onClick={() => {join.mutate(password); setPasswd("")}}>
-					Join
-				</button>
-			</div>
-		</div>
-	);
-
-	if (getChan.isError) return (
-		<div className="ChatContent ChatContent__Mdp">
-			<div style={{fontSize: "2rem", marginBottom: "12px"}}>💀</div>
-			<div className="error-msg">
-				{
-					getChan.error.message.includes("permitted") ?
-					"You've been banned from this channel" :
-					"This channel requires an invitation to join."
-				}
-			</div>
-		</div>
-	);
-
-	const role = getChanRole(chan, me!.id);
 
 	if (getMsgs.isPending) {
 		return (
@@ -204,8 +231,6 @@ function ChatContent()
 		</div>
 	);
 
-	console.log(chan.members);
-
 	return (
 		<div className="ChatContent">
 			<ChatHeader
@@ -219,16 +244,14 @@ function ChatContent()
 					<hr />
 				</div>
 				{
-					getMsgs.data.map((item: any, index: number) =>
+					getMsgs.data
+						.sort((a: MsgType, b: MsgType) => a.createdAt > b.createdAt)
+						.map((item: MsgType, index: number) =>
 						<Msg
 							key={index}
 							data={item}
 							prev={index ? getMsgs.data[index - 1] : null}
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
-							size={chan.membersCount}
-							role={role}
-							chan={chan}
-							idMap={idMap}
 							popupFn={popupFn}
 						/>
 					)
@@ -251,7 +274,7 @@ function ChatContent()
 				</div> ||
 				<div className="Chat__Input join">
 					Join this channel to interact with it.
-					<button onClick={() => join.mutate("")}>
+					<button onClick={() => handleJoinChannel("")}>
 						Join
 					</button>
 				</div>

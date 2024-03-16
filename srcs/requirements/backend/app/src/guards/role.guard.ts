@@ -17,7 +17,7 @@ export class RoleGuard implements CanActivate {
     context: ExecutionContext,
   ): Promise<boolean> {
   	const request = context.switchToHttp().getRequest();
-	const token = this.jwtService.decode(request.headers.authorization);
+	const token = this.jwtService.decode(request.cookies['access_token']);
 	const params = request.params;
 	const roles = this.reflector.get(Role, context.getHandler());
 	// console.log(user.channelId)
@@ -70,7 +70,7 @@ export class RoleGlobalGuard implements CanActivate {
     context: ExecutionContext,
   ): Promise<boolean> {
   	const request = context.switchToHttp().getRequest();
-	const token = this.jwtService.decode(request.headers.authorization);
+	const token = this.jwtService.decode(request.cookies['access_token']);
 	const roles = this.reflector.get(GlobalRole, context.getHandler());
 	// console.log(user.channelId)
 	// console.log(token.user_id)

@@ -5,6 +5,7 @@ import OnlineGame  from './OnlinePlay'
 
 import "../../styles/play.css";
 import { MyContext } from '../../utils/contexts.ts';
+import { useNavigate } from 'react-router-dom';
 
 // <Play /> ====================================================================
 
@@ -28,6 +29,7 @@ function Play()
 	const [paddlesColor, setPaddlesColor] = useState('#fff');
 	const [ballColor, setBallColor] = useState('#fff');
 
+	const navigate = useNavigate();
 
 	const destroySocketListeners = () => {
 		socket.off('userJoinedSocket');
@@ -113,12 +115,8 @@ function Play()
 	}
 
 	const backToMenuHandler = () => {
-		setInQueue(false);
-		setPlayerReady(false);
-		setGameReady(false);
-		setGameOver(false);
 		socket.emit('leaveLobby', lobby);
-		setLobby('');
+		navigate('/');
 	}
 
 	// Backend http requests ==============================================================================================================

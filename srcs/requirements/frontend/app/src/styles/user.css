@@ -174,3 +174,10 @@
 	display: block;
 	margin-bottom: 6px;
 }
+
+.User__InvitePlayer {
+	width:100%;
+  	display: flex;
+  	justify-content: center;
+	margin-top: 10px;
+}

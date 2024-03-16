@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useMutation, MutationFunction } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { MyContext } from "../../utils/contexts.ts";
 import { FriendshipType } from "../../utils/types.ts"
@@ -10,7 +10,7 @@ import Spinner from "../Spinner.tsx";
 import Me from "./Me.tsx";
 import UserInfos from "./UserInfos.tsx";
 
-import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
+import { useInvalidate, useMutateError, useGet, useSetMe } from "../../utils/hooks.ts";
 
 import "../../styles/user.css";
 import ConfirmPopup from "../ConfirmPopup.tsx";
@@ -38,7 +38,7 @@ function User()
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 
-	const { api, addNotif, me } = useContext(MyContext);
+	const { api, me } = useContext(MyContext);
 
 	const [popup, setPopup] = useState(false);
 
@@ -65,18 +65,7 @@ function User()
 		onError: mutateError,
 	});
 
-	const setMe = useMutation({
-		mutationFn: ((name: string) =>
-			api.post("/auth/log_as/" + name, {})) as unknown as
-			MutationFunction<{ access_token: string; }, unknown>,
-		onSuccess: (data: {access_token: string}) => {
-			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true, token: data.access_token}));
-			window.location.reload();
-		},
-		onError: e => addNotif({content: "Failed to log as: "
-			+ getUser.data.username + ", " + e.message}),
-	});
+	const setMe = useSetMe();
 
 	if (getUser.isPending || !me) return (
 		<main className="MainContent">
@@ -177,7 +166,9 @@ function User()
 						name={user.username}
 					/>
 				}
-				<InvitePlayer user={user.username} />
+				<div className="User__InvitePlayer">
+					<InvitePlayer  user={user.username} />
+				</div>
 				<hr />
 				<div style={{textAlign: "center"}}>
 					<button onClick={() => setPopup(true)}>Log as {user.username}</button>
@@ -191,7 +182,7 @@ function User()
 						Please don't do anything dumb using it.</>}
 					cancelFt={() => setPopup(false)}
 					action="Done"
-					actionFt={() => setMe.mutate(user.username)}
+					actionFt={() => setMe(user.username)}
 				/>
 			}
 		</main>

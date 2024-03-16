@@ -115,6 +115,8 @@
 
 .Header__PopupLink>img {
 	height: 64px;
+	width: 64px;
+	object-fit: cover;
 	border-radius: 14px;
 }
 

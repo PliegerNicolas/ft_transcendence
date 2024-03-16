@@ -10,10 +10,8 @@ export const InvitePlayer = (props: any) => {
 	const lobby_id = uuid();
 
 	const toPrivatePlay=()=>{
-  		navigate('/play/private',{state:{
-			lobby: lobby_id,
-			playerNumber: 1,
-		}});
+		const data = { lobby: lobby_id, playerNumber: 1, };
+		navigate('/play/private',{state: data});
 		if (socket) {
 			socket.emit('inviteToPrivate', {user: props.user, lobby: lobby_id});
 		}
@@ -63,23 +61,21 @@ function Invite(
 	const navigate = useNavigate();
 
 	const acceptHandler = () => {
-		socket.emit('acceptInvite', invite.from, invite.lobby);
-		navigate('/play/private',{state:{
-			lobby: invite.lobby,
-			playerNumber: 2,
-		}});
+		const data = { lobby: invite.lobby, playerNumber: 2, };
+		socket.emit('acceptInvite', {user: invite.from, lobby: invite.lobby});
+		navigate('/play/private',{state: data});
 		rmSelf();
 	}
 
 	const rejectHandler = () => {
-		socket.emit('rejectInvite', invite.from, invite.lobby);
+		socket.emit('rejectInvite', {user: invite.from, lobby: invite.lobby});
 		rmSelf();
 	}
 
 	return (
-		<div className={`Invites__Invite`}>
-			<div>
-				<div>{invite.from} invited you.</div>
+		<div className="Invite">
+			<div>{invite.from} invited you.</div>
+			<div className="Invite__Buttons">
 				<button onClick={() => acceptHandler()}>Accept</button>
 				<button onClick={() => rejectHandler()}>Reject</button>
 			</div>

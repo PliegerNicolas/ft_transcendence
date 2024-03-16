@@ -1,6 +1,6 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useMutation, MutationFunction } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import "../styles/header.css";
 
@@ -8,10 +8,11 @@ import ft_logo from "../assets/42.svg";
 import defaultPicture from "../assets/default_profile.png";
 import logoutIcon from "../assets/logout.svg";
 
+import UserSuggestions from "./UserSuggestions.tsx";
 import Login from "./Login.tsx";
 
 import { MyContext } from "../utils/contexts.ts";
-import { useGet } from "../utils/hooks.ts";
+import { useGet, useSetMe } from "../utils/hooks.ts";
 
 function useOutsideClick(callback: (event: MouseEvent) => void) {
   const ref = useRef<HTMLDivElement>(null);
@@ -35,11 +36,11 @@ function useOutsideClick(callback: (event: MouseEvent) => void) {
 
 export default function Header()
 {
-	const { logged, api, setGlobalPopup, addNotif, me } = useContext(MyContext);
+	const { logged, setGlobalPopup, me } = useContext(MyContext);
 
 	const [ popup, setPopup ] = useState(false);
 
-	const getPic = useGet(["picture"], logged && api.auth);
+	const getPic = useGet(["picture"], logged);
 
 	const popupRef = useOutsideClick(() => {
 			setTimeout(() => setPopup(false), 0);
@@ -47,18 +48,7 @@ export default function Header()
 
 	const [logAsUsername, setLogAsUsername] = useState("");
 
-	const setMe = useMutation({
-		mutationFn: (() =>
-			api.post("/auth/log_as/" + logAsUsername, {})) as unknown as
-			MutationFunction<{ access_token: string; }, unknown>,
-		onSuccess: (data: {access_token: string}) => {
-			localStorage.setItem(
-				"my_info", JSON.stringify({logged: true, token: data.access_token}));
-			window.location.reload();
-		},
-		onError: e => addNotif({content: "Failed to log as: " + logAsUsername +
-		", " + e.message}),
-	});
+	const setMe = useSetMe();
 
 	function setLogAsPopup(value: string) {
 		setGlobalPopup({
@@ -70,15 +60,17 @@ export default function Header()
 					<div style={{textAlign: "center"}}>
 						<input
 							type="text"
+							list="UserSuggestions"
 							value={value}
 							onChange={handleUsernameChange}
 						/>
+						<UserSuggestions />
 					</div>
 				</>,
 			action: "Done",
 			cancelFt: () => {},
 			actionFt: () => {
-				setMe.mutate(logAsUsername);
+				setMe(logAsUsername);
 				setGlobalPopup(null);
 			}
 		});
@@ -164,7 +156,7 @@ export default function Header()
 
 function Logout()
 {
-	const { setLogInfo, api } = useContext(MyContext);
+	const { setLogged, api } = useContext(MyContext);
 
 	const backendLogout = useMutation({
 		mutationFn: () => api.post("/auth/logout", {}),
@@ -172,8 +164,7 @@ function Logout()
 	});
 
 	function logoutNow() {
-		localStorage.removeItem("my_info");
-		setLogInfo({logged: false, token: ""});
+		setLogged(false);
 		backendLogout.mutate();
 	}
 

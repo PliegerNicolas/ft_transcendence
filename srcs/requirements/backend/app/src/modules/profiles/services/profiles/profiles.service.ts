@@ -72,7 +72,6 @@ export class ProfilesService {
     async updateProfile(username: string = undefined, profileDetails: UpdateProfileParams): Promise<Profile> {
         const profile = await this.profileRepository.findOne({
             where: { user: { username: Equal(username) } },
-            relations: ['picture'],
         });
 
         if (!profile) throw new NotFoundException(`Profile of User '${username ? username : '{undefined}' }' not found`);

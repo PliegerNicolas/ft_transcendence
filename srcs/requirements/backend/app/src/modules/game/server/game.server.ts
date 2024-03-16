@@ -5,10 +5,16 @@ import { WINDOW_WIDTH, WINDOW_HEIGHT, BALL_SIZE, MAX_SCORE, FRAME_RATE, PADDLE_W
 import { GameService } from '../services/game.service';
 import { GamelogsService } from 'src/modules/gamelogs/services/gamelogs/gamelogs.service';
 import { Injectable } from '@nestjs/common';
+import { User } from 'src/modules/users/entities/User.entity';
+import { ProfilesService } from 'src/modules/profiles/services/profiles/profiles.service';
+import { UsersService } from 'src/modules/users/services/users/users.service';
+import { IntegerType } from 'typeorm';
 
 @Injectable()
 export class GameServer {
-	constructor(private readonly gameService: GameService) {};
+	constructor(private readonly gameService: GameService,
+				private readonly profileService: ProfilesService,
+				private readonly userService: UsersService) {};
 
 	createGameState() {
 		return ({
@@ -37,9 +43,9 @@ export class GameServer {
 		gameState.player2 = { x: WINDOW_WIDTH - PADDLE_WIDTH - 20, y: (WINDOW_HEIGHT / 2) - PADDLE_HEIGHT, speed: 0 };
 	}
 
-	startGameInterval(lobby: string, gameState: gameState, socket: Server, player1Username: string, player2Username) {
+	startGameInterval(lobby: string, gameState: gameState, socket: Server, player1Username: string, player2Username: string) {
 		let gameOver = false;
-		const intervalId = setInterval(() => {
+		const intervalId = setInterval(async () => {
 			const winner = this.gameLoop(gameState);
 
 			if (winner === 1) {
@@ -55,12 +61,16 @@ export class GameServer {
 				gameOver = true;
 				this.gameService.createGamelogs(player1Username, player2Username, 1);
 				socket.to(lobby).emit('gameOver', gameState);
+				this.eloCalculator(await this.userService.getUser(player1Username), await this.userService.getUser(player2Username), 1);
+				//console.log('player1 ELO : ' + (await this.userService.getUser(player1Username)).profile.elo + ' | player2 ELO : ' + (await this.userService.getUser(player2Username)).profile.elo);
 				setTimeout(() => {clearInterval(intervalId)}, 100);
 			}
 			else if (gameOver === false && gameState.score.player2 === MAX_SCORE) {
 				gameOver = true;
 				this.gameService.createGamelogs(player1Username, player2Username, 2);
 				socket.to(lobby).emit('gameOver', gameState);
+				this.eloCalculator(await this.userService.getUser(player1Username), await this.userService.getUser(player2Username), 2);
+				//console.log('player1 ELO : ' + (await this.userService.getUser(player1Username)).profile.elo + ' | player2 ELO : ' + (await this.userService.getUser(player2Username)).profile.elo);
 				setTimeout(() => {clearInterval(intervalId)}, 100);
 			}
 		}, 1000 / FRAME_RATE);
@@ -124,18 +134,24 @@ export class GameServer {
 		return (0);
 	}
 
-	eloCalculator(player1: Players, player2: Players, gameOutcome: number) {
-		const player1ExpectedOutcome = 1 / (1 + Math.pow(10, (player2.elo - player1.elo) / 400));
-		const player2ExpectedOutcome = 1 / (1 + Math.pow(10, (player1.elo - player2.elo) / 400));
+	eloCalculator(player1: User, player2: User, gameOutcome: number) {
+		const player1ExpectedOutcome = 1 / (1 + Math.pow(10, (player2.profile.elo - player1.profile.elo) / 400));
+		const player2ExpectedOutcome = 1 / (1 + Math.pow(10, (player1.profile.elo - player2.profile.elo) / 400));
+		var player1Elo: IntegerType;
+		var player2Elo: IntegerType;
 		if (gameOutcome === 1) {
-			player1.elo = player1.elo + 32 * (1 - player1ExpectedOutcome);
-			player2.elo = player2.elo + 32 * (0 - player2ExpectedOutcome);
-			console.log('player1 elo : ' + player1.elo + ' | player2 elo : ' + player2.elo);
+			player1Elo = Math.trunc(player1.profile.elo + 32 * (1 - player1ExpectedOutcome));
+			player2Elo = Math.trunc(player2.profile.elo + 32 * (0 - player2ExpectedOutcome));
+			this.profileService.updateProfile(player1.username, { elo: player1Elo });
+			this.profileService.updateProfile(player2.username, { elo: player2Elo });
+			//console.log('player1 elo : ' + player1Elo + ' | player2 elo : ' + player2Elo);
 		}
 		else if (gameOutcome === 2) {
-			player1.elo = player1.elo + 32 * (0 - player1ExpectedOutcome);
-			player2.elo = player2.elo + 32 * (1 - player2ExpectedOutcome);
-			console.log('player1 elo : ' + player1.elo + ' | player2 elo : ' + player2.elo);
+			player1Elo = Math.trunc(player1.profile.elo + 32 * (0 - player1ExpectedOutcome));
+			player2Elo = Math.trunc(player2.profile.elo + 32 * (1 - player2ExpectedOutcome));
+			this.profileService.updateProfile(player1.username, { elo: player1Elo });
+			this.profileService.updateProfile(player2.username, { elo: player2Elo });
+			//console.log('player1 elo : ' + player1Elo + ' | player2 elo : ' + player2Elo);
 		}
 	}
 

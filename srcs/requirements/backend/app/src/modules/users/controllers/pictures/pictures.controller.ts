@@ -8,8 +8,10 @@ import { UsersGuard } from '../../../../guards/users.guard';
 import { RoleGlobalGuard } from '../../../../guards/role.guard';
 import { File } from 'src/modules/file-uploads/entities/file.entity';
 import { Response } from 'express';
+import { Serialize } from 'src/common/serialization/decorators/serialization/serialization.decorator';
 
 @Controller()
+@Serialize()
 export class PicturesController {
 
     constructor(
