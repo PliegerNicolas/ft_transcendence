@@ -8,8 +8,10 @@ import { UpdateGamelogDto } from "../../dtos/UpdateGamelog.dto";
 import { AuthGuard } from "@nestjs/passport";
 import { GlobalRole } from "../../../../guards/role.decorator";
 import { RoleGlobalGuard } from "../../../../guards/role.guard";
+import { Serialize } from "src/common/serialization/decorators/serialization/serialization.decorator";
 
 @Controller()
+@Serialize()
 export class GamelogsController {
 
     constructor(private gamelogService: GamelogsService) {}

@@ -7,6 +7,7 @@ import { ChannelMember } from "./ChannelMember.entity";
 import { Message } from "../../messages/entities/Message.entity";
 import { ChannelRole, compareChannelRoles, demoteChannelRole, promoteChannelRole } from "../enums/channel-role.enum";
 import { BadRequestException, ForbiddenException } from "@nestjs/common";
+import { Exclude } from "class-transformer";
 
 @Entity({ name: 'channels' })
 export class Channel {
@@ -28,7 +29,7 @@ export class Channel {
     @Column({ default: 0 })
     membersCount: number;
 
-    //@Exclude()
+    @Exclude()
     @Column({ nullable: true })
     password: string;
 

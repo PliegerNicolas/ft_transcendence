@@ -26,7 +26,7 @@ export class RelationshipsService {
 
         if (!user) throw new NotFoundException(`User '${username} not found`);
 
-        return (user.getRelationships());
+        return (user.relationships);
     }
 
     async getRelationship(username: string = undefined, targetUsername: string = undefined): Promise<Relationship> {

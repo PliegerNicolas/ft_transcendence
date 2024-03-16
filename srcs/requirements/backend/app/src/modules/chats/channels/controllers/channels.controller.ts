@@ -16,8 +16,10 @@ import { GlobalRole, Role } from "../../../../guards/role.decorator";
 import { ChannelsGuard, ChannelsNotGuard } from "../../../../guards/channels.guard";
 import { RoleGlobalGuard, RoleGuard } from "../../../../guards/role.guard";
 import { UsersGuard } from "../../../../guards/users.guard";
+import { Serialize } from "src/common/serialization/decorators/serialization/serialization.decorator";
 
 @Controller()
+@Serialize()
 export class ChannelsController {
 
     constructor(private channelService: ChannelsService) {}
