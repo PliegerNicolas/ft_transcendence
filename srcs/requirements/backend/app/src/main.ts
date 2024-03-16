@@ -1,24 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { TypeormExceptionFilter } from './common/filters/typeorm-exception/typeorm-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
+import { httpsOptions } from './ssl-config';
 import * as cookieParser from 'cookie-parser';
 
-
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
+	const app = await NestFactory.create(AppModule, { httpsOptions });
 
 	//Setting up middleware for cookies
 	app.use(cookieParser(process.env.API_SECRET));
-
-	app.enableCors({
-		origin: true,
-		credentials: true
-	})
-
-	// Apply a global TypeORM exception filter
-	app.useGlobalFilters(new TypeormExceptionFilter());
-
+	app.enableCors({ origin: true, credentials: true })
 
 	app.useGlobalPipes(
 		new ValidationPipe({
@@ -28,6 +19,6 @@ async function bootstrap() {
 	);
 
 	//app.setGlobalPrefix('api');
-	await app.listen(3450);
+	await app.listen((process.env.BACKEND_PORT ?? '3000'));
 }
 bootstrap();

@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 20:08:41 by nicolas           #+#    #+#              #
-#    Updated: 2024/02/25 15:42:16 by nicolas          ###   ########.fr        #
+#    Updated: 2024/03/16 17:57:16 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 # Latest stable version of alpine linux at 8 january 2024.
@@ -17,6 +17,7 @@ ARG PORT
 # Install NODE.JS and NPM.
 RUN apk update && \
 	apk add --no-cache \
+		openssl \
 		nodejs \
 		npm \
 		python3 \
@@ -25,6 +26,13 @@ RUN apk update && \
 
 # Map /app as working directory in container.
 WORKDIR /app
+
+# General self-signed SSL certificates
+RUN mkdir -p ssl && \
+	openssl req -nodes -new -x509 \
+		-keyout ssl/nestjs_ssl.key \
+		-out ssl/nestjs_ssl.cert \
+		-subj "/C=FR/ST=Île De France/L=Paris/O=42School/CN=localhost"
 
 # Copy local package files to container and install those dependencies.
 COPY ./app/package*.json ./
