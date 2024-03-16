@@ -16,7 +16,7 @@ import { JwtRefreshStrategy } from "./jwt-refresh.strategy";
 		JwtModule.register({
 			global:true,
 			secret:jwtConstants.secret,
-			signOptions : {expiresIn: '7200s'}
+			signOptions : {expiresIn: '15s'}
   		}), 
 		TypeOrmModule.forFeature([User, Profile]),
 		forwardRef(() => UsersModule),

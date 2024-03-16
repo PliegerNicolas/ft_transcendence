@@ -114,7 +114,12 @@ export class AuthService
 
 	async refresh_token(jwt : string){
 		const payload = this.jwtService.decode(jwt);
-		const access_token = (await this.createJwt({user_id : payload.user_id, oauth_id: payload.oauth_id, isTwoFactorEnabled: payload.isTwoFactorAuthEnabled}, payload.isTwoFactorAuthLogged))
+		const user = await this.userRepository.findOne({
+			where: { id: Equal(BigInt(payload.user_id)) },
+			relations: ['profile'],
+		});
+		const access_token = await this.createJwt({user_id : user.id, oauth_id: user.oauthId, isTwoFactorEnabled: user.isTwoFactorAuthEnabled}, payload.isTwoFactorAuthLogged)
+		console.log(access_token)
 		return {access_token : access_token}
 	}
 
