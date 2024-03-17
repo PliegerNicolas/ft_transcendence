@@ -52,11 +52,11 @@ export class ChannelsNotGuard implements CanActivate {
 			where : {
 				channel : { id: Equal(params.channelId) },
 				user : { id: Equal(token.user_id) },
-				active: true,
+				active: false,
 			},
 			relations: ['channel', 'user'],
 		});
-
+		
 		if (!member) return (true);
 	
 		return (false);

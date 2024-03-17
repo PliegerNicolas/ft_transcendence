@@ -54,8 +54,8 @@ export default function ChatContentRouter()
 		if (!getChan.isSuccess)
 			return (ret);
 
-		getChan.data.channel.members
-			.sort((a: MemberType, b: MemberType) => +a.id - +b.id)
+		getChan.data.channel.activeMembers
+			.sort((a: MemberType, b: MemberType) => +a.user.id - +b.user.id)
 			.forEach((member: MemberType, index: number) =>
 			ret[member.id] = index
 		);
@@ -105,7 +105,6 @@ export default function ChatContentRouter()
 			</div>
 		</div>
 	);
-
 
 	return (
 		<ChatContentContext.Provider value={{

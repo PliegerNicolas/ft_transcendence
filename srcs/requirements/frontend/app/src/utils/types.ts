@@ -41,10 +41,12 @@ export interface MyInfoType {
 
 export interface MemberType {
 	id: string,
-	mute: boolean,
 	role: "owner" | "operator" | "member",
 	user: UserType,
-	hasLeft: boolean,
+	banned: boolean,
+	invited: boolean,
+	muted: boolean,
+	active: boolean,
 }
 
 export interface MsgType {
@@ -63,10 +65,11 @@ export interface ChanType {
 	passwordRepeat: string | undefined,
 	visibility: string,
 	membersCount: number,
-	members: Array<MemberType>,
-	bannedUsers: Array<UserType>,
-	invitedUsers: Array<UserType>,
-	mutedUsers: Array<UserType>,
+	activeMembers: Array<MemberType>,
+	inactiveMembers: Array<MemberType>,
+	bannedMembers: Array<MemberType>,
+	invitedMembers: Array<MemberType>,
+	mutedMembers: Array<MemberType>,
 }
 
 export interface ChanSpecsType {

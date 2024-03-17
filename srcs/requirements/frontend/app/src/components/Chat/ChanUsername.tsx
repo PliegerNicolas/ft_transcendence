@@ -11,7 +11,7 @@ export default function ChanUsername(
 	const { chan, idMap } = useContext(ChatContentContext);
 
 	const user = member.user;
-	const color = member.hasLeft ? "#aac" :
+	const color = !member.active ? "#aac" :
 		`hsl(${(360 / chan.membersCount) * (idMap[member.id])} 80% 80%)`;
 
 	return (
@@ -23,7 +23,7 @@ export default function ChanUsername(
 				style={{color}}
 			>
 				{user.username}
-				{member.hasLeft ? " [gone]" : ""}
+				{!member.active ? " [gone]" : ""}
 				{
 					(member.role === "owner" || member.role === "operator") &&
 				<svg xmlns="http://www.w3.org/2000/svg" height="24"

@@ -4,7 +4,7 @@ import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import { useMutateError, useInvalidate, useGet } from "../../utils/hooks.ts";
 import { httpStatus } from "../../utils/utils.ts";
-import { ChanType, MemberType, UserType } from "../../utils/types.ts";
+import { ChanSpecsType, ChanType, MemberType } from "../../utils/types.ts";
 import { ChatContentContext, MyContext } from "../../utils/contexts.ts";
 
 import { socket } from "../../App.tsx"
@@ -39,12 +39,13 @@ export default function ChanEdit({id}: {id: number})
 		mode: "open",
 		password: "",
 		passwordRepeat: "",
-		bannedUsers: [],
-		invitedUsers: [],
-		mutedUsers: [],
+		bannedMembers: [],
+		invitedMembers: [],
+		mutedMembers: [],
+		activeMembers: [],
+		inactiveMembers: [],
 		id: "",
 		membersCount: 1,
-		members: [],
 	});
 
 	const [setPasswd, setSetPasswd] = useState(!id);
@@ -66,29 +67,26 @@ export default function ChanEdit({id}: {id: number})
 	}
 
 	const postChan = useMutation({
-		mutationFn: ((data: ChanType) => api.post("/channels", data)) as
-			unknown as MutationFunction<ChanType>,
+		mutationFn: ((data: ChanSpecsType) => api.post("/channels", data)) as MutationFunction<ChanSpecsType>,
 		onError: mutateError,
 		onSettled: () => invalidate(["channels"]),
-		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
+		onSuccess: (data: ChanSpecsType) => navigate("/chat/" + data.channel.id)
 	});
 
 	const patchChan = useMutation({
 		mutationFn:
-			((data: ChanType) => {
+			((data: ChanSpecsType) => {
 				console.log(data);
-				return api.patch("/channels/" + id, data)}) as
-					unknown as MutationFunction<ChanType>,
+				return api.patch("/channels/" + id, data)}) as MutationFunction<ChanSpecsType>,
 		onError: mutateError,
 		onSettled: () => invalidate(["channels"]),
-		onSuccess: (data: ChanType) => navigate("/chat/" + data.id)
+		onSuccess: ((data: ChanSpecsType) => navigate("/chat/" + data.channel.id))
 	});
 
 	const patchChanNoRedirect = useMutation({
-		mutationFn: ((data: ChanType) => api.patch("/channels/" + id, data)) as
-			unknown as MutationFunction<ChanType>,
+		mutationFn: ((data: ChanSpecsType) => api.patch("/channels/" + id, data)) as MutationFunction<ChanSpecsType>,
 		onError: mutateError,
-		onSuccess: (data: ChanType) => invalidate(["channels", data.id])
+		onSuccess: (data: ChanSpecsType) => invalidate(["channels", data.channel.id])
 	});
 
 	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -325,7 +323,7 @@ function MemberList()
 	const { me } = useContext(MyContext);
 	const { chan } = useContext(ChatContentContext);
 
-	const myMember = chan.members.find(member => member.user.id === me!.id);
+	const myMember = chan.activeMembers.find(member => member.user.id === me!.id);
 
 	return (
 		<div className="MemberList">
@@ -337,7 +335,7 @@ function MemberList()
 			</>
 		}
 		{
-			chan.members.filter(member => member.user.id !== me!.id).map(member =>
+			chan.activeMembers.filter((member) => member.user.id !== me!.id).map((member) =>
 				<MemberListItem key={member.id} member={member} />
 			)
 		}
@@ -379,54 +377,54 @@ function RoleUserLists()
 	return (
 		<>
 		<section className="allowed">
-			<UserList
+			<ChannelMemberList
 				title="Invited users"
-				list={chan.invitedUsers}
-				add={(value: UserType) =>
-					action.mutate({action: "invite", usernames: [value.username]})
+				list={chan.invitedMembers}
+				add={(value: MemberType) =>
+					action.mutate({action: "invite", usernames: [value.user.username]})
 				}
-				rm={(value: UserType) =>
-					action.mutate({action: "uninvite", usernames: [value.username]})
+				rm={(value: MemberType) =>
+					action.mutate({action: "uninvite", usernames: [value.user.username]})
 				}
 			/>
 		</section>
 		<section className="muted">
-			<UserList
+			<ChannelMemberList
 				title="Muted users"
-				list={chan.mutedUsers}
-				add={(value: UserType) =>
-					action.mutate({action: "mute", usernames: [value.username]})
+				list={chan.mutedMembers}
+				add={(value: MemberType) =>
+					action.mutate({action: "mute", usernames: [value.user.username]})
 				}
-				rm={(value: UserType) =>
-					action.mutate({action: "unmute", usernames: [value.username]})
+				rm={(value: MemberType) =>
+					action.mutate({action: "unmute", usernames: [value.user.username]})
 				}
 			/>
 		</section>
 		<section className="banned">
-			<UserList
+			<ChannelMemberList
 				title="Banned users"
-				list={chan.bannedUsers}
-				add={(value: UserType) => {
-					action.mutate({action: "ban", usernames: [value.username]});
+				list={chan.bannedMembers}
+				add={(value: MemberType) => {
+					action.mutate({action: "ban", usernames: [value.user.username]});
 				}}
-				rm={(value: UserType) => {
-					action.mutate({action: "deban", usernames: [value.username]});
+				rm={(value: MemberType) => {
+					action.mutate({action: "deban", usernames: [value.user.username]});
 				}}
 			/>
 		</section>
 		{
 		role === "owner" &&
 		<section className="admins">
-			<UserList
+			<ChannelMemberList
 				title="Admins"
 				list={
-					chan.members.filter(item => item.role === "operator").map(item => item.user)
+					chan.activeMembers.filter((member) => member.role === "operator")
 				}
-				add={(value: UserType) =>
-					action.mutate({action: "promote", usernames: [value.username]})
+				add={(value: MemberType) =>
+					action.mutate({action: "promote", usernames: [value.user.username]})
 				}
-				rm={(value: UserType) =>
-					action.mutate({action: "demote", usernames: [value.username]})
+				rm={(value: MemberType) =>
+					action.mutate({action: "demote", usernames: [value.user.username]})
 				}
 			/>
 		</section>
@@ -437,16 +435,16 @@ function RoleUserLists()
 
 // <UserList /> ================================================================
 
-function UserList(
+function ChannelMemberList(
 	{title, list, add, rm}:
-	{title: string, list: UserType[], add: Function, rm: Function}
+	{title: string, list: MemberType[], add: Function, rm: Function}
 )
 {
-	const listHTML = list.map(user =>
-		<div className="UserList__Item" key={user.id}>
-			<div>{user.username}</div>
+	const listHTML = list.map((member) =>
+		<div className="UserList__Item" key={member.user.id}>
+			<div>{member.user.username}</div>
 			<button type="button" onClick={() => {
-					rm(list.find(elem => elem.id == user.id))
+					rm(list.find(elem => elem.id == member.user.id))
 			}}>
 				<img src={closeIcon}/>
 			</button>

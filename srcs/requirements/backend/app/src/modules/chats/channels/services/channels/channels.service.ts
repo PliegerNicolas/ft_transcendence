@@ -65,7 +65,7 @@ export class ChannelsService {
     async getChannel(channelId: bigint, username: string = undefined, channelDetails: GetChannelParams): Promise<ChannelWithSpecs> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
-            relations: ['messages.channelMember.user'],
+            relations: ['members.user', 'messages.channelMember.user'],
         });
         
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);

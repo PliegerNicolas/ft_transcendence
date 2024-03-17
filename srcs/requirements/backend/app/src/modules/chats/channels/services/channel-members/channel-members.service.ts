@@ -184,6 +184,7 @@ export class ChannelMembersService {
                 throw new ForbiddenException(`User '${user.username}' is neither member or invited to Channel with ID ${channel.id}`);
             case (ChannelMode.PASSWORD_PROTECTED):
                 if (this.isActiveMember(channel, user.id)) return ;
+                else if (!password) throw new ForbiddenException(`A password is needed for Channel with ID ${channel.id} and mode ${channel.mode}`);
                 else if (await this.passwordHashingService.comparePasswords(channel.password, password)) return;
                 throw new ForbiddenException(`Invalid password for Channel with ID ${channel.id} and mode ${channel.mode}`);
             default:
@@ -205,7 +206,8 @@ export class ChannelMembersService {
                 if (this.isInvited(channel, user.id)) return ;
                 throw new ForbiddenException(`User '${user.username}' is not invited to Channel with ID ${channel.id}`);
             case (ChannelMode.PASSWORD_PROTECTED):
-                if (await this.passwordHashingService.comparePasswords(channel.password, password)) return;
+                if (!password) throw new ForbiddenException(`A password is needed for Channel with ID ${channel.id} and mode ${channel.mode}`);
+                else if (await this.passwordHashingService.comparePasswords(channel.password, password)) return;
                 throw new ForbiddenException(`Invalid password for Channel with ID ${channel.id} and mode ${channel.mode}`);
             default:
                 throw new UnprocessableEntityException(`Channel with ID ${channel.id}'s mode not recognized`);

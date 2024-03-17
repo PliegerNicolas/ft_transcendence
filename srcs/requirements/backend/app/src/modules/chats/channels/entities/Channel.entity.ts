@@ -56,9 +56,9 @@ export class Channel {
 
     @AfterLoad()
     populateMemberStatusFields(): void {
-        this.invitedMembers = this.members?.filter((member) => member.banned) || [];
+        this.invitedMembers = this.members?.filter((member) => member.invited) || [];
         this.bannedMembers = this.members?.filter((member) => member.banned) || [];
-        this.mutedMembers = this.members?.filter((member) => member.banned) || [];
+        this.mutedMembers = this.members?.filter((member) => member.muted) || [];
         this.activeMembers = [];
         this.inactiveMembers = [];
         this.members?.forEach((member) => {
