@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Request, UseGuards, ValidationPipe } from "@nestjs/common";
 import { GamelogsService } from "../../services/gamelogs/gamelogs.service";
-import { ParseIdPipe } from "../../../../common/pipes/parse-id/parse-id.pipe";
 import { ParseUsernamePipe } from "../../../../common/pipes/parse-username/parse-username.pipe";
 import { CreateGamelogDto } from "../../dtos/CreateGamelog.dto";
 import { ReplaceGamelogDto } from "../../dtos/ReplaceGamelog.dto";
@@ -8,7 +7,8 @@ import { UpdateGamelogDto } from "../../dtos/UpdateGamelog.dto";
 import { AuthGuard } from "@nestjs/passport";
 import { GlobalRole } from "../../../../guards/role.decorator";
 import { RoleGlobalGuard } from "../../../../guards/role.guard";
-import { Serialize } from "src/common/serialization/decorators/serialization/serialization.decorator";
+import { Serialize } from "src/common/serialization/decorators/serialize/serialize.decorator";
+import { IdPipe } from "src/common/pipes/id/id.pipe";
 
 @Controller()
 @Serialize()
@@ -27,7 +27,7 @@ export class GamelogsController {
 
     @Get('gamelogs/:gamelogId')
     async getGamelog(
-        @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
+        @Param('gamelogId', IdPipe) gamelogId: bigint,
     ) {
         return (await this.gamelogService.getGamelog(gamelogId));
     }
@@ -61,14 +61,6 @@ export class GamelogsController {
     /* Global PATHS: need to be connected and concerned to access or be admin. It doesn't retrieve user from authentication but from the path itself. */
     /* */
 
-    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
-    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
-    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
-    // In our cases here we have to enforce being ADMIN or MODERATOR to access to update gamelogs.
-    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
-    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
-    // /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
-
 	@GlobalRole(['operator'])
 	@UseGuards(AuthGuard('jwtTwoFactor'), RoleGlobalGuard)
     @Post('gamelogs')
@@ -85,7 +77,7 @@ export class GamelogsController {
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async replaceGamelog(
         @Body(new ValidationPipe) replaceGamelogDto: ReplaceGamelogDto,
-        @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
+        @Param('gamelogId', IdPipe) gamelogId: bigint,
     ) {
         return (await this.gamelogService.replaceGamelog(gamelogId, replaceGamelogDto));
     }
@@ -96,7 +88,7 @@ export class GamelogsController {
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async updateGamelog(
         @Body(new ValidationPipe) updateGamelogDto: UpdateGamelogDto,
-        @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
+        @Param('gamelogId', IdPipe) gamelogId: bigint,
     ) {
         return (await this.gamelogService.updateGamelog(gamelogId, updateGamelogDto));
     }
@@ -106,7 +98,7 @@ export class GamelogsController {
     @Delete('gamelogs/:gamelogId')
     // UseGuard => Verify if user connected AND if user as special global server permissions (ADMIN, OPERATOR ...)
     async deleteGamelog(
-        @Param('gamelogId', ParseIdPipe) gamelogId: bigint,
+        @Param('gamelogId', IdPipe) gamelogId: bigint,
     ) {
         return (await this.gamelogService.deleteGamelog(gamelogId));
     }

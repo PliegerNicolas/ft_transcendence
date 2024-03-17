@@ -97,7 +97,7 @@ export class AuthService
 
 		const member = await this.userRepository.findOne({
 			where : {
-				username : username
+				username : Equal(username),
 			}
 		}).then(
 			(data) => data

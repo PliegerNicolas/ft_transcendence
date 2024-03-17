@@ -21,29 +21,21 @@ export class ChannelsGuard implements CanActivate {
 		const params = request.params;
 	
 		const member = await this.channelMemberRepository.findOne({
-			relations : {
-					channel : true,
-					user : true
-				},
-				where : {
-					channel : {
-						id: params.channelId
-					},
-					user : {
-						id : token.user_id
-					}
-				}
-		
-			}).then(
-				(data) => data
-			)
-			if (member == null || member.hasLeft)
-			{
-				return (false);
-			}
+			where: {
+				channel: { id: Equal(params.channelId) },
+				user: { id: Equal(token.user_id) },
+				//active: true,
+			},
+			relations: ['channel', 'user'],
+		});
+
+		console.log("ChannelsGuard");
+		console.log(member);
+
+		if (!member) return (false);
 	
-		return true;
-	  }
+		return (true);
+	}
 }
 
 @Injectable()
@@ -52,11 +44,9 @@ export class ChannelsNotGuard implements CanActivate {
 	constructor(private jwtService : JwtService,
 		@InjectRepository(ChannelMember)
 		private channelMemberRepository : Repository<ChannelMember>,
-		) {}
+	) {}
 
-	async canActivate(
-		context: ExecutionContext,
-	  ): Promise<boolean> {
+	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
 		const token = this.jwtService.decode(request.cookies['access_token']);
 		const params = request.params;
@@ -65,10 +55,13 @@ export class ChannelsNotGuard implements CanActivate {
 			where : {
 				channel : { id: Equal(params.channelId) },
 				user : { id: Equal(token.user_id) },
-				active: true,
+				//active: true,
 			},
 			relations: ['channel', 'user'],
 		});
+
+		console.log("ChannelsNotGuard");
+		console.log(member);
 
 		if (!member) return (true);
 	
