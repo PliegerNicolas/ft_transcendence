@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 20:08:41 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/17 11:53:36 by nicolas          ###   ########.fr        #
+#    Updated: 2024/03/17 12:02:03 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,6 @@ ARG PORT
 # Install NODE.JS and NPM.
 RUN apk update && \
 	apk add --no-cache \
-		openssl \
 		nodejs \
 		npm \
 		python3 \

@@ -6,11 +6,12 @@
 #    By: julboyer <julboyer@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 23:43:12 by nicolas           #+#    #+#              #
-#    Updated: 2024/02/19 11:40:32 by nicolas          ###   ########.fr        #
+#    Updated: 2024/03/17 12:02:21 by nicolas          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-FROM alpine:3.19.0
+# Latest stable version of alpine linux at 17 mars 2024.
+FROM alpine:3.19.1
 
 ENV LANG=en_US.utf8
 ENV PG_RUN_DIR=/run/postgresql
