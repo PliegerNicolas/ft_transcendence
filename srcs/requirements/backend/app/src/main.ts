@@ -17,7 +17,7 @@ async function bootstrap() {
 		}),
 	);
 
-	//app.setGlobalPrefix('api');
+	app.setGlobalPrefix('api');
 	await app.listen((process.env.BACKEND_PORT ?? '3000'));
 }
 bootstrap();
