@@ -278,6 +278,10 @@ Example general purpose body:
 
 To run this project, you will need to add the following environment variables to your .env file in the ./srcs folder.
 
+__NGINX__
+
+`DOMAIN_NAME` = "localhost"
+
 __FRONTEND__
 
 `VITE_FTAPI_CLIENTID` = "<UID of 42School API>"

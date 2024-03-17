@@ -1,11 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { httpsOptions } from './ssl-config';
 import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule, { httpsOptions });
+	const app = await NestFactory.create(AppModule);
 
 	//Setting up middleware for cookies
 	app.use(cookieParser(process.env.API_SECRET));
