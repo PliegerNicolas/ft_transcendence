@@ -24,13 +24,10 @@ export class ChannelsGuard implements CanActivate {
 			where: {
 				channel: { id: Equal(params.channelId) },
 				user: { id: Equal(token.user_id) },
-				//active: true,
+				active: true,
 			},
 			relations: ['channel', 'user'],
 		});
-
-		console.log("ChannelsGuard");
-		console.log(member);
 
 		if (!member) return (false);
 	
@@ -55,13 +52,10 @@ export class ChannelsNotGuard implements CanActivate {
 			where : {
 				channel : { id: Equal(params.channelId) },
 				user : { id: Equal(token.user_id) },
-				//active: true,
+				active: true,
 			},
 			relations: ['channel', 'user'],
 		});
-
-		console.log("ChannelsNotGuard");
-		console.log(member);
 
 		if (!member) return (true);
 	
