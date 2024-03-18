@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useContext, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 
@@ -132,6 +132,7 @@ function ChatContent()
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
+	const navigate = useNavigate();
 
 	const params = useParams();
 	const id = params.id!;
@@ -156,6 +157,11 @@ function ChatContent()
 		mutationFn: () =>
 			api.patch("/channels/" + id + "/leave", {}),
 		onSettled: () => invalidate(["channels"]),
+		onSuccess: () => {
+			if (chan.membersCount <= 1)
+				navigate("/chat")
+			invalidate(["channels"])
+		},
 		onError: mutateError,
 	});
 

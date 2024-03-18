@@ -12,7 +12,7 @@ export const FriendshipContext = createContext({
 export const MyContext = createContext({
 	logged: false,
 	setLogged: (() => {}) as Function,
-	api: new Api(`https://${location.hostname}:3450`),
+	api: new Api(`https://${location.hostname}:4433/api`),
 	addNotif: (() => {}) as Function,
 	addInvite: (() => {}) as Function,
 	lastChan: "",

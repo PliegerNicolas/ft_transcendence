@@ -25,14 +25,14 @@ import Invites from "./components/Game/Invitations.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
 
 import Api from "./utils/Api";
-import { httpStatus, randomString } from "./utils/utils.ts";
-import { useGet } from "./utils/hooks.ts";
+import { randomString } from "./utils/utils.ts";
+import { useGet, useStopOnHttp } from "./utils/hooks.ts";
 import { PopupType } from "./utils/types.ts";
 
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
 
-export const socket = io(`https://${location.hostname}:3450/socket`);
+export const socket = io(`https://${location.hostname}:4433/api/socket`);
 import ConfirmPopup from "./components/ConfirmPopup.tsx";
 
 function Auth()
@@ -40,7 +40,7 @@ function Auth()
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
 
-	const api = new Api(`https://${location.hostname}:3450`);
+	const api = new Api(`https://${location.hostname}:4433/api`);
 
 	const { setLogged } = useContext(MyContext);
 
@@ -69,8 +69,9 @@ function Auth()
 			}
 		},
 
-		onError: () => {
+		onError: (err: Error) => {
 			setStatus("error");
+			console.log(err.message);
 			setLogged(false);
 		},
 	});
@@ -158,10 +159,11 @@ function NotFound()
 
 function App()
 {
+	const stopOnHttp = useStopOnHttp();
 	const checkLog = useQuery({
 		queryKey: ["me"],
-		queryFn: () => new Api(`https://${location.hostname}:3450`).get("/me"),
-		retry: (count: number, error: Error) => httpStatus(error) !== 401 && count < 3,
+		queryFn: () => new Api(`https://${location.hostname}:4433/api`).get("/me"),
+		retry: stopOnHttp,
 		staleTime: 5000
 	});
 
@@ -230,7 +232,7 @@ function App()
 			setLogged,
 			addNotif,
 			addInvite,
-			api: new Api(`https://${location.hostname}:3450`),
+			api: new Api(`https://${location.hostname}:4433/api`),
 			lastChan,
 			setLastChan,
 			setGlobalPopup,
