@@ -1,12 +1,11 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Channel } from "../../entities/Channel.entity";
-import { Equal, Not, Repository } from "typeorm";
+import { Equal, Repository } from "typeorm";
 import { User } from "../../../../users/entities/User.entity";
 import { UsersService } from "src/modules/users/services/users/users.service";
 import { ChannelAccessParams, ChannelWithSpecs, CreateChannelParams, GetChannelParams, GetChannelsQueryParam, JoinChannelParams, LeaveChannelParams, ReplaceChannelParams, UpdateChannelParams } from "../../types/channel.type";
 import { ChannelVisibility } from "../../enums/channel-visibility.enum";
-import { ChannelMode } from "../../enums/channel-mode.enum";
 import { ChannelRole } from "../../enums/channel-role.enum";
 import { ChannelAccessAction } from "../../enums/channel-access-action.enum";
 import { PasswordHashingService } from "../../../../password-hashing/services/password-hashing/password-hashing.service";
@@ -41,8 +40,8 @@ export class ChannelsService {
             where: { username: Equal(username) },
         });
 
-        return (channels?.map((channel) => {
-            const member = user ? this.channelMemberService.getMember(channel, user.id) : null;
+        return (channels.map((channel) => {
+            const member = user ? this.channelMemberService.getActiveMember(channel, user.id) : null;
             return (this.channelToChannelWithSpecs(channel, member));
         }));
     }
@@ -56,8 +55,8 @@ export class ChannelsService {
             where: { username: Equal(username) },
         });
 
-        return (channels?.map((channel) => {
-            const member = user ? this.channelMemberService.getMember(channel, user.id) : null;
+        return (channels.map((channel) => {
+            const member = user ? this.channelMemberService.getActiveMember(channel, user.id) : null;
             return (this.channelToChannelWithSpecs(channel, member));
         }));
     }
@@ -76,7 +75,7 @@ export class ChannelsService {
         
         await this.channelMemberService.canViewChannel(channel, user, channelDetails.password);
 
-        return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getMember(channel, user.id)));
+        return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getActiveMember(channel, user.id)));
     }
 
     async createChannel(username: string = undefined, channelDetails: CreateChannelParams): Promise <ChannelWithSpecs> {
@@ -90,7 +89,7 @@ export class ChannelsService {
 
         const channel = this.channelRepository.create({
             ...channelDetails,
-            members: [{ user, role: ChannelRole.OWNER }],
+            members: [{ user: user, role: ChannelRole.OWNER, active: true, invited: false, muted: false, banned: false }],
         });
 
         await this.channelRepository.save(channel);
@@ -165,8 +164,8 @@ export class ChannelsService {
 
     /* Non standard actions */
 
-    async joinChannel(channelId: bigint, username: string = undefined, channelDetails: JoinChannelParams): Promise<Channel> {
-        const channel = await this.channelRepository.findOne({
+    async joinChannel(channelId: bigint, username: string = undefined, channelDetails: JoinChannelParams): Promise<ChannelWithSpecs> {
+        let channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
             relations: ['members.user', 'messages.channelMember.user'],
         });
@@ -188,14 +187,16 @@ export class ChannelsService {
             member.role = ChannelRole.MEMBER;
             member.active = true;
         }
-    
+
         channel.setupChannel();
 
-        return (await this.channelRepository.save(channel));
+        channel = await this.channelRepository.save(channel);
+
+        return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getActiveMember(channel, user.id)));
     }
 
-    async leaveChannel(channelId: bigint, username: string = undefined, channelDetails: LeaveChannelParams): Promise<Channel> {
-        const channel = await this.channelRepository.findOne({
+    async leaveChannel(channelId: bigint, username: string = undefined, channelDetails: LeaveChannelParams): Promise<ChannelWithSpecs | string> {
+        let channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
             relations: ['members.user', 'messages.channelMember.user'],
         });
@@ -214,11 +215,17 @@ export class ChannelsService {
 
         channel.setupChannel();
 
-        return (await this.channelRepository.save(channel));
+        channel = await this.channelRepository.save(channel);
+
+        if (channel.membersCount <= 0) {
+            await this.channelRepository.remove(channel);
+            return (`Channel with ID ${channelId} successfully deleted`);
+        }
+        return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getActiveMember(channel, user.id)));
     }
 
-    async manageChannelAccess(channelId: bigint, username: string = undefined, channelAccessDetails: ChannelAccessParams) {
-        const channel = await this.channelRepository.findOne({
+    async manageChannelAccess(channelId: bigint, username: string = undefined, channelAccessDetails: ChannelAccessParams): Promise<ChannelWithSpecs> {
+        let channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId) },
             relations: ['members.user', 'messages.channelMember.user'],
         });
@@ -269,7 +276,12 @@ export class ChannelsService {
                 throw new BadRequestException(`Action not recognized`);
         }
 
-        return (await this.channelRepository.save(channel));
+        channel = await this.channelRepository.save(channel);
+
+        console.log("===  Manage Access ===");
+        console.log(channel);
+
+        return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getActiveMember(channel, user.id)));
     }
 
     /* Helper functions */

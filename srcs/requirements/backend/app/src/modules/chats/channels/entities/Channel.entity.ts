@@ -75,7 +75,7 @@ export class Channel {
     }
 
     private updateMembersCount(): void {
-        this.membersCount = this.activeMembers ? this.activeMembers.length : 0;
+        this.membersCount = this.members ? this.members.filter((member) => member.active).length : 0;
     }
 
     private ensureOwnerExists(): void {

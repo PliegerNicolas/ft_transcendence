@@ -33,7 +33,9 @@ export class ChannelMembersService {
                     channel,
                     user,
                     active: false,
+                    banned: false,
                     invited: true,
+                    muted: false,
                 });
                 channel.members.push(newMember);
                 channel.invitedMembers.push(newMember);
@@ -69,13 +71,17 @@ export class ChannelMembersService {
                     user,
                     active: false,
                     banned: true,
+                    invited: false,
+                    muted: false,
                 });
                 channel.members.push(newMember);
                 channel.bannedMembers.push(newMember);
-            } else member.banned = true;
+            } else {
+                member.banned = true;
+                member.active = false;
+                member.invited = false;
+            }
         }
-
-        this.uninvite(channel, users);
     }
 
     deban(channel: Channel, users: User[]): void {
@@ -105,6 +111,8 @@ export class ChannelMembersService {
                     channel,
                     user,
                     active: false,
+                    banned: false,
+                    invited: false,
                     muted: true,
                 });
                 channel.members.push(newMember);
@@ -132,12 +140,19 @@ export class ChannelMembersService {
         if (!channel.members) channel.members = [];
         if (!channel.invitedMembers)
 
+        console.log("=== kick users ===");
+        console.log(users);
+
         for (const user of users) {
             const member = this.getMember(channel, user.id);
-            if (member) member.active = false;
+            if (member) {
+                member.active = false;
+                member.invited = false;
+            }
         }
 
-        this.uninvite(channel, users);
+        console.log("=== kick ===");
+        console.log(channel);
     }
 
     /* Rank */
@@ -271,9 +286,8 @@ export class ChannelMembersService {
     /* Helper Functions */
 
     public getMember(channel: Channel, userId: bigint): ChannelMember {
-        if (!channel) return (null);
-        const members = [...channel?.activeMembers, ...channel?.inactiveMembers];
-        return (members.find((member) => member.user.id === userId));
+        if (!channel || !channel.members) return (null);
+        return (channel.members?.find((member) => member.user.id === userId));
     }
 
     public getActiveMember(channel: Channel, userId: bigint): ChannelMember {
