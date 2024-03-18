@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Message } from "../entities/Message.entity";
 import { Equal, Repository } from "typeorm";
-import { Channel } from "../../channels/entities/Channel.entity";
-import { User } from "../../../users/entities/User.entity";
-import { CreateMessageParams, ReplaceMessageParams, UpdateMessageParams } from "../types/message.type";
+import { Message } from "../../entities/Message.entity";
+import { Channel } from "src/modules/chats/channels/entities/Channel.entity";
+import { User } from "src/modules/users/entities/User.entity";
+import { ChannelMembersService } from "src/modules/chats/channels/services/channel-members/channel-members.service";
+import { MessagesRightsService } from "../messages-rights/messages-rights.service";
+import { CreateMessageParams, ReplaceMessageParams, UpdateMessageParams } from "../../types/message.type";
 
 @Injectable()
 export class MessagesService {
@@ -16,13 +18,15 @@ export class MessagesService {
         private readonly channelRepository: Repository<Channel>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+
+        private readonly channelMemberService: ChannelMembersService,
+        private readonly messageRightsService: MessagesRightsService,
     ) {}
 
     async getChannelMessages(channelId: bigint, username: string = undefined): Promise<Message[]> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId)},
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
-            // exclude profile here
+            relations: ['members.user', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -31,7 +35,7 @@ export class MessagesService {
             where: { username: Equal(username) },
         });
 
-        channel.validateAccess(user);
+        await this.channelMemberService.canViewChannel(channel, user);
 
         return (channel.messages);
     }
@@ -39,8 +43,7 @@ export class MessagesService {
     async getChannelMessage(channelId: bigint, username: string = undefined, messageId: bigint): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId)},
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
-            // exclude profile here
+            relations: ['members.user', 'messages.channelMember.user'],
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -49,7 +52,7 @@ export class MessagesService {
             where: { username: Equal(username) },
         });
 
-        channel.validateAccess(user);
+        await this.channelMemberService.canViewChannel(channel, user);
 
         const message = channel.messages.find((message) => BigInt(message.id) === messageId);
 
@@ -61,7 +64,7 @@ export class MessagesService {
     async createChannelMessage(channelId: bigint, username: string = undefined, messageDetails: CreateMessageParams): Promise<Message> {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId)},
-            relations: ['members.user', 'invitedUsers', 'bannedUsers', 'mutedUsers', 'messages.channelMember.user'],
+            relations: ['members.user', 'messages.channelMember.user'],
         })
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
@@ -70,9 +73,9 @@ export class MessagesService {
             where: { username: Equal(username) },
         });
 
-        channel.validateWrite(user);
+        await this.channelMemberService.canWriteInChannel(channel, user);
 
-        const member = channel.getMember(user.username);
+        const member = this.channelMemberService.getActiveMember(channel, user.id);
 
         const message = this.messageRepository.create({
             id: this.generateNextMessageId(channel),
@@ -99,7 +102,7 @@ export class MessagesService {
             where: { username: Equal(username) },
         });
 
-        message.validateReplaceOrUpdate(user);
+        await this.messageRightsService.canEdit(message, user);
 
         this.messageRepository.merge(message, {
             ...messageDetails,
@@ -123,7 +126,7 @@ export class MessagesService {
             where: { username: Equal(username) },
         });
 
-        message.validateReplaceOrUpdate(user);
+        await this.messageRightsService.canEdit(message, user);
 
         this.messageRepository.merge(message, {
             ...messageDetails,
@@ -147,7 +150,7 @@ export class MessagesService {
             where: { username: Equal(username) },
         });
 
-        message.validateDelete(user);
+        await this.messageRightsService.canDelete(message, user);
 
         await this.messageRepository.remove(message);
         return (`Message with ID ${messageId} of Channel with ID ${channelId} successfully deleted`);
