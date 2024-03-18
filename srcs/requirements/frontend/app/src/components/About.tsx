@@ -1,11 +1,8 @@
-import Construction from "./Construction";
-
 function About()
 {
 	return (
 		<main className="MainContent">
-			<h2>About</h2>
-			<Construction />
+			<iframe src="../assets/en.subject.pdf" width="100%" height="500px" />
 		</main>
 	);
 }
