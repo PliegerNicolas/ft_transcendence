@@ -13,6 +13,7 @@ import UserInfos from "./UserInfos.tsx";
 import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
 
 import "../../styles/user.css";
+import Stats from "./Stats.tsx";
 
 // <Me /> ====================================================================
 
@@ -75,12 +76,14 @@ export default function Me()
 			<section>
 				<UserInfos user={me} me={true} />
 				<hr />
-				<h3>Relationships:</h3>
+				<h3>Relationships :</h3>
 				<Friendships
 					id={me.username}
 					query={getRelations}
 					action={friendshipAction}
 				/>
+				<h3>Statistics :</h3>
+				<Stats username={me.username}/>
 			</section>
 			<button
 				style={{margin: "0 15px"}}

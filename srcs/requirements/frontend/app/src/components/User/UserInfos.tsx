@@ -1,16 +1,19 @@
 import { MyContext } from "../../utils/contexts";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 
 import { UserType } from "../../utils/types";
-import { useGet, useInvalidate } from "../../utils/hooks";
+import { useGet, useInvalidate, useMutateError } from "../../utils/hooks";
 
 import defaultPicture from "../../assets/default_profile.png";
 import camera from "../../assets/camera.svg";
+import { useMutation } from "@tanstack/react-query";
+import ConfirmPopup from "../ConfirmPopup";
 
 export default function UserInfos({user, me}: {user: UserType, me: boolean})
 {
-	const { addNotif } = useContext(MyContext);
+	const { addNotif, api } = useContext(MyContext);
 	const invalidate = useInvalidate();
+	const mutateError = useMutateError();
 
 	const getPic = useGet(["users", user.username, "picture"]);
 
@@ -53,6 +56,16 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 		catch (err) {}
 	}
 
+	const patchUser = useMutation({
+		mutationFn: ({username}: {username: string}) =>
+			api.patch("/me", {username}),
+		onSettled: () => invalidate(["me"]),
+		onError: mutateError,
+	});
+
+	const [nameEditPopup, setNameEditPopup] = useState(false);
+	const [newUsername, setNewUsername] = useState("");
+
 	return (
 		<>
 			<h2>
@@ -77,7 +90,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 				</div>
 				<div className="genericList User__InfoItems">
 					<div><div>Id</div> <div>{"#" + user.id}</div></div>
-					<div><div>Username</div> <div>{"@" + user.username}</div></div>
+					<div><div>Username</div> <div>{"@" + user.username} <button onClick={() => setNameEditPopup(true)}>edit</button></div></div>
 					<div><div>First Name</div> <div>{user.profile.firstName}</div></div>
 					<div><div>Last Name</div> <div>{user.profile.lastName}</div></div>
 				</div>
@@ -87,6 +100,24 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 				style={{display: "none"}}
 				onChange={e => postPic(e.currentTarget.files![0])}
 			/>
+			{
+				nameEditPopup &&
+				<ConfirmPopup
+					title="Edit Username"
+					text={<>
+						<div style={{textAlign: "center"}}>
+							<input type="text" placeholder="new username" value={newUsername}
+								onChange={(ev) => setNewUsername(ev.currentTarget.value)}
+							/>
+						</div>
+					</>}
+					cancelFt={() => {
+						setNameEditPopup(false);
+					}}
+					action="Confirm"
+					actionFt={() => {patchUser.mutate({username: newUsername}); setNameEditPopup(false)}}
+				/>
+			}
 		</>
 	);
 }

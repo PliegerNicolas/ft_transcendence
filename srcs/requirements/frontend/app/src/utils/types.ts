@@ -95,6 +95,16 @@ export interface InviteType {
 	from: string
 }
 
+export interface User {
+	id: number,
+	username: string,
+	accountname: string,
+	createdAt: Date,
+	updatedAt: Date,
+	isTwoFactorAuthEnabled: boolean,
+	relationships: []
+}
+
 export enum GameResult {
     VICTORY = 'victory',
     DEFEAT = 'defeat',
@@ -112,6 +122,18 @@ export interface GamelogPostType {
         { username: string, result: GameResult }
 	],
     gameType: GameType
+}
+
+export interface GamelogsType {
+	id: bigint,
+    gameType: GameType,
+    gamelogToUsers: Array<GamelogToUsersType>
+}
+
+export interface GamelogToUsersType {
+	id: bigint,
+    result: GameResult;
+    user: User;
 }
 
 export interface PopupType {

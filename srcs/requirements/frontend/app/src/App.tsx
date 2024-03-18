@@ -15,7 +15,6 @@ import Navbar from "./components/Navbar.tsx";
 import Home from "./components/Home.tsx";
 import Play from "./components/Game/Play.tsx";
 import PrivatePlay from "./components/Game/PrivatePlay.tsx";
-import Stats from "./components/Stats.tsx";
 import Chat from "./components/Chat/Chat.tsx";
 import Settings from "./components/Settings.tsx";
 import About from "./components/About.tsx";
@@ -247,9 +246,6 @@ function App()
 					} />
 					<Route path="/play/private" element={
 						<RequireAuth elem={<PrivatePlay />} />
-					} />
-					<Route path="/stats" element={
-						<RequireAuth elem={<Stats />} />
 					} />
 					<Route path="/about" element={<About />} />
 					<Route path="/auth" element={<Auth />} />
