@@ -3,6 +3,8 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-username.pipe';
 import { Response } from 'express';
+import { RoleGlobalGuard } from 'src/guards/role.guard';
+import { GlobalRole } from 'src/guards/role.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -30,6 +32,8 @@ export class AuthController {
 		return this.authService.blacklist("add", req.cookies['access_token'])
 	}
 
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwtTwoFactor'), RoleGlobalGuard)
 	@Post('log_as/:username')
 	async logAs(@Param('username', ParseUsernamePipe) username: string,
 				@Res({passthrough : true}) res : Response){
