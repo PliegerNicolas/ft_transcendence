@@ -41,10 +41,12 @@ export interface MyInfoType {
 
 export interface MemberType {
 	id: string,
-	mute: boolean,
 	role: "owner" | "operator" | "member",
 	user: UserType,
-	hasLeft: boolean,
+	banned: boolean,
+	invited: boolean,
+	muted: boolean,
+	active: boolean,
 }
 
 export interface MsgType {
@@ -63,10 +65,11 @@ export interface ChanType {
 	passwordRepeat: string | undefined,
 	visibility: string,
 	membersCount: number,
-	members: Array<MemberType>,
-	bannedUsers: Array<UserType>,
-	invitedUsers: Array<UserType>,
-	mutedUsers: Array<UserType>,
+	activeMembers: Array<MemberType>,
+	inactiveMembers: Array<MemberType>,
+	bannedMembers: Array<MemberType>,
+	invitedMembers: Array<MemberType>,
+	mutedMembers: Array<MemberType>,
 }
 
 export interface ChanSpecsType {
@@ -95,6 +98,16 @@ export interface InviteType {
 	from: string
 }
 
+export interface User {
+	id: number,
+	username: string,
+	accountname: string,
+	createdAt: Date,
+	updatedAt: Date,
+	isTwoFactorAuthEnabled: boolean,
+	relationships: []
+}
+
 export enum GameResult {
     VICTORY = 'victory',
     DEFEAT = 'defeat',
@@ -112,6 +125,18 @@ export interface GamelogPostType {
         { username: string, result: GameResult }
 	],
     gameType: GameType
+}
+
+export interface GamelogsType {
+	id: bigint,
+    gameType: GameType,
+    gamelogToUsers: Array<GamelogToUsersType>
+}
+
+export interface GamelogToUsersType {
+	id: bigint,
+    result: GameResult;
+    user: User;
 }
 
 export interface PopupType {

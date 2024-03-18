@@ -38,7 +38,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
 
 	async validate(req: Request, payload : any) : Promise<any>{
 
-		if (await this.authService.blacklist("check", req.cookies['access_token']) === false) throw new UnauthorizedException();
+		if (await this.authService.blacklist("check", req.cookies['refresh_token']) === false) throw new UnauthorizedException();
 
 		const user = await this.checkUser(payload.account_name);
 		if (!user) throw new UnauthorizedException();

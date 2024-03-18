@@ -9,7 +9,7 @@ export class JwtTwoFactorStrategy extends PassportStrategy(Strategy, 'jwtTwoFact
 	constructor(private authService : AuthService) {
 		var cookieExtractor = function(req) {
 			var token = null;
-			console.log(req.cookies)
+			// console.log(req.cookies)
 			if (req && req.cookies) {
 				token = req.cookies['access_token'];
 			}
