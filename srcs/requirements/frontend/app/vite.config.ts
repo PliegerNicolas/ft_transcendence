@@ -3,13 +3,13 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 3030,
-  },
-  preview: {
-    port: 8080,
-  },
-  envDir: "../../..",
-  clearScreen: false,
+	plugins: [react()],
+	server: {
+    	port: 3030,
+	},
+	preview: {
+		port: parseInt(process.env.PORT || '3000'),
+	},
+	envDir: "../../..",
+	clearScreen: false,
 })

@@ -5,36 +5,39 @@
 #                                                     +:+ +:+         +:+      #
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/01/08 19:52:38 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/18 13:31:39 by nplieger         ###   ########.fr        #
+#    Created: 2024/03/17 11:51:15 by nicolas           #+#    #+#              #
+#    Updated: 2024/03/18 13:46:49 by nplieger         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-# Latest stable version of alpine linux at 17 mars 2024.
+# Latest stable version of alpine linux at 8 january 2024.
 FROM alpine:3.19.1
 
-ENV PORT=8080
+ENV FRONTEND_PORT=8080
+ENV BACKEND_PORT=3450
+ENV PORT=443
 
 # Install NODE.JS and NPM.
 RUN apk update && \
 	apk add --no-cache \
-		nodejs \
-		npm && \
+		nginx \
 	rm -f /var/cache/apk/*
 
-# Map /app as working directory in container.
-WORKDIR /app
+# Create folder for nginx to store it's PID file
+RUN mkdir -p /run/nginx && mkdir -p /etc/scripts
 
-# Copy local package files to container and install those dependencies.
-COPY ./app/package*.json ./
-RUN npm install
+# Copy local ssl_certificates
+COPY ./config/ssl_certificates /etc/nginx/ssl_certificates/
 
-# Copy the other local app files and build the application.
-COPY ./app/ .
-RUN npm run build
+# Transfer configuration file
+COPY ./tools/generate_nginx_conf.sh /etc/scripts/generate_nginx_conf.sh
+COPY ./config/nginx.conf.template /etc/scripts/
+
+# Generate nginx.conf with environment variables
+ENTRYPOINT ["sh", "/etc/scripts/generate_nginx_conf.sh"]
 
 # Expose port from .env
 EXPOSE $PORT
 
 # Run NPM.
-CMD ["npm", "run", "preview", "--", "--host"]
+CMD ["nginx", "-g", "daemon off;"]

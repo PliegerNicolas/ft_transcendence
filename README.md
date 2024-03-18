@@ -278,28 +278,23 @@ Example general purpose body:
 
 To run this project, you will need to add the following environment variables to your .env file in the ./srcs folder.
 
-__FRONTEND__
+```
+#NGINX
+DOMAIN_NAME="localhost"
 
-`VITE_FTAPI_CLIENTID` = "<UID of 42School API>"
+#FRONTEND
 
-`FRONTEND_PORT` = 8080
+#BACKEND
 
-__BACKEND__
+#DATABASE
 
-`API_CLIENT_ID` = "<UID of 42School API>"
+DB_USER="VJpQU75G2yMAJ2DxFrjugmCdEksXBwhj"
+DB_PASSWORD="mOgjYgmZgvHQQMU0rZsdPOobfqHEGjbW"
+DB_NAME="pong42"
 
-`API_SECRET` = "<SECRET KEY of 42School API>"
+#42API
 
-`BACKEND_PORT` = 3450
+API42_CLIENT_ID="u-s4t2ud-47522b77c55ebcbee01a8c50c84be3f6be3bc06c1795d9a1881c55a7ab8f032b"
+API42_SECRET="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"
 
-__DATABASE__
-
-`POSTGRES_USER` = "name"
-
-`POSTGRES_PASSWORD` = "Password"
-
-`POSTGRES_DB` = "pong42"
-
-`PGDATA` = "/var/lib/postgresql/data"
-
-`DB_PORT` = 5432
+```

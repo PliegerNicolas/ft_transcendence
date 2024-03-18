@@ -6,13 +6,15 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 20:08:41 by nicolas           #+#    #+#              #
-#    Updated: 2024/02/25 15:42:16 by nicolas          ###   ########.fr        #
+#    Updated: 2024/03/18 13:04:38 by nplieger         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
-# Latest stable version of alpine linux at 8 january 2024.
-FROM alpine:3.19.0
 
-ARG PORT
+# Latest stable version of alpine linux at 17 mars 2024.
+FROM alpine:3.19.1
+
+ENV PORT=3450
+ENV DB_PORT=3400
 
 # Install NODE.JS and NPM.
 RUN apk update && \
@@ -34,9 +36,9 @@ RUN npm install
 COPY ./app/ .
 RUN npm run build
 
-# Expose port 3450.
+# Expose port from .env file
 EXPOSE $PORT
 
 # Run NPM.
-CMD ["npm", "run", "start:dev", "--",  "--preserveWatchOutput"]
+CMD ["npm", "run", "start:dev"]
 # START:DEV IS TEMPORARY FOR DEVELOPMENT PURPOSE

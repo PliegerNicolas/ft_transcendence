@@ -43,7 +43,7 @@ export class AuthService
 	async createRefreshToken(payload : any, isTwoFactorAuthLogged : boolean = false){
 		payload.isTwoFactorAuthLogged = isTwoFactorAuthLogged;
 		return (await this.jwtService.signAsync(payload,{
-			secret : process.env.API_SECRET,
+			secret : process.env.API42_SECRET,
 			expiresIn : '1d'
 		}))
 	}
@@ -58,8 +58,8 @@ export class AuthService
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					"grant_type": "authorization_code",
-					"client_id": process.env.API_CLIENT_ID,
-					"client_secret": process.env.API_SECRET,
+					"client_id": process.env.API42_CLIENT_ID,
+					"client_secret": process.env.API42_SECRET,
 					"code": code,
 					"redirect_uri": redirect_uri,
 				}),
