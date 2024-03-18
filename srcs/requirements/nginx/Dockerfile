@@ -6,12 +6,16 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/03/17 11:51:15 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/17 11:51:17 by nicolas          ###   ########.fr        #
+#    Updated: 2024/03/18 13:46:49 by nplieger         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # Latest stable version of alpine linux at 8 january 2024.
 FROM alpine:3.19.1
+
+ENV FRONTEND_PORT=8080
+ENV BACKEND_PORT=3450
+ENV PORT=443
 
 # Install NODE.JS and NPM.
 RUN apk update && \
@@ -33,8 +37,7 @@ COPY ./config/nginx.conf.template /etc/scripts/
 ENTRYPOINT ["sh", "/etc/scripts/generate_nginx_conf.sh"]
 
 # Expose port from .env
-EXPOSE 443
+EXPOSE $PORT
 
 # Run NPM.
-#CMD ["sleep", "infinity"]
 CMD ["nginx", "-g", "daemon off;"]

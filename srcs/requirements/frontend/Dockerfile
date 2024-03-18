@@ -6,14 +6,14 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:52:38 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/17 11:53:02 by nicolas          ###   ########.fr        #
+#    Updated: 2024/03/18 13:31:39 by nplieger         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # Latest stable version of alpine linux at 17 mars 2024.
 FROM alpine:3.19.1
 
-ARG PORT
+ENV PORT=8080
 
 # Install NODE.JS and NPM.
 RUN apk update && \
@@ -33,7 +33,7 @@ RUN npm install
 COPY ./app/ .
 RUN npm run build
 
-# Expose port.
+# Expose port from .env
 EXPOSE $PORT
 
 # Run NPM.

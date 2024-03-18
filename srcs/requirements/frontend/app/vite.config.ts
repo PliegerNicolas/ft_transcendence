@@ -8,7 +8,7 @@ export default defineConfig({
     	port: 3030,
 	},
 	preview: {
-		port: parseInt(process.env.FRONTEND_PORT || '3000'),
+		port: parseInt(process.env.PORT || '3000'),
 	},
 	envDir: "../../..",
 	clearScreen: false,
