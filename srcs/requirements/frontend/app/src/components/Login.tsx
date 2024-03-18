@@ -8,10 +8,13 @@ export default function Login()
 {
 	const { logged } = useContext(MyContext);
 	const redirectLinkParams = new URLSearchParams({
-		client_id: import.meta.env.API42_CLIENT_ID,
+		client_id: import.meta.env.VITE_FTAPI_CLIENTID,
 		redirect_uri: `http://${location.host}/auth`,
 		response_type: "code"
 	});
+
+	console.log(`http://${location.host}/auth`);
+
 	const redirectLink
 		= "https://api.intra.42.fr/oauth/authorize?"
 		+ redirectLinkParams.toString();

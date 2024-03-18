@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:52:38 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/18 13:31:39 by nplieger         ###   ########.fr        #
+#    Updated: 2024/03/18 15:02:02 by nplieger         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,4 +37,5 @@ RUN npm run build
 EXPOSE $PORT
 
 # Run NPM.
-CMD ["npm", "run", "preview", "--", "--host"]
+CMD ["sh", "-c", "npm run build && npm run preview -- --host"]
+#CMD ["npm", "run", "preview", "--", "--host"]

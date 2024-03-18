@@ -32,7 +32,7 @@ import { PopupType } from "./utils/types.ts";
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
 
-export const socket = io(`http://${location.hostname}:3450/socket`);
+export const socket = io(`https://${location.hostname}:3450/socket`);
 import ConfirmPopup from "./components/ConfirmPopup.tsx";
 
 function Auth()
@@ -40,7 +40,7 @@ function Auth()
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
 
-	const api = new Api(`http://${location.hostname}:3450`);
+	const api = new Api(`https://${location.hostname}:3450`);
 
 	const { setLogged } = useContext(MyContext);
 
@@ -55,7 +55,7 @@ function Auth()
 
 	const postAuth = useMutation({
 		mutationFn: ((code: string) =>
-			api.post("/auth", {code, redirect_uri: `http://${location.host}/auth`})) as
+			api.post("/auth", {code, redirect_uri: `https://${location.host}/auth`})) as
 			MutationFunction<{isTwoFactorAuthEnabled: boolean}>,
 
 		onSuccess: (data: {isTwoFactorAuthEnabled: boolean}) => {
@@ -160,7 +160,7 @@ function App()
 {
 	const checkLog = useQuery({
 		queryKey: ["me"],
-		queryFn: () => new Api(`http://${location.hostname}:3450`).get("/me"),
+		queryFn: () => new Api(`https://${location.hostname}:3450`).get("/me"),
 		retry: (count: number, error: Error) => httpStatus(error) !== 401 && count < 3,
 		staleTime: 5000
 	});
@@ -230,7 +230,7 @@ function App()
 			setLogged,
 			addNotif,
 			addInvite,
-			api: new Api(`http://${location.hostname}:3450`),
+			api: new Api(`https://${location.hostname}:3450`),
 			lastChan,
 			setLastChan,
 			setGlobalPopup,
