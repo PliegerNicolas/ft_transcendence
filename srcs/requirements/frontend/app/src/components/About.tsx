@@ -1,8 +1,9 @@
+
 function About()
 {
 	return (
 		<main className="MainContent">
-			<iframe src="../assets/en.subject.pdf" width="100%" height="500px" />
+			<p>ft_transcendance 42 project done by julboyer, mlaneyri, nplieger and anbourge</p>
 		</main>
 	);
 }
