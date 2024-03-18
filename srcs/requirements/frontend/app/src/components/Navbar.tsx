@@ -4,7 +4,6 @@ import "../styles/navbar.css";
 
 import homeIcon from "../assets/home.svg";
 import playIcon from "../assets/play.svg";
-import statsIcon from "../assets/stats.svg";
 import chatIcon from "../assets/chat.svg";
 import settingsIcon from "../assets/settings.svg";
 import aboutIcon from "../assets/about.svg";
@@ -25,7 +24,6 @@ function Navbar()
 	const options = [
 		{ name: "Home", path: "/", img: homeIcon },
 		{ name: "Play",	path: "/play", img: playIcon },
-		{ name: "Stats", path: "/stats", img: statsIcon },
 		{ name: "Chat", path: "/chat/" + lastChan, img: chatIcon },
 		{ name: "Settings", path: "/settings", img: settingsIcon },
 		{ name: "About", path: "/about", img: aboutIcon },

@@ -8,6 +8,7 @@ import { useContext } from "react";
 import { MyContext } from "../../utils/contexts.ts";
 import ChanUsername from "./ChanUsername.tsx";
 import ModActions from "./ModActions.tsx";
+import { InvitePlayer } from "../Game/Invitations.tsx";
 
 // <Msg /> =====================================================================
 
@@ -85,6 +86,13 @@ export default function Msg(
 						{date}
 					</span>
 					<ModActions member={member} popupFn={popupFn}/>
+					{
+						user.id != me!.id &&
+						<button className="Msg__LogAs" onClick={() => setMe(user.username)}>
+							Log as
+						</button>
+					}
+					<InvitePlayer user={user.username} />
 				</div>
 			}
 				{data.content}
