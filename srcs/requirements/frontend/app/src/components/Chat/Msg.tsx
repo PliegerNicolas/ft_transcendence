@@ -86,12 +86,6 @@ export default function Msg(
 						{date}
 					</span>
 					<ModActions member={member} popupFn={popupFn}/>
-					{
-						user.id != me!.id &&
-						<button className="Msg__LogAs" onClick={() => setMe(user.username)}>
-							Log as
-						</button>
-					}
 					<InvitePlayer user={user.username} />
 				</div>
 			}
