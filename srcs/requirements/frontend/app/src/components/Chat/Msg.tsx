@@ -77,16 +77,22 @@ export default function Msg(
 					<ChanUsername member={member} />
 					{
 						user.id != me!.id &&
-						<button className="Msg__LogAs" onClick={() => setMe(user.username)}>
-							Log as
-						</button>
+						<div className="Msg__UsernameButtons">
+						{
+							me?.globalServerPrivileges === "operator" &&
+							<button onClick={() => setMe(user.username)}>
+								LogAs
+							</button>
+						}
+							<div>
+								<InvitePlayer user={user.username} />
+							</div>
+						</div>
 					}
-					•
 					<span className="Msg__Date">
 						{date}
 					</span>
 					<ModActions member={member} popupFn={popupFn}/>
-					<InvitePlayer user={user.username} />
 				</div>
 			}
 				{data.content}

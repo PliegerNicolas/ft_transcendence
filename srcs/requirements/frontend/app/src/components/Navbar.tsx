@@ -20,7 +20,8 @@ function firstPathSegment(fullPath: string)
 
 function Navbar()
 {
-	const { lastChan } = useContext(MyContext);
+	const { me, lastChan } = useContext(MyContext);
+
 	const options = [
 		{ name: "Home", path: "/", img: homeIcon },
 		{ name: "Play",	path: "/play", img: playIcon },
@@ -32,7 +33,9 @@ function Navbar()
 	const loc = useLocation();
 	const path = firstPathSegment(loc.pathname);
 
-	const navHtml = options.map((elem, index) =>
+	const navHtml = options
+		.filter(elem => elem.path !== "/sandbox" || me?.globalServerPrivileges === "operator")
+		.map((elem, index) =>
 		<Link to={elem.path} key={index} className={
 			`Navbar__Link Navbar__Button${
 				firstPathSegment(elem.path) === path ? "--Curr" : ""

@@ -380,36 +380,24 @@ function RoleUserLists()
 			<ChannelMemberList
 				title="Invited users"
 				list={chan.invitedMembers}
-				add={(value: MemberType) =>
-					action.mutate({action: "invite", usernames: [value.user.username]})
-				}
-				rm={(value: MemberType) =>
-					action.mutate({action: "uninvite", usernames: [value.user.username]})
-				}
+				add={(name: string) => action.mutate({action: "invite", usernames: [name]})}
+				rm={(name: string) => action.mutate({action: "uninvite", usernames: [name]})}
 			/>
 		</section>
 		<section className="muted">
 			<ChannelMemberList
 				title="Muted users"
 				list={chan.mutedMembers}
-				add={(value: MemberType) =>
-					action.mutate({action: "mute", usernames: [value.user.username]})
-				}
-				rm={(value: MemberType) =>
-					action.mutate({action: "unmute", usernames: [value.user.username]})
-				}
+				add={(name: string) => action.mutate({action: "mute", usernames: [name]})}
+				rm={(name: string) => action.mutate({action: "unmute", usernames: [name]})}
 			/>
 		</section>
 		<section className="banned">
 			<ChannelMemberList
 				title="Banned users"
 				list={chan.bannedMembers}
-				add={(value: MemberType) => {
-					action.mutate({action: "ban", usernames: [value.user.username]});
-				}}
-				rm={(value: MemberType) => {
-					action.mutate({action: "deban", usernames: [value.user.username]});
-				}}
+				add={(name: string) => action.mutate({action: "ban", usernames: [name]})}
+				rm={(name: string) => action.mutate({action: "deban", usernames: [name]})}
 			/>
 		</section>
 		{
@@ -417,15 +405,9 @@ function RoleUserLists()
 		<section className="admins">
 			<ChannelMemberList
 				title="Admins"
-				list={
-					chan.activeMembers.filter((member) => member.role === "operator")
-				}
-				add={(value: MemberType) =>
-					action.mutate({action: "promote", usernames: [value.user.username]})
-				}
-				rm={(value: MemberType) =>
-					action.mutate({action: "demote", usernames: [value.user.username]})
-				}
+				list={chan.activeMembers.filter((member) => member.role === "operator")}
+				add={(name: string) => action.mutate({action: "promote", usernames: [name]})}
+				rm={(name: string) => action.mutate({action: "demote", usernames:[name]})}
 			/>
 		</section>
 		}
@@ -454,30 +436,12 @@ function ChannelMemberList(
 
 	const anchorRef = useRef<HTMLDivElement>(null);
 
-	const { api, addNotif } = useContext(MyContext);
 
 	async function addUser() {
 		setNewUser("");
-		try {
-			const query = await api.get("/users/" + newUser);
-
-			if (list.some(elem => elem.id === query.id))
-				addNotif({content: "This user is already in the list: " + newUser});
-			else
-				add({username: newUser, id: query.id});
-			setTimeout(() =>
-				anchorRef.current?.scrollIntoView({block: "end", inline: "nearest"}),
-				1
-			);
-		}
-		catch (e) {
-			if (!(e instanceof Error))
-				return ;
-			if (httpStatus(e) == 404)
-				addNotif({content: "No such user: '" + newUser + "'"})
-			else
-				addNotif({content: e.message})
-		}
+		add(newUser);
+		setTimeout(() =>
+			anchorRef.current?.scrollIntoView({block: "end", inline: "nearest"}), 1);
 	}
 
 	return (
