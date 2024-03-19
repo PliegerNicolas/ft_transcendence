@@ -90,7 +90,7 @@ export class TwofactorauthController {
 			throw new UnauthorizedException('Wrong authentication code');
 		  }
 		  const access_token = await this.authService.createJwt({user_id : user.id, oauth_id : user.oauth_id, isTwoFactorAuthEnabled: user.isTwoFactorAuthEnabled}, true)
-		  const refresh_token = await this.authService.createRefreshToken({user_id : user.id,  account_name :user.account_name, isTwoFactorAuthEnabled: false}, false)
+		  const refresh_token = await this.authService.createRefreshToken({user_id : user.id,  account_name :user.account_name, isTwoFactorAuthEnabled: true}, true)
 		  res.cookie("access_token", access_token,{maxAge: 1600000, httpOnly: true, sameSite: 'none', secure:true });
 		  res.cookie("refresh_token", refresh_token, {maxAge: 86400000, httpOnly: true, sameSite: 'none', secure:true});
 		  res.json({username: req.user.username})
