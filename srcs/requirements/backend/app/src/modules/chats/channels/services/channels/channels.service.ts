@@ -303,7 +303,6 @@ export class ChannelsService {
                 this.channelMemberService.uninvite(channel, users);
                 break;
             case (ChannelAccessAction.MUTE):
-                console.log("oui");
                 this.channelMemberService.mute(channel, users, channelAccessDetails?.muteDuration);
                 break;
             case (ChannelAccessAction.UNMUTE):

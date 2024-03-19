@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Request, UseGuards, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Request, UseGuards, UseInterceptors, ValidationPipe } from "@nestjs/common";
 import { ChannelsService } from "../services/channels/channels.service";
 import { GetChannelDto } from "../dtos/GetChannel.dto";
 import { CreateChannelDto } from "../dtos/CreateChannel.dto";
@@ -18,6 +18,7 @@ import { UsersGuard } from "../../../../guards/users.guard";
 import { Serialize } from "src/common/serialization/decorators/serialize/serialize.decorator";
 import { IdPipe } from "src/common/pipes/id/id.pipe";
 import { CreatePrivateChannelDto } from "../dtos/CreatePrivateChannel.dto";
+import { MuteInterceptor } from "src/common/interceptors/mute/mute.interceptor";
 
 @Controller()
 @Serialize()
@@ -33,7 +34,6 @@ export class ChannelsController {
     /* Public filtered PATHS: anyone can access but connected users would see additional data. */
     /* */
 
-
 	@UseGuards(JwtPublicGuard)
     @Get('channels')
     // UseGuard => Verify if user is connected but permit anyone to pass.
@@ -46,6 +46,7 @@ export class ChannelsController {
     }
 
 	@UseGuards(JwtPublicGuard)
+    @UseInterceptors(MuteInterceptor)
     @Get('channels/:channelId')
     // UseGuard => Verify if user is connected but permit anyone to pass.
     async getMyChannel(
@@ -72,7 +73,7 @@ export class ChannelsController {
         return (await this.channelService.createChannel(username, createChannelDto));
     }
 
-	//@UseGuards(AuthGuard('jwtTwoFactor'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Post('channels/mp')
     // UseGuard => Verify if user connected and pass it's req.user
     async createMyPrivateChannel(
@@ -111,6 +112,7 @@ export class ChannelsController {
 
 	@GlobalRole(['operator'])
 	@UseGuards(AuthGuard('jwtTwoFactor'), ChannelsNotGuard || RoleGlobalGuard)
+    @UseInterceptors(MuteInterceptor)
     @Patch('channels/:channelId/join')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async joinMyChannel(
@@ -124,6 +126,7 @@ export class ChannelsController {
 
 	@GlobalRole(['operator'])
 	@UseGuards(AuthGuard('jwtTwoFactor'), ChannelsGuard || RoleGlobalGuard)
+    @UseInterceptors(MuteInterceptor)
     @Patch('channels/:channelId/leave')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async leaveMyChannel(
@@ -182,6 +185,7 @@ export class ChannelsController {
 
 	//@GlobalRole(['operator'])
 	//@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
+    @UseInterceptors(MuteInterceptor)
     @Get('users/:username/channels/:channelId')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async getChannel(
@@ -244,6 +248,7 @@ export class ChannelsController {
 
 	//@GlobalRole(['operator'])
 	//@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
+    //@UseInterceptors(MuteInterceptor)
     @Patch('users/:username/channels/:channelId/join')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async joinChannel(
@@ -256,6 +261,7 @@ export class ChannelsController {
 
 	//@GlobalRole(['operator'])
 	//@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
+    //@UseInterceptors(MuteInterceptor)
     @Patch('users/:username/channels/:channelId/leave')
     // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
     async leaveChannel(
