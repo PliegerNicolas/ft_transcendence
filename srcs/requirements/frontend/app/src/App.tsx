@@ -93,6 +93,10 @@ function Auth()
 	});
 
 	useEffect(() => {
+		socket.on("connect_error", (err) => {
+			// the reason of the error, for example "xhr poll error"
+			console.log(err.message);
+		  });
 		if (guard.current) return ;
 		guard.current = true;
 

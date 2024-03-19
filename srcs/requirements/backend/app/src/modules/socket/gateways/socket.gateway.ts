@@ -27,6 +27,12 @@ export class SocketGateway implements OnModuleInit {
 	server: Server;
 
 	onModuleInit() {
+		this.server.on("connection_error", (err) => {
+			console.log(err.req);      // the request object
+			console.log(err.code);     // the error code, for example 1
+			console.log(err.message);  // the error message, for example "Session ID unknown"
+			console.log(err.context);  // some additional error context
+		  });
 		this.server.on('connection', (socket) => {
 			console.log('new socket connection : ' + socket.id);
 			setTimeout(() => {this.server.to(socket.id).emit('getUserInfos');}, 100);
