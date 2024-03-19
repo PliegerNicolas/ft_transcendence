@@ -78,10 +78,13 @@ export default function Msg(
 					{
 						user.id != me!.id &&
 						<div className="Msg__UsernameButtons">
-							<button className="Msg__LogAs" onClick={() => setMe(user.username)}>
-								Log as
+						{
+							me?.globalServerPrivileges === "operator" &&
+							<button onClick={() => setMe(user.username)}>
+								LogAs
 							</button>
-							<div className="Msg__LogAs">
+						}
+							<div>
 								<InvitePlayer user={user.username} />
 							</div>
 						</div>

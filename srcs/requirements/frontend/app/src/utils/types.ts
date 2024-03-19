@@ -14,6 +14,7 @@ export interface UserType {
 	picture: string,
 	profile: ProfileType,
 	isTwoFactorAuthEnabled: boolean,
+	globalServerPrivileges: string,
 }
 
 export interface UserPostType {

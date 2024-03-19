@@ -42,7 +42,7 @@ export class User {
     @Column({ type: 'bigint', unique: true })
     oauthId: bigint;
 
-    @Exclude()
+//    @Exclude()
     @IsEnum(GlobalServerPrivileges)
     @Column({ type: 'enum', enum: GlobalServerPrivileges, default: GlobalServerPrivileges.USER })
     globalServerPrivileges: GlobalServerPrivileges;

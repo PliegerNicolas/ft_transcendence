@@ -4,7 +4,7 @@
 }
 
 .ChatSidebar {
-	width: 220px;
+	width: 200px;
 	padding: 0;
 
 	overflow-y: auto;
@@ -27,13 +27,13 @@
 }
 
 @keyframes collapse {
-	0% { width: 220px; }
+	0% { width: 200px; }
 	100% { width: 0px; }
 }
 
 @keyframes expand {
 	0% { width: 0px; }
-	100% { width: 220px; }
+	100% { width: 200px; }
 }
 
 .ChatSidebar > hr {
@@ -430,9 +430,10 @@
 .Msg__UsernameButtons {
 	display: inline-flex;
 	align-items: center;
+	gap: 2px;
 }
 
-.Msg__LogAs button, .Msg__LogAs {
+.Msg__UsernameButtons button {
 	padding: 2px 6px;
 	margin-right: 0px;
 	border-radius: 7px;
@@ -440,8 +441,8 @@
 }
 
 .Msg__Date {
-	margin-left: 2px;
-	font-size: .75rem;
+	margin-left: 6px;
+	font-size: .72rem;
 	font-style: italic;
 }
 
@@ -449,7 +450,7 @@
 	display: inline-flex;
 	gap: 3px;
 	align-items: center;
-	margin-left: 8px;
+	margin-left: 6px;
 	opacity: .4;
 	transition: opacity 1.8s ease-in;
 }

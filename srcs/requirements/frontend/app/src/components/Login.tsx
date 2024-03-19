@@ -9,7 +9,7 @@ export default function Login()
 	const { logged } = useContext(MyContext);
 	const redirectLinkParams = new URLSearchParams({
 		client_id: import.meta.env.VITE_FTAPI_CLIENTID,
-		redirect_uri: `${location.protocol}//${location.host}/auth`,
+		redirect_uri: `https://${location.host}/auth`,
 		response_type: "code"
 	});
 

@@ -169,10 +169,17 @@ function User()
 				<div className="User__InvitePlayer">
 					<InvitePlayer  user={user.username} />
 				</div>
-				<hr />
-				<div style={{textAlign: "center"}}>
-					<button onClick={() => setPopup(true)}>Log as {user.username}</button>
-				</div>
+				{
+					me?.globalServerPrivileges === "operator" &&
+					<>
+						<hr />
+						<div style={{textAlign: "center"}}>
+							<button onClick={() => setPopup(true)}>
+								Log as {user.username}
+							</button>
+						</div>
+					</>
+				}
 			</section>
 			{
 				popup &&

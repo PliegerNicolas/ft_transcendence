@@ -119,12 +119,15 @@ export default function Header()
 								My profile
 							</Link>
 							<Logout />
-							<div
-								className="Login Logout Header__LogAs"
-								onClick={() => setLogAsPopup("")}
-							>
-								Log as
-							</div>
+							{
+								me?.globalServerPrivileges === "operator" &&
+								<div
+									className="Login Logout Header__LogAs"
+									onClick={() => setLogAsPopup("")}
+								>
+									Log as
+								</div>
+							}
 						</div>
 					}
 				</div> :
