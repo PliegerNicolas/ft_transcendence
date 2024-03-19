@@ -24,29 +24,36 @@ export function useStopOnHttp()
 
 		if (status === 401) {
 			refresh.mutate();
-			return (count < 3);
+			return (count < 2);
 		}
 		else
 			return (!status && count < 3)
 	});
 }
 
-export function useMutateError()
+export function useRetryMutation()
 {
-	const { setLogged, api, addNotif } = useContext(MyContext);
+	const { setLogged, api } = useContext(MyContext);
 
 	const refresh = useMutation({
 		mutationFn: () => api.get("/auth/refresh"),
 		onError: () => setLogged(false)
 	});
 
-	return ((error: Error) => {
-		const status = httpStatus(error);
+	return (count: number, err: Error) => {
+		if (httpStatus(err) !== 401)
+			return (false);
 
-		addNotif({content: error.message});
+		refresh.mutate();
+		return (count < 2);
+	}
+}
 
-		if (status === 401) refresh.mutate();
-	})
+export function useMutateError()
+{
+	const { addNotif } = useContext(MyContext);
+
+	return ((error: Error) => { addNotif({content: error.message}); })
 }
 
 export function useGet(key: QueryKey, enabled = true)

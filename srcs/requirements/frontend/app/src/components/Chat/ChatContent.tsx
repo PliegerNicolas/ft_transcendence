@@ -156,11 +156,10 @@ function ChatContent()
 	const leave = useMutation({
 		mutationFn: () =>
 			api.patch("/channels/" + id + "/leave", {}),
-		onSettled: () => invalidate(["channels"]),
 		onSuccess: () => {
 			if (chan.membersCount <= 1)
-				navigate("/chat")
-			invalidate(["channels"])
+				navigate("/chat");
+			setTimeout(() => invalidate(["channels"]), 50);
 		},
 		onError: mutateError,
 	});
