@@ -1,8 +1,10 @@
 import { BadRequestException } from "@nestjs/common";
 import { IsEnum } from "class-validator";
 import { User } from "../../users/entities/User.entity";
-import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
+import { AfterLoad, BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 import { RelationshipStatus } from "../enums/relationship-status.enum";
+import { UserStatus } from "../types/relationship.type";
+import { Exclude } from "class-transformer";
 
 @Entity({ name: 'relationships' })
 @Unique(['user1', 'user2'])
@@ -17,21 +19,35 @@ export class Relationship {
     @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updated_at: Date;
 
+    @Exclude()
     @ManyToOne(() => User, (user) => user.relationships1, { onDelete: 'CASCADE' })
     user1: User;
 
+    @Exclude()
     @ManyToOne(() => User, (user) => user.relationships2, { onDelete: 'CASCADE' })
     user2: User;
 
+    @Exclude()
     @IsEnum(RelationshipStatus)
     @Column({ type: 'enum', enum: RelationshipStatus, default: RelationshipStatus.UNDEFINED })
     status1: RelationshipStatus;
 
+    @Exclude()
     @IsEnum(RelationshipStatus)
     @Column({ type: 'enum', enum: RelationshipStatus, default: RelationshipStatus.UNDEFINED })
     status2: RelationshipStatus;
 
+    userStatuses: UserStatus[];
+
     /* Helper Functions */
+
+    @AfterLoad()
+    setUserStatus(): void {
+        this.userStatuses = [];
+        this.userStatuses.push({ user: this.user1, status: this.status1 });
+        this.userStatuses.push({ user: this.user2, status: this.status2 });
+    }
+
 
     @BeforeInsert()
     @BeforeUpdate()
