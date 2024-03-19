@@ -75,18 +75,23 @@ export class Channel {
     }
 
     private updateMembersCount(): void {
+        console.log("channel.updateMembersCount");
+        console.log(this);
         this.membersCount = this.members ? this.members.filter((member) => member.active).length : 0;
     }
 
     private ensureOwnerExists(): void {
         if (!this.members || this.members.length === 0) return ;
-        else if (this.members.some((member) => member.role === ChannelRole.OWNER)) return ;
+        if (this.members.some((member) => member.role === ChannelRole.OWNER && member.active)) return ;
 
-        const nextOwner = this.members?.reduce((prevMember, currentMember) => {
-            return (compareChannelRoles(currentMember.role, prevMember.role) > 0 ? currentMember : prevMember);
-        }, this.members[0]);
+        let highestRankMember: ChannelMember;
 
-        nextOwner.role = ChannelRole.OWNER;
+        for (const member of this.members) {
+            if (!member.active) continue ;
+            else if (!highestRankMember || compareChannelRoles(member.role, highestRankMember.role) > 0) highestRankMember = member;
+        }
+
+        if (highestRankMember) highestRankMember.role = ChannelRole.OWNER;
     }
 
 }
