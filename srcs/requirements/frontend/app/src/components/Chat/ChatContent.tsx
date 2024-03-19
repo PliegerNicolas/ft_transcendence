@@ -175,6 +175,9 @@ function ChatContent()
 			}, 100);
 			console.log('onMessage caught', content);
 		});
+		socket.on('refreshPage', () => {
+			window.location.reload();
+		});
 		socket.emit('rejoinChannels');
 		return (() => {socket.off('onMessage')});
 	}, []);

@@ -4,6 +4,7 @@ import { useInvalidate, useMutateError } from "../../utils/hooks";
 import { MemberType } from "../../utils/types";
 import { useMutation } from "@tanstack/react-query";
 import { getChanRole, isAdmin, isBanned, isMuted } from "../../utils/utils";
+import { socket } from "../../App";
 
 export default function ModActions(
 	{member, popupFn}:
@@ -78,7 +79,7 @@ export default function ModActions(
 					className="mute"
 					onClick={() => popupFn(
 						<>Are you sure you want to unmute {username} on this channel?</>,
-						() => {action.mutate("unmute")}
+						() => {action.mutate("unmute"); socket.emit('refreshClientPage', username, 0);}
 					)}
 				>
 					Unmute
@@ -87,7 +88,7 @@ export default function ModActions(
 					className="mute"
 					onClick={() => popupFn(
 						<>Are you sure you want to mute {username} on this channel?</>,
-						() => {action.mutate("mute")}
+						() => {action.mutate("mute"); socket.emit('refreshClientPage', username, 1000);}
 					)}
 				>
 					Mute
