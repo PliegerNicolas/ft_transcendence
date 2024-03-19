@@ -33,12 +33,11 @@ export class SocketGateway implements OnModuleInit {
 			socket.on('disconnect', () => {
 				console.log(socket.id + ' left socket');
 				this.server.emit('userLeftSocket', socket.id);
-				var i = 0;
-				while (playersQueue[i] && playersQueue[i] != socket.id) {
-					i++;
-				}
-				if (playersQueue[i])
-					playersQueue.splice(i, 1);
+				playersQueue = playersQueue.filter((id) => id != socket.id);
+				userByName = userByName.filter((name) => name != userById[socket.id]);
+				userById = userById.filter((id) => id != socket.id);
+				player1ID = player1ID.filter((id) => id != socket.id);
+				player2ID = player2ID.filter((id) => id != socket.id);
 			});
 		});
 	}
@@ -60,13 +59,32 @@ export class SocketGateway implements OnModuleInit {
 	}
 
 	@SubscribeMessage('rejoinChannels')
-	handleRejoinChannels(@ConnectedSocket() client: Socket) {
+	handleRejoinChannels(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
 		this.channelService.getAllChannels(userById[client.id]).then((channelSpec) => {
 			for (let i = 0; channelSpec[i]; i++) {
 				console.log("CLIENT JOINED CHANNEL : " + channelSpec[i].channel.name);
 				client.join(channelSpec[i].channel.name);
 			}
 		});
+	}
+
+	@SubscribeMessage('newUsername')
+	handleNewUsername(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
+		if (userById[client.id]) {
+			userByName = userByName.filter((name) => name != userById[client.id]);
+			userByName[username] = client.id;
+			userById[client.id] = username;
+			console.log("USER : " + userById[client.id] + " with id : " + client.id + " has changed name !");
+		}
+	}
+
+	@SubscribeMessage('logOut')
+	handleLogOut(@ConnectedSocket() client: Socket) {
+		playersQueue = playersQueue.filter((id) => id != client.id);
+		userByName = userByName.filter((name) => name != userById[client.id]);
+		userById = userById.filter((id) => id != client.id);
+		player1ID = player1ID.filter((id) => id != client.id);
+		player2ID = player2ID.filter((id) => id != client.id);
 	}
 
 	// Chat Handlers ==============================================================================================================	

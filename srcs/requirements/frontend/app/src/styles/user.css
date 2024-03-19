@@ -181,3 +181,7 @@
   	justify-content: center;
 	margin-top: 10px;
 }
+
+.User__EditButton {
+	margin-left: 3px;
+}

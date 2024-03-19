@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UseQueryResult, useMutation } from "@tanstack/react-query";
 
 import { FriendshipContext, MyContext } from "../../utils/contexts.ts";
@@ -14,6 +14,7 @@ import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
 
 import "../../styles/user.css";
 import Stats from "./Stats.tsx";
+import { socket } from "../../App.tsx";
 
 // <Me /> ====================================================================
 
@@ -23,6 +24,7 @@ export default function Me()
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
+	const navigate = useNavigate();
 
 	const [popup, setPopup] = useState(false);
 
@@ -44,6 +46,11 @@ export default function Me()
 		mutationFn: (them: string) => api.delete("/relationships/" + them),
 		onSettled: () => invalidate(["relationships"]),
 		onError: mutateError,
+	});
+
+	const backendLogout = useMutation({
+		mutationFn: () => api.post("/auth/logout", {}),
+		onSuccess: () => window.location.reload(),
 	});
 
 	if (!me) return (
@@ -99,7 +106,12 @@ export default function Me()
 					text={<> Warning: This is a permanent operation! </>}
 					action="Delete"
 					cancelFt={() => setPopup(false)}
-					actionFt={delMe.mutate}
+					actionFt={() => {
+						delMe.mutate();
+						socket.emit('logOut');
+						navigate("/");
+						backendLogout.mutate();
+					}}
 				/>
 			}
 		</main>
