@@ -17,6 +17,7 @@ import { RoleGlobalGuard, RoleGuard } from "../../../../guards/role.guard";
 import { UsersGuard } from "../../../../guards/users.guard";
 import { Serialize } from "src/common/serialization/decorators/serialize/serialize.decorator";
 import { IdPipe } from "src/common/pipes/id/id.pipe";
+import { CreatePrivateChannelDto } from "../dtos/CreatePrivateChannel.dto";
 
 @Controller()
 @Serialize()
@@ -69,6 +70,17 @@ export class ChannelsController {
     ) {
         const username = req.user ? req.user.username : undefined;
         return (await this.channelService.createChannel(username, createChannelDto));
+    }
+
+	//@UseGuards(AuthGuard('jwtTwoFactor'))
+    @Post('channels/mp')
+    // UseGuard => Verify if user connected and pass it's req.user
+    async createMyPrivateChannel(
+        @Body(new ValidationPipe) createPrivateChannelDto: CreatePrivateChannelDto,
+        @Request() req: any,
+    ) {
+        const username = req.user ? req.user.username : undefined;
+        return (await this.channelService.createPrivateChannel(username, createPrivateChannelDto));
     }
 
 	@GlobalRole(['operator'])
@@ -189,6 +201,17 @@ export class ChannelsController {
         @Body(new ValidationPipe) createChannelDto: CreateChannelDto,
     ) {
         return (await this.channelService.createChannel(username, createChannelDto));
+    }
+
+	@GlobalRole(['operator'])
+	@UseGuards(AuthGuard('jwtTwoFactor'), UsersGuard || RoleGlobalGuard)
+    @Post('users/:username/channels/mp')
+    // UseGuard => Verify if user connected or if user as special global server permissions (OPERATOR, USER ...)
+    async createPrivateChannel(
+        @Param('username', ParseUsernamePipe) username: string,
+        @Body(new ValidationPipe) createPrivateChannelDto: CreatePrivateChannelDto,
+    ) {
+        return (await this.channelService.createPrivateChannel(username, createPrivateChannelDto));
     }
 
 	@GlobalRole(['operator'])

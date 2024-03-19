@@ -71,6 +71,7 @@ export class Channel {
     @BeforeUpdate()
     setupChannel(): void {
         this.updateMembersCount();
+        this.checkIfPrivate();
         this.ensureOwnerExists();
     }
 
@@ -78,7 +79,13 @@ export class Channel {
         this.membersCount = this.members ? this.members.filter((member) => member.active).length : 0;
     }
 
+    private checkIfPrivate(): void {
+        if (this.mode !== ChannelMode.PRIVATE) return;
+        if (this.members?.length > 2) this.mode = ChannelMode.INVITE_ONLY;
+    }
+
     private ensureOwnerExists(): void {
+        if (this.mode === ChannelMode.PRIVATE) return ;
         if (!this.members || this.members.length === 0) return ;
         if (this.members.some((member) => member.role === ChannelRole.OWNER && member.active)) return ;
 
