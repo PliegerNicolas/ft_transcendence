@@ -41,3 +41,14 @@ http {
 		}
 	}
 }
+
+stream {
+	upstream backend_servers {
+		server backend:${BACKEND_PORT};
+	}
+
+	server {
+		listen 12345;
+		proxy_pass backend:${BACKEND_PORT};
+	}
+}
