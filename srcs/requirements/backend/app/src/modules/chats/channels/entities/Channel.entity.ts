@@ -75,8 +75,6 @@ export class Channel {
     }
 
     private updateMembersCount(): void {
-        console.log("channel.updateMembersCount");
-        console.log(this);
         this.membersCount = this.members ? this.members.filter((member) => member.active).length : 0;
     }
 
