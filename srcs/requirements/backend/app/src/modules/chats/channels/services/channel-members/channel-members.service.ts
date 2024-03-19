@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChannelMember } from '../../entities/ChannelMember.entity';
 import { Repository } from 'typeorm';
@@ -8,6 +8,9 @@ import { ChannelRole, compareChannelRoles, demoteChannelRole, promoteChannelRole
 import { ChannelVisibility } from '../../enums/channel-visibility.enum';
 import { ChannelMode } from '../../enums/channel-mode.enum';
 import { PasswordHashingService } from 'src/modules/password-hashing/services/password-hashing/password-hashing.service';
+import { ChannelAccessAction } from '../../enums/channel-access-action.enum';
+import { Relationship } from 'src/modules/relationships/entities/Relationship.entity';
+import { RelationshipStatus } from 'src/modules/relationships/enums/relationship-status.enum';
 
 @Injectable()
 export class ChannelMembersService {
@@ -41,6 +44,8 @@ export class ChannelMembersService {
                 channel.invitedMembers.push(newMember);
             } else member.invited = true;
         }
+
+        if (channel.mode === ChannelMode.PRIVATE) channel.mode = ChannelMode.INVITE_ONLY;
     }
 
     uninvite(channel: Channel, users: User[]): void {
@@ -241,7 +246,7 @@ export class ChannelMembersService {
         if (!this.isActiveMember(channel, user.id)) throw new ForbiddenException(`User '${user.username}' isn't member of Channel with ID ${channel.id} thus cannot leave it`);
     }
 
-    async canEditChannel(channel: Channel, user: User): Promise<void> {
+    async canEditChannel(channel: Channel, user: User, action?: ChannelAccessAction): Promise<void> {
         if (!user) throw new ForbiddenException(`User isn't identified thus cannot edit Channel with ID ${channel.id}`);
         else if (user.hasGlobalServerPrivileges()) return ;
 
@@ -249,7 +254,11 @@ export class ChannelMembersService {
 
         if (!member) throw new ForbiddenException(`User '${user.username}' isn't member of Channel with ID ${channel.id} thus cannot edit it`);
 
-        if (channel.mode === ChannelMode.PRIVATE) throw new ForbiddenException(`Channel with ID ${channel.id} is ${channel.mode}. It cannot be edited`);
+        if (channel.mode === ChannelMode.PRIVATE) {
+            if (action === ChannelAccessAction.INVITE || action === ChannelAccessAction.UNINVITE) return ;
+            throw new ForbiddenException(`Channel with ID ${channel.id} is ${channel.mode}. It cannot be edited`);
+        }
+
         if (compareChannelRoles(member.role, ChannelRole.OPERATOR) < 0) throw new ForbiddenException(`User '${user.username}' hasn't got enough permissions to edit Channel with ID ${channel.id}`);
     }
 
@@ -273,11 +282,17 @@ export class ChannelMembersService {
         if (this.isMuted(channel, user.id)) throw new ForbiddenException(`User '${user.username}' is muted in Channel with ID ${channel.id} thus cannot write in it`);
     }
 
-    async canUpdateUserPermissionsInChannel(channel: Channel, actingUser: User, users: User[]): Promise<void> {
+    async canUpdateUserPermissionsInChannel(channel: Channel, actingUser: User, users: User[], action?: ChannelAccessAction): Promise<void> {
         if (!actingUser) throw new ForbiddenException(`User isn't identified thus cannot edit Channel with ID ${channel.id}`);
         else if (actingUser.hasGlobalServerPrivileges()) return ;
 
         const actingMember = this.getActiveMember(channel, actingUser.id);
+        if (!actingMember) throw new ForbiddenException(`User '${actingMember.user.username}' isn't member of Channel with ID ${channel.id} thus cannot edit it`);
+
+        if (channel.mode === ChannelMode.PRIVATE) {
+            if (action === ChannelAccessAction.INVITE || action === ChannelAccessAction.UNINVITE) return ;
+            throw new ForbiddenException(`Channel with ID ${channel.id} is ${channel.mode}. Cannot alter member's permissions`);
+        }
 
         const invalidUsernames: string[] = [];
 
@@ -288,6 +303,24 @@ export class ChannelMembersService {
 
         if (invalidUsernames.length > 0) {
             throw new ForbiddenException(`User ${actingUser.username} hasn't got enough permissions to alter permissions of the following users: ${invalidUsernames.join(', ')}`);
+        }
+    }
+
+    async canPrivateMessage(actingUser: User, users: User[]): Promise<void> {
+        if (!actingUser) throw new ForbiddenException(`User isn't identified thus cannot create a ${ChannelMode.PRIVATE} channel`);
+        else if (actingUser.hasGlobalServerPrivileges()) return ;
+        
+        const invalidUsernames: string[] = [];
+
+        users.forEach((user) => {
+            const relationship: Relationship = actingUser.relationships.find((related_user) => related_user.id === user.id);
+            for (const userStatus of relationship.userStatuses) {
+                if (userStatus?.status === RelationshipStatus.BLOCKED) invalidUsernames.push(userStatus.user.username);
+            }
+        });
+
+        if (invalidUsernames.length > 0) {
+            throw new UnauthorizedException(`Cannot build a ${ChannelMode.PRIVATE} with the following users: ${invalidUsernames.join(', ')} du to relationship status`);
         }
     }
 
