@@ -94,7 +94,7 @@ export class ChannelsService {
 
         const channel = this.channelRepository.create({
             ...channelDetails,
-            members: [{ user: user, role: ChannelRole.OWNER, active: true, invited: false, muted: false, banned: false }],
+            members: [{ user: user, role: ChannelRole.OWNER, active: true, invited: false, muted: false, mutedSince: null, muteDuration: null, banned: false }],
         });
 
         await this.channelRepository.save(channel);
@@ -121,8 +121,12 @@ export class ChannelsService {
 
         await this.channelMemberService.canPrivateMessage(actingUser, users);
 
-        const members = [{ user: actingUser, role: ChannelRole.MEMBER, active: true, invited: false, muted: false, banned: false }];
-        for (const user of users) members.push({ user: user, role: ChannelRole.MEMBER, active: false, invited: true, muted: false, banned: false });
+        const members = [
+            { user: actingUser, role: ChannelRole.MEMBER, active: true, invited: false, muted: false, mutedSince: null, muteDuration: null, banned: false }
+        ];
+        for (const user of users) members.push(
+            { user: user, role: ChannelRole.MEMBER, active: false, invited: true, muted: false, mutedSince: null, muteDuration: null, banned: false }
+        );
 
         const channel = this.channelRepository.create({
             ...channelDetails,
@@ -221,7 +225,9 @@ export class ChannelsService {
         const member = channel.members?.find((member) => member.user.username === username);
         if (!member) {
             this.channelRepository.merge(channel, {
-                members: [...channel.members, { user: user, role: ChannelRole.MEMBER, active: true, invited: false, muted: false, banned: false }],
+                members: [...channel.members,
+                    { user: user, role: ChannelRole.MEMBER, active: true, invited: false, muted: false, mutedSince: null, muteDuration: null, banned: false }
+                ],
             });
         } else {
             member.role = ChannelRole.MEMBER;
@@ -297,7 +303,8 @@ export class ChannelsService {
                 this.channelMemberService.uninvite(channel, users);
                 break;
             case (ChannelAccessAction.MUTE):
-                this.channelMemberService.mute(channel, users);
+                console.log("oui");
+                this.channelMemberService.mute(channel, users, channelAccessDetails?.muteDuration);
                 break;
             case (ChannelAccessAction.UNMUTE):
                 this.channelMemberService.unmute(channel, users);

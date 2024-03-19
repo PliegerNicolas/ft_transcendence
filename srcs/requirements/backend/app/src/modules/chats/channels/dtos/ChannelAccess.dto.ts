@@ -1,5 +1,6 @@
-import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsString, MaxLength, Validate } from "class-validator";
+import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength, Validate, ValidateIf } from "class-validator";
 import { ChannelAccessAction } from "../enums/channel-access-action.enum";
+import { IsChannelMuteAction } from "src/common/validators/is-channel-mute-action.validator";
 
 export class ChannelAccessDto {
 
@@ -13,5 +14,8 @@ export class ChannelAccessDto {
     @MaxLength(25, { each: true })
     @ArrayMinSize(1)
     usernames: string[];
+
+    @IsChannelMuteAction()
+    muteDuration?: number; // in seconds
 
 }
