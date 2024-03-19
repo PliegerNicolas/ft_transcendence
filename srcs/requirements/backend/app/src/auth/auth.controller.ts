@@ -28,8 +28,14 @@ export class AuthController {
 
 	@UseGuards(AuthGuard('jwtTwoFactor'))
 	@Post('logout')
-	addBlacklist(@Request() req){
-		return this.authService.blacklist("add", req.cookies['access_token'])
+	addBlacklist(@Request() req,
+	@Res({passthrough : true}) res : Response){
+		
+		this.authService.blacklist("add", req.cookies['refresh_token'])
+		this.authService.blacklist("add", req.cookies['access_token'])
+		res.cookie("access_token", "");
+		res.cookie("refresh_token", "")
+		return {username : req.username}
 	}
 
 	@GlobalRole(['operator'])
