@@ -27,9 +27,6 @@ export class ChannelsGuard implements CanActivate {
 			},
 		});
 
-		console.log("=== ChannelGuard ===");
-		console.log(member);
-
 		if (!member) return (false);
 	
 		return (true);
@@ -56,9 +53,6 @@ export class ChannelsNotGuard implements CanActivate {
 				active: true,
 			},
 		});
-
-		console.log("=== ChannelNotGuard ===");
-		console.log(member);
 
 		if (!member) return (true);
 	

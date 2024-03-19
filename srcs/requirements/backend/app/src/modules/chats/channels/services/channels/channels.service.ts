@@ -181,7 +181,7 @@ export class ChannelsService {
         const member = channel.members?.find((member) => member.user.username === username);
         if (!member) {
             this.channelRepository.merge(channel, {
-                members: [...channel.members, { user, role: ChannelRole.MEMBER }],
+                members: [...channel.members, { user: user, role: ChannelRole.MEMBER, active: true, invited: false, muted: false, banned: false }],
             });
         } else {
             member.role = ChannelRole.MEMBER;
