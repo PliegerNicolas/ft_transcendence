@@ -202,6 +202,9 @@ export class ChannelMembersService {
                 else if (!password) throw new ForbiddenException(`A password is needed for Channel with ID ${channel.id} and mode ${channel.mode}`);
                 else if (await this.passwordHashingService.comparePasswords(channel.password, password)) return;
                 throw new ForbiddenException(`Invalid password for Channel with ID ${channel.id} and mode ${channel.mode}`);
+                case (ChannelMode.PRIVATE):
+                    if (this.isInvited(channel, user.id) || this.isMember(channel, user.id)) return ;
+                    throw new ForbiddenException(`User '${user.username}' is neither member or invited to Channel with ID ${channel.id}`);
             default:
                 throw new UnprocessableEntityException(`Channel with ID ${channel.id}'s mode not recognized`);
         }
@@ -224,6 +227,9 @@ export class ChannelMembersService {
                 if (!password) throw new ForbiddenException(`A password is needed for Channel with ID ${channel.id} and mode ${channel.mode}`);
                 else if (await this.passwordHashingService.comparePasswords(channel.password, password)) return;
                 throw new ForbiddenException(`Invalid password for Channel with ID ${channel.id} and mode ${channel.mode}`);
+                case (ChannelMode.PRIVATE):
+                    if (this.isInvited(channel, user.id)) return ;
+                    throw new ForbiddenException(`User '${user.username}' is not invited to Channel with ID ${channel.id}`);
             default:
                 throw new UnprocessableEntityException(`Channel with ID ${channel.id}'s mode not recognized`);
         }
@@ -243,6 +249,7 @@ export class ChannelMembersService {
 
         if (!member) throw new ForbiddenException(`User '${user.username}' isn't member of Channel with ID ${channel.id} thus cannot edit it`);
 
+        if (channel.mode === ChannelMode.PRIVATE) throw new ForbiddenException(`Channel with ID ${channel.id} is ${channel.mode}. It cannot be edited`);
         if (compareChannelRoles(member.role, ChannelRole.OPERATOR) < 0) throw new ForbiddenException(`User '${user.username}' hasn't got enough permissions to edit Channel with ID ${channel.id}`);
     }
 
@@ -254,6 +261,7 @@ export class ChannelMembersService {
 
         if (!member) throw new ForbiddenException(`User '${user.username}' isn't member of Channel with ID ${channel.id} thus cannot delete it`);
 
+        if (channel.mode === ChannelMode.PRIVATE) throw new ForbiddenException(`Channel with ID ${channel.id} is ${channel.mode}. Both users have to leave it to delete it`);
         if (compareChannelRoles(member.role, ChannelRole.OWNER) < 0) throw new ForbiddenException(`User '${user.username}' hasn't got enough permissions to delete Channel with ID ${channel.id}`);
     }
 

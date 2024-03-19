@@ -4,13 +4,14 @@ import { Channel } from "../../entities/Channel.entity";
 import { Equal, Repository } from "typeorm";
 import { User } from "../../../../users/entities/User.entity";
 import { UsersService } from "src/modules/users/services/users/users.service";
-import { ChannelAccessParams, ChannelWithSpecs, CreateChannelParams, GetChannelParams, GetChannelsQueryParam, JoinChannelParams, LeaveChannelParams, ReplaceChannelParams, UpdateChannelParams } from "../../types/channel.type";
+import { ChannelAccessParams, ChannelWithSpecs, CreateChannelParams, CreatePrivateChannelParams, GetChannelParams, GetChannelsQueryParam, JoinChannelParams, LeaveChannelParams, ReplaceChannelParams, UpdateChannelParams } from "../../types/channel.type";
 import { ChannelVisibility } from "../../enums/channel-visibility.enum";
 import { ChannelRole } from "../../enums/channel-role.enum";
 import { ChannelAccessAction } from "../../enums/channel-access-action.enum";
 import { PasswordHashingService } from "../../../../password-hashing/services/password-hashing/password-hashing.service";
 import { ChannelMembersService } from "../channel-members/channel-members.service";
 import { ChannelMember } from "../../entities/ChannelMember.entity";
+import { ChannelMode } from "../../enums/channel-mode.enum";
 
 @Injectable()
 export class ChannelsService {
@@ -94,6 +95,30 @@ export class ChannelsService {
 
         await this.channelRepository.save(channel);
         return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getActiveMember(channel, user.id)));
+    }
+
+    async createPrivateChannel(username: string = undefined, channelDetails: CreatePrivateChannelParams): Promise <ChannelWithSpecs> {
+        if (!username) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
+
+        const usernames: string[] = [username, channelDetails.username];
+        const users: User[] = await this.userService.findStrictlyUsersByUsername(usernames);
+
+        const index: number = users.findIndex((user) => user.username === username);
+        const actingUser: User = users.splice(index, 1)[0];
+
+        const members = [{ user: actingUser, role: ChannelRole.MEMBER, active: true, invited: false, muted: false, banned: false }];
+        for (const user of users) members.push({ user: user, role: ChannelRole.MEMBER, active: false, invited: true, muted: false, banned: false });
+    
+        const channel = this.channelRepository.create({
+            ...channelDetails,
+            name: 'MP: ' + usernames.join(', '),
+            visibility: ChannelVisibility.HIDDEN,
+            mode: ChannelMode.PRIVATE,
+            members: members,
+        });
+
+        await this.channelRepository.save(channel);
+        return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getActiveMember(channel, actingUser.id)));
     }
 
     async replaceChannel(channelId: bigint, username: string = undefined, channelDetails: ReplaceChannelParams): Promise<ChannelWithSpecs> {
@@ -278,9 +303,6 @@ export class ChannelsService {
 
         channel = await this.channelRepository.save(channel);
 
-        console.log("===  Manage Access ===");
-        console.log(channel);
-
         return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getActiveMember(channel, user.id)));
     }
 
@@ -290,7 +312,7 @@ export class ChannelsService {
         return ({
             channel: channel,
             isMember: !!member,
-            role: member?.role,
+            role: member ? member.role: null,
         } as ChannelWithSpecs);
     }
 
