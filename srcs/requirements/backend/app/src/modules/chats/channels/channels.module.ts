@@ -11,6 +11,7 @@ import { PasswordHashingModule } from "../../password-hashing/password-hashing.m
 import { AuthModule } from "../../../auth/auth.module";
 import { GuardsModule } from "../../../guards/guards.module";
 import { ChannelMembersService } from './services/channel-members/channel-members.service';
+import { ChannelCronService } from './services/channel-cron/channel-cron.service';
 
 @Module({
 	imports: [
@@ -21,7 +22,7 @@ import { ChannelMembersService } from './services/channel-members/channel-member
 		forwardRef(() => PasswordHashingModule),
 	],
 	controllers: [ChannelsController],
-	providers: [ChannelsService, ChannelMembersService],
+	providers: [ChannelsService, ChannelMembersService, ChannelCronService],
 	exports: [ChannelsService, ChannelMembersService],
 })
 export class ChannelsModule {}
