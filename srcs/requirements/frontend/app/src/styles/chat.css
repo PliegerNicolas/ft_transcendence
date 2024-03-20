@@ -41,8 +41,8 @@
 }
 
 .ChatSidebar__Title {
-	height: 54px;
 	margin: 0;
+	height: 36px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -50,6 +50,9 @@
 	user-select: none;
 	overflow: hidden;
 	white-space: nowrap;
+}
+.ChatSidebar__Title.first {
+	height: 54px;
 }
 
 .ChatSidebar__Add {
