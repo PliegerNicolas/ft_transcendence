@@ -12,6 +12,7 @@ import { socket } from "../../App";
 
 export default function UserInfos({user, me}: {user: UserType, me: boolean})
 {
+	console.log(user.username);
 	const { addNotif, api } = useContext(MyContext);
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();

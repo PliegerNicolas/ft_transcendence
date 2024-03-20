@@ -36,6 +36,7 @@ export class ChannelsService {
                 { members: { user: { username: Equal(username) }, active: true } },
                 { members: { user: { username: Equal(username) }, invited: true } },
             ],
+            relations: ['members.user']
         });
 
         const user = await this.userRepository.findOne({
@@ -43,7 +44,12 @@ export class ChannelsService {
         });
 
         return (channels.map((channel) => {
-            const member = user ? this.channelMemberService.getActiveMember(channel, user.id) : null;
+            const member = user ? channel.members?.find((member) => member.user.id === user.id) : null;
+            delete channel.activeMembers;
+            delete channel.inactiveMembers;
+            delete channel.invitedMembers;
+            delete channel.mutedMembers;
+            delete channel.bannedMembers; // Holy fuck this is disgusting
             return (this.channelToChannelWithSpecs(channel, member));
         }));
     }

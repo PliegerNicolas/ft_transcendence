@@ -209,7 +209,7 @@ select:focus {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	margin-top: 3em;
+	margin-top: 2.5em;
 	opacity: 60%;
 
 	user-select: none;
@@ -217,4 +217,104 @@ select:focus {
     -khtml-user-select: none;
     -webkit-user-select: none;
     -o-user-select: none;
+}
+
+/*
+** Ladder ======================================================================
+*/
+
+.Ladder__Container {
+	max-height: 400px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding-right: 10px;
+	margin-right: -10px;
+	margin-top: 50px;
+}
+
+.Ladder__Item {
+	display: flex;
+	flex-direction: row;
+}
+
+.Ladder__Item>div {
+	white-space: nowrap;
+	padding: 2px;
+	padding-left: 12px;
+	display: flex;
+	align-items: center;
+}
+
+.Ladder__Item>div:first-child {
+	width: 50px;
+	border-right: 1px solid var(--bg-color-5);
+}
+
+.Ladder__Item>div:nth-child(2) {
+	flex: 1;
+	width: 250px;
+	border-right: 1px solid var(--bg-color-5);
+}
+
+.Ladder__Title {
+	text-align: center;
+	font-size: 1.5rem;
+}
+
+.Ladder__List {
+	background: var(--bg-color-3);
+	border: 1px solid var(--bg-color-5);
+	margin-top: 20px;
+	border-radius: 7px;
+	overflow-x: auto;
+	box-shadow: 0 0 8px -3px #0008;
+	font-size: 1.2rem;
+}
+
+.Ladder__List > * {
+	margin: 0;
+	border: 1px solid #0000;
+	animation: fadein .15s ease-in-out;
+	background: var(--bg-color-4);
+	border-radius: 0px;
+	color: var(--text-normal);
+	overflow-x: visible;
+	min-width: fit-content;
+	transition: filter .1s, color .2s, text-shadow .2s, border .2s;
+}
+
+.Ladder__ListHead {
+	border-bottom: 1px solid var(--text-faint);
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.Ladder__List > *:nth-child(odd) {
+	background: var(--bg-color-3);
+}
+
+.Ladder__List > *:first-child {
+	border-radius: 7px 7px 0 0;
+}
+
+.Ladder__List > *:last-child {
+	border-radius: 0 0 7px 7px;
+}
+
+.Ladder__List > *:first-child:last-child {
+	border-radius: 7px;
+}
+
+.Ladder__List > * > * {
+	font-size: .86rem;
+	border: 2px solid #0000;
+	margin: -1px;
+	padding: 5px;
+	z-index: 50;
+}
+.Ladder__List > * > *:first-child {
+	border-radius: 7px 0 0 7px;
+}
+.Ladder__List > * > *:last-child {
+	border-radius: 0 7px 7px 0;
 }

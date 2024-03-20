@@ -48,8 +48,8 @@ export class AuthService
 		}))
 	}
 
-	async signIn(oauthToken : JSON ): Promise<{access_token : any, refresh_token : any, isTwoFactorAuthEnabled : any}> {
-		const [code, redirect_uri] = Object.values(oauthToken);
+	async signIn(code : string, redirect_uri : string ): Promise<{access_token : any, refresh_token : any, isTwoFactorAuthEnabled : any}> {
+		// const [code, redirect_uri] = Object.values(oauthToken);
 
 		let ft_payload = await fetch(
 			"https://api.intra.42.fr/oauth/token",
