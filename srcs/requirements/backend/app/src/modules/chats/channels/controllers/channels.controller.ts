@@ -72,7 +72,7 @@ export class ChannelsController {
         return (await this.channelService.createChannel(username, createChannelDto));
     }
 
-	//@UseGuards(AuthGuard('jwtTwoFactor'))
+	@UseGuards(AuthGuard('jwtTwoFactor'))
     @Post('channels/mp')
     // UseGuard => Verify if user connected and pass it's req.user
     async createMyPrivateChannel(

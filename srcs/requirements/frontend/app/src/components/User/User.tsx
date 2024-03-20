@@ -15,6 +15,7 @@ import { useInvalidate, useMutateError, useGet, useSetMe } from "../../utils/hoo
 import "../../styles/user.css";
 import ConfirmPopup from "../ConfirmPopup.tsx";
 import { InvitePlayer } from "../Game/Invitations.tsx";
+import { extractShip } from "../../utils/utils.ts";
 
 // <UserRouter /> ==============================================================
 
@@ -93,16 +94,20 @@ function User()
 		if (!getRelations.isSuccess)
 			return ("");
 
+		console.log(getRelations.data);
 		const match = getRelations.data.find((ship: FriendshipType) =>
-			ship.user1.id == user.id || ship.user2.id == user.id);
+			ship.userStatuses[0].user.id == user.id || ship.userStatuses[1].user.id == user.id);
 
 		if (!match)
 			return ("");
-		if (match.status1 == "accepted" && match.status2 == "accepted")
+
+		const {user1, status1, status2} = extractShip(match);
+
+		if (status1 == "accepted" && status2 == "accepted")
 			return ("accepted");
 
-		const myStatus = match.user1.id == me?.id ? match.status1 : match.status2;
-		const theirStatus = match.user1.id == me?.id ? match.status2 : match.status1;
+		const myStatus = user1.id == me?.id ? status1 : status2;
+		const theirStatus = user1.id == me?.id ? status2 : status1;
 
 		if (theirStatus == "blocked")
 			return ("imblocked");

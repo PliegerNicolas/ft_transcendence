@@ -5,7 +5,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
+import { useInvalidate, useMutateError, useGet, useDmName } from "../../utils/hooks.ts";
 import { getChanRole, httpStatus, isMuted } from "../../utils/utils.ts";
 
 import { ChatContentContext, MyContext } from "../../utils/contexts";
@@ -28,6 +28,7 @@ export default function ChatContentRouter()
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
+	const getDmName = useDmName();
 
 	const params = useParams();
 	const id = params.id!;
@@ -106,11 +107,14 @@ export default function ChatContentRouter()
 		</div>
 	);
 
+	console.log(getChan.data);
+
 	return (
 		<ChatContentContext.Provider value={{
 			chan: getChan.data.channel,
 			role: getChanRole(getChan.data.channel, me!.id),
-			idMap
+			idMap,
+			dmName: getDmName(getChan.data.channel.name),
 		}}>
 			<Routes>
 				<Route path="/" element={<ChatContent />} />
@@ -128,7 +132,7 @@ export default function ChatContentRouter()
 function ChatContent()
 {
 	const { api, setLastChan, me } = useContext(MyContext);
-	const { chan, role } = useContext(ChatContentContext);
+	const { chan, role, dmName } = useContext(ChatContentContext);
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
@@ -156,11 +160,10 @@ function ChatContent()
 	const leave = useMutation({
 		mutationFn: () =>
 			api.patch("/channels/" + id + "/leave", {}),
-		onSettled: () => invalidate(["channels"]),
 		onSuccess: () => {
 			if (chan.membersCount <= 1)
-				navigate("/chat")
-			invalidate(["channels"])
+				navigate("/chat");
+			setTimeout(() => invalidate(["channels"]), 50);
 		},
 		onError: mutateError,
 	});
@@ -245,7 +248,11 @@ function ChatContent()
 			/>
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
-						Start of channel « {chan.name} »
+					{
+						dmName ?
+						"Start of your conversation with " + dmName :
+						"Start of channel « " + chan.name + " »"
+					}
 					<hr />
 				</div>
 				{
@@ -272,7 +279,11 @@ function ChatContent()
 				<div className="Chat__Input">
 					<textarea
 						id="SendMessage"
-						placeholder={`Send a message to « ${chan.name} »`}
+						placeholder={
+							dmName ?
+							`Send a message to ${dmName}` :
+							`Send a message to « ${chan.name} »`
+						}
 						value={inputValue}
 						onChange={handleInputChange}
 					/>

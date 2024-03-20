@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 
-import { ChatContext } from "../../utils/contexts";
+import { ChatContentContext, ChatContext } from "../../utils/contexts";
 
 import closeLeft from "../../assets/close-left.svg";
 import openLeft from "../../assets/open-left.svg";
@@ -16,6 +16,7 @@ export default function ChatHeader(
 	{name: string, edit: boolean, leave: Function | null})
 {
 	const {showSidebar, setShowSidebar} = useContext(ChatContext);
+	const {dmName} = useContext(ChatContentContext);
 
 	return (
 		<div className="ChatHeader">
@@ -27,7 +28,7 @@ export default function ChatHeader(
 			</div>
 			<div className="ChatHeader__Main">
 				<div className="ChatHeader__Title">
-					{name}
+					{dmName ? dmName : name}
 				</div>
 				<div className="ChatHeader__Right">
 					{

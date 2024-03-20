@@ -65,7 +65,10 @@ function Auth()
 			else {
 				setStatus("success");
 				setLogged(true);
-				setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
+				setTimeout(() => {
+					if (document.location.pathname === "/auth")
+						navigate(redirectPath ? redirectPath : "/")
+				}, 1000);
 			}
 		},
 

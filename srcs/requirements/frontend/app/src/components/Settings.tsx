@@ -54,7 +54,17 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 		},
 		onSuccess: () => {
 			setPopup2fa(false);
-			window.location.reload();
+			location.reload();
+		},
+	});
+
+	const turnOff2fa = useMutation({
+		mutationFn: () => api.post("/2fa/turn-off", {}),
+		onError: mutateError,
+		onSuccess: () => {
+			location.reload(),
+			setPopup2fa(false);
+			location.reload();
 		},
 	});
 
@@ -90,7 +100,7 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 					<div className="Setup2fa__Status">
 						<>2FA is enabled for your account</> <img src={check} />
 					</div>
-					<button onClick={() => addNotif({type: 1, content: "This does nothing (yet)."})}>
+					<button onClick={() => turnOff2fa.mutate()}>
 						Disable 2FA?
 					</button>
 				</> :

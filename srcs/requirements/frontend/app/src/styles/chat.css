@@ -114,6 +114,34 @@
 	cursor: pointer;
 }
 
+.Chat__ChanListItem img {
+	height: 32px;
+	width: 32px;
+	object-fit: cover;
+	border-radius: 7px;
+}
+
+.Chat__ChanListItem.dm {
+	height: 36px;
+	width: calc(100% - 24px - 12px);
+
+	margin: 4px 6px;
+	padding: 2px 16px 2px 8px;
+	border-radius: 7px;
+
+	user-select: none;
+
+	transition: .1s;
+
+	display: flex;
+	flex-direction: row;
+	justify-content: left;
+	align-items: center;
+	gap: 8px;
+
+	color: var(--text-normal);
+}
+
 .Chat__ChanListItemName {
 	overflow: hidden;
 	white-space: nowrap;
