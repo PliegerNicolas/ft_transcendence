@@ -5,7 +5,7 @@ import OnlineGame  from './OnlinePlay'
 
 import "../../styles/play.css";
 import { MyContext } from '../../utils/contexts.ts';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useGet } from '../../utils/hooks.ts';
 import { UserType } from '../../utils/types.ts';
 
@@ -225,7 +225,11 @@ function Ladder() {
 				getUsers.data.sort((a: UserType, b: UserType) => b.profile.elo - a.profile.elo).map((user: UserType, index: number) =>
 					<div className="Ladder__Item">
 						<div className="Ladder__Index">#{index + 1} {index + 1 === 1 ? <>🏆</> : <></>}</div>
-						<div className="Ladder__Username">{user.username} </div>
+						<div className="Ladder__Username">
+							<Link to={"/user/" + user.username}>
+								<span>{user.username}</span>
+							</Link>
+						</div>
 						<div className="Ladder__Elo">{user.profile.elo}</div>
 					</div>	
 				)
