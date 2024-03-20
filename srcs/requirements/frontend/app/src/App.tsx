@@ -33,7 +33,7 @@ import { PopupType } from "./utils/types.ts";
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
 
-export const socket = io(`https://${location.hostname}:4433/api/socket`);
+export const socket = io(`https://${location.hostname}:4433/socket`);
 
 function Auth()
 {

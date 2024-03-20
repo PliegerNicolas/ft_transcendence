@@ -41,14 +41,25 @@ http {
 		}
 
 		location /socket.io/ {
-			proxy_pass http://backend:${BACKEND_PORT};
-			proxy_set_header Host $host;
-			proxy_set_header X-Real-IP $remote_addr;
-			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-			proxy_set_header X-Forwarded-Proto $scheme;
-        	proxy_http_version 1.1;
-        	proxy_set_header Upgrade $http_upgrade;
-        	proxy_set_header Connection "Upgrade";
-		}
+      		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      		proxy_set_header Host $host;
+
+      		proxy_pass http://backend:${BACKEND_PORT};
+
+      		proxy_http_version 1.1;
+      		proxy_set_header Upgrade $http_upgrade;
+      		proxy_set_header Connection "upgrade";
+    }
+	}
+}
+
+stream {
+	upstream backend_servers {
+		server backend:${BACKEND_PORT};
+	}
+
+	server {
+		listen 12345;
+		proxy_pass backend:${BACKEND_PORT};
 	}
 }
