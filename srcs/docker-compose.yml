@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:41:05 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/18 22:13:09 by nicolas          ###   ########.fr        #
+#    Updated: 2024/03/20 18:24:05 by nplieger         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,6 +25,12 @@ volumes:
     driver_opts:
       type: none
       device: ${HOME}/data/postgresql
+      o: bind
+  backend_uploads:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${HOME}/data/uploads
       o: bind
 
 # Services
@@ -60,6 +66,8 @@ services:
       - transcendence
     depends_on:
       - database
+#    volumes:
+#      - backend_uploads:/app/assets/uploads
 
   frontend:
     init: true
@@ -83,4 +91,4 @@ services:
     networks:
       - transcendence
 #    volumes:
-#      - postgresql_data:/${PGDATA}
+#      - postgresql_data:/var/lib/postgresql/data
