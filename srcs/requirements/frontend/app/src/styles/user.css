@@ -185,3 +185,11 @@
 .User__EditButton {
 	margin-left: 3px;
 }
+
+.Historic__Victory {
+	color: #0a7;
+}
+
+.Historic__Defeat {
+	color: #d35;
+}

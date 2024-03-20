@@ -43,19 +43,21 @@ export default function Stats({username}: {username: string}) {
 }
 
 function Historic({infos, user}: {infos: GamelogsType, user: User}) {
-
+	console.log("user 0 : " + infos.gamelogToUsers[0]);
+	console.log("user 1 : " + infos.gamelogToUsers[1]);
+	
 	if (!user) {
 		return (<div className="Historic__Error">Couldn't get historic</div>)
 	}
 
 	const getGameResult = () => {
-		if (infos.gamelogToUsers[0].user.id === user.id) {
+		if (infos.gamelogToUsers[0] && infos.gamelogToUsers[0].user.id === user.id) {
 			if (infos.gamelogToUsers[0].result == GameResult.VICTORY)
 				return (<div className="Historic__Victory">VICTORY</div>);
 			else
 				return (<div className="Historic__Defeat">DEFEAT</div>);
 		}
-		else if (infos.gamelogToUsers[1].user.id === user.id) {
+		else if (infos.gamelogToUsers[1] && infos.gamelogToUsers[1].user.id === user.id) {
 			if (infos.gamelogToUsers[1].result == GameResult.VICTORY)
 				return (<div className="Historic__Victory">VICTORY</div>);
 			else
@@ -64,10 +66,14 @@ function Historic({infos, user}: {infos: GamelogsType, user: User}) {
 	}
 
 	const getOpponentName = () => {
-		if (infos.gamelogToUsers[0].user.id === user.id)
-			return (<div className="Historic__Opponent"> against {infos.gamelogToUsers[1].user.username}</div>);
-		else if (infos.gamelogToUsers[1].user.id === user.id)
-			return (<div className="Historic__Opponent"> against {infos.gamelogToUsers[0].user.username}</div>);
+		if (infos.gamelogToUsers[1] && infos.gamelogToUsers[0]) {
+			if (infos.gamelogToUsers[0].user.id === user.id)
+				return (<div className="Historic__Opponent"> against {infos.gamelogToUsers[1].user.username}</div>);
+			else if (infos.gamelogToUsers[1].user.id === user.id)
+				return (<div className="Historic__Opponent"> against {infos.gamelogToUsers[0].user.username}</div>);
+		}		
+		else
+			return (<div className="Historic__Opponent"> against [deleted user]</div>);
 	}
 
 	return (
