@@ -1,4 +1,4 @@
-import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsString, MaxLength, Validate } from "class-validator";
 import { ChannelAccessAction } from "../enums/channel-access-action.enum";
 
 export class ChannelAccessDto {
@@ -10,6 +10,7 @@ export class ChannelAccessDto {
     @IsNotEmpty()
     @IsArray()
     @IsString({ each: true })
+    @MaxLength(25, { each: true })
     @ArrayMinSize(1)
     usernames: string[];
 
