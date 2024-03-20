@@ -3,6 +3,7 @@ export interface ProfileType {
 	firstName: string,
 	lastName:string,
 	picture: string,
+	elo: number
 }
 
 export interface UserType {

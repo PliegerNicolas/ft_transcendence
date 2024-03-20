@@ -6,6 +6,8 @@ import OnlineGame  from './OnlinePlay'
 import "../../styles/play.css";
 import { MyContext } from '../../utils/contexts.ts';
 import { useNavigate } from 'react-router-dom';
+import { useGet } from '../../utils/hooks.ts';
+import { UserType } from '../../utils/types.ts';
 
 // <Play /> ====================================================================
 
@@ -119,8 +121,6 @@ function Play()
 		navigate('/');
 	}
 
-	// Backend http requests ==============================================================================================================
-
 	return (
 		<main className="MainContent">
 			<div>
@@ -199,9 +199,38 @@ function Play()
 			</div> }
 			{gameReady === true ? <div></div> : <div>
 				<span className="Play__Instructions">Use W/S or 🔼/🔽 to control your paddle</span>
+				<div className="Ladder_Container">
+					<Ladder />
+				</div>
 			</div>}
 		</div>
 		</main>
+	);
+}
+
+function Ladder() {
+	const getUsers = useGet(["users"]);
+	if (!getUsers.isSuccess) {
+		return (
+			<div className="Ladder__Element">
+				<div className="Ladder__Error">Couldn't get ladder</div>
+			</div>
+		)
+	}
+
+	return (
+		<div className="Ladder__List">
+			<div className="Ladder__Title Ladder__ListHead">Ladder</div>
+			{
+				getUsers.data.sort((a: UserType, b: UserType) => b.profile.elo - a.profile.elo).map((user: UserType, index: number) =>
+					<div className="Ladder__Item">
+						<div className="Ladder__Index">#{index + 1} {index + 1 === 1 ? <>🏆</> : <></>}</div>
+						<div className="Ladder__Username">{user.username} </div>
+						<div className="Ladder__Elo">{user.profile.elo}</div>
+					</div>	
+				)
+			}
+		</div>
 	);
 }
 
