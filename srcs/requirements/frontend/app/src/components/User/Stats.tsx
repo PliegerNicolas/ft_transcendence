@@ -43,9 +43,6 @@ export default function Stats({username}: {username: string}) {
 }
 
 function Historic({infos, user}: {infos: GamelogsType, user: User}) {
-	console.log("user 0 : " + infos.gamelogToUsers[0]);
-	console.log("user 1 : " + infos.gamelogToUsers[1]);
-	
 	if (!user) {
 		return (<div className="Historic__Error">Couldn't get historic</div>)
 	}

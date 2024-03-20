@@ -163,7 +163,7 @@ const OnlineGame = (props: any) => {
 		if (socket) {
 			socket.on('startedGame', () => {
 				drawTimer();
-				console.log('Start game');
+				//console.log('Start game');
 				props.gameOver = false;
 			});
 			socket.on('updateGame', (new_gameState: InputPayloads) => {
@@ -171,7 +171,7 @@ const OnlineGame = (props: any) => {
 					requestAnimationFrame(() => drawGame(new_gameState));
 			});
 			socket.on('gameOver', (new_gameState: InputPayloads) => {
-				console.log('game is over');
+				//console.log('game is over');
 				props.gameOver = true;
 				props.onDataChange(true);
 				if (gameContext)
