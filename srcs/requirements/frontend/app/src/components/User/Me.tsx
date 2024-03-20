@@ -1,12 +1,11 @@
-import { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { Link } from "react-router-dom";
 import { UseQueryResult, useMutation } from "@tanstack/react-query";
 
 import { FriendshipContext, MyContext } from "../../utils/contexts.ts";
 import { FriendshipType } from "../../utils/types.ts"
 
 import Spinner from "../Spinner.tsx";
-import ConfirmPopup from "../ConfirmPopup.tsx";
 
 import UserInfos from "./UserInfos.tsx";
 
@@ -14,7 +13,6 @@ import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
 
 import "../../styles/user.css";
 import Stats from "./Stats.tsx";
-import { socket } from "../../App.tsx";
 
 // <Me /> ====================================================================
 
@@ -24,16 +22,8 @@ export default function Me()
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
-	const navigate = useNavigate();
-
-	const [popup, setPopup] = useState(false);
 
 	const getRelations = useGet(["relationships"]);
-
-	const delMe = useMutation({
-		mutationFn: () => api.delete("/me"),
-		onSettled: () => invalidate(["me"])
-	});
 
 	const patchRelation = useMutation({
 		mutationFn: ({them, status}: {them: string, status: string}) =>
@@ -46,11 +36,6 @@ export default function Me()
 		mutationFn: (them: string) => api.delete("/relationships/" + them),
 		onSettled: () => invalidate(["relationships"]),
 		onError: mutateError,
-	});
-
-	const backendLogout = useMutation({
-		mutationFn: () => api.post("/auth/logout", {}),
-		onSuccess: () => window.location.reload(),
 	});
 
 	if (!me) return (
@@ -92,28 +77,6 @@ export default function Me()
 				<h3>Statistics :</h3>
 				<Stats username={me.username}/>
 			</section>
-			<button
-				style={{margin: "0 15px"}}
-				className="danger"
-				onClick={() => setPopup(true)}
-			>
-				Delete account
-			</button>
-			{
-				popup &&
-				<ConfirmPopup
-					title="Are you sure you want to delete your account?"
-					text={<> Warning: This is a permanent operation! </>}
-					action="Delete"
-					cancelFt={() => setPopup(false)}
-					actionFt={() => {
-						delMe.mutate();
-						socket.emit('logOut');
-						navigate("/");
-						backendLogout.mutate();
-					}}
-				/>
-			}
 		</main>
 	);
 }
