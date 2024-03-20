@@ -7,15 +7,15 @@ import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../../game/server/game.constants'
 import { MessagePayloads } from '../../chats/types/messagePayloads.type';
 import { ChannelsService } from 'src/modules/chats/channels/services/channels/channels.service';
 
-let state: gameState[] = [];
-let player1ID: string[] = [];
-let player2ID: string[] = [];
+let state = new Map<string, gameState>();
+let player1ID = new Map<string, string>();
+let player2ID = new Map<string, string>();
 let playersQueue: string[] = [];
-let player1Username: string[] = [];
-let player2Username: string[] = [];
+let player1Username = new Map<string, string>();
+let player2Username = new Map<string, string>();
 
-let userByName: string[] = [];
-let userById: string[] = [];
+let userByName = new Map<string, string>();
+let userById = new Map<string, string>();
 
 @WebSocketGateway({ cors: true, namespace: 'socket' })
 export class SocketGateway implements OnModuleInit {
@@ -34,22 +34,21 @@ export class SocketGateway implements OnModuleInit {
 				console.log(socket.id + ' left socket');
 				this.server.emit('userLeftSocket', socket.id);
 				playersQueue = playersQueue.filter((id) => id != socket.id);
-				//userByName = userByName.filter((name) => name != userById[socket.id]);
-				userById = userById.filter((id) => id != socket.id);
-				player1ID = player1ID.filter((id) => id != socket.id);
-				player2ID = player2ID.filter((id) => id != socket.id);
+				userByName.delete(userById.get(socket.id));
+				userById.delete(socket.id);
+				player1ID.delete(socket.id);
+				player2ID.delete(socket.id);
 			});
 		});
 	}
 
 	@SubscribeMessage('userInfos')
 	handleGetUsername(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
-		console.log("----- USER INFOS -----");
-		if (!userById[client.id]) {
-			userByName[username] = client.id;
-			userById[client.id] = username;
-			console.log("USER : " + userById[client.id] + " with id : " + client.id + " has joined the socket !");
-			this.channelService.getAllChannels(userById[client.id]).then((chan) => {
+		if (!userById.has(client.id)) {
+			userByName.set(username, client.id);
+			userById.set(client.id, username);
+			console.log("USER : " + userById.get(client.id) + " with id : " + client.id + " has joined the socket !");
+			this.channelService.getAllChannels(userById.get(client.id)).then((chan) => {
 				for (let i = 0; chan[i]; i++) {
 						console.log("CLIENT JOINED CHANNEL : " + chan[i].channel.name);
 						client.join(chan[i].channel.name);
@@ -60,7 +59,7 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('rejoinChannels')
 	handleRejoinChannels(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
-		this.channelService.getAllChannels(userById[client.id]).then((channelSpec) => {
+		this.channelService.getAllChannels(userById.get(client.id)).then((channelSpec) => {
 			for (let i = 0; channelSpec[i]; i++) {
 				console.log("CLIENT JOINED CHANNEL : " + channelSpec[i].channel.name);
 				client.join(channelSpec[i].channel.name);
@@ -70,21 +69,22 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('newUsername')
 	handleNewUsername(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
-		if (userById[client.id]) {
-			userByName = userByName.filter((name) => name != userById[client.id]);
-			userByName[username] = client.id;
-			userById[client.id] = username;
-			console.log("USER : " + userById[client.id] + " with id : " + client.id + " has changed name !");
+		if (userById.get(client.id)) {
+			userByName.delete(userById.get(client.id));
+			userByName.set(username, client.id);
+			userById.set(client.id, username);
+			console.log("USER : " + userById.get(client.id) + " with id : " + client.id + " has changed name !");
 		}
 	}
 
 	@SubscribeMessage('logOut')
 	handleLogOut(@ConnectedSocket() client: Socket) {
+		console.log("LOG OUT");
 		playersQueue = playersQueue.filter((id) => id != client.id);
-		userByName = userByName.filter((name) => name != userById[client.id]);
-		userById = userById.filter((id) => id != client.id);
-		player1ID = player1ID.filter((id) => id != client.id);
-		player2ID = player2ID.filter((id) => id != client.id);
+		userByName.delete(userById.get(client.id));
+		userById.delete(client.id);
+		player1ID.delete(client.id);
+		player2ID.delete(client.id);
 	}
 
 	// Chat Handlers ==============================================================================================================	
@@ -105,28 +105,33 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('inviteToPrivate')
 	handleInviteToPrivate(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
-		console.log("INVITING USER : " + data.user + " WITH ID : " + userByName[data.user]);
-		if (userByName[data.user]) {
-			console.log("oui");
-			this.server.to(userByName[data.user]).emit('invitedToPrivate', userById[client.id], data.lobby);
+		console.log(userById.get(client.id) + " IS INVITING USER : " + data.user + " WITH ID : " + userByName.get(data.user));
+		if (userByName.has(data.user)) {
+			this.server.to(userByName.get(data.user)).emit('invitedToPrivate', userById.get(client.id), data.lobby);
 		}
 	}
 
 	@SubscribeMessage('acceptInvite')
 	handleAcceptInvite(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
-		console.log("USER : " + data.user + " INVITATION HAS BEEN ACCEPTED BY : " + userById[client.id]);
-		if (userByName[data.user]) {
-			console.log("caca");
-			this.server.to(userByName[data.user]).emit('inviteAccepted', userById[client.id], data.lobby);
+		console.log("USER : " + data.user + " INVITATION HAS BEEN ACCEPTED BY : " + userById.get(client.id));
+		if (userByName.has(data.user)) {
+			this.server.to(userByName.get(data.user)).emit('inviteAccepted', userById.get(client.id), data.lobby);
 		}
 	}
 
 	@SubscribeMessage('rejectInvite')
 	handleRejectInvite(@MessageBody() data: {user: string, lobby: string}, @ConnectedSocket() client: Socket) {
-		console.log("USER : " + data.user + " INVITATION HAS BEEN REFUSED BY : " + userById[client.id]);
-		if (userByName[data.user]) {
-			console.log("caca");
-			this.server.to(userByName[data.user]).emit('inviteRejected', userById[client.id], data.lobby);
+		console.log("USER : " + data.user + " INVITATION HAS BEEN REFUSED BY : " + userById.get(client.id));
+		if (userByName.has(data.user)) {
+			this.server.to(userByName.get(data.user)).emit('inviteRejected', userById.get(client.id), data.lobby);
+		}
+	}
+
+	@SubscribeMessage('refreshLobby')
+	handleRefreshLobby(@MessageBody() data: {lobby: string, playerNumber: number}, @ConnectedSocket() client: Socket) {
+		console.log("USER : " + userById.get(client.id) + " LOBBY HAS BEEN REFRESHED");
+		if (userById.has(client.id)) {
+			this.server.to(client.id).emit('changeLobby', data.lobby, data.playerNumber);
 		}
 	}
 
@@ -134,19 +139,19 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('opponentLeft')
 	handleOpponentLeft(@MessageBody() data: {userId: string, lobby: string}, @ConnectedSocket() client: Socket) {
-		if (player1ID[data.lobby] === data.userId) {
-			if (state[data.lobby]) {
-				state[data.lobby].score.player2 = 5;
+		if (player1ID.get(data.lobby) === data.userId) {
+			if (state.has(data.lobby)) {
+				state.get(data.lobby).score.player2 = 5;
 			}
-			player1ID = player1ID.filter((id) => id != data.userId);
+			player1ID.delete(data.userId);
 		}
-		else if (player2ID[data.lobby] === data.userId) {
-			if (state[data.lobby]) {
-				state[data.lobby].score.player1 = 5;
+		else if (player2ID.get(data.lobby) === data.userId) {
+			if (state.has(data.lobby)) {
+				state.get(data.lobby).score.player1 = 5;
 			}
-			player2ID = player2ID.filter((id) => id != data.userId);
+			player2ID.delete(data.userId);
 		}
-		if (!state[data.lobby])
+		if (!state.has(data.lobby))
 			this.server.to(data.lobby).emit('leaveLobby');
 	}
 
@@ -172,44 +177,44 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('ready')
 	handleReady(@MessageBody() data: {lobby: string, playerNumber: number, playerName: string}, @ConnectedSocket() client: Socket) {
-		if (!player1ID[data.lobby] && data.playerNumber === 1) {
-			player1ID[data.lobby] = client.id;
-			player1Username[data.lobby] = data.playerName;
+		if (!player1ID.has(data.lobby) && data.playerNumber === 1) {
+			player1ID.set(data.lobby, client.id);
+			player1Username.set(data.lobby, data.playerName);
 			client.join(data.lobby);
 		}
-		else if (!player2ID[data.lobby] && data.playerNumber === 2) {
-			player2ID[data.lobby] = client.id;
-			player2Username[data.lobby] = data.playerName;
+		else if (!player2ID.has(data.lobby) && data.playerNumber === 2) {
+			player2ID.set(data.lobby, client.id);
+			player2Username.set(data.lobby, data.playerName);
 			client.join(data.lobby);
 		}
-		if (player1ID[data.lobby] && player2ID[data.lobby]) {
+		if (player1ID.has(data.lobby) && player2ID.has(data.lobby)) {
 			this.server.to(data.lobby).emit(
 				'gameReady',
-				player1Username[data.lobby],
-				player2Username[data.lobby],
-				player1ID[data.lobby],
-				player2ID[data.lobby]
+				player1Username.get(data.lobby),
+				player2Username.get(data.lobby),
+				player1ID.get(data.lobby),
+				player2ID.get(data.lobby)
 			);
 			setTimeout(() => {this.server.to(data.lobby).emit('startedGame')}, 200);
-			state[data.lobby] = this.gameServer.createGameState();
-			state[data.lobby].player1ID = player1ID[data.lobby];
-			state[data.lobby].player2ID = player2ID[data.lobby];
-			setTimeout(() => {this.gameServer.startGameInterval(data.lobby, state[data.lobby], this.server, player1Username[data.lobby], player2Username[data.lobby])}, 3200);
+			state.set(data.lobby, this.gameServer.createGameState());
+			state.get(data.lobby).player1ID = player1ID.get(data.lobby);
+			state.get(data.lobby).player2ID = player2ID.get(data.lobby);
+			setTimeout(() => {this.gameServer.startGameInterval(data.lobby, state.get(data.lobby), this.server, player1Username.get(data.lobby), player2Username.get(data.lobby))}, 3200);
 		}
 	}
 
 	@SubscribeMessage('notReady')
 	handleNotReady(@MessageBody() data: {lobby: string, playerNumber: number}, @ConnectedSocket() client: Socket) {
-		if (player1ID[data.lobby] && data.playerNumber === 1) {
+		if (player1ID.has(data.lobby) && data.playerNumber === 1) {
 			console.log('NOT READY : ' + client.id);
-   			player1ID = player1ID.filter((id) => id != client.id);
-			console.log('player1ID should be null/undefined : ' + player1ID[data.lobby]);
+   			player1ID.delete(client.id);
+			console.log('player1ID should be null/undefined : ' + player1ID.get(data.lobby));
 			client.leave(data.lobby);
 		}
-		else if (player2ID[data.lobby]  && data.playerNumber === 2) {
+		else if (player2ID.has(data.lobby)  && data.playerNumber === 2) {
 			console.log('NOT READY : ' + client.id);
-			player2ID = player2ID.filter((id) => id != client.id);
-			console.log('player2ID should be null/undefined : ' + player2ID[data.lobby]);
+			player2ID.delete(client.id);
+			console.log('player2ID should be null/undefined : ' + player2ID.get(data.lobby));
 			client.leave(data.lobby);
 		}
 	}
@@ -217,19 +222,19 @@ export class SocketGateway implements OnModuleInit {
 	@SubscribeMessage('keyDown')
 	handleKeyDown(@MessageBody() data: {key: string, lobby: string}, @ConnectedSocket() client: Socket) {
 		if (data.key === 'w' || data.key === 'ArrowUp') {
-			if (state[data.lobby].player1ID === client.id && state[data.lobby].player1.y - PADDLE_SPEED > 0) {
-				state[data.lobby].player1.speed = -Math.abs(PADDLE_SPEED);
+			if (state.get(data.lobby).player1ID === client.id && state.get(data.lobby).player1.y - PADDLE_SPEED > 0) {
+				state.get(data.lobby).player1.speed = -Math.abs(PADDLE_SPEED);
 			}
-			else if (state[data.lobby].player2ID === client.id && state[data.lobby].player2.y - PADDLE_SPEED > 0) {
-				state[data.lobby].player2.speed = -Math.abs(PADDLE_SPEED);
+			else if (state.get(data.lobby).player2ID === client.id && state.get(data.lobby).player2.y - PADDLE_SPEED > 0) {
+				state.get(data.lobby).player2.speed = -Math.abs(PADDLE_SPEED);
 			}
 		}
 		else if (data.key === 's' || data.key === 'ArrowDown') {
-			if (state[data.lobby].player1ID === client.id && state[data.lobby].player1.y + PADDLE_SPEED < WINDOW_HEIGHT) {
-				state[data.lobby].player1.speed = Math.abs(PADDLE_SPEED);
+			if (state.get(data.lobby).player1ID === client.id && state.get(data.lobby).player1.y + PADDLE_SPEED < WINDOW_HEIGHT) {
+				state.get(data.lobby).player1.speed = Math.abs(PADDLE_SPEED);
 			}
-			else if (state[data.lobby].player2ID === client.id && state[data.lobby].player2.y + PADDLE_SPEED < WINDOW_HEIGHT) {
-				state[data.lobby].player2.speed = Math.abs(PADDLE_SPEED);
+			else if (state.get(data.lobby).player2ID === client.id && state.get(data.lobby).player2.y + PADDLE_SPEED < WINDOW_HEIGHT) {
+				state.get(data.lobby).player2.speed = Math.abs(PADDLE_SPEED);
 			}
 		}
 	}
@@ -237,19 +242,19 @@ export class SocketGateway implements OnModuleInit {
 	@SubscribeMessage('keyUp')
 	handleKeyUp(@MessageBody() data: {key: string, lobby: string}, @ConnectedSocket() client: Socket) {
 		if (data.key === 'w' || data.key === 'ArrowUp') {
-			if (state[data.lobby].player1ID === client.id) {
-				state[data.lobby].player1.speed = 0;
+			if (state.get(data.lobby).player1ID === client.id) {
+				state.get(data.lobby).player1.speed = 0;
 			}
-			else if (state[data.lobby].player2ID === client.id) {
-				state[data.lobby].player2.speed = 0;
+			else if (state.get(data.lobby).player2ID === client.id) {
+				state.get(data.lobby).player2.speed = 0;
 			}
 		}
 		else if (data.key === 's' || data.key === 'ArrowDown') {
-			if (state[data.lobby].player1ID === client.id) {
-					state[data.lobby].player1.speed = 0;
+			if (state.get(data.lobby).player1ID === client.id) {
+					state.get(data.lobby).player1.speed = 0;
 			}
-			else if (state[data.lobby].player2ID === client.id) {
-				state[data.lobby].player2.speed = 0;
+			else if (state.get(data.lobby).player2ID === client.id) {
+				state.get(data.lobby).player2.speed = 0;
 			}
 		}
 	}
@@ -266,6 +271,6 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('gameEnded')
 	handleSentLogs(@MessageBody() lobby: string) {
-		this.server.to(lobby).emit('drawEndGame', state[lobby]);
+		this.server.to(lobby).emit('drawEndGame', state.get(lobby));
 	}
 }

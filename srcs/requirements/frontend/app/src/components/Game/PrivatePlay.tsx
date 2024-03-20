@@ -22,6 +22,7 @@ const PrivatePlay = () => {
 	const [inviteState, setInviteState] = useState(false);
 
 	const [lobby, setLobby] = useState<string>(data.lobby);
+	const [playerNumber, setPlayerNumber] = useState<number>(data.playerNumber);
 	const [oppId, setOppId] = useState('');
 	const [oppName, setOppName] = useState('');
 
@@ -33,10 +34,9 @@ const PrivatePlay = () => {
 	const navigate = useNavigate();
 
 	const destroySocketListeners = () => {
-		socket.off('userJoinedSocket');
 		socket.off('userLeftSocket');
 		socket.off('leaveLobby');
-		socket.off('gameFound');
+		socket.off('changeLobby');
 		socket.off('gameReady');
 		socket.off('inviteRejected');
 		socket.off('inviteAccepted');
@@ -48,35 +48,34 @@ const PrivatePlay = () => {
 
 	useEffect(() => {
 		if (socket) {
-			socket.on('userJoinedSocket', (newUserId: string) => {
-				console.log('New user connected:', newUserId);
-			});
 			socket.on('userLeftSocket', (userId: string) => {
-				console.log('User disconnected:', userId);
+				//console.log('User disconnected:', userId);
 				if (userId === oppId) {
-					console.log('opponent left lobby');
+					//console.log('opponent left lobby');
 					socket.emit('opponentLeft', {userId, lobby});
 					setOppId('');
-					if (gameOver === true) {
-						setLobby('');
-						setGameReady(false);
-					}
 				}
 			});
 			socket.on('leaveLobby', () => {
 				setPlayerReady(false);
 				setLobby('');
 			});
+			socket.on('changeLobby', (lobby: string, playerNb: number) => {
+				setLobby(lobby);
+				setPlayerNumber(playerNb);
+				setPlayerReady(false);
+				//console.log("lobby : " + lobby + " has been changed !");
+			});
 			socket.on('gameReady', (player1Name: string, player2Name: string, player1ID: string, player2ID: string) => {
-				if (data.playerNumber === 1) {
+				if (playerNumber === 1) {
 					setOppName(player2Name);
 					setOppId(player2ID);
 				}
-				if (data.playerNumber === 2) {
+				if (playerNumber === 2) {
 					setOppName(player1Name);
 					setOppId(player1ID)
 				}
-				console.log(oppName);
+				//console.log(oppName);
 				setGameReady(true);
 			});
 			socket.on('inviteRejected', () => {
@@ -92,17 +91,18 @@ const PrivatePlay = () => {
 		return () => {
 			if (socket)
 				destroySocketListeners();
+			window.history.replaceState({}, '');
 		};
 	}, [[]]);
 
 	const readyCheckHandler = () => {
-		socket.emit('ready', {lobby: lobby, playerNumber: data.playerNumber, playerName: me.username});
-		console.log('lobby : ' + lobby + ', playerNumber : ' + data.playerNumber);
+		socket.emit('ready', {lobby: lobby, playerNumber: playerNumber, playerName: me.username});
+		//console.log('lobby : ' + lobby + ', playerNumber : ' + playerNumber);
 		setPlayerReady(true);
 	}
 
 	const notReadyCheckHandler = () => {
-		socket.emit('notReady', { lobby: lobby, playerNumber: data.playerNumber});
+		socket.emit('notReady', { lobby: lobby, playerNumber: playerNumber});
 		setPlayerReady(false);
 	}
 
@@ -155,7 +155,7 @@ const PrivatePlay = () => {
 						gameOver={gameOver}
 						oppId={oppId}
 						oppName={oppName}
-						playerNumber={data.playerNumber}
+						playerNumber={playerNumber}
 						backgroundColor={backgroundColor}
 						paddlesColor={paddlesColor}
 						ballColor={ballColor}
@@ -166,7 +166,7 @@ const PrivatePlay = () => {
 						<button className="Play__BackToMenu" onClick={backToMenuHandler}>Back to Menu</button>
 					</div> : <div></div>}
 				</div> : <div>
-					{inviteState === false && data.playerNumber === 1 ? <div>
+					{inviteState === false && playerNumber === 1 ? <div>
 						<div className="Play__ReadyCheckText">
 							<span>Invitation pending</span>
 						</div>

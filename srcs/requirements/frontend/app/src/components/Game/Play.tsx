@@ -34,7 +34,6 @@ function Play()
 	const navigate = useNavigate();
 
 	const destroySocketListeners = () => {
-		socket.off('userJoinedSocket');
 		socket.off('userLeftSocket');
 		socket.off('leaveLobby');
 		socket.off('gameFound');
@@ -47,13 +46,10 @@ function Play()
 
 	useEffect(() => {
 		if (socket) {
-			socket.on('userJoinedSocket', (newUserId: string) => {
-				console.log('New user connected:', newUserId);
-			});
 			socket.on('userLeftSocket', (userId: string) => {
-				console.log('User disconnected:', userId);
+				//console.log('User disconnected:', userId);
 				if (userId === oppId) {
-					console.log('opponent left lobby');
+					//console.log('opponent left lobby');
 					socket.emit('opponentLeft', {userId, lobby});
 					setOppId('');
 					if (gameOver === true) {
@@ -68,7 +64,7 @@ function Play()
 				setLobby('');
 			});
 			socket.on('gameFound', (player_number: number, lobby_id: string, opp_id: string) => {
-				console.log('lobby : ' + lobby_id + ' joined');
+				//console.log('lobby : ' + lobby_id + ' joined');
 				setLobby(lobby_id);
 				setPlayerNumber(player_number);
 				setOppId(opp_id);
@@ -85,7 +81,7 @@ function Play()
 					if (!oppId)
 						setOppId(player1ID)
 				}
-				console.log(oppName);
+				//console.log(oppName);
 				setGameReady(true);
 			});
 		}
@@ -108,7 +104,7 @@ function Play()
 	const joinQueueHandler = () => {
 		setInQueue(true);
 		socket.emit('joinQueue');
-		console.log('joinedQueue');
+		//console.log('joinedQueue');
 	}
 
 	const leaveQueueHandler = () => {
