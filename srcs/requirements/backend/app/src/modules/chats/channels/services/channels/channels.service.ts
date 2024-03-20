@@ -116,7 +116,8 @@ export class ChannelsService {
                 where: {
                     mode: ChannelMode.PRIVATE,
                     members: { user: { username: In(usernames) } },
-                }
+                },
+                relations: ['members'],
             });
 
             if (channel?.members?.length === usernames.length) throw new BadRequestException(`A private channel between ${usernames.join(', ')} already exists`);
