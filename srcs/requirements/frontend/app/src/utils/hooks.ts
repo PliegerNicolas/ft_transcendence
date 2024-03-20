@@ -31,7 +31,7 @@ export function useStopOnHttp()
 	});
 }
 
-export function useRetryMutation()
+export function useRetryMutate()
 {
 	const { setLogged, api } = useContext(MyContext);
 
@@ -53,7 +53,9 @@ export function useMutateError()
 {
 	const { addNotif } = useContext(MyContext);
 
-	return ((error: Error) => { addNotif({content: error.message}); })
+	return ((error: Error) => {
+		addNotif({content: error.message});
+	})
 }
 
 export function useGet(key: QueryKey, enabled = true)

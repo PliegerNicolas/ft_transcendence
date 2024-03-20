@@ -2,7 +2,7 @@ import { useState, useContext, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, MutationFunction } from "@tanstack/react-query";
 
-import { useMutateError, useInvalidate, useGet } from "../../utils/hooks.ts";
+import { useMutateError, useInvalidate, useGet, useRetryMutate } from "../../utils/hooks.ts";
 import { httpStatus } from "../../utils/utils.ts";
 import { ChanSpecsType, ChanType, MemberType } from "../../utils/types.ts";
 import { ChatContentContext, MyContext } from "../../utils/contexts.ts";
@@ -32,6 +32,7 @@ export default function ChanEdit({id}: {id: number})
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
 	const navigate = useNavigate();
+	const retryMutate = useRetryMutate();
 
 	const [chanForm, setChanForm] = useState<ChanType>({
 		name: "New Channel",
@@ -66,11 +67,20 @@ export default function ChanEdit({id}: {id: number})
 		});
 	}
 
+	const postDm = useMutation({
+		mutationFn: (username: string) => api.post("/channels/mp", {username}),
+		onError: mutateError,
+		onSettled: () => invalidate(["channels"]),
+		onSuccess: (data: ChanSpecsType) => navigate("/chat/" + data.channel.id),
+		retry: retryMutate,
+	});
+
 	const postChan = useMutation({
 		mutationFn: ((data: ChanSpecsType) => api.post("/channels", data)) as MutationFunction<ChanSpecsType>,
 		onError: mutateError,
 		onSettled: () => invalidate(["channels"]),
-		onSuccess: (data: ChanSpecsType) => navigate("/chat/" + data.channel.id)
+		onSuccess: (data: ChanSpecsType) => navigate("/chat/" + data.channel.id),
+		retry: retryMutate,
 	});
 
 	const patchChan = useMutation({
@@ -80,13 +90,15 @@ export default function ChanEdit({id}: {id: number})
 				return api.patch("/channels/" + id, data)}) as MutationFunction<ChanSpecsType>,
 		onError: mutateError,
 		onSettled: () => invalidate(["channels"]),
-		onSuccess: ((data: ChanSpecsType) => navigate("/chat/" + data.channel.id))
+		onSuccess: ((data: ChanSpecsType) => navigate("/chat/" + data.channel.id)),
+		retry: retryMutate,
 	});
 
 	const patchChanNoRedirect = useMutation({
 		mutationFn: ((data: ChanSpecsType) => api.patch("/channels/" + id, data)) as MutationFunction<ChanSpecsType>,
 		onError: mutateError,
-		onSuccess: (data: ChanSpecsType) => invalidate(["channels", data.channel.id])
+		onSuccess: (data: ChanSpecsType) => invalidate(["channels", data.channel.id]),
+		retry: retryMutate,
 	});
 
 	function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -138,31 +150,8 @@ export default function ChanEdit({id}: {id: number})
 	}
 
 	async function newDm() {
-		try {
-			const them = await api.get("/users/" + dmUsername);
-
-			const dmChan = await api.post("/channels", {
-				name: "__DM__," + me?.username + "," + them.username,
-				visibility: "hidden",
-				mode: "invite_only"
-			});
-
-			api.patch("/channels/" + dmChan.id + "/manage_access", {
-				action: "invite",
-				usernames: [them.username],
-			})
-
-			console.log(dmChan);
-			invalidate(["channels"]);
-		}
-		catch (e) {
-			if (!(e instanceof Error))
-				return ;
-			if (httpStatus(e) == 404)
-				addNotif({content: "No such user!"});
-			else
-				addNotif({content: e.message});
-		}
+		console.log(dmUsername);
+		postDm.mutate(dmUsername);
 	}
 
 	if (!id) return (
