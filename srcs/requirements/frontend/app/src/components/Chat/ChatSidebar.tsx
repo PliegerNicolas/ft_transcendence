@@ -69,50 +69,43 @@ export default function ChatSidebar() {
 		<div className={
 			`ChatSidebar ${showSidebar < 0 && "collapse"} ${showSidebar > 1 && "expand"}`
 		}>
-			<h3 className="ChatSidebar__Title">
-				DMs
+			<h3 className="ChatSidebar__Title first">
+				Chat
 				<Link to="new" className="ChatSidebar__Add">
 					<img src={add} />
 				</Link>
 			</h3>
-			<ChanList
-				id={id}
-				isDm={true}
-				chans={dmChans}
-			/>
-			<hr />
-			<h4 className="ChatSidebar__Title">
-				All channels:
-			</h4>
-			<ChanList
-				id={id}
-				isDm={false}
-				chans={memberChans}
-			/>
-			<hr />
-			<h4 className="ChatSidebar__Title">
-				All channels:
-			</h4>
-			<ChanList
-				id={id}
-				isDm={false}
-				chans={allChans}
-			/>
+			{
+				!!dmChans.length &&
+				<ChanList id={id} isDm={true} chans={dmChans} title="Your DMs:"/>
+			}
+			{
+				!!memberChans.length &&
+				<ChanList id={id} isDm={false} chans={memberChans} title="Your channels:" />
+			}
+			{
+				!!allChans.length &&
+				<ChanList id={id} isDm={false} chans={allChans} title="All channels:" />
+			}
 		</div>
 	);
 }
 
 function ChanList(
-	{chans, id, isDm}:
-	{chans: ChanSpecsType[], id: string, isDm: boolean}
+	{chans, id, isDm, title}:
+	{chans: ChanSpecsType[], id: string, isDm: boolean, title: string}
 )
 {
 	return (
 		<div className="Chat__Chanlist">
-		{
-			chans.map((chan: ChanSpecsType) =>
-				<ChanListItem key={chan.channel.id} isDm={isDm} chan={chan} id={id} />)
-		}
+			{
+				title !== "Your DMs:" && <hr />
+			}
+			<h4 className="ChatSidebar__Title">{title}</h4>
+			{
+				chans.map((chan: ChanSpecsType) =>
+					<ChanListItem key={chan.channel.id} isDm={isDm} chan={chan} id={id} />)
+			}
 		</div>
 	);
 }

@@ -222,8 +222,10 @@ function Ladder() {
 		<div className="Ladder__List">
 			<div className="Ladder__Title Ladder__ListHead">Ladder</div>
 			{
-				getUsers.data.sort((a: UserType, b: UserType) => b.profile.elo - a.profile.elo).map((user: UserType, index: number) =>
-					<div className="Ladder__Item">
+				getUsers.data
+					.sort((a: UserType, b: UserType) => b.profile.elo - a.profile.elo)
+					.map((user: UserType, index: number) =>
+					<div className="Ladder__Item" key={user.id}>
 						<div className="Ladder__Index">#{index + 1} {index + 1 === 1 ? <>🏆</> : <></>}</div>
 						<div className="Ladder__Username">
 							<Link to={"/user/" + user.username}>

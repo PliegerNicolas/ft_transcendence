@@ -22,7 +22,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 	function humanFileSize(size: number) {
     var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
     return +(size / Math.pow(1024, i)).toFixed(2) * 1 + ' '
-			+ ['', '', 'MB', 'GB', 'TB'][i];
+			+ ['', 'KiB', 'MiB', 'GiB', 'TiB'][i];
 	}
 
 	async function postPic(file: File) {
@@ -30,14 +30,14 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 			addNotif({
 				type: 1,
 				content: `This file is too big (${humanFileSize(file.size)}),
-				the limit is 5MB.`});
+				the limit is 1MiB.`});
 			return ;
 		}
 
 		const data = new FormData()
 		data.append('picture', file);
 
-		const res = await fetch(`https://${location.hostname}:3450/picture`, {
+		const res = await fetch(`https://${location.hostname}:4433/api/picture`, {
 				method: "PUT",
 				credentials: "include",
 				body: data
