@@ -8,6 +8,7 @@ import defaultPicture from "../../assets/default_profile.png";
 import camera from "../../assets/camera.svg";
 import { useMutation } from "@tanstack/react-query";
 import ConfirmPopup from "../ConfirmPopup";
+import { socket } from "../../App";
 
 export default function UserInfos({user, me}: {user: UserType, me: boolean})
 {
@@ -90,7 +91,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 				</div>
 				<div className="genericList User__InfoItems">
 					<div><div>Id</div> <div>{"#" + user.id}</div></div>
-					<div><div>Username</div> <div>{"@" + user.username} <button onClick={() => setNameEditPopup(true)}>edit</button></div></div>
+					<div><div>Username</div> <div>{"@" + user.username}<button className="User__EditButton" onClick={() => setNameEditPopup(true)}>edit</button></div></div>
 					<div><div>First Name</div> <div>{user.profile.firstName}</div></div>
 					<div><div>Last Name</div> <div>{user.profile.lastName}</div></div>
 				</div>
@@ -115,7 +116,12 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 						setNameEditPopup(false);
 					}}
 					action="Confirm"
-					actionFt={() => {patchUser.mutate({username: newUsername}); setNameEditPopup(false)}}
+					actionFt={() => {
+						patchUser.mutate({username: newUsername});
+						setNameEditPopup(false);
+						socket.emit('newUsername', newUsername);
+						setNewUsername('');
+					}}
 				/>
 			}
 		</>
