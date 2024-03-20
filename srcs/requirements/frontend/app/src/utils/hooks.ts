@@ -2,6 +2,7 @@ import { useQueryClient, QueryKey, useQuery, useMutation } from "@tanstack/react
 import { useContext } from "react";
 import { MyContext } from "./contexts";
 import { httpStatus } from "./utils";
+import { useNavigate } from "react-router";
 
 export function useInvalidate()
 {
@@ -77,12 +78,27 @@ export function useSetMe()
 {
 	const { api } = useContext(MyContext);
 	const mutateError = useMutateError();
+	const navigate = useNavigate();
 
 	const mutation = useMutation({
 		mutationFn: ((name: string) => api.post("/auth/log_as/" + name, {})),
-		onSuccess: () => window.location.reload(),
+		onSuccess: () => {navigate("/"); window.location.reload()},
 		onError: mutateError,
 	});
 
 	return ((name: string) => mutation.mutate(name));
+}
+
+export function useDmName()
+{
+	const {me} = useContext(MyContext);
+
+	return (name: string) => {
+		if (name.slice(0, 4) !== "MP: ")
+			return ("");
+		const array = name.slice(4).split(", ");
+		if (array[0] === me!.username)
+			return ("@" + array[1]);
+		return ("@" + array[0]);
+	}
 }

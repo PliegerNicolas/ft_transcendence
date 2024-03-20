@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, MutationFunction } from "@tanstack/react-query";
 
 import { useMutateError, useInvalidate, useGet, useRetryMutate } from "../../utils/hooks.ts";
-import { httpStatus } from "../../utils/utils.ts";
 import { ChanSpecsType, ChanType, MemberType } from "../../utils/types.ts";
 import { ChatContentContext, MyContext } from "../../utils/contexts.ts";
 
@@ -26,7 +25,7 @@ import UserSuggestions from "../UserSuggestions.tsx";
 
 export default function ChanEdit({id}: {id: number})
 {
-	const { api, addNotif, me } = useContext(MyContext);
+	const { api } = useContext(MyContext);
 	const { chan, role } = useContext(ChatContentContext);
 
 	const mutateError = useMutateError();

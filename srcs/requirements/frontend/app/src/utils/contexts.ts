@@ -30,4 +30,5 @@ export const ChatContentContext = createContext({
 	chan: {} as ChanType,
 	role: "member",
 	idMap: {} as {[memberId: string]: number},
+	dmName: "",
 });
