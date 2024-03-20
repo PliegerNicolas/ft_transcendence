@@ -5,6 +5,7 @@ import { ParseUsernamePipe } from 'src/common/pipes/parse-username/parse-usernam
 import { Response } from 'express';
 import { RoleGlobalGuard } from 'src/guards/role.guard';
 import { GlobalRole } from 'src/guards/role.decorator';
+import {AuthDto } from './dtos/auth.dtos';
 
 @Controller('auth')
 export class AuthController {
@@ -12,11 +13,11 @@ export class AuthController {
 	
 	@HttpCode(HttpStatus.OK)
 	@Post()
-	async signIn(@Body() oauthToken:JSON,
+	async signIn(@Body() {code, redirect_uri}:AuthDto,
 				@Res({passthrough : true}) res : Response
 				) {
 		// console.log("controller")
-		const ret = await (this.authService.signIn(oauthToken)).then(
+		const ret = await (this.authService.signIn(code, redirect_uri)).then(
 			(data) => data
 		);
 		res.cookie("access_token", ret.access_token,{maxAge: 1600000, httpOnly: true, sameSite: 'none', secure:true });
