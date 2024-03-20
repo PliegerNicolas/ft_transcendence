@@ -30,6 +30,12 @@ export type CreateChannelParams = {
 
 };
 
+export type CreatePrivateChannelParams = {
+
+    username: string;
+
+}
+
 export type ReplaceChannelParams = {
 
     name: string;

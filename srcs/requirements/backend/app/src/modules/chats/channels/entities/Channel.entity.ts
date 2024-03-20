@@ -1,5 +1,5 @@
 import { IsEnum } from "class-validator";
-import { AfterLoad, BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { AfterLoad, AfterUpdate, BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ChannelVisibility } from "../enums/channel-visibility.enum";
 import { ChannelMode } from "../enums/channel-mode.enum";
 import { User } from "../../../users/entities/User.entity";
@@ -55,6 +55,7 @@ export class Channel {
     /* Helper Functions */
 
     @AfterLoad()
+    @AfterUpdate()
     populateMemberStatusFields(): void {
         this.invitedMembers = this.members?.filter((member) => member.invited) || [];
         this.bannedMembers = this.members?.filter((member) => member.banned) || [];
@@ -79,6 +80,7 @@ export class Channel {
     }
 
     private ensureOwnerExists(): void {
+        if (this.mode === ChannelMode.PRIVATE) return ;
         if (!this.members || this.members.length === 0) return ;
         if (this.members.some((member) => member.role === ChannelRole.OWNER && member.active)) return ;
 

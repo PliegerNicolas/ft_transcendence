@@ -10,9 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/default-layout": "^3.12.0",
+    "@react-pdf/renderer": "^3.4.0",
     "@tanstack/react-query": "^5.17.15",
+    "pdfjs-dist": "^3.4.120",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-pdf": "^7.7.1",
     "react-router-dom": "^6.21.1",
     "socket.io-client": "^4.7.4",
     "uuid": "^9.0.1"

@@ -13,6 +13,7 @@ import Login from "./Login.tsx";
 
 import { MyContext } from "../utils/contexts.ts";
 import { useGet, useSetMe } from "../utils/hooks.ts";
+import { socket } from "../App.tsx";
 
 function useOutsideClick(callback: (event: MouseEvent) => void) {
   const ref = useRef<HTMLDivElement>(null);
@@ -168,6 +169,7 @@ function Logout()
 
 	function logoutNow() {
 		setLogged(false);
+		socket.emit('logOut');
 		backendLogout.mutate();
 	}
 
