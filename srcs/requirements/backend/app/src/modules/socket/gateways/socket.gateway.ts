@@ -34,7 +34,7 @@ export class SocketGateway implements OnModuleInit {
 				console.log(socket.id + ' left socket');
 				this.server.emit('userLeftSocket', socket.id);
 				playersQueue = playersQueue.filter((id) => id != socket.id);
-				userByName = userByName.filter((name) => name != userById[socket.id]);
+				//userByName = userByName.filter((name) => name != userById[socket.id]);
 				userById = userById.filter((id) => id != socket.id);
 				player1ID = player1ID.filter((id) => id != socket.id);
 				player2ID = player2ID.filter((id) => id != socket.id);
