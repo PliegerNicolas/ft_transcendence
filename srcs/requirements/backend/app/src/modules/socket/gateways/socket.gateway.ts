@@ -90,10 +90,24 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('getUserStatus')
 	handleGetUserStatut(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
+		for (let value of player1ID.values()) {
+			if (value === userByName.get(username)) {
+				this.server.to(client.id).emit('userStatus', username, "in game");
+				return ;
+			}
+		}
+		for (let value of player2ID.values()) {
+			if (value === userByName.get(username)) {
+				this.server.to(client.id).emit('userStatus', username, "in game");
+				return ;
+			}
+		}
 		if (userByName.has(username)) {
 			this.server.to(client.id).emit('userStatus', username, "online");
 		}
-		this.server.to(client.id).emit('userStatus', username, "offline");
+		else {
+			this.server.to(client.id).emit('userStatus', username, "offline");
+		}
 	}
 
 	// Chat Handlers ==============================================================================================================	
@@ -295,11 +309,11 @@ export class SocketGateway implements OnModuleInit {
 	handleSentLogs(@MessageBody() lobby: string, @ConnectedSocket() client: Socket) {
 		this.server.to(lobby).emit('drawEndGame', state.get(lobby));
 		if (player1ID.has(lobby)) {
-			this.server.to(client.id).emit('userStatus', userById.get(client.id), "online");
+			this.server.emit('userStatus', userById.get(client.id), "online");
 			player1ID.delete(lobby);
 		}
 		else if (player2ID.has(lobby)) {
-			this.server.to(client.id).emit('userStatus', userById.get(client.id), "online");
+			this.server.emit('userStatus', userById.get(client.id), "online");
 			player2ID.delete(lobby);
 		}
 	}
