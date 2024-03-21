@@ -46,10 +46,11 @@ function User()
 	const [status, setStatus] = useState("offline");
 
 	useEffect(() => {
-		socket.on("useStatus", (username: string, status: string) => {
-			console.log("STATUS UPDATE")
-			console.log("USERNAME" + username);
-			console.log("STATUS" + status);
+		socket.on("userStatus", (username: string, status: string) => {
+			console.log("STATUS UPDATE ")
+			console.log("USERNAME " + username);
+			console.log("STATUS " + status);
+			console.log("username " + getUser.data?.username);
 			if (username === getUser.data?.username)
 				setStatus(status);
 		});

@@ -11,9 +11,8 @@
 	justify-content: center;
 	align-items: center;
 
-	width: 30vw;
-	height: 20vh;
-  	font-size: 8vh;
+	padding: 15px 30px;
+  	font-size: 2rem;
 	margin: 5px auto 15px;
 
 	object-fit: contain;
@@ -32,9 +31,8 @@
 	justify-content: center;
 	align-items: center;
 
-	width: 10vw;
-	height: 5vh;
-  	font-size: 2vh;
+	padding: 15px 30px;
+  	font-size: 2rem;
 
 	object-fit: contain;
 	box-shadow: 0 0 12px #000a;
@@ -191,7 +189,7 @@ select:focus {
 }
 
 .Play__Instructions {
-	font-size: 1.5rem;
+	font-size: 1.4rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;

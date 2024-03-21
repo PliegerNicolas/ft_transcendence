@@ -70,11 +70,9 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 
 	return (
 		<>
-			<h2>
+			<h2 style={{marginLeft: "20px"}}>
 			{
-				user.profile.firstName
-				+ " « " + user.username + " » "
-				+ user.profile.lastName
+				user.username
 			}
 			</h2>
 			<div className="User__Infos">
