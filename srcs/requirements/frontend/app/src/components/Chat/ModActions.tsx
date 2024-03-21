@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { ChatContentContext, MyContext } from "../../utils/contexts";
 import { useInvalidate, useMutateError } from "../../utils/hooks";
 import { MemberType } from "../../utils/types";
@@ -20,15 +20,21 @@ export default function ModActions(
 	const mutateError = useMutateError();
 	const invalidate = useInvalidate();
 
-	const action = useMutation({
-		mutationFn: (action: string) =>
+	const [duration, setDuration] = useState("60");
+
+	const actionMutate = useMutation({
+		mutationFn: ({action, duration}: {action: string, duration: string | undefined}) =>
 			api.patch(
 				"/channels/" + chan.id + "/manage_access",
-				{action, usernames: [username]}
+				{action, usernames: [username], muteDuration: duration}
 			),
 		onError: mutateError,
 		onSuccess: () => invalidate(["channels", chan.id]),
 	});
+
+	function mutate(action: string, duration = undefined as string | undefined) {
+		actionMutate.mutate({action, duration})
+	}
 
 	if (
 		user.id === me?.id
@@ -38,6 +44,25 @@ export default function ModActions(
 		<div className="Msg__ModActions owner">Owner</div>
 	);
 
+	function handleDurationChange(e: React.ChangeEvent<HTMLInputElement>) {
+		setDuration(e.target.value);
+		popupFn(
+			<>
+				Are you sure you want to mute {username} on this channel?<br /><br />
+				Mute duration (in seconds):
+				<div style={{textAlign: "center"}}>
+					<input
+						type="number"
+						list="UserSuggestions"
+						value={e.target.value}
+						onChange={handleDurationChange}
+					/>
+				</div>
+			</>,
+			() => {mutate("mute", e.target.value); socket.emit('refreshClientPage', username, 1000);}
+		);
+	}
+
 	return (
 		<div className="Msg__ModActions">
 			{
@@ -46,7 +71,7 @@ export default function ModActions(
 					className="ban"
 					onClick={() => popupFn(
 						<>Are you sure you want to unban {username} from this channel?</>,
-						() => {action.mutate("deban")}
+						() => {mutate("deban")}
 					)}
 				>
 					Unban
@@ -55,7 +80,7 @@ export default function ModActions(
 					className="ban"
 					onClick={() => popupFn(
 						<>Are you sure you want to ban {username} from this channel?</>,
-						() => {action.mutate("ban")}
+						() => {mutate("ban")}
 					)}
 				>
 					Ban
@@ -67,7 +92,7 @@ export default function ModActions(
 					className="kick"
 					onClick={() => popupFn(
 						<>Are you sure you want to kick {username} from this channel?</>,
-						() => {action.mutate("kick")}
+						() => {mutate("kick")}
 					)}
 				>
 					Kick
@@ -79,7 +104,7 @@ export default function ModActions(
 					className="mute"
 					onClick={() => popupFn(
 						<>Are you sure you want to unmute {username} on this channel?</>,
-						() => {action.mutate("unmute"); socket.emit('refreshClientPage', username, 0);}
+						() => {mutate("unmute"); socket.emit('refreshClientPage', username, 0);}
 					)}
 				>
 					Unmute
@@ -87,8 +112,19 @@ export default function ModActions(
 				<button
 					className="mute"
 					onClick={() => popupFn(
-						<>Are you sure you want to mute {username} on this channel?</>,
-						() => {action.mutate("mute"); socket.emit('refreshClientPage', username, 1000);}
+						<>
+							Are you sure you want to mute {username} on this channel?<br /><br />
+							Mute duration (in seconds):
+							<div style={{textAlign: "center"}}>
+								<input
+									type="number"
+									list="UserSuggestions"
+									value={duration}
+									onChange={handleDurationChange}
+								/>
+							</div>
+						</>,
+						() => {mutate("mute", duration); socket.emit('refreshClientPage', username, 1000);}
 					)}
 				>
 					Mute
@@ -102,7 +138,7 @@ export default function ModActions(
 						onClick={() => popupFn(
 							<>Are you sure you want to retrieve {username}'s admin privileges
 							on this channel?</>,
-							() => {action.mutate("demote")}
+							() => {mutate("demote")}
 						)}
 					>
 						Unadmin
@@ -111,7 +147,7 @@ export default function ModActions(
 						className="admin"
 						onClick={() => popupFn(
 							<>Are you sure you want to make {username} an admin on this channel?</>,
-							() => {action.mutate("promote")}
+							() => {mutate("promote")}
 						)}
 					>
 						Admin
