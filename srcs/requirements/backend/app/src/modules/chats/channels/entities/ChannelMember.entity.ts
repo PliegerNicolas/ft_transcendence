@@ -24,8 +24,11 @@ export class ChannelMember {
     @Column({ default: false })
     muted: boolean;
 
-    //@Column({ default: () => Date.now() - (24 * 60 * 60 * 1000) })
-    //mutedUntil: Date;
+    @Column({ nullable: true })
+    mutedSince: Date;
+
+    @Column({ nullable: true })
+    muteDuration: number; // in seconds
 
     @Column({ default: true })
     active: boolean;
@@ -38,5 +41,28 @@ export class ChannelMember {
 
     @OneToMany(() => Message, (messages) => messages.channelMember, { cascade: true, onDelete: 'CASCADE' }) // soft deletion ?
     messages?: Message[];
+
+    /* Helper Functions */
+
+    public mute(duration?: number): void {
+        this.muted = true;
+        if (duration) {
+            this.mutedSince = new Date();
+            this.muteDuration = duration;
+        }
+    }
+
+    public unmute(): void {
+        this.muted = false;
+        this.mutedSince = null;
+        this.muteDuration = null;
+    }
+
+    public isMuteExpired(): boolean {
+        if (!this.muted || !this.mutedSince || !this.muteDuration) return (true);
+
+        const expirationTime = new Date(this.mutedSince.getTime() + (this.muteDuration * 1000));
+        return (expirationTime <= new Date());
+    }
 
 }

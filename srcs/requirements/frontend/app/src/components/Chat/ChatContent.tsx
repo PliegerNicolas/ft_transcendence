@@ -6,7 +6,7 @@ import { Routes, Route } from "react-router-dom";
 import Spinner from "../Spinner.tsx";
 
 import { useInvalidate, useMutateError, useGet, useDmName } from "../../utils/hooks.ts";
-import { getChanRole, httpStatus, isMuted } from "../../utils/utils.ts";
+import { getChanRole, httpStatus, isMuted, muteDelay } from "../../utils/utils.ts";
 
 import { ChatContentContext, MyContext } from "../../utils/contexts";
 
@@ -179,6 +179,9 @@ function ChatContent()
 			}, 100);
 			console.log('onMessage caught', content);
 		});
+		socket.on('refreshPage', () => {
+			window.location.reload();
+		});
 		socket.emit('rejoinChannels');
 		return (() => {socket.off('onMessage')});
 	}, []);
@@ -274,7 +277,9 @@ function ChatContent()
 			{
 				role && isMuted(chan, me!.id) &&
 				<div className="Chat__Input join">
-					You are muted on this channel,<br />and thus cannot send messages to it.
+					You are muted on this channel,
+					({muteDelay(chan.mutedMembers.find(member => member.user.id === me!.id))}s remaining)
+					<br />and thus cannot send messages to it.
 				</div> ||
 				role &&
 				<div className="Chat__Input">

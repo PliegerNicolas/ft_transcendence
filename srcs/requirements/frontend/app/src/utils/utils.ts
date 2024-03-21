@@ -1,4 +1,4 @@
-import { ChanType, FriendshipType } from "./types";
+import { ChanType, FriendshipType, MemberType } from "./types";
 
 export function httpStatus(e: Error)
 {
@@ -79,4 +79,20 @@ export function toOldShip(ship: FriendshipType)
 		...ship,
 		...extractShip(ship),
 	};
+}
+
+export function muteDelay(member: MemberType | undefined)
+{
+	if (!member)
+		return ("");
+
+	const start = new Date(member.mutedSince);
+	const now = new Date();
+
+	const elapsed = now.getSeconds() - start.getSeconds();
+	const remaining = +member.muteDuration - elapsed;
+
+	if (remaining < 0)
+		return (0);
+	return (remaining);
 }

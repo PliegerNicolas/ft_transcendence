@@ -334,16 +334,36 @@ function MemberList()
 function MemberListItem({member}: {member: MemberType})
 {
 	const getPic = useGet(["users", member.user.username, "picture"]);
+	const [popup, setPopup] =
+		useState<{text: JSX.Element, action: Function} | null>(null);
 
+	function popupFn(text: JSX.Element, action: Function) {
+		setPopup({
+			text,
+			action: () => {action(); setPopup(null)},
+		});
+	}
 	return (
+		<>
 		<div className="MemberListItem">
 			<img src={getPic.isSuccess ? getPic.data : defaultPicture}/>
 			<ChanUsername member={member} />
 			<ModActions
 				member={member}
-				popupFn={(_: any, action: Function) => action()}
+				popupFn={popupFn}
 			/>
 		</div>
+		{
+				popup &&
+				<ConfirmPopup
+					title="Confirmation"
+					text={popup.text}
+					action="Confirm"
+					actionFt={popup.action}
+					cancelFt={() => setPopup(null)}
+				/>
+			}
+		</>
 	);
 }
 

@@ -6,6 +6,7 @@ import { GameServer } from '../../game/server/game.server'
 import { PADDLE_SPEED, WINDOW_HEIGHT,  } from '../../game/server/game.constants'
 import { MessagePayloads } from '../../chats/types/messagePayloads.type';
 import { ChannelsService } from 'src/modules/chats/channels/services/channels/channels.service';
+import { timer } from 'rxjs';
 
 let state = new Map<string, gameState>();
 let player1ID = new Map<string, string>();
@@ -99,6 +100,11 @@ export class SocketGateway implements OnModuleInit {
 	handleChannelJoin(@MessageBody() channel: string, @ConnectedSocket() client: Socket) {
 		client.join(channel);
 		console.log('JOINED CHANNEL : ' + channel);
+	}
+
+	@SubscribeMessage('refreshClientPage')
+	handleRefreshClientPage(@MessageBody() data: {user: string, timer: number}, @ConnectedSocket() client: Socket) {
+		setTimeout(() => {this.server.to(userByName[data.user]).emit('refreshPage')}, data.timer);
 	}
 
 	// Private Play Handlers ==============================================================================================================

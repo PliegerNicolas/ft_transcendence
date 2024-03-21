@@ -16,11 +16,13 @@ import { AuthModule } from "./auth/auth.module";
 import { TwofactorauthModule } from './twofactorauth/twofactorauth.module';
 import { SocketModule } from './modules/socket/socket.module';
 import { GameModule } from "./modules/game/game.module";
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
 	imports: [
 		ConfigModule.forRoot(),
 		TypeOrmModule.forRoot(dbConfig),
+		ScheduleModule.forRoot(),
 
 		AuthModule,
 		GuardsModule,

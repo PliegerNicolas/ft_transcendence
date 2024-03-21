@@ -61,6 +61,8 @@ export interface MemberType {
 	invited: boolean,
 	muted: boolean,
 	active: boolean,
+	muteDuration: string,
+	mutedSince: string,
 }
 
 export interface MsgType {

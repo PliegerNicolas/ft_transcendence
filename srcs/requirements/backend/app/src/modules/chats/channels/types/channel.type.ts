@@ -70,6 +70,7 @@ export type ChannelAccessParams = {
 
     action: ChannelAccessAction;
     usernames: string[];
+    muteDuration?: number;
 
 }
 

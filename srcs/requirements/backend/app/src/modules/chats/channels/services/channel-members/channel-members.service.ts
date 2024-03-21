@@ -39,6 +39,8 @@ export class ChannelMembersService {
                     banned: false,
                     invited: true,
                     muted: false,
+                    mutedSince: null,
+                    muteDuration: null,
                 });
                 channel.members.push(newMember);
                 channel.invitedMembers.push(newMember);
@@ -78,6 +80,8 @@ export class ChannelMembersService {
                     banned: true,
                     invited: false,
                     muted: false,
+                    mutedSince: null,
+                    muteDuration: null,
                 });
                 channel.members.push(newMember);
                 channel.bannedMembers.push(newMember);
@@ -104,7 +108,7 @@ export class ChannelMembersService {
 
     /* Muted */
 
-    mute(channel: Channel, users: User[]): void {
+    mute(channel: Channel, users: User[], duration?: number): void {
         if (!channel.members) channel.members = [];
         if (!channel.mutedMembers) channel.mutedMembers = [];
 
@@ -118,11 +122,16 @@ export class ChannelMembersService {
                     active: false,
                     banned: false,
                     invited: false,
-                    muted: true,
+                    muted: false,
+                    mutedSince: null,
+                    muteDuration: null,
                 });
+                newMember.mute(duration);
                 channel.members.push(newMember);
                 channel.mutedMembers.push(newMember);
-            } else member.muted = true;
+            } else {
+                member.mute(duration);
+            }
         }
     }
 
@@ -132,10 +141,7 @@ export class ChannelMembersService {
 
         for (const user of users) {
             const member = this.getMember(channel, user.id);
-            if (member) {
-                member.muted = false;
-                channel.mutedMembers = channel.mutedMembers.filter((mutedMember) => mutedMember.id !== member.id);
-            }
+            if (member) member.unmute();
         }
     }
 
@@ -145,9 +151,6 @@ export class ChannelMembersService {
         if (!channel.members) channel.members = [];
         if (!channel.invitedMembers)
 
-        console.log("=== kick users ===");
-        console.log(users);
-
         for (const user of users) {
             const member = this.getMember(channel, user.id);
             if (member) {
@@ -155,9 +158,6 @@ export class ChannelMembersService {
                 member.invited = false;
             }
         }
-
-        console.log("=== kick ===");
-        console.log(channel);
     }
 
     /* Rank */

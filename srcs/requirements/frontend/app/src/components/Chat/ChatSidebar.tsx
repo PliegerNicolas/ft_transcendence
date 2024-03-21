@@ -22,8 +22,6 @@ export default function ChatSidebar() {
 
 	const getChans = useGet(["channels"]);
 
-	console.log(getChans.data);
-
 	if (getChans.isPending) return (
 		<div className={
 			`ChatSidebar ${showSidebar < 0 && "collapse"} ${showSidebar > 1 && "expand"}`
@@ -116,9 +114,9 @@ function ChanListItem(
 
 	const isDm = chan.channel.mode === "private";
 
-	const getChan = useGet(["channels", chan.channel.id], isDm)
+	const getChan = useGet(["channels", chan.channel.id], isDm);
 	const username = getChan.isSuccess ? dmName(getChan.data.channel) : "";
-	const getPic = useGet(["users", username, "picture"], getChan.isSuccess);
+	const getPic = useGet(["users", username, "picture"], !!username);
 
 	return (
 		<Link
