@@ -195,7 +195,7 @@ function Play()
 			</div> }
 			{gameReady === true ? <div></div> : <div>
 				<span className="Play__Instructions">Use W/S or 🔼/🔽 to control your paddle</span>
-				<div className="Ladder_Container">
+				<div className="Ladder__Container">
 					<Ladder />
 				</div>
 			</div>}
@@ -221,17 +221,27 @@ function Ladder() {
 				getUsers.data
 					.sort((a: UserType, b: UserType) => b.profile.elo - a.profile.elo)
 					.map((user: UserType, index: number) =>
-					<div className="Ladder__Item" key={user.id}>
-						<div className="Ladder__Index">#{index + 1} {index + 1 === 1 ? <>🏆</> : <></>}</div>
-						<div className="Ladder__Username">
-							<Link to={"/user/" + user.username}>
-								<span>{user.username}</span>
-							</Link>
-						</div>
-						<div className="Ladder__Elo">{user.profile.elo}</div>
-					</div>	
+						<LadderItem user={user} index={index} key={user.id} />
 				)
 			}
+		</div>
+	);
+}
+
+function LadderItem({user, index}: {user: UserType, index: number})
+{
+	const getPic = useGet(["users", user.username, "picture"]);
+
+	return (
+		<div className="Ladder__Item">
+			<div className="Ladder__Index">#{index + 1} {index + 1 === 1 ? <>🏆</> : <></>}</div>
+			<div className="Ladder__Username">
+				<img src={getPic.data} />
+				<Link to={"/user/" + user.username}>
+					<span>{user.username}</span>
+				</Link>
+			</div>
+			<div className="Ladder__Elo">{user.profile.elo}</div>
 		</div>
 	);
 }

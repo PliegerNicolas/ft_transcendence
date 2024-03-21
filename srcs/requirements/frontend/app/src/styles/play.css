@@ -154,9 +154,8 @@ select:focus {
 	justify-content: center;
 	align-items: center;
 	
-	width: 30vw;
-	height: 20vh;
-	font-size: 8vh;
+	padding: 15px 30px;
+	font-size: 2rem;
 	margin: 5px auto 15px;
 	
 	object-fit: contain;
@@ -175,14 +174,14 @@ select:focus {
 	justify-content: center;
 	align-items: center;
 	
-	width: 30vw;
-	height: 20vh;
-	font-size: 8vh;
+	padding: 15px 30px;
+
+	font-size: 2rem;
 	margin: 5px auto 15px;
 	
 	object-fit: contain;
 	box-shadow: 0 0 12px #000a;
-	  
+
 	background-color: #6f313c;
 	border-color: #994353;
 }
@@ -191,21 +190,8 @@ select:focus {
 	background-color: #994353;
 }
 
-.Play__BackToMenu {
-	display:flex;
-	justify-content: center;
-	align-items: center;
-
-	width: 8vw;
-	height: 4vh;
-	font-size: 1.5vh;
-	margin: 25px auto 25px;
-	object-fit: contain;
-	box-shadow: 0 0 12px #000a;
-}
-
 .Play__Instructions {
-	font-size: 2em;
+	font-size: 1.5rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -225,11 +211,10 @@ select:focus {
 
 .Ladder__Container {
 	max-height: 400px;
+	display: flex;
+	justify-content: center;
 	overflow-y: auto;
 	overflow-x: hidden;
-	padding-right: 10px;
-	margin-right: -10px;
-	margin-top: 50px;
 }
 
 .Ladder__Item {
@@ -258,10 +243,12 @@ select:focus {
 
 .Ladder__Title {
 	text-align: center;
-	font-size: 1.5rem;
+	font-size: 1.2rem;
 }
 
 .Ladder__List {
+	max-width: 500px;
+	width: 100%;
 	background: var(--bg-color-3);
 	border: 1px solid var(--bg-color-5);
 	margin-top: 20px;
@@ -271,9 +258,18 @@ select:focus {
 	font-size: 1.2rem;
 }
 
+.Ladder__List img {
+	height: 36px;
+	width: 36px;
+	object-fit: cover;
+	border-radius: 7px;
+	margin-right: 10px;
+}
+
 .Ladder__List > * {
 	margin: 0;
 	border: 1px solid #0000;
+	padding: 2px;
 	animation: fadein .15s ease-in-out;
 	background: var(--bg-color-4);
 	border-radius: 0px;
@@ -317,4 +313,5 @@ select:focus {
 }
 .Ladder__List > * > *:last-child {
 	border-radius: 0 7px 7px 0;
+	padding-right: 10px;
 }
