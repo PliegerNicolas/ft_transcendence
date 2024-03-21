@@ -51,7 +51,7 @@ export function isAdmin(chan: ChanType, id: string)
 
 export async function dynaGet(uri: string)
 {
-	console.log("GET --> " + uri);
+	//console.log("GET --> " + uri);
 	const response = await fetch(uri, {
 		headers: { "Content-Type": "application/json" },
 		credentials: "include",

@@ -57,7 +57,6 @@ export default function ChanEdit({id}: {id: number})
 	useEffect(() => {
 		if (id)
 			setChanForm({...chan, password: "", passwordRepeat: "",})
-		console.log(chan);
 	}, [chan]);
 
 	function updateField(field: string, value: unknown) {
@@ -85,7 +84,6 @@ export default function ChanEdit({id}: {id: number})
 	const patchChan = useMutation({
 		mutationFn:
 			((data: ChanSpecsType) => {
-				console.log(data);
 				return api.patch("/channels/" + id, data)}) as MutationFunction<ChanSpecsType>,
 		onError: mutateError,
 		onSettled: () => invalidate(["channels"]),
