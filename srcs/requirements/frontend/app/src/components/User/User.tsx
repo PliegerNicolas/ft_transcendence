@@ -115,8 +115,8 @@ function User()
 		<main className="MainContent User">
 			<section>
 				<UserInfos user={user} me={false} />
-				<div style={{textAlign: "center", marginTop: "15px"}}>
-					Current status is: {status}
+				<div className={"User__Status"}>
+					Status: <span className={status}>{status}</span>
 				</div>
 				<hr />
 				{
@@ -124,7 +124,7 @@ function User()
 					<RelationshipActions name={user.username} />
 				}
 				<div className="User__InvitePlayer">
-					<InvitePlayer  user={user.username} />
+					<InvitePlayer user={user.username} />
 				</div>
 				{
 					me?.globalServerPrivileges === "operator" &&

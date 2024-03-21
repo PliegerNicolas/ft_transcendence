@@ -21,7 +21,14 @@ export const InvitePlayer = (props: any) => {
 
 	return (
 		<div>
-			<div><button onClick={()=>{toPrivatePlay()}}>Invite to play</button></div>
+			<div>
+				<button
+					onClick={()=>{toPrivatePlay()}}
+					style={{color: "#6DF", borderColor: "#6DF"}}
+				>
+					Invite to play
+				</button>
+			</div>
 		</div>
 	);
 }
