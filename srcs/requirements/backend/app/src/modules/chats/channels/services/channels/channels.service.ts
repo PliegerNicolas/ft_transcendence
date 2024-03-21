@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Channel } from "../../entities/Channel.entity";
 import { Equal, In, Repository } from "typeorm";
@@ -12,6 +12,7 @@ import { PasswordHashingService } from "../../../../password-hashing/services/pa
 import { ChannelMembersService } from "../channel-members/channel-members.service";
 import { ChannelMember } from "../../entities/ChannelMember.entity";
 import { ChannelMode } from "../../enums/channel-mode.enum";
+import { RelationshipStatus } from "src/modules/relationships/enums/relationship-status.enum";
 
 @Injectable()
 export class ChannelsService {
@@ -109,7 +110,15 @@ export class ChannelsService {
 
     async createPrivateChannel(username: string = undefined, channelDetails: CreatePrivateChannelParams): Promise <ChannelWithSpecs> {
         if (!username) throw new NotFoundException(`User '${username ? username : '{undefined}'}' not found`);
+
         const usernames: string[] = [username, channelDetails.username];
+        const users: User[] = await this.userService.findStrictlyUsersAndRelationshipsByUsername(usernames);
+        const actingUser: User = users.splice(users.findIndex((user) => user.username === username), 1)[0];
+
+        for (const user of users) {
+            const blocked: boolean = actingUser.isOrHasBlocked(user.username);
+            if (blocked) throw new ForbiddenException(`Cannot create a private channel with a blocked user or a user that blocked you`);
+        }
 
         {
             const channel = await this.channelRepository.findOne({
@@ -123,13 +132,10 @@ export class ChannelsService {
             if (channel?.members?.length === usernames.length) throw new BadRequestException(`A private channel between ${usernames.join(', ')} already exists`);
         }
 
-        const users: User[] = await this.userService.findStrictlyUsersByUsername(usernames);
-        const actingUser: User = users.splice(users.findIndex((user) => user.username === username), 1)[0];
-
         await this.channelMemberService.canPrivateMessage(actingUser, users);
 
         const members = [
-            { user: actingUser, role: ChannelRole.MEMBER, active: true, invited: false, muted: false, mutedSince: null, muteDuration: null, banned: false }
+            { user: actingUser, role: ChannelRole.MEMBER, active: true, invited: true, muted: false, mutedSince: null, muteDuration: null, banned: false }
         ];
         for (const user of users) members.push(
             { user: user, role: ChannelRole.MEMBER, active: false, invited: true, muted: false, mutedSince: null, muteDuration: null, banned: false }
@@ -225,6 +231,10 @@ export class ChannelsService {
 
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
+            relations: [
+                'relationships1.user1', 'relationships1.user2',
+                'relationships2.user1', 'relationships2.user2'
+            ],
         });
 
         await this.channelMemberService.canJoinChannel(channel, user, channelDetails.password);
@@ -267,12 +277,12 @@ export class ChannelsService {
 
         channel.setupChannel();
 
-        await this.channelRepository.save(channel);
-
         if (channel.membersCount <= 0) {
             await this.channelRepository.remove(channel);
             return (`Channel with ID ${channelId} successfully deleted`);
         }
+
+        await this.channelRepository.save(channel);
         return (this.channelToChannelWithSpecs(channel, this.channelMemberService.getActiveMember(channel, user.id)));
     }
 
