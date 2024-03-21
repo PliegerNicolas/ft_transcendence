@@ -15,8 +15,13 @@ export class MuteInterceptor implements NestInterceptor {
 
 	async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
 		const request = context.switchToHttp().getRequest();
-		const userId: bigint = request.user ? BigInt(request.user.id) : BigInt(request.params?.userId);
-		const channelId: bigint = BigInt(request.params?.channelId);
+
+		let userId: bigint = null;
+		if (request.user) BigInt(request.user.id);
+		else if (request.params?.userId) userId = request.params.userId;
+		const channelId: bigint = request.params?.channelId ? BigInt(request.params.channelId) : null;
+
+		if (!channelId || !userId) return (next.handle());
 
 		const channelMember: ChannelMember = await this.channelMemberRepository.findOne({
 			where: {
@@ -27,8 +32,6 @@ export class MuteInterceptor implements NestInterceptor {
 
 		if (channelMember?.muted && channelMember?.isMuteExpired())
 		{
-			// console.log("=== MuteInterceptor ===")
-			// console.log("Expired mute detected");
 			channelMember.unmute();
 			await this.channelMemberRepository.save(channelMember);
 		}
