@@ -119,7 +119,7 @@ export class AuthService
 			relations: ['profile'],
 		});
 		const access_token = await this.createJwt({user_id : user.id, oauth_id: user.oauthId, isTwoFactorEnabled: user.isTwoFactorAuthEnabled}, payload.isTwoFactorAuthLogged)
-		console.log(access_token)
+		// console.log(access_token)
 		return {access_token : access_token}
 	}
 
