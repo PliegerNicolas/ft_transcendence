@@ -5,7 +5,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate, useMutateError, useGet, useDmName } from "../../utils/hooks.ts";
+import { useInvalidate, useMutateError, useGet, useDmName, useRetryMutate, useRelation } from "../../utils/hooks.ts";
 import { getChanRole, httpStatus, isMuted, muteDelay } from "../../utils/utils.ts";
 
 import { ChatContentContext, MyContext } from "../../utils/contexts";
@@ -135,9 +135,12 @@ function ChatContent()
 	const { api, setLastChan, me } = useContext(MyContext);
 	const { chan, role, dmName } = useContext(ChatContentContext);
 
+	const relation = useRelation(dmName);
+
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 	const navigate = useNavigate();
+	const retryMutate = useRetryMutate();
 
 	const params = useParams();
 	const id = params.id!;
@@ -149,6 +152,7 @@ function ChatContent()
 			api.post("/channels/" + id + "/messages", { content }),
 		onSettled: () => invalidate(["channels", id, "messages"]),
 		onError: mutateError,
+		retry: retryMutate,
 	});
 
 	const join = useMutation({
@@ -156,6 +160,7 @@ function ChatContent()
 			api.patch("/channels/" + id + "/join", {password}),
 		onSettled: () => invalidate(["channels"]),
 		onError: mutateError,
+		retry: retryMutate,
 	});
 
 	const leave = useMutation({
@@ -167,6 +172,7 @@ function ChatContent()
 			setTimeout(() => invalidate(["channels"]), 50);
 		},
 		onError: mutateError,
+		retry: retryMutate,
 	});
 
 	useEffect(() => setLastChan(id), [id]);
@@ -268,7 +274,7 @@ function ChatContent()
 						.sort((a: MsgType, b: MsgType) => a.createdAt > b.createdAt)
 						.map((item: MsgType, index: number) =>
 						<Msg
-							key={index}
+							key={item.createdAt}
 							data={item}
 							prev={index ? getMsgs.data[index - 1] : null}
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}
@@ -307,12 +313,15 @@ function ChatContent()
 				</div> ||
 				chan.mode === "private" &&
 				<div className="Chat__Input join Chat__DmRequest">
-					<div>
-					{dmName} has started this conversation.
-					<button className="accept" onClick={() => handleJoinChannel("")}>
-						Join the conversation
-					</button>
+				{
+					relation !== "blocked" &&
+					<div className="Chat__Initiator">
+						{dmName} has started this conversation.
+						<button className="accept" onClick={() => handleJoinChannel("")}>
+							Join the conversation
+						</button>
 					</div>
+				}
 					<RelationshipActions name={dmName} />
 				</div>
 			}

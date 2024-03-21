@@ -144,13 +144,11 @@ export default function ChanEdit({id}: {id: number})
 				visibility: chanForm.visibility,
 		});
 		}
-		console.log("SOCKET EMIT JOIN CHANNEL.");
 		socket.emit('joinChannel', chanForm.name);
 		socket.emit('newChannel');
 	}
 
 	async function newDm() {
-		console.log(dmUsername);
 		postDm.mutate(dmUsername);
 		socket.emit('newChannel');
 	}
