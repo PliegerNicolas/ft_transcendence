@@ -210,7 +210,6 @@ function App()
 	useEffect(() => {
 		if (getUser.isSuccess) {
 			socket.emit('userInfos', getUser.data.username);
-			console.log("OUIIIIIIIII " + getUser.data.username);
 		}
 	}, [logged]);
 
