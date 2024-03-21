@@ -17,7 +17,7 @@ export class RelationshipsService {
 
     async getRelationships(username: string = undefined): Promise<Relationship[]> {
         const user = await this.userRepository.findOne({
-            where: { username: username },
+            where: { username: Equal(username) },
             relations: [
                 'relationships1.user1', 'relationships1.user2',
                 'relationships2.user1', 'relationships2.user2'
@@ -32,8 +32,8 @@ export class RelationshipsService {
     async getRelationship(username: string = undefined, targetUsername: string = undefined): Promise<Relationship> {
         const relationship = await this.relationshipRepository.findOne({
             where: [
-                { user1: { username: username }, user2: { username: targetUsername } },
-                { user1: { username: targetUsername }, user2: { username: username } },
+                { user1: { username: Equal(username) }, user2: { username: Equal(targetUsername) } },
+                { user1: { username: Equal(targetUsername) }, user2: { username: Equal(username) } },
             ],
             relations: ['user1', 'user2'],
         });
