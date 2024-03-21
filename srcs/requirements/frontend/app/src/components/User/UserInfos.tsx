@@ -30,7 +30,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 			addNotif({
 				type: 1,
 				content: `This file is too big (${humanFileSize(file.size)}),
-				the limit is 1MiB.`});
+				the limit is 5MiB.`});
 			return ;
 		}
 

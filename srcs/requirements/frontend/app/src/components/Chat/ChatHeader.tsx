@@ -28,7 +28,7 @@ export default function ChatHeader(
 			</div>
 			<div className="ChatHeader__Main">
 				<div className="ChatHeader__Title">
-					{dmName ? dmName : name}
+					{dmName ? "@"+dmName : name}
 				</div>
 				<div className="ChatHeader__Right">
 					{

@@ -167,14 +167,6 @@
 	text-align: center;
 }
 
-.User__Status {
-	font-style: italic;
-	color: var(--text-faint);
-	font-size: .92rem;
-	display: block;
-	margin-bottom: 6px;
-}
-
 .User__InvitePlayer {
 	width:100%;
   	display: flex;

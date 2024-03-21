@@ -290,6 +290,29 @@
 	text-align: center;
 }
 
+.Chat__DmRequest {
+	display: flex;
+	flex-direction: row !important;
+	gap: 40px !important;
+}
+.Chat__DmRequest > div:first-child {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	border-right: 2px solid var(--text-faint);
+	padding-right: 40px;
+}
+
+.Chat__DmRequest .accept {
+	border: 1px solid #6d9;
+	color: #6d9
+}
+.Chat__DmRequest .block {
+	border: 1px solid #e7a;
+	color: #e7a;
+}
+
 /*
 ** <ChatHeader /> ==============================================================
 */
@@ -428,7 +451,7 @@
 .Msg__PictureDiv img {
 	width: 48px;
 	height: 48px;
-
+	object-fit: cover;
 	border-radius: 12px;
 	border: 1px solid var(--bg-color-5);
 }
@@ -581,6 +604,17 @@
 
 .ChanEdit__GlobOrListsItem.operator:hover {
 	cursor: default;
+}
+
+.ChanEdit_Dm {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+}
+
+.ChanEdit_Dm > input {
+	width: 100%;
 }
 
 .ChanEdit__NameSection {
