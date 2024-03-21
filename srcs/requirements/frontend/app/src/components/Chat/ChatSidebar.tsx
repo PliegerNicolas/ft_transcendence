@@ -22,8 +22,6 @@ export default function ChatSidebar() {
 
 	const getChans = useGet(["channels"]);
 
-	const dmName = useDmName();
-
 	console.log(getChans.data);
 
 	if (getChans.isPending) return (
@@ -59,11 +57,11 @@ export default function ChatSidebar() {
 	const chans = getChans.data;
 
 	const dmChans =
-		chans.filter((chan: ChanSpecsType) => dmName(chan.channel.name));
+		chans.filter((chan: ChanSpecsType) => chan.channel.mode === "private");
 	const memberChans =
-		chans.filter((chan: ChanSpecsType) => chan.isMember && !dmName(chan.channel.name));
+		chans.filter((chan: ChanSpecsType) => chan.isMember && chan.channel.mode !== "private");
 	const allChans =
-		chans.filter((chan: ChanSpecsType) => !chan.isMember && !dmName(chan.channel.name))
+		chans.filter((chan: ChanSpecsType) => !chan.isMember && chan.channel.mode !== "private")
 
 	return (
 		<div className={
@@ -77,23 +75,23 @@ export default function ChatSidebar() {
 			</h3>
 			{
 				!!dmChans.length &&
-				<ChanList id={id} isDm={true} chans={dmChans} title="Your DMs:"/>
+				<ChanList id={id} chans={dmChans} title="Your DMs:"/>
 			}
 			{
 				!!memberChans.length &&
-				<ChanList id={id} isDm={false} chans={memberChans} title="Your channels:" />
+				<ChanList id={id} chans={memberChans} title="Your channels:" />
 			}
 			{
 				!!allChans.length &&
-				<ChanList id={id} isDm={false} chans={allChans} title="All channels:" />
+				<ChanList id={id} chans={allChans} title="All channels:" />
 			}
 		</div>
 	);
 }
 
 function ChanList(
-	{chans, id, isDm, title}:
-	{chans: ChanSpecsType[], id: string, isDm: boolean, title: string}
+	{chans, id, title}:
+	{chans: ChanSpecsType[], id: string, title: string}
 )
 {
 	return (
@@ -104,22 +102,23 @@ function ChanList(
 			<h4 className="ChatSidebar__Title">{title}</h4>
 			{
 				chans.map((chan: ChanSpecsType) =>
-					<ChanListItem key={chan.channel.id} isDm={isDm} chan={chan} id={id} />)
+					<ChanListItem key={chan.channel.id} chan={chan} id={id} />)
 			}
 		</div>
 	);
 }
 
 function ChanListItem(
-	{chan, id, isDm}:
-	{chan: ChanSpecsType, id: string, isDm: boolean})
+	{chan, id}:
+	{chan: ChanSpecsType, id: string})
 {
-	const getDmName = useDmName();
-	const dmName = getDmName(chan.channel.name);
-	const username = dmName ? dmName.slice(1): "";
+	const dmName = useDmName();
 
-	const getPic = useGet(["users", username, "picture"], isDm);
-	console.log("USERNAME:  " + username + "  " + isDm);
+	const isDm = chan.channel.mode === "private";
+
+	const getChan = useGet(["channels", chan.channel.id], isDm)
+	const username = getChan.isSuccess ? dmName(getChan.data.channel) : "";
+	const getPic = useGet(["users", username, "picture"], getChan.isSuccess);
 
 	return (
 		<Link
@@ -132,10 +131,10 @@ function ChanListItem(
 				<img src={getPic.data} />
 			}
 			<div className="Chat__ChanListItemName">
-				{dmName ? dmName : chan.channel.name}
+				{username ? "@"+username : chan.channel.name}
 			</div>
 			{
-				!dmName &&
+				!isDm &&
 				<div className="Chat__ChanListItemSize">
 					{chan.channel.membersCount} members
 				</div>

@@ -1,8 +1,8 @@
 import { useQueryClient, QueryKey, useQuery, useMutation } from "@tanstack/react-query";
 import { useContext } from "react";
 import { MyContext } from "./contexts";
-import { httpStatus } from "./utils";
-import { useNavigate } from "react-router";
+import { extractShip, httpStatus } from "./utils";
+import { ChanType, FriendshipType } from "./types";
 
 export function useInvalidate()
 {
@@ -78,11 +78,10 @@ export function useSetMe()
 {
 	const { api } = useContext(MyContext);
 	const mutateError = useMutateError();
-	const navigate = useNavigate();
 
 	const mutation = useMutation({
 		mutationFn: ((name: string) => api.post("/auth/log_as/" + name, {})),
-		onSuccess: () => {navigate("/"); window.location.reload()},
+		onSuccess: () => {window.location.reload()},
 		onError: mutateError,
 	});
 
@@ -91,14 +90,57 @@ export function useSetMe()
 
 export function useDmName()
 {
-	const {me} = useContext(MyContext);
+	const { me } = useContext(MyContext);
 
-	return (name: string) => {
-		if (name.slice(0, 4) !== "MP: ")
+	return (chan: ChanType) => {
+		if (chan.mode !== "private")
 			return ("");
-		const array = name.slice(4).split(", ");
-		if (array[0] === me!.username)
-			return ("@" + array[1]);
-		return ("@" + array[0]);
+
+		if (!chan.activeMembers || !chan.inactiveMembers)
+			return ("");
+
+		//TODO move to a method based on invited, which require backend modifs.
+		const members = chan.activeMembers.concat(chan.inactiveMembers);
+		if (members.length !== 2)
+			return ("");
+
+		if (members[0].user.id === me!.id)
+			return (members[1].user.username);
+		return (members[0].user.username);
 	}
+}
+
+export function useStatus(username: string)
+{
+	const { me } = useContext(MyContext);
+	const getRelations = useGet(["relationships"]);
+	const getUser = useGet(["users", username]);
+
+	if (!getRelations.isSuccess || !getUser.isSuccess)
+		return ("");
+
+	const match = getRelations.data.find((ship: FriendshipType) =>
+		ship.userStatuses[0].user.id == getUser.data.id
+		|| ship.userStatuses[1].user.id == getUser.data.id);
+
+	if (!match)
+		return ("none");
+
+	const {user1, status1, status2} = extractShip(match);
+
+	if (status1 == "accepted" && status2 == "accepted")
+		return ("accepted");
+
+	const myStatus = user1.id == me?.id ? status1 : status2;
+	const theirStatus = user1.id == me?.id ? status2 : status1;
+
+	if (theirStatus == "blocked")
+		return ("imblocked");
+	if (myStatus == "blocked")
+		return ("blocked");
+	if (myStatus == "pending")
+		return ("approve");
+	if (theirStatus == "pending")
+		return ("pending");
+	return ("none");
 }

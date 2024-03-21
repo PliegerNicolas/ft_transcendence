@@ -1,0 +1,36 @@
+.Relations button.unfriend,
+.Relations button.cancel,
+.Relations button.reject {
+	border: 1px solid #e7a;
+	color: #e7a;
+}
+
+.Relations button.accept {
+	border: 1px solid #6d9;
+	color: #6d9
+}
+
+.Relations button.unblock {
+	border: 1px solid #69d;
+	color: #69d;
+}
+
+.Relations button.unfriend:hover,
+.Relations button.cancel:hover,
+.Relations button.reject:hover,
+.Relations button.accept:hover,
+.Relations button.unblock:hover {
+	color: var(--text-accent);
+}
+
+.Relations {
+	text-align: center;
+}
+
+.Relations__Status {
+	font-style: italic;
+	color: var(--text-faint);
+	font-size: .92rem;
+	display: block;
+	margin-bottom: 6px;
+}

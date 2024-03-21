@@ -181,7 +181,7 @@ export default function ChanEdit({id}: {id: number})
 						setPasswd={setPasswd}
 						setSetPasswd={setSetPasswd}
 					/> :
-					<section>
+					<section className="ChanEdit_Dm">
 						<label className="ChanEdit__NameLabel" htmlFor="channelName">
 							Username
 						</label>

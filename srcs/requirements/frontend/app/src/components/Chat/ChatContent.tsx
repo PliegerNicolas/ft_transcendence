@@ -19,6 +19,7 @@ import Msg from "./Msg.tsx";
 import ChanEdit from "./ChanEdit.tsx";
 import ConfirmPopup from "../ConfirmPopup.tsx";
 import { MemberType, MsgType } from "../../utils/types.ts";
+import RelationshipActions from "../RelationshipActions.tsx";
 
 // <ChatContentRouter /> =======================================================
 
@@ -114,7 +115,7 @@ export default function ChatContentRouter()
 			chan: getChan.data.channel,
 			role: getChanRole(getChan.data.channel, me!.id),
 			idMap,
-			dmName: getDmName(getChan.data.channel.name),
+			dmName: getDmName(getChan.data.channel),
 		}}>
 			<Routes>
 				<Route path="/" element={<ChatContent />} />
@@ -288,11 +289,22 @@ function ChatContent()
 						onChange={handleInputChange}
 					/>
 				</div> ||
+				chan.mode !== "private" &&
 				<div className="Chat__Input join">
 					Join this channel to interact with it.
 					<button onClick={() => handleJoinChannel("")}>
 						Join
 					</button>
+				</div> ||
+				chan.mode === "private" &&
+				<div className="Chat__Input join Chat__DmRequest">
+					<div>
+					{dmName} has started this conversation.
+					<button className="accept" onClick={() => handleJoinChannel("")}>
+						Join the conversation
+					</button>
+					</div>
+					<RelationshipActions name={dmName} />
 				</div>
 			}
 			{

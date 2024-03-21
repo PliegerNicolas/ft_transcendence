@@ -11,6 +11,7 @@ async function bootstrap() {
 	app.enableCors({ origin: true, credentials: true })
 	app.use((req, res, next) => {
 		res.header('Access-Control-Allow-Origin', 'https://localhost:8080');
+		res.header('Access-Control-Allow-Origin', 'https://localhost:3030');
 		next();
 	});
 
