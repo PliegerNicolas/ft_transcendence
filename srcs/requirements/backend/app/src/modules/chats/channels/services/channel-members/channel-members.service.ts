@@ -238,9 +238,6 @@ export class ChannelMembersService {
                 else if (await this.passwordHashingService.comparePasswords(channel.password, password)) return;
                 throw new ForbiddenException(`Invalid password for Channel with ID ${channel.id} and mode ${channel.mode}`);
                 case (ChannelMode.PRIVATE):
-                    console.log("=== canJoinChannel ===");
-                    console.log(user);
-
                     if (this.isInvited(channel, user.id)) {
                         for (const member of channel.members) {
                             if (user.isOrHasBlocked(member.user.username)) throw new ForbiddenException(`Cannot join a private channel with who you share a blocked relationship`);

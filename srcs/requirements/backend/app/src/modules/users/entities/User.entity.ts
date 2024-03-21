@@ -92,9 +92,6 @@ export class User {
     /* Helper Functions */
 
     isOrHasBlocked(username: string): boolean {
-        console.log("=== isOrHasBlocked ===");
-        console.log(this.relationships);
-
         if (!username) return (false);
         if (!this.relationships || this.relationships.length <= 0) return (false);
         return (this.relationships?.some((relationship) => relationship.userStatuses?.some((userStatus) => userStatus?.user.username === username)));

@@ -229,8 +229,6 @@ export class ChannelsService {
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
 
-        console.log("ziguigui");
-
         const user = await this.userRepository.findOne({
             where: { username: Equal(username) },
             relations: [
@@ -238,8 +236,6 @@ export class ChannelsService {
                 'relationships2.user1', 'relationships2.user2'
             ],
         });
-
-        console.log(user);
 
         await this.channelMemberService.canJoinChannel(channel, user, channelDetails.password);
 
