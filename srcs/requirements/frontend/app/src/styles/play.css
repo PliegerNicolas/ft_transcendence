@@ -313,3 +313,15 @@ select:focus {
 	border-radius: 0 7px 7px 0;
 	padding-right: 10px;
 }
+
+.Play__BackToMenu {
+	display:flex;
+	justify-content: center;
+	align-items: center;
+
+	padding: 5px 10px;
+	font-size: 1.2rem;
+	margin: 25px auto 25px;
+	object-fit: contain;
+	box-shadow: 0 0 12px #000a;
+}
