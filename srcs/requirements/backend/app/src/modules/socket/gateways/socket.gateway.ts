@@ -30,15 +30,14 @@ export class SocketGateway implements OnModuleInit {
 	onModuleInit() {
 		this.server.on('connection', (socket) => {
 			console.log('new socket connection : ' + socket.id);
-			setTimeout(() => {this.server.to(socket.id).emit('getUserInfos');}, 100);
+			this.server.to(socket.id).emit('getUserInfos');
 			socket.on('disconnect', () => {
 				console.log(socket.id + ' left socket');
 				this.server.emit('userLeftSocket', socket.id);
+				this.server.emit('userStatus', userById.get(socket.id), "offline");
 				playersQueue = playersQueue.filter((id) => id != socket.id);
 				userByName.delete(userById.get(socket.id));
 				userById.delete(socket.id);
-				player1ID.delete(socket.id);
-				player2ID.delete(socket.id);
 			});
 		});
 	}
@@ -48,13 +47,14 @@ export class SocketGateway implements OnModuleInit {
 		if (!userById.has(client.id)) {
 			userByName.set(username, client.id);
 			userById.set(client.id, username);
+			this.server.emit('userStatut', userById.get(client.id), "online");
 			console.log("USER : " + userById.get(client.id) + " with id : " + client.id + " has joined the socket !");
 			this.channelService.getAllChannels(userById.get(client.id)).then((chan) => {
 				for (let i = 0; chan[i]; i++) {
 						console.log("CLIENT JOINED CHANNEL : " + chan[i].channel.name);
 						client.join(chan[i].channel.name);
 					}
-				});
+			});
 		}
 	}
 
@@ -74,6 +74,7 @@ export class SocketGateway implements OnModuleInit {
 			userByName.delete(userById.get(client.id));
 			userByName.set(username, client.id);
 			userById.set(client.id, username);
+			this.server.emit('userStatut', userById.get(client.id), "online");
 			console.log("USER : " + userById.get(client.id) + " with id : " + client.id + " has changed name !");
 		}
 	}
@@ -81,11 +82,18 @@ export class SocketGateway implements OnModuleInit {
 	@SubscribeMessage('logOut')
 	handleLogOut(@ConnectedSocket() client: Socket) {
 		console.log("LOG OUT");
+		this.server.emit('userStatus', userById.get(client.id), "offline");
 		playersQueue = playersQueue.filter((id) => id != client.id);
 		userByName.delete(userById.get(client.id));
 		userById.delete(client.id);
-		player1ID.delete(client.id);
-		player2ID.delete(client.id);
+	}
+
+	@SubscribeMessage('getUserStatus')
+	handleGetUserStatut(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
+		if (userByName.has(username)) {
+			this.server.to(client.id).emit('userStatus', username, "online");
+		}
+		this.server.to(client.id).emit('userStatus', username, "offline");
 	}
 
 	// Chat Handlers ==============================================================================================================	
@@ -105,6 +113,11 @@ export class SocketGateway implements OnModuleInit {
 	@SubscribeMessage('refreshClientPage')
 	handleRefreshClientPage(@MessageBody() data: {user: string, timer: number}, @ConnectedSocket() client: Socket) {
 		setTimeout(() => {this.server.to(userByName[data.user]).emit('refreshPage')}, data.timer);
+	}
+
+	@SubscribeMessage('newChannel')
+	handleNewChannel(@ConnectedSocket() client: Socket) {
+		this.server.emit('refreshChannels');
 	}
 
 	// Private Play Handlers ==============================================================================================================
@@ -202,6 +215,8 @@ export class SocketGateway implements OnModuleInit {
 				player2ID.get(data.lobby)
 			);
 			setTimeout(() => {this.server.to(data.lobby).emit('startedGame')}, 200);
+			this.server.emit('userStatus', player1Username.get(data.lobby), "in game");
+			this.server.emit('userStatus', player2Username.get(data.lobby), "in game");
 			state.set(data.lobby, this.gameServer.createGameState());
 			state.get(data.lobby).player1ID = player1ID.get(data.lobby);
 			state.get(data.lobby).player2ID = player2ID.get(data.lobby);
@@ -213,13 +228,13 @@ export class SocketGateway implements OnModuleInit {
 	handleNotReady(@MessageBody() data: {lobby: string, playerNumber: number}, @ConnectedSocket() client: Socket) {
 		if (player1ID.has(data.lobby) && data.playerNumber === 1) {
 			console.log('NOT READY : ' + client.id);
-   			player1ID.delete(client.id);
+   			player1ID.delete(data.lobby);
 			console.log('player1ID should be null/undefined : ' + player1ID.get(data.lobby));
 			client.leave(data.lobby);
 		}
 		else if (player2ID.has(data.lobby)  && data.playerNumber === 2) {
 			console.log('NOT READY : ' + client.id);
-			player2ID.delete(client.id);
+			player2ID.delete(data.lobby);
 			console.log('player2ID should be null/undefined : ' + player2ID.get(data.lobby));
 			client.leave(data.lobby);
 		}
@@ -265,18 +280,27 @@ export class SocketGateway implements OnModuleInit {
 		}
 	}
 
-	@SubscribeMessage('startGame')
-	handleStartGame(@MessageBody() lobby: string) {
-		this.server.to(lobby).emit('startedGame');
-	}
-
 	@SubscribeMessage('leaveLobby')
 	handleLeaveLobby(@MessageBody() lobby: string, @ConnectedSocket() client: Socket) {
+		if (player1ID.has(lobby)) {
+			player1ID.delete(lobby);
+		}
+		else if (player2ID.has(lobby)) {
+			player2ID.delete(lobby);
+		}
 		client.leave(lobby);
 	}
 
 	@SubscribeMessage('gameEnded')
-	handleSentLogs(@MessageBody() lobby: string) {
+	handleSentLogs(@MessageBody() lobby: string, @ConnectedSocket() client: Socket) {
 		this.server.to(lobby).emit('drawEndGame', state.get(lobby));
+		if (player1ID.has(lobby)) {
+			this.server.to(client.id).emit('userStatus', userById.get(client.id), "online");
+			player1ID.delete(lobby);
+		}
+		else if (player2ID.has(lobby)) {
+			this.server.to(client.id).emit('userStatus', userById.get(client.id), "online");
+			player2ID.delete(lobby);
+		}
 	}
 }
