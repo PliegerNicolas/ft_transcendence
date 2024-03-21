@@ -5,7 +5,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate, useMutateError, useGet, useDmName } from "../../utils/hooks.ts";
+import { useInvalidate, useMutateError, useGet, useDmName, useRetryMutate } from "../../utils/hooks.ts";
 import { getChanRole, httpStatus, isMuted, muteDelay } from "../../utils/utils.ts";
 
 import { ChatContentContext, MyContext } from "../../utils/contexts";
@@ -138,6 +138,7 @@ function ChatContent()
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
 	const navigate = useNavigate();
+	const retryMutate = useRetryMutate();
 
 	const params = useParams();
 	const id = params.id!;
@@ -149,6 +150,7 @@ function ChatContent()
 			api.post("/channels/" + id + "/messages", { content }),
 		onSettled: () => invalidate(["channels", id, "messages"]),
 		onError: mutateError,
+		retry: retryMutate,
 	});
 
 	const join = useMutation({
@@ -156,6 +158,7 @@ function ChatContent()
 			api.patch("/channels/" + id + "/join", {password}),
 		onSettled: () => invalidate(["channels"]),
 		onError: mutateError,
+		retry: retryMutate,
 	});
 
 	const leave = useMutation({
@@ -167,6 +170,7 @@ function ChatContent()
 			setTimeout(() => invalidate(["channels"]), 50);
 		},
 		onError: mutateError,
+		retry: retryMutate,
 	});
 
 	useEffect(() => setLastChan(id), [id]);
@@ -264,7 +268,7 @@ function ChatContent()
 						.sort((a: MsgType, b: MsgType) => a.createdAt > b.createdAt)
 						.map((item: MsgType, index: number) =>
 						<Msg
-							key={index}
+							key={item.createdAt}
 							data={item}
 							prev={index ? getMsgs.data[index - 1] : null}
 							next={index < getMsgs.data.length ? getMsgs.data[index + 1] : null}

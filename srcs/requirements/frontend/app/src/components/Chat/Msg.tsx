@@ -3,7 +3,7 @@ import { MsgType } from "../../utils/types.ts";
 
 import "../../styles/chat.css";
 import defaultPicture from "../../assets/default_profile.png"
-import { useGet, useSetMe } from "../../utils/hooks.ts";
+import { useGet, useRelation, useSetMe } from "../../utils/hooks.ts";
 import { useContext } from "react";
 import { MyContext } from "../../utils/contexts.ts";
 import ChanUsername from "./ChanUsername.tsx";
@@ -23,6 +23,8 @@ export default function Msg(
 	const date = fmtDate(data.createdAt);
 	const member = data.channelMember;
 	const user = member.user;
+
+	const relation = useRelation(user.username);
 
 	const getPic = useGet(["users", user.username ,"picture"]);
 
@@ -64,7 +66,8 @@ export default function Msg(
 			`Msg
 			${me && user.id == me.id && "me"}
 			${connectPrev && "connectPrev"}
-			${connectNext && "connectNext"}`
+			${connectNext && "connectNext"}
+			${relation === "blocked" && "blocked"}`
 		}>
 			<div className="Msg__PictureDiv">
 				<Link to={"/user/" + user.username}>
@@ -98,7 +101,13 @@ export default function Msg(
 					<ModActions member={member} popupFn={popupFn}/>
 				</div>
 			}
-				{data.content}
+				<div className="Msg__Content">
+					{relation !== "blocked" ?
+						data.content :
+						<span className="error-msg">
+							You've blocked this user
+						</span>}
+				</div>
 			</div>
 		</div>
 	);

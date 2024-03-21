@@ -8,7 +8,7 @@ import Spinner from "../Spinner.tsx";
 import Me from "./Me.tsx";
 import UserInfos from "./UserInfos.tsx";
 
-import { useGet, useSetMe, useStatus } from "../../utils/hooks.ts";
+import { useGet, useSetMe, useRelation } from "../../utils/hooks.ts";
 
 import "../../styles/user.css";
 import ConfirmPopup from "../ConfirmPopup.tsx";
@@ -39,7 +39,7 @@ function User()
 	const [popup, setPopup] = useState(false);
 
 	const getUser = useGet(["users", id]);
-	const status = useStatus(id);
+	const relation = useRelation(id);
 	const setMe = useSetMe();
 
 	if (getUser.isPending || !me) return (
@@ -63,7 +63,7 @@ function User()
 	if (me.id == user.id)
 		return (<Me />);
 
-	if (!status) return (
+	if (!relation) return (
 		<main className="MainContent User">
 			<section>
 				<h2>
@@ -77,7 +77,7 @@ function User()
 		</main>
 	);
 
-	if (status == "imblocked") return (
+	if (relation == "imblocked") return (
 		<main className="MainContent User">
 			<section>
 				<h2>
@@ -100,7 +100,7 @@ function User()
 				<UserInfos user={user} me={false} />
 				<hr />
 				{
-					status &&
+					relation &&
 					<RelationshipActions name={user.username} />
 				}
 				<div className="User__InvitePlayer">

@@ -44,6 +44,12 @@ function Auth()
 
 	const { setLogged } = useContext(MyContext);
 
+	async function emitUserInfos() {
+		const res = await api.get("/me");
+
+		socket.emit('userInfos', res.username);
+	}
+
 	const navigate = useNavigate();
 	const redirectPath = localStorage.getItem("auth_redirect");
 
@@ -65,6 +71,7 @@ function Auth()
 			else {
 				setStatus("success");
 				setLogged(true);
+				emitUserInfos();
 				setTimeout(() => {
 					if (document.location.pathname === "/auth")
 						navigate(redirectPath ? redirectPath : "/")
@@ -86,6 +93,7 @@ function Auth()
 		onSuccess: () => {
 			setLogged(true);
 			setStatus("success");
+			emitUserInfos();
 			setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
 		},
 
@@ -96,10 +104,7 @@ function Auth()
 	});
 
 	useEffect(() => {
-		socket.on("connect_error", (err) => {
-			// the reason of the error, for example "xhr poll error"
-			console.log(err.message);
-		  });
+
 		if (guard.current) return ;
 		guard.current = true;
 
@@ -204,6 +209,7 @@ function App()
 	const getUser = useGet(["me"], logged);
 
 	useEffect(() => {
+		console.log("COUCOUCPOOCIUHIUH " + getUser.isSuccess);
 		if (getUser.isSuccess) {
 			socket.emit('userInfos', getUser.data.username);
 		}

@@ -439,6 +439,21 @@
 	border-radius: 0px;
 }
 
+.Msg.blocked .Msg__Content {
+	display: flex;
+	align-items: center;
+	opacity: .6;
+}
+
+.Msg.blocked .Msg__Content .error-msg {
+	font-size: .82rem;
+}
+
+.Msg.blocked .Msg__Content button {
+	font-size: .86rem;
+	padding: 2px 4px;
+}
+
 .Msg__PictureDiv {
 	width: 48px;
 	height: 50px;
