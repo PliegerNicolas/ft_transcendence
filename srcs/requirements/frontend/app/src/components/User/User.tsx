@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { MyContext } from "../../utils/contexts.ts";
@@ -14,6 +14,7 @@ import "../../styles/user.css";
 import ConfirmPopup from "../ConfirmPopup.tsx";
 import { InvitePlayer } from "../Game/Invitations.tsx";
 import RelationshipActions from "../RelationshipActions.tsx";
+import { socket } from "../../App.tsx";
 
 // <UserRouter /> ==============================================================
 
@@ -41,6 +42,21 @@ function User()
 	const getUser = useGet(["users", id]);
 	const relation = useRelation(id);
 	const setMe = useSetMe();
+
+	const [status, setStatus] = useState("offline");
+
+	useEffect(() => {
+		socket.on("useStatus", (username: string, status: string) => {
+			console.log("STATUS UPDATE")
+			console.log("USERNAME" + username);
+			console.log("STATUS" + status);
+			if (username === getUser?.data.username)
+				setStatus(status);
+		});
+		socket.emit("getUserStatus", getUser?.data.username);
+		return (() => {socket.off("userStatus")});
+	}
+	, [getUser.isSuccess])
 
 	if (getUser.isPending || !me) return (
 		<main className="MainContent">
@@ -98,6 +114,9 @@ function User()
 		<main className="MainContent User">
 			<section>
 				<UserInfos user={user} me={false} />
+				<div style={{textAlign: "center", marginTop: "15px"}}>
+					Current status is: {status}
+				</div>
 				<hr />
 				{
 					relation &&

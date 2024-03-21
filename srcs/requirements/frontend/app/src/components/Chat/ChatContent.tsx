@@ -5,7 +5,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate, useMutateError, useGet, useDmName, useRetryMutate } from "../../utils/hooks.ts";
+import { useInvalidate, useMutateError, useGet, useDmName, useRetryMutate, useRelation } from "../../utils/hooks.ts";
 import { getChanRole, httpStatus, isMuted, muteDelay } from "../../utils/utils.ts";
 
 import { ChatContentContext, MyContext } from "../../utils/contexts";
@@ -134,6 +134,8 @@ function ChatContent()
 {
 	const { api, setLastChan, me } = useContext(MyContext);
 	const { chan, role, dmName } = useContext(ChatContentContext);
+
+	const relation = useRelation(dmName);
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
@@ -307,12 +309,15 @@ function ChatContent()
 				</div> ||
 				chan.mode === "private" &&
 				<div className="Chat__Input join Chat__DmRequest">
-					<div>
-					{dmName} has started this conversation.
-					<button className="accept" onClick={() => handleJoinChannel("")}>
-						Join the conversation
-					</button>
+				{
+					relation !== "blocked" &&
+					<div className="Chat__Initiator">
+						{dmName} has started this conversation.
+						<button className="accept" onClick={() => handleJoinChannel("")}>
+							Join the conversation
+						</button>
 					</div>
+				}
 					<RelationshipActions name={dmName} />
 				</div>
 			}
