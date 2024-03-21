@@ -5,7 +5,9 @@ import OnlineGame  from './OnlinePlay'
 
 import "../../styles/play.css";
 import { MyContext } from '../../utils/contexts.ts';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useGet } from '../../utils/hooks.ts';
+import { UserType } from '../../utils/types.ts';
 
 // <Play /> ====================================================================
 
@@ -32,7 +34,6 @@ function Play()
 	const navigate = useNavigate();
 
 	const destroySocketListeners = () => {
-		socket.off('userJoinedSocket');
 		socket.off('userLeftSocket');
 		socket.off('leaveLobby');
 		socket.off('gameFound');
@@ -45,13 +46,10 @@ function Play()
 
 	useEffect(() => {
 		if (socket) {
-			socket.on('userJoinedSocket', (newUserId: string) => {
-				console.log('New user connected:', newUserId);
-			});
 			socket.on('userLeftSocket', (userId: string) => {
-				console.log('User disconnected:', userId);
+				//console.log('User disconnected:', userId);
 				if (userId === oppId) {
-					console.log('opponent left lobby');
+					//console.log('opponent left lobby');
 					socket.emit('opponentLeft', {userId, lobby});
 					setOppId('');
 					if (gameOver === true) {
@@ -66,7 +64,7 @@ function Play()
 				setLobby('');
 			});
 			socket.on('gameFound', (player_number: number, lobby_id: string, opp_id: string) => {
-				console.log('lobby : ' + lobby_id + ' joined');
+				//console.log('lobby : ' + lobby_id + ' joined');
 				setLobby(lobby_id);
 				setPlayerNumber(player_number);
 				setOppId(opp_id);
@@ -83,7 +81,7 @@ function Play()
 					if (!oppId)
 						setOppId(player1ID)
 				}
-				console.log(oppName);
+				//console.log(oppName);
 				setGameReady(true);
 			});
 		}
@@ -106,7 +104,7 @@ function Play()
 	const joinQueueHandler = () => {
 		setInQueue(true);
 		socket.emit('joinQueue');
-		console.log('joinedQueue');
+		//console.log('joinedQueue');
 	}
 
 	const leaveQueueHandler = () => {
@@ -118,8 +116,6 @@ function Play()
 		socket.emit('leaveLobby', lobby);
 		navigate('/');
 	}
-
-	// Backend http requests ==============================================================================================================
 
 	return (
 		<main className="MainContent">
@@ -199,9 +195,44 @@ function Play()
 			</div> }
 			{gameReady === true ? <div></div> : <div>
 				<span className="Play__Instructions">Use W/S or 🔼/🔽 to control your paddle</span>
+				<div className="Ladder_Container">
+					<Ladder />
+				</div>
 			</div>}
 		</div>
 		</main>
+	);
+}
+
+function Ladder() {
+	const getUsers = useGet(["users"]);
+	if (!getUsers.isSuccess) {
+		return (
+			<div className="Ladder__Element">
+				<div className="Ladder__Error">Couldn't get ladder</div>
+			</div>
+		)
+	}
+
+	return (
+		<div className="Ladder__List">
+			<div className="Ladder__Title Ladder__ListHead">Ladder</div>
+			{
+				getUsers.data
+					.sort((a: UserType, b: UserType) => b.profile.elo - a.profile.elo)
+					.map((user: UserType, index: number) =>
+					<div className="Ladder__Item" key={user.id}>
+						<div className="Ladder__Index">#{index + 1} {index + 1 === 1 ? <>🏆</> : <></>}</div>
+						<div className="Ladder__Username">
+							<Link to={"/user/" + user.username}>
+								<span>{user.username}</span>
+							</Link>
+						</div>
+						<div className="Ladder__Elo">{user.profile.elo}</div>
+					</div>	
+				)
+			}
+		</div>
 	);
 }
 

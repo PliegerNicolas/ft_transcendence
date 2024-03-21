@@ -167,17 +167,21 @@
 	text-align: center;
 }
 
-.User__Status {
-	font-style: italic;
-	color: var(--text-faint);
-	font-size: .92rem;
-	display: block;
-	margin-bottom: 6px;
-}
-
 .User__InvitePlayer {
 	width:100%;
   	display: flex;
   	justify-content: center;
 	margin-top: 10px;
+}
+
+.User__EditButton {
+	margin-left: 3px;
+}
+
+.Historic__Victory {
+	color: #0a7;
+}
+
+.Historic__Defeat {
+	color: #d35;
 }

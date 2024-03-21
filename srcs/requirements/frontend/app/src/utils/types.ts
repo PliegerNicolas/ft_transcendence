@@ -3,6 +3,7 @@ export interface ProfileType {
 	firstName: string,
 	lastName:string,
 	picture: string,
+	elo: number
 }
 
 export interface UserType {
@@ -26,14 +27,26 @@ export interface UserPostType {
 	}
 }
 
+interface UserStatus {
+	user: UserType,
+	status: string,
+}
+
 export interface FriendshipType {
 	id: string,
-	status1: string,
-	status2: string,
+	updated_at: string,
+	created_at: string,
+	userStatuses: UserStatus[],
+}
+
+export interface OldShip {
+	id: string,
 	updated_at: string,
 	created_at: string,
 	user1: UserType,
-	user2: UserType
+	user2: UserType,
+	status1: string,
+	status2: string,
 }
 
 export interface MyInfoType {

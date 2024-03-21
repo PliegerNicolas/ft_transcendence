@@ -84,9 +84,12 @@ export default function Msg(
 								LogAs
 							</button>
 						}
+						{
+							member.active &&
 							<div>
 								<InvitePlayer user={user.username} />
 							</div>
+						}
 						</div>
 					}
 					<span className="Msg__Date">

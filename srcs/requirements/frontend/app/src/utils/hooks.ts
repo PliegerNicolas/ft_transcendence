@@ -1,7 +1,8 @@
 import { useQueryClient, QueryKey, useQuery, useMutation } from "@tanstack/react-query";
 import { useContext } from "react";
 import { MyContext } from "./contexts";
-import { httpStatus } from "./utils";
+import { extractShip, httpStatus } from "./utils";
+import { ChanType, FriendshipType } from "./types";
 
 export function useInvalidate()
 {
@@ -24,28 +25,37 @@ export function useStopOnHttp()
 
 		if (status === 401) {
 			refresh.mutate();
-			return (count < 3);
+			return (count < 2);
 		}
 		else
 			return (!status && count < 3)
 	});
 }
 
-export function useMutateError()
+export function useRetryMutate()
 {
-	const { setLogged, api, addNotif } = useContext(MyContext);
+	const { setLogged, api } = useContext(MyContext);
 
 	const refresh = useMutation({
 		mutationFn: () => api.get("/auth/refresh"),
 		onError: () => setLogged(false)
 	});
 
+	return (count: number, err: Error) => {
+		if (httpStatus(err) !== 401)
+			return (false);
+
+		refresh.mutate();
+		return (count < 2);
+	}
+}
+
+export function useMutateError()
+{
+	const { addNotif } = useContext(MyContext);
+
 	return ((error: Error) => {
-		const status = httpStatus(error);
-
 		addNotif({content: error.message});
-
-		if (status === 401) refresh.mutate();
 	})
 }
 
@@ -71,9 +81,66 @@ export function useSetMe()
 
 	const mutation = useMutation({
 		mutationFn: ((name: string) => api.post("/auth/log_as/" + name, {})),
-		onSuccess: () => window.location.reload(),
+		onSuccess: () => {window.location.reload()},
 		onError: mutateError,
 	});
 
 	return ((name: string) => mutation.mutate(name));
+}
+
+export function useDmName()
+{
+	const { me } = useContext(MyContext);
+
+	return (chan: ChanType) => {
+		if (chan.mode !== "private")
+			return ("");
+
+		if (!chan.activeMembers || !chan.inactiveMembers)
+			return ("");
+
+		//TODO move to a method based on invited, which require backend modifs.
+		const members = chan.activeMembers.concat(chan.inactiveMembers);
+		if (members.length !== 2)
+			return ("");
+
+		if (members[0].user.id === me!.id)
+			return (members[1].user.username);
+		return (members[0].user.username);
+	}
+}
+
+export function useStatus(username: string)
+{
+	const { me } = useContext(MyContext);
+	const getRelations = useGet(["relationships"]);
+	const getUser = useGet(["users", username]);
+
+	if (!getRelations.isSuccess || !getUser.isSuccess)
+		return ("");
+
+	const match = getRelations.data.find((ship: FriendshipType) =>
+		ship.userStatuses[0].user.id == getUser.data.id
+		|| ship.userStatuses[1].user.id == getUser.data.id);
+
+	if (!match)
+		return ("none");
+
+	const {user1, status1, status2} = extractShip(match);
+
+	if (status1 == "accepted" && status2 == "accepted")
+		return ("accepted");
+
+	const myStatus = user1.id == me?.id ? status1 : status2;
+	const theirStatus = user1.id == me?.id ? status2 : status1;
+
+	if (theirStatus == "blocked")
+		return ("imblocked");
+	if (myStatus == "blocked")
+		return ("blocked");
+	if (myStatus == "pending")
+		return ("approve");
+	if (theirStatus == "pending")
+		return ("pending");
+	return ("none");
 }

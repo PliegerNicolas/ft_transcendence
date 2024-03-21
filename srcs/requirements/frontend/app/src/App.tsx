@@ -23,6 +23,7 @@ import User from "./components/User/User.tsx";
 import Notifs from "./components/Notifs.tsx";
 import Invites from "./components/Game/Invitations.tsx";
 import RequireAuth from "./components/RequireAuth.tsx";
+import ConfirmPopup from "./components/ConfirmPopup.tsx";
 
 import Api from "./utils/Api";
 import { randomString } from "./utils/utils.ts";
@@ -32,8 +33,7 @@ import { PopupType } from "./utils/types.ts";
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
 
-export const socket = io(`https://${location.hostname}:4433/api/socket`);
-import ConfirmPopup from "./components/ConfirmPopup.tsx";
+export const socket = io(`https://${location.hostname}:4433/socket`);
 
 function Auth()
 {
@@ -65,7 +65,10 @@ function Auth()
 			else {
 				setStatus("success");
 				setLogged(true);
-				setTimeout(() => navigate(redirectPath ? redirectPath : "/"), 1000);
+				setTimeout(() => {
+					if (document.location.pathname === "/auth")
+						navigate(redirectPath ? redirectPath : "/")
+				}, 1000);
 			}
 		},
 
@@ -93,6 +96,10 @@ function Auth()
 	});
 
 	useEffect(() => {
+		socket.on("connect_error", (err) => {
+			// the reason of the error, for example "xhr poll error"
+			console.log(err.message);
+		  });
 		if (guard.current) return ;
 		guard.current = true;
 

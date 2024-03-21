@@ -41,8 +41,8 @@
 }
 
 .ChatSidebar__Title {
-	height: 54px;
 	margin: 0;
+	height: 36px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -50,6 +50,9 @@
 	user-select: none;
 	overflow: hidden;
 	white-space: nowrap;
+}
+.ChatSidebar__Title.first {
+	height: 54px;
 }
 
 .ChatSidebar__Add {
@@ -112,6 +115,34 @@
 
 .Chat__ChanListItem.curr:hover {
 	cursor: pointer;
+}
+
+.Chat__ChanListItem img {
+	height: 32px;
+	width: 32px;
+	object-fit: cover;
+	border-radius: 7px;
+}
+
+.Chat__ChanListItem.dm {
+	height: 36px;
+	width: calc(100% - 24px - 12px);
+
+	margin: 4px 6px;
+	padding: 2px 16px 2px 8px;
+	border-radius: 7px;
+
+	user-select: none;
+
+	transition: .1s;
+
+	display: flex;
+	flex-direction: row;
+	justify-content: left;
+	align-items: center;
+	gap: 8px;
+
+	color: var(--text-normal);
 }
 
 .Chat__ChanListItemName {
@@ -259,6 +290,29 @@
 	text-align: center;
 }
 
+.Chat__DmRequest {
+	display: flex;
+	flex-direction: row !important;
+	gap: 40px !important;
+}
+.Chat__DmRequest > div:first-child {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	border-right: 2px solid var(--text-faint);
+	padding-right: 40px;
+}
+
+.Chat__DmRequest .accept {
+	border: 1px solid #6d9;
+	color: #6d9
+}
+.Chat__DmRequest .block {
+	border: 1px solid #e7a;
+	color: #e7a;
+}
+
 /*
 ** <ChatHeader /> ==============================================================
 */
@@ -397,7 +451,7 @@
 .Msg__PictureDiv img {
 	width: 48px;
 	height: 48px;
-
+	object-fit: cover;
 	border-radius: 12px;
 	border: 1px solid var(--bg-color-5);
 }
@@ -550,6 +604,17 @@
 
 .ChanEdit__GlobOrListsItem.operator:hover {
 	cursor: default;
+}
+
+.ChanEdit_Dm {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+}
+
+.ChanEdit_Dm > input {
+	width: 100%;
 }
 
 .ChanEdit__NameSection {

@@ -1,0 +1,5 @@
+.pdf {
+	max-width: 100%;
+	height: auto;
+	filter: sepia(1) invert(.925) hue-rotate(-15deg);
+}

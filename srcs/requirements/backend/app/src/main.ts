@@ -9,6 +9,11 @@ async function bootstrap() {
 	//Setting up middleware for cookies
 	app.use(cookieParser(process.env.API42_SECRET));
 	app.enableCors({ origin: true, credentials: true })
+	app.use((req, res, next) => {
+		res.header('Access-Control-Allow-Origin', 'https://localhost:8080');
+		res.header('Access-Control-Allow-Origin', 'https://localhost:3030');
+		next();
+	});
 
 	app.useGlobalPipes(
 		new ValidationPipe({

@@ -2,13 +2,15 @@ import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
 
 import { MyContext } from "../utils/contexts";
-import { useMutateError } from "../utils/hooks";
+import { useInvalidate, useMutateError } from "../utils/hooks";
 import { httpStatus } from "../utils/utils";
 
 import ConfirmPopup from "./ConfirmPopup";
 import Spinner from "./Spinner";
 
 import check from "../assets/check.svg";
+import { socket } from "../App";
+import { useNavigate } from "react-router-dom";
 
 export default function Settings()
 {
@@ -33,6 +35,8 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 	const { api, addNotif, me } = useContext(MyContext);
 
 	const mutateError = useMutateError();
+	const invalidate = useInvalidate();
+	const navigate = useNavigate();
 
 	const generate2fa = useMutation({
 		mutationFn: () => api.post("/2fa/generate", {}),
@@ -49,13 +53,34 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 				mutateError(error);
 		},
 		onSuccess: () => {
-			setPopup(false);
-			window.location.reload();
+			setPopup2fa(false);
+			location.reload();
 		},
 	});
 
+	const turnOff2fa = useMutation({
+		mutationFn: () => api.post("/2fa/turn-off", {}),
+		onError: mutateError,
+		onSuccess: () => {
+			location.reload(),
+			setPopup2fa(false);
+			location.reload();
+		},
+	});
+
+	const backendLogout = useMutation({
+		mutationFn: () => api.post("/auth/logout", {}),
+		onSuccess: () => window.location.reload(),
+	});
+
+	const delMe = useMutation({
+		mutationFn: () => api.delete("/me"),
+		onSettled: () => invalidate(["me"])
+	});
+
 	const [code, setCode] = useState("");
-	const [popup, setPopup] = useState(false);
+	const [popup2fa, setPopup2fa] = useState(false);
+	const [popupDel, setPopupDel] = useState(false);
 
 	if (!me) return (
 		<section>
@@ -75,7 +100,7 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 					<div className="Setup2fa__Status">
 						<>2FA is enabled for your account</> <img src={check} />
 					</div>
-					<button onClick={() => addNotif({type: 1, content: "This does nothing (yet)."})}>
+					<button onClick={() => turnOff2fa.mutate()}>
 						Disable 2FA?
 					</button>
 				</> :
@@ -100,7 +125,7 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 								<div style={{textAlign: "center", marginTop: "10px"}}>
 									<img style={{borderRadius: "18px"}} src={generate2fa.data} />
 								</div>
-								<form onSubmit={e => {e.preventDefault(); reference.current?.scrollTo(0, 0); setPopup(true)}}>
+								<form onSubmit={e => {e.preventDefault(); reference.current?.scrollTo(0, 0); setPopup2fa(true)}}>
 								<input
 									type="text"
 									placeholder="xxx xxx"
@@ -115,15 +140,37 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 				</>
 			}
 		</section>
+		<button
+				style={{margin: "0 15px"}}
+				className="danger"
+				onClick={() => setPopupDel(true)}
+			>
+				Delete account
+			</button>
+			{
+				popupDel &&
+				<ConfirmPopup
+					title="Are you sure you want to delete your account?"
+					text={<> Warning: This is a permanent operation! </>}
+					action="Delete"
+					cancelFt={() => setPopupDel(false)}
+					actionFt={() => {
+						delMe.mutate();
+						socket.emit('logOut');
+						navigate("/");
+						backendLogout.mutate();
+					}}
+				/>
+			}
 		{
-			popup &&
+			popup2fa &&
 			<ConfirmPopup
 				title="Confirmation"
 				text={<>Are you sure you want to enable 2FA on your account?<br /><br />
 					You will need your authentication application to be available whenever
 					you'll want to log in.
 				</>}
-				cancelFt={() => setPopup(false)}
+				cancelFt={() => setPopup2fa(false)}
 				action="Enable"
 				actionFt={() => turnOn2fa.mutate(code)}
 			/>

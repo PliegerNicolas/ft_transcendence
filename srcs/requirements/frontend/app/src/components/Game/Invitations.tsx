@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { v4 as uuid } from 'uuid';
 import { socket } from "../../App.tsx"
 import { InviteType } from "../../utils/types";
@@ -10,11 +10,13 @@ export const InvitePlayer = (props: any) => {
 	const lobby_id = uuid();
 
 	const toPrivatePlay=()=>{
-		const data = { lobby: lobby_id, playerNumber: 1, };
-		navigate('/play/private',{state: data});
+		//console.log("inviting " + props.user + " to play a pong game !");
 		if (socket) {
 			socket.emit('inviteToPrivate', {user: props.user, lobby: lobby_id});
 		}
+		const data = { lobby: lobby_id, playerNumber: 1 };
+		//console.log(location.pathname);
+		navigate('/play/private',{state: data});
 	}
 
 	return (
@@ -59,11 +61,16 @@ function Invite(
 )
 {
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	const acceptHandler = () => {
 		const data = { lobby: invite.lobby, playerNumber: 2, };
 		socket.emit('acceptInvite', {user: invite.from, lobby: invite.lobby});
-		navigate('/play/private',{state: data});
+		if (location.pathname === "/play/private") {
+			socket.emit('refreshLobby', {lobby: invite.lobby, playerNumber: 2});
+		}
+		else
+			navigate('/play/private',{state: data});
 		rmSelf();
 	}
 

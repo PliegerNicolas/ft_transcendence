@@ -6,7 +6,7 @@
 #    By: julboyer <julboyer@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:32:44 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/18 12:40:14 by nplieger         ###   ########.fr        #
+#    Updated: 2024/03/20 18:19:01 by nplieger         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,6 +31,7 @@ REQUIREMENTS_PATH	:=			./srcs/requirements
 
 define build_volume_folders
 	mkdir -p "${HOME}/data/postgresql"
+	mkdir -p "${HOME}/data/uploads"
 endef
 
 define build_images

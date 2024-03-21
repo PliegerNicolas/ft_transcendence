@@ -5,7 +5,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useInvalidate, useMutateError, useGet } from "../../utils/hooks.ts";
+import { useInvalidate, useMutateError, useGet, useDmName } from "../../utils/hooks.ts";
 import { getChanRole, httpStatus, isMuted } from "../../utils/utils.ts";
 
 import { ChatContentContext, MyContext } from "../../utils/contexts";
@@ -19,6 +19,7 @@ import Msg from "./Msg.tsx";
 import ChanEdit from "./ChanEdit.tsx";
 import ConfirmPopup from "../ConfirmPopup.tsx";
 import { MemberType, MsgType } from "../../utils/types.ts";
+import RelationshipActions from "../RelationshipActions.tsx";
 
 // <ChatContentRouter /> =======================================================
 
@@ -28,6 +29,7 @@ export default function ChatContentRouter()
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
+	const getDmName = useDmName();
 
 	const params = useParams();
 	const id = params.id!;
@@ -106,11 +108,14 @@ export default function ChatContentRouter()
 		</div>
 	);
 
+	console.log(getChan.data);
+
 	return (
 		<ChatContentContext.Provider value={{
 			chan: getChan.data.channel,
 			role: getChanRole(getChan.data.channel, me!.id),
-			idMap
+			idMap,
+			dmName: getDmName(getChan.data.channel),
 		}}>
 			<Routes>
 				<Route path="/" element={<ChatContent />} />
@@ -128,7 +133,7 @@ export default function ChatContentRouter()
 function ChatContent()
 {
 	const { api, setLastChan, me } = useContext(MyContext);
-	const { chan, role } = useContext(ChatContentContext);
+	const { chan, role, dmName } = useContext(ChatContentContext);
 
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
@@ -156,11 +161,10 @@ function ChatContent()
 	const leave = useMutation({
 		mutationFn: () =>
 			api.patch("/channels/" + id + "/leave", {}),
-		onSettled: () => invalidate(["channels"]),
 		onSuccess: () => {
 			if (chan.membersCount <= 1)
-				navigate("/chat")
-			invalidate(["channels"])
+				navigate("/chat");
+			setTimeout(() => invalidate(["channels"]), 50);
 		},
 		onError: mutateError,
 	});
@@ -248,7 +252,11 @@ function ChatContent()
 			/>
 			<div className="Chat__Convo">
 				<div className="notice-msg Chat__Start">
-						Start of channel « {chan.name} »
+					{
+						dmName ?
+						"Start of your conversation with " + dmName :
+						"Start of channel « " + chan.name + " »"
+					}
 					<hr />
 				</div>
 				{
@@ -275,16 +283,31 @@ function ChatContent()
 				<div className="Chat__Input">
 					<textarea
 						id="SendMessage"
-						placeholder={`Send a message to « ${chan.name} »`}
+						placeholder={
+							dmName ?
+							`Send a message to ${dmName}` :
+							`Send a message to « ${chan.name} »`
+						}
 						value={inputValue}
 						onChange={handleInputChange}
 					/>
 				</div> ||
+				chan.mode !== "private" &&
 				<div className="Chat__Input join">
 					Join this channel to interact with it.
 					<button onClick={() => handleJoinChannel("")}>
 						Join
 					</button>
+				</div> ||
+				chan.mode === "private" &&
+				<div className="Chat__Input join Chat__DmRequest">
+					<div>
+					{dmName} has started this conversation.
+					<button className="accept" onClick={() => handleJoinChannel("")}>
+						Join the conversation
+					</button>
+					</div>
+					<RelationshipActions name={dmName} />
 				</div>
 			}
 			{

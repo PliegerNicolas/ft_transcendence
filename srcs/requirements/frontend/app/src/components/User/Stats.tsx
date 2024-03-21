@@ -26,10 +26,11 @@ export default function Stats({username}: {username: string}) {
 	return (
 		<div className="Stats">
 			<div className="Stats__elo">{user.profile.elo} elo</div>
-			<div className="Stats__victories">{getLogs.data.userResultsCount.victory}V</div>
-			<div className="Stats__defeats">{getLogs.data.userResultsCount.defeat}D</div>
-			<div className="Stats__winrate">Winrate : {getWinrate()}%</div>
+			<div className="Stats__winrate">{getLogs.data.userResultsCount.victory}V / {getLogs.data.userResultsCount.defeat}D | Winrate {getWinrate()}%</div>
+			<h4 className="Stats__historic">Match history :</h4>
 			{
+				getLogs.data.userResultsCount.victory + getLogs.data.userResultsCount.defeat === 0 ? 
+				<div className="Stats__noHistoric">No games played :(</div> :
 				getLogs.data.gamelogs.map((item: GamelogsType, index: number) =>
 					<Historic 
 						key={index}
@@ -42,19 +43,18 @@ export default function Stats({username}: {username: string}) {
 }
 
 function Historic({infos, user}: {infos: GamelogsType, user: User}) {
-
 	if (!user) {
 		return (<div className="Historic__Error">Couldn't get historic</div>)
 	}
 
 	const getGameResult = () => {
-		if (infos.gamelogToUsers[0].user.id === user.id) {
+		if (infos.gamelogToUsers[0] && infos.gamelogToUsers[0].user.id === user.id) {
 			if (infos.gamelogToUsers[0].result == GameResult.VICTORY)
 				return (<div className="Historic__Victory">VICTORY</div>);
 			else
 				return (<div className="Historic__Defeat">DEFEAT</div>);
 		}
-		else if (infos.gamelogToUsers[1].user.id === user.id) {
+		else if (infos.gamelogToUsers[1] && infos.gamelogToUsers[1].user.id === user.id) {
 			if (infos.gamelogToUsers[1].result == GameResult.VICTORY)
 				return (<div className="Historic__Victory">VICTORY</div>);
 			else
@@ -63,16 +63,20 @@ function Historic({infos, user}: {infos: GamelogsType, user: User}) {
 	}
 
 	const getOpponentName = () => {
-		if (infos.gamelogToUsers[0].user.id === user.id)
-			return (<div className="Historic__Opponent"> against {infos.gamelogToUsers[1].user.username}</div>);
-		else if (infos.gamelogToUsers[1].user.id === user.id)
-			return (<div className="Historic__Opponent"> against {infos.gamelogToUsers[0].user.username}</div>);
+		if (infos.gamelogToUsers[1] && infos.gamelogToUsers[0]) {
+			if (infos.gamelogToUsers[0].user.id === user.id)
+				return (<div className="Historic__Opponent"> against {infos.gamelogToUsers[1].user.username}</div>);
+			else if (infos.gamelogToUsers[1].user.id === user.id)
+				return (<div className="Historic__Opponent"> against {infos.gamelogToUsers[0].user.username}</div>);
+		}		
+		else
+			return (<div className="Historic__Opponent"> against [deleted user]</div>);
 	}
 
 	return (
-		<div className="Historic">
+		<p className="Historic">
 			{getGameResult()}
 			{getOpponentName()}
-		</div>
+		</p>
 	)
 }

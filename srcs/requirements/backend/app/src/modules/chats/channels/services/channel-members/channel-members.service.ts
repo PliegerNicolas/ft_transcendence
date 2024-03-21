@@ -314,6 +314,8 @@ export class ChannelMembersService {
 
         users.forEach((user) => {
             const relationship: Relationship = actingUser.relationships.find((related_user) => related_user.id === user.id);
+            if (!relationship)
+                return ;
             for (const userStatus of relationship.userStatuses) {
                 if (userStatus?.status === RelationshipStatus.BLOCKED) invalidUsernames.push(userStatus.user.username);
             }

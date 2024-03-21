@@ -1,4 +1,4 @@
-import { ChanType } from "./types";
+import { ChanType, FriendshipType } from "./types";
 
 export function httpStatus(e: Error)
 {
@@ -61,4 +61,22 @@ export async function dynaGet(uri: string)
 		return (Promise.reject(error));
 	}
 	return (response.json());
+}
+
+export function extractShip(ship: FriendshipType)
+{
+	return {
+		user1: ship.userStatuses[0].user,
+		user2: ship.userStatuses[1].user,
+		status1: ship.userStatuses[0].status,
+		status2: ship.userStatuses[1].status,
+	};
+}
+
+export function toOldShip(ship: FriendshipType)
+{
+	return {
+		...ship,
+		...extractShip(ship),
+	};
 }
