@@ -180,11 +180,14 @@ function ChatContent()
 			setTimeout(() => {
 				invalidate(["channels", id, "messages"]);
 				invalidate(["channels", id]);
-			}, 100);
-			socket.on("updateChannel", () => {
-				invalidate(["channels", id]);
-			})
+			}, 100
+			);
 			//console.log('onMessage caught', content);
+		});
+		console.log("SOCKKETT OOON");
+		socket.on("updateChannel", () => {
+			console.log("UPDATE CHANNELLLL");
+			invalidate(["channels", id]);
 		});
 		socket.on('refreshPage', () => {
 			window.location.reload();
@@ -194,6 +197,7 @@ function ChatContent()
 			socket.off('onMessage');
 			socket.off('rejoinChannels');
 			socket.off('refreshPage');
+			socket.off('updateChannel');
 		});
 	}, []);
 

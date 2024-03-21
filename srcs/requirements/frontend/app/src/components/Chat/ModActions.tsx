@@ -30,8 +30,9 @@ export default function ModActions(
 			),
 		onError: mutateError,
 		onSuccess: () => {
-			invalidate(["channels", chan.id]);
 			socket.emit("channelAction");
+			console.log("EMIIIIIT");
+			invalidate(["channels", chan.id]);
 		},
 	});
 

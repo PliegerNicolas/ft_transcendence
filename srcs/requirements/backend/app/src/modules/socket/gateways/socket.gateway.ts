@@ -146,6 +146,7 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('channelAction')
 	handleChannelAction(@ConnectedSocket() client: Socket) {
+		console.log("OUUUAIS SUUUPEPPERRR!!!");
 		this.server.emit('updateChannel');
 	}
 
