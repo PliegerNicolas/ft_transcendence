@@ -112,6 +112,21 @@
 	font-weight: 600;
 }
 
+.User__Status {
+	text-align: center;
+	margin-top: 15px;
+}
+
+.User__Status .offline {
+	color: var(--text-faint);
+}
+.User__Status .online {
+	color: #6d9;
+}
+.User__Status .game {
+	color: #6DF;
+}
+
 .User__FriendItem {
 	display: grid;
 	grid-column-gap: 2px;
