@@ -47,14 +47,17 @@ export class SocketGateway implements OnModuleInit {
 		if (!userById.has(client.id)) {
 			userByName.set(username, client.id);
 			userById.set(client.id, username);
-			this.server.emit('userStatut', userById.get(client.id), "online");
-			// console.log("USER : " + userById.get(client.id) + " with id : " + client.id + " has joined the socket !");
+			//console.log("USER : " + userById.get(client.id) + " with id : " + client.id + " has joined the socket !");
 			this.channelService.getAllChannels(userById.get(client.id)).then((chan) => {
 				for (let i = 0; chan[i]; i++) {
 						// console.log("CLIENT JOINED CHANNEL : " + chan[i].channel.name);
 						client.join(chan[i].channel.name);
 					}
 			});
+		}
+		if (userById.has(client.id)) {
+			setTimeout(() => {this.server.emit('userStatus', username, "online");}, 200);
+			//console.log("sent online to server");
 		}
 	}
 
@@ -90,23 +93,30 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('getUserStatus')
 	handleGetUserStatut(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
+		let check: boolean = false;
+
 		for (let value of player1ID.values()) {
 			if (value === userByName.get(username)) {
 				this.server.to(client.id).emit('userStatus', username, "in game");
-				return ;
+				check = true;
 			}
 		}
 		for (let value of player2ID.values()) {
 			if (value === userByName.get(username)) {
 				this.server.to(client.id).emit('userStatus', username, "in game");
-				return ;
+				check = true;
 			}
 		}
+
+		if (check) return ;
+
 		if (userByName.has(username)) {
-			this.server.to(client.id).emit('userStatus', username, "online");
+			this.server.emit('userStatus', username, "online");
+			console.log("ONLINE OUIIIIIIIIII " + userById.get(client.id));
 		}
 		else {
-			this.server.to(client.id).emit('userStatus', username, "offline");
+			this.server.emit('userStatus', username, "offline");
+			console.log("OFFLINE FFFFFFFFFFFFFFFF" + userById.get(client.id));
 		}
 	}
 
