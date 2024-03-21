@@ -70,7 +70,7 @@ export default function ChanEdit({id}: {id: number})
 		mutationFn: (username: string) => api.post("/channels/mp", {username}),
 		onError: mutateError,
 		onSettled: () => invalidate(["channels"]),
-		onSuccess: (data: ChanSpecsType) => navigate("/chat/" + data.channel.id),
+		onSuccess: (data: ChanSpecsType) => {socket.emit('joinChannel', data.channel.name); navigate("/chat/" + data.channel.id);},
 		retry: retryMutate,
 	});
 
@@ -145,11 +145,12 @@ export default function ChanEdit({id}: {id: number})
 		});
 		}
 		socket.emit('joinChannel', chanForm.name);
+		socket.emit('newChannel');
 	}
 
 	async function newDm() {
 		postDm.mutate(dmUsername);
-		socket.emit('joinChannel', dmUsername);
+		socket.emit('newChannel');
 	}
 
 	if (!id) return (
