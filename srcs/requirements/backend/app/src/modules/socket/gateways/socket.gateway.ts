@@ -309,11 +309,11 @@ export class SocketGateway implements OnModuleInit {
 	handleSentLogs(@MessageBody() lobby: string, @ConnectedSocket() client: Socket) {
 		this.server.to(lobby).emit('drawEndGame', state.get(lobby));
 		if (player1ID.has(lobby)) {
-			this.server.to(client.id).emit('userStatus', userById.get(client.id), "online");
+			this.server.emit('userStatus', userById.get(client.id), "online");
 			player1ID.delete(lobby);
 		}
 		else if (player2ID.has(lobby)) {
-			this.server.to(client.id).emit('userStatus', userById.get(client.id), "online");
+			this.server.emit('userStatus', userById.get(client.id), "online");
 			player2ID.delete(lobby);
 		}
 	}
