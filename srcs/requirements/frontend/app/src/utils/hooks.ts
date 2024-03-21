@@ -123,8 +123,12 @@ export function useDmName()
 export function useRelation(username: string)
 {
 	const { me } = useContext(MyContext);
-	const getRelations = useGet(["relationships"]);
-	const getUser = useGet(["users", username]);
+
+	const getRelations = useGet(["relationships"], !!username);
+	const getUser = useGet(["users", username], !!username);
+
+	if (!username)
+		return ("");
 
 	if (!getRelations.isSuccess || !getUser.isSuccess)
 		return ("");
