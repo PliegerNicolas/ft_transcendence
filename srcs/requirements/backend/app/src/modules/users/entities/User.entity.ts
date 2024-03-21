@@ -42,7 +42,7 @@ export class User {
     @Column({ type: 'bigint', unique: true })
     oauthId: bigint;
 
-//    @Exclude()
+    //@Exclude()
     @IsEnum(GlobalServerPrivileges)
     @Column({ type: 'enum', enum: GlobalServerPrivileges, default: GlobalServerPrivileges.USER })
     globalServerPrivileges: GlobalServerPrivileges;
@@ -78,10 +78,6 @@ export class User {
     @OneToMany(() => ChannelMember, (member) => member.user)
     channelMembers?: ChannelMember[];
 
-    // Add back channelsInvitedTo
-    // Add back ChannelBannedFrom
-    // Add back ChannelMutedFrom
-
     /* Life cycles */
 
     @AfterLoad()
@@ -91,6 +87,14 @@ export class User {
 
     public hasGlobalServerPrivileges(): boolean {
         return (compareGlobalServerPrivileges(this.globalServerPrivileges, GlobalServerPrivileges.OPERATOR) >= 0);
+    }
+
+    /* Helper Functions */
+
+    isOrHasBlocked(username: string): boolean {
+        if (!username) return (false);
+        if (!this.relationships || this.relationships.length <= 0) return (false);
+        return (this.relationships?.some((relationship) => relationship.userStatuses?.some((userStatus) => userStatus?.user.username === username)));
     }
 
 }

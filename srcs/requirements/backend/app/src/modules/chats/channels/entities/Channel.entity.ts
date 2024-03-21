@@ -56,7 +56,17 @@ export class Channel {
 
     @AfterLoad()
     @AfterUpdate()
-    populateMemberStatusFields(): void {
+    afterLoad(): void {
+        this.orderMessages();
+        this.populateMemberStatusFields();
+    }
+
+    private orderMessages(): void {
+        if (!this.messages || this.messages.length < 2) return ;
+        this.messages.sort((a, b) => a.createdAt?.getTime() - b.createdAt?.getTime());
+    }
+
+    private populateMemberStatusFields(): void {
         this.invitedMembers = this.members?.filter((member) => member.invited) || [];
         this.bannedMembers = this.members?.filter((member) => member.banned) || [];
         this.mutedMembers = this.members?.filter((member) => member.muted) || [];

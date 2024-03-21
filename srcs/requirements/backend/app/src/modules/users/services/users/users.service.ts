@@ -173,4 +173,26 @@ export class UsersService {
         return (users);
     }
 
+    public async findStrictlyUsersAndRelationshipsByUsername(usernames: string[]): Promise<User[]> {
+        if (usernames.length !== new Set(usernames).size) {
+            const duplicateUsernames = usernames.filter((username, i) => usernames.indexOf(username) !== i);
+            throw new BadRequestException(`Duplicate username${duplicateUsernames.length > 1 ? 's' : ''} given: ${duplicateUsernames.join(', ')}`);
+        }
+
+        const users = await this.userRepository.find({
+            where: { username: In(usernames) },
+            relations: [
+                'relationships1.user1', 'relationships1.user2',
+                'relationships2.user1', 'relationships2.user2'
+            ],
+        });
+
+        if (users.length !== usernames.length) {
+            const missingUsernames = usernames.filter((username) => !users.some((user) => user.username === username));
+            throw new BadRequestException(`User${missingUsernames.length > 1 ? 's weren\'t' : ' wasn\'t'} found: ${missingUsernames.join(', ')}`);
+        }
+
+        return (users);
+    }
+
 }

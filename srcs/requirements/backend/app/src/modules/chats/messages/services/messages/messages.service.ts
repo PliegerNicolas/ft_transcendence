@@ -27,6 +27,7 @@ export class MessagesService {
         const channel = await this.channelRepository.findOne({
             where: { id: Equal(channelId)},
             relations: ['members.user', 'messages.channelMember.user'],
+            order: { createdAt: 'ASC' },
         });
 
         if (!channel) throw new NotFoundException(`Channel with ID ${channelId} not found`);
