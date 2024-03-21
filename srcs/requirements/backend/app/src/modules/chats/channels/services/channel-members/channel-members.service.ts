@@ -149,7 +149,9 @@ export class ChannelMembersService {
 
     kick(channel: Channel, users: User[]): void {
         if (!channel.members) channel.members = [];
-        if (!channel.invitedMembers)
+        if (!channel.invitedMembers) channel.invitedMembers = [];
+
+        console.log(channel.members);
 
         for (const user of users) {
             const member = this.getMember(channel, user.id);
