@@ -151,8 +151,6 @@ export class ChannelMembersService {
         if (!channel.members) channel.members = [];
         if (!channel.invitedMembers) channel.invitedMembers = [];
 
-        console.log(channel.members);
-
         for (const user of users) {
             const member = this.getMember(channel, user.id);
             if (member) {
@@ -202,8 +200,6 @@ export class ChannelMembersService {
             case (ChannelMode.OPEN):
                 return ;
             case (ChannelMode.INVITE_ONLY):
-                console.log("=== Ouistiti ===");
-                console.log(channel);
                 if (this.isInvited(channel, user.id) || this.isActiveMember(channel, user.id)) return ;
                 throw new ForbiddenException(`User '${user.username}' is neither member or invited to Channel with ID ${channel.id}`);
             case (ChannelMode.PASSWORD_PROTECTED):

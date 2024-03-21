@@ -1,15 +1,11 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryColumn, Unique, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ChannelMember } from "../../channels/entities/ChannelMember.entity";
-import { User } from "../../../users/entities/User.entity";
-import { NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { Channel } from "../../channels/entities/Channel.entity";
-import { ChannelRole } from "../../channels/enums/channel-role.enum";
 
 @Entity({ name: 'messages' })
-@Unique(['id', 'channelId'])
 export class Message {
 
-    @PrimaryColumn({ type: 'bigint' })
+    @PrimaryGeneratedColumn({ type: 'bigint' })
     id: bigint;
 
     @PrimaryColumn({ type: 'bigint' })

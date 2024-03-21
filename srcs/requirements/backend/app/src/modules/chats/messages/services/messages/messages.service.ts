@@ -79,7 +79,6 @@ export class MessagesService {
         const member = this.channelMemberService.getActiveMember(channel, user.id);
 
         const message = this.messageRepository.create({
-            id: this.generateNextMessageId(channel),
             channelId: channel.id,
             channelMember: member,
             ...messageDetails,
@@ -159,7 +158,7 @@ export class MessagesService {
 
     /* Helper Functions */
 
-    public generateNextMessageId(channel: Channel): bigint {
+    /*public generateNextMessageId(channel: Channel): bigint {
         if (!channel.messages) return (BigInt(1));
 
         const highestMessageId: bigint = channel.messages.reduce<bigint>((maxId, message) => {
@@ -168,6 +167,6 @@ export class MessagesService {
         }, BigInt(0));
 
         return (highestMessageId + BigInt(1));
-    }
+    }*/
 
 }
