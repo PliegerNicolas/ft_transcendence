@@ -1,9 +1,9 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 
 import Spinner from "../Spinner.tsx";
 
-import { useDmName, useGet } from "../../utils/hooks.ts";
+import { useDmName, useGet, useInvalidate } from "../../utils/hooks.ts";
 import { ChatContext } from "../../utils/contexts.ts";
 
 import add from "../../assets/add.svg";
@@ -11,16 +11,26 @@ import add from "../../assets/add.svg";
 import "../../styles/chat.css";
 import { ChanSpecsType } from "../../utils/types.ts";
 
+import { socket } from "../../App.tsx"
+
 // <ChatSidebar /> =============================================================
 
 export default function ChatSidebar() {
 	const loc = useLocation();
+	const invalidate = useInvalidate();
 	const idArray = loc.pathname.match(/\/[^/]*$/);
 	const id = idArray?.length ? idArray[0].slice(1) : "";
 
 	const { showSidebar } = useContext(ChatContext);
 
 	const getChans = useGet(["channels"]);
+
+	useEffect(() => {
+		socket.on('refreshChannels', () => {
+			invalidate(["channels"]);
+		});
+		return (() => {socket.off('refreshChannels')});
+	}, []);
 
 	if (getChans.isPending) return (
 		<div className={

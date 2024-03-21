@@ -183,7 +183,11 @@ function ChatContent()
 			window.location.reload();
 		});
 		socket.emit('rejoinChannels');
-		return (() => {socket.off('onMessage')});
+		return (() => {
+			socket.off('onMessage');
+			socket.off('rejoinChannels');
+			socket.off('refreshPage');
+		});
 	}, []);
 
 	/*
