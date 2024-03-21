@@ -35,12 +35,12 @@ export class TwofactorauthController {
 		@Body() {twoFactorAuthCode} : TwoFactorAuthCodeDto
 	){
 		const user = req.user
-		console.log(user.id)
+		// console.log(user.id)
 
 		const isCodeValid = await this.twoFactorAuthService.isTwoFactorAuthSecretValid(
 			twoFactorAuthCode, user.id
 		  ).then((data) => data);
-		  console.log(isCodeValid)
+		//   console.log(isCodeValid)
 		  if (!isCodeValid) {
 			throw new ForbiddenException('Wrong authentication code');
 		  }

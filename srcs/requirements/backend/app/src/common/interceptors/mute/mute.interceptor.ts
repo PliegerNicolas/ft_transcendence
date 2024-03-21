@@ -27,8 +27,8 @@ export class MuteInterceptor implements NestInterceptor {
 
 		if (channelMember?.muted && channelMember?.isMuteExpired())
 		{
-			console.log("=== MuteInterceptor ===")
-			console.log("Expired mute detected");
+			// console.log("=== MuteInterceptor ===")
+			// console.log("Expired mute detected");
 			channelMember.unmute();
 			await this.channelMemberRepository.save(channelMember);
 		}
