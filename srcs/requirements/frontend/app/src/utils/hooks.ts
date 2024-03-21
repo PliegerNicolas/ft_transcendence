@@ -14,7 +14,7 @@ export function useInvalidate()
 
 export function useStopOnHttp()
 {
-	//const { setLogged, api } = useContext(MyContext);
+	const { setLogged } = useContext(MyContext);
 
 	/*
 	const refresh = useMutation({
@@ -24,6 +24,9 @@ export function useStopOnHttp()
 
 	return ((count: number, error: Error) => {
 		const status = httpStatus(error);
+
+		if (status === 401)
+			setLogged(false);
 
 		return (!status && count < 3)
 	});
