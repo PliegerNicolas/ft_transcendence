@@ -112,11 +112,11 @@ export class SocketGateway implements OnModuleInit {
 
 		if (userByName.has(username)) {
 			this.server.emit('userStatus', username, "online");
-			console.log("ONLINE OUIIIIIIIIII " + userById.get(client.id));
+			//console.log("ONLINE OUIIIIIIIIII " + userById.get(client.id));
 		}
 		else {
 			this.server.emit('userStatus', username, "offline");
-			console.log("OFFLINE FFFFFFFFFFFFFFFF" + userById.get(client.id));
+			//console.log("OFFLINE FFFFFFFFFFFFFFFF" + userById.get(client.id));
 		}
 	}
 
