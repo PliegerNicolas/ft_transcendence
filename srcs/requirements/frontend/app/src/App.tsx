@@ -79,9 +79,8 @@ function Auth()
 			}
 		},
 
-		onError: (err: Error) => {
+		onError: () => {
 			setStatus("error");
-			console.log(err.message);
 			setLogged(false);
 		},
 	});
@@ -209,7 +208,6 @@ function App()
 	const getUser = useGet(["me"], logged);
 
 	useEffect(() => {
-		console.log("COUCOUCPOOCIUHIUH " + getUser.isSuccess);
 		if (getUser.isSuccess) {
 			socket.emit('userInfos', getUser.data.username);
 		}
@@ -219,12 +217,12 @@ function App()
 		if (socket) {
 			socket.on('getUserInfos', () => {
 				if (getUser.isSuccess) {
-					console.log("sent user infos to back");
+					//console.log("sent user infos to back");
 					socket.emit('userInfos', getUser.data.username);
 				}
 			});
 			socket.on('invitedToPrivate', (user: string, lobby: string) => {
-				console.log("invitation de : " + user);
+				//console.log("invitation de : " + user);
 				addInvite({from: user, lobby: lobby});
 			});
 		}

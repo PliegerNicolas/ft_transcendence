@@ -108,8 +108,6 @@ export default function ChatContentRouter()
 		</div>
 	);
 
-	console.log(getChan.data);
-
 	return (
 		<ChatContentContext.Provider value={{
 			chan: getChan.data.channel,
@@ -178,12 +176,12 @@ function ChatContent()
 	useEffect(() => setLastChan(id), [id]);
 
 	useEffect(() => {
-		socket.on('onMessage', (content: string) => {
+		socket.on('onMessage', () => {
 			setTimeout(() => {
 				invalidate(["channels", id, "messages"]);
 				invalidate(["channels", id]);
 			}, 100);
-			console.log('onMessage caught', content);
+			//console.log('onMessage caught', content);
 		});
 		socket.on('refreshPage', () => {
 			window.location.reload();

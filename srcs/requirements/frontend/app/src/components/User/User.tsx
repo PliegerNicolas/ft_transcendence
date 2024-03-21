@@ -47,10 +47,10 @@ function User()
 
 	useEffect(() => {
 		socket.on("userStatus", (username: string, status: string) => {
-			console.log("STATUS UPDATE ")
-			console.log("USERNAME " + username);
-			console.log("STATUS " + status);
-			console.log("username " + getUser.data?.username);
+			//console.log("STATUS UPDATE ")
+			//console.log("USERNAME " + username);
+			//console.log("STATUS " + status);
+			//console.log("username " + getUser.data?.username);
 			if (username === getUser.data?.username)
 				setStatus(status);
 		});
