@@ -14,22 +14,18 @@ export function useInvalidate()
 
 export function useStopOnHttp()
 {
-	const { setLogged, api } = useContext(MyContext);
+	//const { setLogged, api } = useContext(MyContext);
 
+	/*
 	const refresh = useMutation({
 		mutationFn: () => api.get("/auth/refresh"),
 		onError: () => setLogged(false)
-	});
+	});*/
 
 	return ((count: number, error: Error) => {
 		const status = httpStatus(error);
 
-		if (status === 401) {
-			refresh.mutate();
-			return (count < 2);
-		}
-		else
-			return (!status && count < 3)
+		return (!status && count < 3)
 	});
 }
 
@@ -43,6 +39,7 @@ export function useRetryMutate()
 	});
 
 	return (count: number, err: Error) => {
+		return (false);
 		if (httpStatus(err) !== 401)
 			return (false);
 

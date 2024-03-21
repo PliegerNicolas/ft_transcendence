@@ -7,10 +7,10 @@ export default defineConfig({
 	plugins: [react()],
 	server: {
     	port: 3030,
-		https: {
-			key: fs.readFileSync(`./ssl_certificates/dev.key`),
-			cert: fs.readFileSync(`./ssl_certificates/dev.crt`),
-		},
+	//	https: {
+	//		key: fs.readFileSync(`./ssl_certificates/dev.key`),
+	//		cert: fs.readFileSync(`./ssl_certificates/dev.crt`),
+	//	},
 	},
 	preview: {
 		port: parseInt(process.env.PORT || '3000'),
