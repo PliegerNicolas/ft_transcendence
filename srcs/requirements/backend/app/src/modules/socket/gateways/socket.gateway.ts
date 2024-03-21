@@ -144,6 +144,11 @@ export class SocketGateway implements OnModuleInit {
 		this.server.emit('refreshChannels');
 	}
 
+	@SubscribeMessage('channelAction')
+	handleChannelAction(@ConnectedSocket() client: Socket) {
+		this.server.emit('updateChannel');
+	}
+
 	// Private Play Handlers ==============================================================================================================
 
 	@SubscribeMessage('inviteToPrivate')
