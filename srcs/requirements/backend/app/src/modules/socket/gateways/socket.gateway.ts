@@ -131,7 +131,7 @@ export class SocketGateway implements OnModuleInit {
 	@SubscribeMessage('joinChannel')
 	handleChannelJoin(@MessageBody() channel: string, @ConnectedSocket() client: Socket) {
 		client.join(channel);
-		// console.log('JOINED CHANNEL : ' + channel);
+		console.log('JOINED CHANNEL : ' + channel);
 	}
 
 	@SubscribeMessage('refreshClientPage')
@@ -146,6 +146,7 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('channelAction')
 	handleChannelAction(@ConnectedSocket() client: Socket) {
+		console.log("OUUUAIS SUUUPEPPERRR!!!");
 		this.server.emit('updateChannel');
 	}
 

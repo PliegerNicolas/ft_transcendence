@@ -210,6 +210,7 @@ function App()
 	useEffect(() => {
 		if (getUser.isSuccess) {
 			socket.emit('userInfos', getUser.data.username);
+			socket.emit("rejoinChannels", getUser.data.username);
 		}
 	}, [logged]);
 

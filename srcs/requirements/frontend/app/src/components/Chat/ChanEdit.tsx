@@ -69,7 +69,12 @@ export default function ChanEdit({id}: {id: number})
 		mutationFn: (username: string) => api.post("/channels/mp", {username}),
 		onError: mutateError,
 		onSettled: () => invalidate(["channels"]),
-		onSuccess: (data: ChanSpecsType) => {socket.emit('joinChannel', data.channel.name); navigate("/chat/" + data.channel.id);},
+		onSuccess: (data: ChanSpecsType) => {
+			socket.emit('joinChannel', data.channel.name);
+			console.log("JOIOOOIN" + data.channel.name);
+			socket.emit('newChannel');
+			navigate("/chat/" + data.channel.id);
+		},
 		retry: retryMutate,
 	});
 
@@ -148,7 +153,6 @@ export default function ChanEdit({id}: {id: number})
 
 	async function newDm() {
 		postDm.mutate(dmUsername);
-		socket.emit('newChannel');
 	}
 
 	if (!id) return (
@@ -377,7 +381,10 @@ function RoleUserLists()
 		mutationFn: (action: actionType) =>
 			api.patch("/channels/" + chan.id + "/manage_access", action),
 		onError: mutateError,
-		onSuccess: () => invalidate(["channels", chan.id]),
+		onSuccess: () => {
+			socket.emit("channelAction");
+			invalidate(["channels", chan.id])
+		},
 	});
 
 	return (
@@ -432,7 +439,7 @@ function ChannelMemberList(
 		<div className="UserList__Item" key={member.user.id}>
 			<div>{member.user.username}</div>
 			<button type="button" onClick={() => {
-					rm(list.find(elem => elem.id == member.user.id))
+					rm(list.find(elem => elem.user.id == member.user.id)?.user.username)
 			}}>
 				<img src={closeIcon}/>
 			</button>
