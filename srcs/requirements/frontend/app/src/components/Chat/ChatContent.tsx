@@ -181,6 +181,9 @@ function ChatContent()
 				invalidate(["channels", id, "messages"]);
 				invalidate(["channels", id]);
 			}, 100);
+			socket.on("updateChannel", () => {
+				invalidate(["channels", id]);
+			})
 			//console.log('onMessage caught', content);
 		});
 		socket.on('refreshPage', () => {

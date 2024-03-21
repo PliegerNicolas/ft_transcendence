@@ -29,7 +29,10 @@ export default function ModActions(
 				{action, usernames: [username], muteDuration: duration}
 			),
 		onError: mutateError,
-		onSuccess: () => invalidate(["channels", chan.id]),
+		onSuccess: () => {
+			invalidate(["channels", chan.id]);
+			socket.emit("channelAction");
+		},
 	});
 
 	function mutate(action: string, duration = undefined as string | undefined) {
