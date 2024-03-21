@@ -90,10 +90,24 @@ export class SocketGateway implements OnModuleInit {
 
 	@SubscribeMessage('getUserStatus')
 	handleGetUserStatut(@MessageBody() username: string, @ConnectedSocket() client: Socket) {
+		for (let value of player1ID.values()) {
+			if (value === userByName.get(username)) {
+				this.server.to(client.id).emit('userStatus', username, "in game");
+				return ;
+			}
+		}
+		for (let value of player2ID.values()) {
+			if (value === userByName.get(username)) {
+				this.server.to(client.id).emit('userStatus', username, "in game");
+				return ;
+			}
+		}
 		if (userByName.has(username)) {
 			this.server.to(client.id).emit('userStatus', username, "online");
 		}
-		this.server.to(client.id).emit('userStatus', username, "offline");
+		else {
+			this.server.to(client.id).emit('userStatus', username, "offline");
+		}
 	}
 
 	// Chat Handlers ==============================================================================================================	
