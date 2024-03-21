@@ -158,7 +158,6 @@ function ChatContent()
 			api.patch("/channels/" + id + "/join", {password}),
 		onSettled: () => invalidate(["channels"]),
 		onSuccess: () => {
-			console.log("EMIT JOIN CHANNEL");
 			socket.emit("channelAction");
 			socket.emit('joinChannel', chan.name);
 		},
@@ -189,9 +188,7 @@ function ChatContent()
 			);
 			//console.log('onMessage caught', content);
 		});
-		console.log("SOCKKETT OOON");
 		socket.on("updateChannel", () => {
-			console.log("UPDATE CHANNELLLL");
 			invalidate(["channels", id]);
 		});
 		socket.on('refreshPage', () => {

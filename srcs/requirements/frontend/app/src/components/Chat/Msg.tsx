@@ -103,7 +103,7 @@ export default function Msg(
 			}
 				<div className="Msg__Content">
 					{relation !== "blocked" ?
-						data.content :
+						data.content.split("\n").map((item: string) => <div>{item}</div>) :
 						<span className="error-msg">
 							You've blocked this user
 						</span>}

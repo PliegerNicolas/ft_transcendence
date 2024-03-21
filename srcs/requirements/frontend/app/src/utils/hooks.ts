@@ -56,7 +56,8 @@ export function useMutateError()
 	const { addNotif } = useContext(MyContext);
 
 	return ((error: Error) => {
-		addNotif({content: error.message});
+		if (httpStatus(error) !== 500)
+			addNotif({content: error.message});
 	})
 }
 
