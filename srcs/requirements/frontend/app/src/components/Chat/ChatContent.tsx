@@ -157,6 +157,11 @@ function ChatContent()
 		mutationFn: (password: string) =>
 			api.patch("/channels/" + id + "/join", {password}),
 		onSettled: () => invalidate(["channels"]),
+		onSuccess: () => {
+			console.log("EMIT JOIN CHANNEL");
+			socket.emit("channelAction");
+			socket.emit('joinChannel', chan.name);
+		},
 		onError: mutateError,
 		retry: retryMutate,
 	});
@@ -228,7 +233,6 @@ function ChatContent()
 
 	function handleJoinChannel(password: string) {
 		join.mutate(password);
-		socket.emit('joinChannel', chan.name);
 	}
 
 	const [popup, setPopup] =
