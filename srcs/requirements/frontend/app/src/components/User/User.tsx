@@ -50,10 +50,10 @@ function User()
 			console.log("STATUS UPDATE")
 			console.log("USERNAME" + username);
 			console.log("STATUS" + status);
-			if (username === getUser?.data.username)
+			if (username === getUser.data?.username)
 				setStatus(status);
 		});
-		socket.emit("getUserStatus", getUser?.data.username);
+		socket.emit("getUserStatus", getUser.data?.username);
 		return (() => {socket.off("userStatus")});
 	}
 	, [getUser.isSuccess])
