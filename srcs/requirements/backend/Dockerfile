@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 20:08:41 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/18 13:04:38 by nplieger         ###   ########.fr        #
+#    Updated: 2024/03/21 15:04:22 by mlaneyri         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -40,5 +40,5 @@ RUN npm run build
 EXPOSE $PORT
 
 # Run NPM.
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start"]
 # START:DEV IS TEMPORARY FOR DEVELOPMENT PURPOSE
