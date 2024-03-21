@@ -84,7 +84,7 @@ const PrivatePlay = () => {
 				setGameOver(true);
 			});
 			socket.on('inviteAccepted', () => {
-				addNotif({content: "Invitation accepted"});
+				addNotif({type: 1, content: "Invitation accepted"});
 				setInviteState(true);
 			});
 		}
