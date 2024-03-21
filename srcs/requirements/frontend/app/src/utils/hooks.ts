@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { MyContext } from "./contexts";
 import { extractShip, httpStatus } from "./utils";
 import { ChanType, FriendshipType } from "./types";
+import { socket } from "../App";
 
 export function useInvalidate()
 {
@@ -79,9 +80,18 @@ export function useSetMe()
 	const { api } = useContext(MyContext);
 	const mutateError = useMutateError();
 
+	async function emitUserInfos() {
+		const res = await api.get("/me");
+
+		socket.emit('userInfos', res.username);
+	}
+
 	const mutation = useMutation({
 		mutationFn: ((name: string) => api.post("/auth/log_as/" + name, {})),
-		onSuccess: () => {window.location.reload()},
+		onSuccess: () => {
+			emitUserInfos();
+			window.location.reload()
+		},
 		onError: mutateError,
 	});
 
@@ -110,7 +120,7 @@ export function useDmName()
 	}
 }
 
-export function useStatus(username: string)
+export function useRelation(username: string)
 {
 	const { me } = useContext(MyContext);
 	const getRelations = useGet(["relationships"]);

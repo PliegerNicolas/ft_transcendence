@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useContext } from "react";
 
 import { MyContext } from "../utils/contexts";
-import { useInvalidate, useMutateError, useStatus } from "../utils/hooks";
+import { useInvalidate, useMutateError, useRelation } from "../utils/hooks";
 
 import "../styles/relations.css";
 
@@ -13,7 +13,7 @@ export default function RelationshipActions({name}: {name: string})
 
 	const { api } = useContext(MyContext);
 
-	const status = useStatus(name);
+	const relation = useRelation(name);
 
 	const patchRelation = useMutation({
 		mutationFn: ({them, status}: {them: string, status: string}) =>
@@ -47,7 +47,7 @@ export default function RelationshipActions({name}: {name: string})
 		patchRelation.mutate({them: name, status: "accepted"});
 	}
 
-	switch (status) {
+	switch (relation) {
 		case "accepted": return (
 			<div className="Relations">
 				<div className="Relations__Status">
