@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:41:05 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/21 01:28:49 by nicolas          ###   ########.fr        #
+#    Updated: 2024/03/22 12:53:10 by nplieger         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,6 +39,8 @@ services:
   nginx:
     container_name: nginx
     image: nginx
+    build:
+      context: ./requirements/nginx
     environment:
       DOMAIN_NAME: ${DOMAIN_NAME}
     restart: unless-stopped
@@ -55,6 +57,8 @@ services:
     init: true
     container_name: backend
     image: backend
+    build:
+      context: ./requirements/backend
     environment:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -73,6 +77,8 @@ services:
     init: true
     container_name: frontend
     image: frontend
+    build:
+      context: ./requirements/frontend
     environment:
       VITE_FTAPI_CLIENTID: ${API42_CLIENT_ID}
     restart: unless-stopped
@@ -82,6 +88,8 @@ services:
   database:
     init: true
     container_name: database
+    build:
+      context: ./requirements/database
     image: database
     environment:
       DB_USER: ${DB_USER}
