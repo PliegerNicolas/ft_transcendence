@@ -3,6 +3,11 @@
 	margin-bottom: 4px;
 }
 
+.Relations.false button {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
 .Relations button.unfriend,
 .Relations button.cancel,
 .Relations button.reject {

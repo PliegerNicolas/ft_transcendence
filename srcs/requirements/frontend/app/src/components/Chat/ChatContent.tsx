@@ -342,7 +342,7 @@ function ChatContent()
 						</button>
 					</div>
 				}
-					<RelationshipActions name={dmName} />
+					<RelationshipActions name={dmName} showStatus={true}/>
 				</div>
 			}
 			{

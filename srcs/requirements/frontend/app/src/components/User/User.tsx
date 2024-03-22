@@ -47,22 +47,15 @@ function User()
 
 	useEffect(() => {
 		if (socket) {
-			//console.log("socket on status")
 			socket.on("userStatus", (username: string, status: string) => {
-				//console.log("STATUS UPDATE ")
-				//console.log("USERNAME " + username);
-				//console.log("STATUS " + status);
-				//console.log("username " + getUser.data?.username);
 				if (username === getUser.data?.username)
 					setStatus(status);
 			});
 			socket.emit("getUserStatus", getUser.data?.username);
 		}
 		return () => {
-			if (socket) {
-				socket.off("userStatus")
-				//console.log("socket off status");
-			}	
+			if (socket)
+				socket.off("userStatus");
 		};
 	}
 	, [getUser.isSuccess])
@@ -124,12 +117,12 @@ function User()
 			<section>
 				<UserInfos user={user} me={false} />
 				<div className={"User__Status"}>
-					Status: <span className={status}>{status}</span>
+					Status: <span className={"Status " + status}>{status}</span>
 				</div>
 				<hr />
 				{
 					relation &&
-					<RelationshipActions name={user.username} />
+					<RelationshipActions name={user.username} showStatus={true}/>
 				}
 				<div className="User__InvitePlayer">
 					<InvitePlayer user={user.username} />
