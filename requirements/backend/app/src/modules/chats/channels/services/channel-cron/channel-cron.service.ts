@@ -12,7 +12,7 @@ export class ChannelCronService {
         private readonly channelMemberRepository: Repository<ChannelMember>
     ) {}
 
-    @Cron('15 * * * * *') // Every 15 seconds
+    @Cron('10 * * * * *') // Every 15 seconds
     async unmuteCronJob(): Promise<void> {
         const channelMembers = await this.channelMemberRepository.find({
             where: {

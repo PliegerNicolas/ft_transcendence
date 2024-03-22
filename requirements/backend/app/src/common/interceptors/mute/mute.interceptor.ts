@@ -18,14 +18,12 @@ export class MuteInterceptor implements NestInterceptor {
 	async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
 		const request = context.switchToHttp().getRequest();
 
-		let channelId: bigint;
 		let userId: bigint;
+		let channelId: bigint;
 
 		if (request.user) userId = this.idPipe.transform(request.user.id);
-		else if (request.params) {
-			if (request.params.userId) userId = this.idPipe.transform(request.params.userId);
-			if (request.params.channelId) channelId = this.idPipe.transform(request.params.channelId);
-		}
+		else if (request.params) userId = this.idPipe.transform(request.params.userId);
+		if (request.params.channelId) channelId = this.idPipe.transform(request.params.channelId);
 
 		if (!channelId || !userId) return (next.handle());
 
