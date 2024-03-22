@@ -34,14 +34,14 @@ export class BigintPipe implements PipeTransform, OnModuleInit {
 		} else throw new Error(`Couldn't retrieve postgresql's max and min values for BigInt`);
 	}
 
-	transform(value: string, metadata: ArgumentMetadata): bigint {
+	transform(value: string, metadata?: ArgumentMetadata): bigint {
     	if (!/^-?\d+$/.test(value)) throw new BadRequestException(`Validation failed (numeric string expected)`);
 
 		try {
 			const bigintValue = BigInt(value);
 
-			if (bigintValue > this.maxPostgresqlBigInt) throw new BadRequestException('Validation failed (too big)');
-			else if (bigintValue < this.minPostgresqlBigInt) throw new BadRequestException('Validation failed (too small)');
+			if (bigintValue > this.maxPostgresqlBigInt) throw new BadRequestException('Validation failed (numeric string represents a too big value)');
+			else if (bigintValue < this.minPostgresqlBigInt) throw new BadRequestException('Validation failed (number string represents a too small value)');
 
 			return (bigintValue);
 		} catch(error) {

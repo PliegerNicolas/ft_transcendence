@@ -1,8 +1,8 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Observable } from 'rxjs';
+import { IdPipe } from 'src/common/pipes/id/id.pipe';
 import { ChannelMember } from 'src/modules/chats/channels/entities/ChannelMember.entity';
-import { ChannelMembersService } from 'src/modules/chats/channels/services/channel-members/channel-members.service';
 import { Equal, Repository } from 'typeorm';
 
 @Injectable()
@@ -11,15 +11,21 @@ export class MuteInterceptor implements NestInterceptor {
 	constructor(
         @InjectRepository(ChannelMember)
         private readonly channelMemberRepository: Repository<ChannelMember>,
+
+		private readonly idPipe: IdPipe,
 	) {}
 
 	async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
 		const request = context.switchToHttp().getRequest();
 
-		let userId: bigint = null;
-		if (request.user) BigInt(request.user.id);
-		else if (request.params?.userId) userId = request.params.userId;
-		const channelId: bigint = request.params?.channelId ? BigInt(request.params.channelId) : null;
+		let channelId: bigint;
+		let userId: bigint;
+
+		if (request.user) userId = this.idPipe.transform(request.user.id);
+		else if (request.params) {
+			if (request.params.userId) userId = this.idPipe.transform(request.params.userId);
+			if (request.params.channelId) channelId = this.idPipe.transform(request.params.channelId);
+		}
 
 		if (!channelId || !userId) return (next.handle());
 

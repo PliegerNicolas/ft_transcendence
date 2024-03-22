@@ -12,6 +12,7 @@ import { AuthModule } from "../../../auth/auth.module";
 import { GuardsModule } from "../../../guards/guards.module";
 import { ChannelMembersService } from './services/channel-members/channel-members.service';
 import { ChannelCronService } from './services/channel-cron/channel-cron.service';
+import { IdPipe } from "src/common/pipes/id/id.pipe";
 
 @Module({
 	imports: [
@@ -22,7 +23,7 @@ import { ChannelCronService } from './services/channel-cron/channel-cron.service
 		forwardRef(() => PasswordHashingModule),
 	],
 	controllers: [ChannelsController],
-	providers: [ChannelsService, ChannelMembersService, ChannelCronService],
+	providers: [ChannelsService, ChannelMembersService, ChannelCronService, IdPipe],
 	exports: [ChannelsService, ChannelMembersService],
 })
 export class ChannelsModule {}
