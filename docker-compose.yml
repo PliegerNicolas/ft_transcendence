@@ -1,0 +1,102 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    docker-compose.yml                                 :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/01/08 19:41:05 by nicolas           #+#    #+#              #
+#    Updated: 2024/03/22 12:53:10 by nplieger         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+# Latest version as of january 8 2024
+version: '3.9'
+
+# Networks
+networks:
+  transcendence:
+    driver: bridge
+
+# Volumes
+volumes:
+  backend_uploads_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${HOME}/data/uploads
+      o: bind
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${HOME}/data/postgresql
+      o: bind
+
+# Services
+services:
+
+  nginx:
+    container_name: nginx
+    image: nginx
+    build:
+      context: ./requirements/nginx
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME}
+    restart: unless-stopped
+    networks:
+      - transcendence
+    ports:
+#      - "443:443"
+      - "4433:443"
+    depends_on:
+      - frontend
+      - backend
+
+  backend:
+    init: true
+    container_name: backend
+    image: backend
+    build:
+      context: ./requirements/backend
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      API42_CLIENT_ID: ${API42_CLIENT_ID}
+      API42_SECRET: ${API42_SECRET}
+    restart: unless-stopped
+    networks:
+      - transcendence
+    depends_on:
+      - database
+#    volumes:
+#      - backend_uploads_data:/app/assets/uploads
+
+  frontend:
+    init: true
+    container_name: frontend
+    image: frontend
+    build:
+      context: ./requirements/frontend
+    environment:
+      VITE_FTAPI_CLIENTID: ${API42_CLIENT_ID}
+    restart: unless-stopped
+    networks:
+      - transcendence
+
+  database:
+    init: true
+    container_name: database
+    build:
+      context: ./requirements/database
+    image: database
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    restart: unless-stopped
+    networks:
+      - transcendence
+#    volumes:
+#      - db_data:/var/lib/postgresql/data
