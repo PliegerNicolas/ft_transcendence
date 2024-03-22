@@ -11,7 +11,10 @@ import { PasswordHashingModule } from "../../password-hashing/password-hashing.m
 import { AuthModule } from "../../../auth/auth.module";
 import { GuardsModule } from "../../../guards/guards.module";
 import { ChannelMembersService } from './services/channel-members/channel-members.service';
+import { ChannelCronService } from './services/channel-cron/channel-cron.service';
 import { IdPipe } from "src/common/pipes/id/id.pipe";
+import { ScheduleModule } from "@nestjs/schedule";
+
 @Module({
 	imports: [
 		TypeOrmModule.forFeature([Channel, ChannelMember, Message, User]),
@@ -21,7 +24,7 @@ import { IdPipe } from "src/common/pipes/id/id.pipe";
 		forwardRef(() => PasswordHashingModule),
 	],
 	controllers: [ChannelsController],
-	providers: [ChannelsService, ChannelMembersService, IdPipe],
+	providers: [ChannelsService, ChannelMembersService, ChannelCronService, IdPipe],
 	exports: [ChannelsService, ChannelMembersService],
 })
 export class ChannelsModule {}
