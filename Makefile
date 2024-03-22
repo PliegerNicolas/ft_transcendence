@@ -6,7 +6,7 @@
 #    By: julboyer <julboyer@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:32:44 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/22 12:47:42 by nplieger         ###   ########.fr        #
+#    Updated: 2024/03/22 12:59:25 by nplieger         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,8 +22,8 @@ NAME			:=			transcendence
 
 COMPOSE				:=			docker-compose
 BUILD               :=			docker build -t
-COMPOSE_FILE		:=			./srcs/docker-compose.yml
-REQUIREMENTS_PATH	:=			./srcs/requirements
+COMPOSE_FILE		:=			./docker-compose.yml
+REQUIREMENTS_PATH	:=			./requirements
 
 # **************************************************************************** #
 # *                                FUNCTIONS                                 * #
@@ -49,7 +49,6 @@ all:	up
 
 up:
 	$(call build_volume_folders)
-
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d --build
 
 clean:
@@ -59,6 +58,6 @@ clean:
 re:		clean up
 
 prune:
-	docker system prune -f
+	docker system prune -af
 
 .PHONY: up clean re prune
