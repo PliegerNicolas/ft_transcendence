@@ -83,7 +83,7 @@ export function toOldShip(ship: FriendshipType)
 
 export function muteDelay(member: MemberType | undefined)
 {
-	if (!member || !member.mutedSince || !member.muteDuration)
+	if (!member || !member.mutedSince || !member.muteDuration || !member.muted)
 		return (0);
 
 	const start = new Date(member.mutedSince);

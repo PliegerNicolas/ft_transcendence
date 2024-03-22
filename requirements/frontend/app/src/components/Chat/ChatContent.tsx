@@ -251,12 +251,13 @@ function ChatContent()
 	useEffect(() => {
 		const timerId = setInterval(() => {
 			setDuration(muteDelay(mutedMember));
-			console.log(muteDelay(mutedMember));
-			if (muteDelay(mutedMember) < 0)
+			if (muteDelay(mutedMember) < 0) {
+				clearInterval(timerId);
 				invalidate(["channels", chan.id]);
+			}
 		}, 1000);
 		return (() => clearInterval(timerId))
-	}, []);
+	}, [chan]);
 
 	if (getMsgs.isPending) {
 		return (
