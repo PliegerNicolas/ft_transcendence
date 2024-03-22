@@ -6,7 +6,9 @@ import { useInvalidate, useMutateError, useRelation } from "../utils/hooks";
 
 import "../styles/relations.css";
 
-export default function RelationshipActions({name}: {name: string})
+export default function RelationshipActions(
+	{name, showStatus}:
+	{name: string, showStatus: boolean})
 {
 	const invalidate = useInvalidate();
 	const mutateError = useMutateError();
@@ -49,20 +51,26 @@ export default function RelationshipActions({name}: {name: string})
 
 	switch (relation) {
 		case "accepted": return (
-			<div className="Relations">
+			<div className={"Relations " + showStatus}>
+			{
+				showStatus &&
 				<div className="Relations__Status">
 					You are friend with {name}.
 				</div>
+			}
 				<button className="reject" onClick={() => delRelation.mutate(name)}>
 					Unfriend
 				</button>
 			</div>
 		);
 		case "approve": return (
-			<div className="Relations">
+			<div className={"Relations " + showStatus}>
+			{
+				showStatus &&
 				<div className="Relations__Status">
 					{name} sent you a friend request.
 				</div>
+			}
 				<button onClick={acceptShip} className="accept">
 					Accept as friend
 				</button>
@@ -72,27 +80,33 @@ export default function RelationshipActions({name}: {name: string})
 			</div>
 		);
 		case "pending": return (
-			<div className="Relations">
+			<div className={"Relations " + showStatus}>
+			{
+				showStatus &&
 				<div className="Relations__Status">
 					Your friend request to {name} is pending.
 				</div>
+			}
 				<button className="reject" onClick={() => delRelation.mutate(name)}>
 					Cancel
 				</button>
 			</div>
 		);
 		case "blocked": return (
-			<div className="Relations">
+			<div className={"Relations " + showStatus}>
+			{
+				showStatus &&
 				<div className="Relations__Status">
 					You are blocking {name}.
 				</div>
+			}
 				<button className="unblock" onClick={() => delRelation.mutate(name)}>
 					Unblock
 				</button>
 			</div>
 		);
 		case "imblocked": return (
-			<div className="Relations">
+			<div className={"Relations " + showStatus}>
 				<button className="accept">
 					Friend request
 				</button>
@@ -104,7 +118,7 @@ export default function RelationshipActions({name}: {name: string})
 	}
 
 	return (
-		<div className="Relations">
+		<div className={"Relations " + showStatus}>
 			<button onClick={friend} className="accept">
 				Friend request
 			</button>

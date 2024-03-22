@@ -244,6 +244,21 @@ function ChatContent()
 
 	const [leavePopup, setLeavePopup] = useState(false);
 
+	const mutedMember = chan.mutedMembers.find(member => member.user.id === me!.id);
+
+	const [duration, setDuration] = useState(muteDelay(mutedMember));
+
+	useEffect(() => {
+		const timerId = setInterval(() => {
+			setDuration(muteDelay(mutedMember));
+			if (muteDelay(mutedMember) < 0) {
+				clearInterval(timerId);
+				invalidate(["channels", chan.id]);
+			}
+		}, 1000);
+		return (() => clearInterval(timerId))
+	}, [chan]);
+
 	if (getMsgs.isPending) {
 		return (
 			<div className="ChatContent">
@@ -294,7 +309,7 @@ function ChatContent()
 				role && isMuted(chan, me!.id) &&
 				<div className="Chat__Input join">
 					You are muted on this channel,
-					({muteDelay(chan.mutedMembers.find(member => member.user.id === me!.id))}s remaining)
+					{duration > 0 && " (" + duration + "s remaining)"}
 					<br />and thus cannot send messages to it.
 				</div> ||
 				role &&
@@ -328,7 +343,7 @@ function ChatContent()
 						</button>
 					</div>
 				}
-					<RelationshipActions name={dmName} />
+					<RelationshipActions name={dmName} showStatus={true}/>
 				</div>
 			}
 			{

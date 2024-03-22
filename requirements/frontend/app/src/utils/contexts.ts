@@ -6,7 +6,6 @@ import { ChanType, FriendshipType, UserType } from "./types";
 export const FriendshipContext = createContext({
 	id: "0",
 	friendships: [] as FriendshipType[],
-	action: (() => {}) as Function
 });
 
 export const MyContext = createContext({

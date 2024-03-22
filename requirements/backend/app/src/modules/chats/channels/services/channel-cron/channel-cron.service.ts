@@ -14,7 +14,7 @@ export class ChannelCronService {
 
     @Cron('*/15 * * * * *') // Every 8 seconds
     async unmuteCronJob(): Promise<void> {
-        console.log("=== cron ===")
+        //console.log("=== cron ===")
 
         const channelMembers = await this.channelMemberRepository.find({
             where: {

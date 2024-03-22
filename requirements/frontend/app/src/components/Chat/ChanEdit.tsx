@@ -71,7 +71,6 @@ export default function ChanEdit({id}: {id: number})
 		onSettled: () => invalidate(["channels"]),
 		onSuccess: (data: ChanSpecsType) => {
 			socket.emit('joinChannel', data.channel.name);
-			console.log("JOIOOOIN" + data.channel.name);
 			socket.emit('newChannel');
 			navigate("/chat/" + data.channel.id);
 		},
