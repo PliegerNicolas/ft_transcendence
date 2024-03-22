@@ -85,7 +85,7 @@ class Api
 
 	constructor(base_url = "https://localhost:4433/api") {
 		this.base_url = base_url;
-		this.debug = false;
+		this.debug = true;
 	}
 }
 

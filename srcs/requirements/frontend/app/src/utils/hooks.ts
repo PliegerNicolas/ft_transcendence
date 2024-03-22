@@ -34,20 +34,22 @@ export function useStopOnHttp()
 
 export function useRetryMutate()
 {
-	const { setLogged, api } = useContext(MyContext);
+	/*const { setLogged, api } = useContext(MyContext);
 
 	const refresh = useMutation({
 		mutationFn: () => api.get("/auth/refresh"),
 		onError: () => setLogged(false)
-	});
+	});*/
 
-	return (count: number, err: Error) => {
+	return (/*count: number, err: Error*/) => {
 		return (false);
+	/*
 		if (httpStatus(err) !== 401)
 			return (false);
 
 		refresh.mutate();
 		return (count < 2);
+	*/
 	}
 }
 
@@ -125,11 +127,13 @@ export function useRelation(username: string)
 {
 	const { me } = useContext(MyContext);
 
-	const getRelations = useGet(["relationships"], !!username);
-	const getUser = useGet(["users", username], !!username);
+	const exit = username === me?.username || !username
 
-	if (!username)
-		return ("");
+	const getRelations = useGet(["relationships"], !exit);
+	const getUser = useGet(["users", username], !exit);
+
+	if (exit)
+		return ("none");
 
 	if (!getRelations.isSuccess || !getUser.isSuccess)
 		return ("");
