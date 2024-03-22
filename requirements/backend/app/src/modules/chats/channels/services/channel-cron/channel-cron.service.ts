@@ -4,6 +4,7 @@ import { ChannelMember } from '../../entities/ChannelMember.entity';
 import { Not, Repository } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
+/*
 @Injectable()
 export class ChannelCronService {
 
@@ -14,6 +15,8 @@ export class ChannelCronService {
 
     @Cron('10 * * * * *') // Every 15 seconds
     async unmuteCronJob(): Promise<void> {
+        console.log("=== cron ===")
+
         const channelMembers = await this.channelMemberRepository.find({
             where: {
                 muted: true,
@@ -30,3 +33,4 @@ export class ChannelCronService {
     }
 
 }
+*/
