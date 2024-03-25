@@ -128,6 +128,7 @@ function Setup2fa({reference}: {reference: React.RefObject<HTMLDivElement>})
 								<form onSubmit={e => {e.preventDefault(); reference.current?.scrollTo(0, 0); setPopup2fa(true)}}>
 								<input
 									type="text"
+									id="NiqueTaMereGoogleChromeBisouxMayeul"
 									placeholder="xxx xxx"
 									value={code}
 									style={{textAlign: "center", width: "6em"}}
