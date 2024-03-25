@@ -20,7 +20,7 @@ export class AuthController {
 		const ret = await (this.authService.signIn(code, redirect_uri)).then(
 			(data) => data
 		);
-		res.cookie("access_token", ret.access_token,{maxAge: 1600000, httpOnly: true, sameSite: 'none', secure:true });
+		res.cookie("access_token", ret.access_token,{maxAge: 86400000, httpOnly: true, sameSite: 'none', secure:true });
 		res.cookie("refresh_token", ret.refresh_token, {maxAge: 86400000, httpOnly: true, sameSite: 'none', secure:true})
 		res.json({isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled});
 		res.send();
@@ -47,7 +47,7 @@ export class AuthController {
 	async logAs(@Param('username', ParseUsernamePipe) username: string,
 				@Res({passthrough : true}) res : Response){
 		const ret = await this.authService.log_as(username)
-		res.cookie("access_token", ret.access_token,{maxAge: 1600000, httpOnly: true, sameSite: 'none', secure:true });
+		res.cookie("access_token", ret.access_token,{maxAge: 86400000, httpOnly: true, sameSite: 'none', secure:true });
 		res.cookie("refresh_token", ret.refresh_token, {maxAge: 86400000, httpOnly: true, sameSite: 'none', secure:true})
 		res.json({isTwoFactorAuthEnabled: ret.isTwoFactorAuthEnabled});
 		res.send();
@@ -60,7 +60,7 @@ export class AuthController {
 	async refreshToken(@Request() req : any,
 				@Res() res : Response){
 		const access_token = (await this.authService.refresh_token(req.cookies['refresh_token'])).access_token;
-		res.cookie("access_token", access_token,{maxAge: 1600000, httpOnly: true, sameSite: 'none', secure:true });
+		res.cookie("access_token", access_token,{maxAge: 86400000, httpOnly: true, sameSite: 'none', secure:true });
 		res.send();
 	}
 }
