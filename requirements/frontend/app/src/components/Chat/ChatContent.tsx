@@ -18,7 +18,7 @@ import ChatHeader from "./ChatHeader.tsx";
 import Msg from "./Msg.tsx";
 import ChanEdit from "./ChanEdit.tsx";
 import ConfirmPopup from "../ConfirmPopup.tsx";
-import { MemberType, MsgType } from "../../utils/types.ts";
+import { ChanSpecsType, MemberType, MsgType } from "../../utils/types.ts";
 import RelationshipActions from "../RelationshipActions.tsx";
 
 // <ChatContentRouter /> =======================================================
@@ -41,12 +41,8 @@ export default function ChatContentRouter()
 			api.patch("/channels/" + id + "/join", {password}),
 		onSettled: () => invalidate(["channels"]),
 		onError: mutateError,
+		onSuccess: (data: ChanSpecsType) => socket.emit('joinChannel', data.channel.name)
 	});
-
-	function handleJoinChannel(password: string) {
-		join.mutate(password);
-		socket.emit('joinChannel', getChan.data.channel.name);
-	}
 
 	const [password, setPasswd] = useState("");
 
@@ -88,7 +84,7 @@ export default function ChatContentRouter()
 					onChange={(ev) => setPasswd(ev.currentTarget.value)}
 					placeholder="Password"
 				/>
-				<button onClick={() => {handleJoinChannel(password); setPasswd("")}}>
+				<button onClick={() => {join.mutate(password); setPasswd("")}}>
 					Join
 				</button>
 			</div>
