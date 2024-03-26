@@ -6,7 +6,7 @@
 #    By: nicolas <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/08 19:41:05 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/22 12:53:10 by nplieger         ###   ########.fr        #
+#    Updated: 2024/03/26 09:25:29 by nplieger         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,6 +16,7 @@ version: '3.9'
 # Networks
 networks:
   transcendence:
+    name: transcendence
     driver: bridge
 
 # Volumes
