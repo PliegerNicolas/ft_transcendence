@@ -5,7 +5,7 @@ The last project of 42's common core program. We have to build a single page web
 
 We use NestJs and React there for.
 
-
+/!\ If you're a 42 student, do not copy this project. First of all it would be detrimental to your education but it's also an old subject.
 
 
 ## API Paths
