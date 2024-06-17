@@ -274,8 +274,3 @@ Example general purpose body:
     "content": "Bonjour"
 }
 ```
-
-API42_CLIENT_ID="u-s4t2ud-..."
-API42_SECRET="s-s4t2ud-..."
-
-```
