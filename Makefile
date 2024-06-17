@@ -20,7 +20,7 @@ NAME			:=			transcendence
 # *                                 DOCKER                                   * #
 # **************************************************************************** #
 
-COMPOSE				:=			docker-compose
+COMPOSE				:=			docker compose
 BUILD               :=			docker build -t
 COMPOSE_FILE		:=			./docker-compose.yml
 REQUIREMENTS_PATH	:=			./requirements

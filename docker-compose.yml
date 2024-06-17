@@ -10,9 +10,6 @@
 #                                                                              #
 # **************************************************************************** #
 
-# Latest version as of january 8 2024
-version: '3.9'
-
 # Networks
 networks:
   transcendence:
@@ -48,8 +45,8 @@ services:
     networks:
       - transcendence
     ports:
-#      - "443:443"
-      - "4433:443"
+      - "443:443"
+#      - "4433:443"
     depends_on:
       - frontend
       - backend

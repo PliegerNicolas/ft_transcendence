@@ -36,7 +36,7 @@ export default function UserInfos({user, me}: {user: UserType, me: boolean})
 		const data = new FormData()
 		data.append('picture', file);
 
-		const res = await fetch(`https://${location.hostname}:4433/api/picture`, {
+		const res = await fetch(`https://${location.hostname}/api/picture`, {
 				method: "PUT",
 				credentials: "include",
 				body: data

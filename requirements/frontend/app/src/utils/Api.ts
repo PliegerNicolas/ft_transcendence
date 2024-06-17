@@ -83,7 +83,7 @@ class Api
 		return (this.#return_switch(response));
 	};
 
-	constructor(base_url = "https://localhost:4433/api") {
+	constructor(base_url = "https://localhost/api") {
 		this.base_url = base_url;
 		this.debug = false;
 	}

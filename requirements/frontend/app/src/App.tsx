@@ -33,14 +33,14 @@ import { PopupType } from "./utils/types.ts";
 import closeIcon from "./assets/close.svg";
 import check from "./assets/check.svg";
 
-export const socket = io(`https://${location.hostname}:4433/socket`);
+export const socket = io(`https://${location.hostname}/socket`);
 
 function Auth()
 {
 	const params = (new URL(location.href)).searchParams;
 	const code = params.get("code");
 
-	const api = new Api(`https://${location.hostname}:4433/api`);
+	const api = new Api(`https://${location.hostname}/api`);
 
 	const { setLogged } = useContext(MyContext);
 
@@ -173,7 +173,7 @@ function App()
 	const stopOnHttp = useStopOnHttp();
 	const checkLog = useQuery({
 		queryKey: ["me"],
-		queryFn: () => new Api(`https://${location.hostname}:4433/api`).get("/me"),
+		queryFn: () => new Api(`https://${location.hostname}/api`).get("/me"),
 		retry: stopOnHttp,
 		staleTime: 5000
 	});
@@ -241,7 +241,7 @@ function App()
 			setLogged,
 			addNotif,
 			addInvite,
-			api: new Api(`https://${location.hostname}:4433/api`),
+			api: new Api(`https://${location.hostname}/api`),
 			lastChan,
 			setLastChan,
 			setGlobalPopup,
