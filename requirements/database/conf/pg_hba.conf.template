@@ -111,19 +111,21 @@
 # use another authentication method.
 
 
-# TYPE  DATABASE        USER            ADDRESS                 METHOD
+# TYPE  DATABASE        USER            ADDRESS                                 METHOD
 
 # "local" is for Unix domain socket connections only
-local   all             all                                     trust
+local   all             postgres                                                peer
+local   all             all                                                     md5
 # IPv4 local connections:
-host    all             all             127.0.0.1/32            trust
+host    all             all             127.0.0.1/32                            md5
 # IPv6 local connections:
-host    all             all             ::1/128                 trust
+host    all             all             ::1/128                                 md5
 # Allow replication connections from localhost, by a user with the
 # replication privilege.
-local   replication     all                                     trust
-host    replication     all             127.0.0.1/32            trust
-host    replication     all             ::1/128                 trust
+local   replication     all                                                     peer
+host    replication     all             127.0.0.1/32                            md5
+host    replication     all             ::1/128                                 md5
 
-# Allow connections from other containers on the same network
-host    all             all        backend.transcendence        md5
+### Elements will be appended under here. Take those into consideration. Specifically:
+# host    all             all             all                                     reject
+

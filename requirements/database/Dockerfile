@@ -1,53 +1,50 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Dockerfile                                         :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: julboyer <julboyer@student.42.fr>          +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/01/08 23:43:12 by nicolas           #+#    #+#              #
-#    Updated: 2024/03/18 12:43:46 by nplieger         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
+# Latest stable version of alpine linux image as of 16/06/2024
+FROM alpine:3.20.0
 
-# Latest stable version of alpine linux at 8 january 2024.
-FROM alpine:3.19.1
+# Set docker-compose build arguments
+ARG	PORT=3400 \
+	WL_ADDRS=${WL_ADDRS} \
+	POSTGRES_DB=${POSTGRES_DB} \
+	POSTGRES_USER=${POSTGRES_USER} \
+	POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
-ENV LANG=en_US.utf8
-ENV PG_RUN_DIR=/run/postgresql
-ENV PGDATA=/var/lib/postgresql/data
-ENV DB_PORT=3400
+# Set local build arguments
+ARG	PGDATA='/var/lib/postgresql/data' \
+	PGRUN='/run/postgresql' \
+	PGSCRIPTS='/var/lib/postgresql/scripts'
 
-# POSTGRES_USER, POSTGRES_PASSWORD and POSTGRES_DB variables set in .env file
+# Add PGDATA to env variables independently of docker-compose
+ENV	PGDATA=${PGDATA} \
+	PGSCRIPTS=${PGSCRIPTS} \
+	PORT=${PORT}
 
-# Install postgresql
+# Install dependencies
 RUN apk update && \
-	apk add --no-cache \
-		postgresql \
-		postgresql-client && \
-	rm -f /var/cache/apk/*
+    apk add --no-cache --virtual .build-deps \
+        postgresql \
+        postgresql-contrib && \
+    rm -f /var/cache/apk/*
 
-COPY /tools/init-db.sh /docker-entrypoint-initdb.d/
+# Set permissions on data and socket directories
+RUN mkdir -p ${PGDATA} ${PGRUN} ${PGSCRIPTS} && \
+	chown -R postgres:postgres ${PGDATA} ${PGRUN} ${PGSCRIPTS} && \
+	chmod 700 ${PGDATA} ${PGRUN} ${PGSCRIPTS}
 
-RUN mkdir -p "$PGDATA" "$PG_RUN_DIR" && \
-	chown -R postgres:postgres "$PGDATA" "$PG_RUN_DIR" && \
-	chmod 700 "$PGDATA" "$PG_RUN_DIR" && \
-	chmod +x /docker-entrypoint-initdb.d/init-db.sh
-
-# Switch to postgres USER.
+# Set user
 USER postgres
 
-# Initialize the database with the postgres user.
-RUN initdb -D $PGDATA && \
-	echo "port = $DB_PORT" >> $PGDATA/postgresql.conf
+# Initializing PostgreSQL database cluster if needed
+RUN	if [ -z "$(ls -A $PGDATA)" ]; then \
+		initdb -D $PGDATA -E UTF8 --locale=en_US.utf8 || exit 1; \
+	fi
 
-# Copy host-based authentification configuration file.
-COPY /conf/pg_hba.conf $PGDATA/
+# Transfer local configuration files to container
+COPY ./conf/pg_hba.conf.template ./conf/postgresql.conf.template ${PGDATA}/
+COPY ./scripts/generate_postgresql.conf.sh ./scripts/generate_pg_hba.conf.sh ./scripts/docker-entrypoint.sh ${PGSCRIPTS}/
 
-ENTRYPOINT ["sh", "/docker-entrypoint-initdb.d/init-db.sh"]
+ENTRYPOINT ["sh", "/var/lib/postgresql/scripts/docker-entrypoint.sh"]
 
-# Expose the default postgres port.
-EXPOSE $DB_PORT
+# Expose given port
+EXPOSE ${PORT}
 
-# Startup database on given port
-CMD postgres -p $DB_PORT -c listen_addresses='*'
+CMD ["postgres"]

@@ -57,7 +57,7 @@ clean:
 
 re:		clean up
 
-prune:
+purge:
 	docker system prune -af
 
-.PHONY: up clean re prune
+.PHONY: up clean re purge
