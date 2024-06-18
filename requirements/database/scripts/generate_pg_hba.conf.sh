@@ -11,8 +11,6 @@ fi
 
 WL_ADDRS=$1
 
-echo $WL_ADDRS
-
 echo "[i] Copy ${INPUT_FILE} as ${OUTPUT_FILE}."
 cp ${INPUT_FILE} ${OUTPUT_FILE}
 
