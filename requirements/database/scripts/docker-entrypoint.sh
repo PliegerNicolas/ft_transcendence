@@ -23,7 +23,6 @@ echo "[i] Executing ${PGSCRIPTS}/generate_pg_hba.conf.sh ${WL_ADDRS}"
 sh ${PGSCRIPTS}/generate_pg_hba.conf.sh ${WL_ADDRS}
 
 # Setup $POSTGRES_DB
-echo "[i] Initialize database(s) and user(s)."
 initialize_database
 
 echo "[i] Remove ${PGSCRIPTS}"
